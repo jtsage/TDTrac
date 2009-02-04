@@ -1,11 +1,7 @@
 <?php
 ob_start(); session_start(); 
 
-$TDTRAC_VERSION = "0.0.9a";
-$TDTRAC_CPNY = "PMT";
-$TDTRAC_SITE = "http://td.pittsburghmusicals.com/";
-$TDTRAC_PERMS = array("addshow", "editshow", "viewshow", "addbudget", "editbudget", "viewbudget", "addhours", "edithours", "viewhours", "adduser");
-
+require_once("config.php");
 require_once("lib/functions-load.php");
 $login = islogin();
 $page_title = substr($_SERVER['REQUEST_URI'], 1); 
