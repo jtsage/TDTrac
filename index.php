@@ -101,6 +101,12 @@ if ( $login[0] ) {
                 else { echo hours_edit($match[1]); }
         } else { echo perms_no(); }
         break;
+    case "email-hours":
+        preg_match("/.+\?id=(\d+)&sdate=(.+)&edate=(.+)$/", $_SERVER['REQUEST_URI'], $match);
+        if ( perms_checkperm($user_name, 'viewhours') ) {
+                echo email_hours($match[1], $match[2], $match[3]);
+        } else { echo perms_no(); }
+        break;
     case "del-hours":
         preg_match("/.+\?id=(\d+)$/", $_SERVER['REQUEST_URI'], $match);
         if ( perms_checkperm($user_name, 'edithours') ) {
