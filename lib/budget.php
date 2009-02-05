@@ -1,10 +1,10 @@
 <?php
 function budget_addform() {
-	GLOBAL $db;
+	GLOBAL $db, $MYSQL_PREFIX;
 	$html  = "<h2>Add Budget Expense</h2>\n";
 	$html .= "<div id=\"genform\"><form method=\"post\" action=\"add-budget\" name=\"form1\">\n";
 	$html .= "<div class=\"frmele\">Show: <select tabindex=\"1\" style=\"width: 25em;\" name=\"showid\">\n";
-	$sql = "SELECT showname, showid FROM shows ORDER BY created DESC;";
+	$sql = "SELECT showname, showid FROM {$MYSQL_PREFIX}shows ORDER BY created DESC;";
 	$result = mysql_query($sql, $db);
 	while ( $row = mysql_fetch_array($result) ) {
 		$html .= "<option value=\"{$row['showid']}\">{$row['showname']}</option>\n";
@@ -15,7 +15,7 @@ function budget_addform() {
 	$html .= "<div class=\"frmele\">New Vendor: <input type=\"text\" size=\"35\" name=\"vendornew\" /></div>\n";
 	$html .= "<div class=\"frmele\">Old Vendor: <select style=\"width: 25em\" name=\"vendor\" />\n";
 	$html .= "<option value=\"--NEW--\">^--NEW</option>\n";
-        $sql = "SELECT vendor FROM `budget` GROUP BY vendor ORDER BY COUNT(vendor) DESC, vendor ASC";
+        $sql = "SELECT vendor FROM `{$MYSQL_PREFIX}budget` GROUP BY vendor ORDER BY COUNT(vendor) DESC, vendor ASC";
         $result = mysql_query($sql, $db);
         while ( $row = mysql_fetch_array($result) ) {
                 $html .= "<option value=\"{$row['vendor']}\">{$row['vendor']}</option>\n";
@@ -28,11 +28,11 @@ function budget_addform() {
 }
 
 function budget_editform($id) {
-	GLOBAL $db;
+	GLOBAL $db, $MYSQL_PREFIX;
 	$html  = "<h2>Edit Budget Expense</h2>\n";
 	$html .= "<div id=\"genform\"><form method=\"post\" action=\"edit-budget\" name=\"form1\">\n";
 	$html .= "<div class=\"frmele\">Show: <select tabindex=\"1\" style=\"width: 25em;\" name=\"showid\">\n";
-	$sql = "SELECT showname, budget.* FROM shows, budget WHERE budget.id = {$id} AND budget.showid = shows.showid LIMIT 1;";
+	$sql = "SELECT showname, {$MYSQL_PREFIX}budget.* FROM {$MYSQL_PREFIX}shows, {$MYSQL_PREFIX}budget WHERE {$MYSQL_PREFIX}budget.id = {$id} AND {$MYSQL_PREFIX}budget.showid = {$MYSQL_PREFIX}shows.showid LIMIT 1;";
 	$result = mysql_query($sql, $db);
 	$row = mysql_fetch_array($result);
 	$html .= "<option value=\"{$row['showid']}\">{$row['showname']}</option>\n";
@@ -42,7 +42,7 @@ function budget_editform($id) {
 	$html .= "<div class=\"frmele\">New Vendor: <input type=\"text\" size=\"35\" name=\"vendornew\" value=\"{$row['vendor']}\"/></div>\n";
 	$html .= "<div class=\"frmele\">Old Vendor: <select style=\"width: 25em\" name=\"vendor\" />\n";
 	$html .= "<option value=\"--NEW--\">^--NEW</option>\n";
-        $sql = "SELECT vendor FROM `budget` GROUP BY vendor ORDER BY COUNT(vendor) DESC, vendor ASC";
+        $sql = "SELECT vendor FROM `{$MYSQL_PREFX}budget` GROUP BY vendor ORDER BY COUNT(vendor) DESC, vendor ASC";
         $result2 = mysql_query($sql, $db);
         while ( $row2 = mysql_fetch_array($result2) ) {
                 $html .= "<option value=\"{$row['vendor']}\">{$row['vendor']}</option>\n";
@@ -56,11 +56,11 @@ function budget_editform($id) {
 }
 
 function budget_delform($id) {
-	GLOBAL $db;
+	GLOBAL $db, $MYSQL_PREFIX;
 	$html  = "<h2>Remove Budget Expense</h2>\n";
 	$html .= "<div id=\"genform\"><form method=\"post\" action=\"del-budget\" name=\"form1\">\n";
 	$html .= "<div class=\"frmele\">Show: <select tabindex=\"1\" style=\"width: 25em;\" name=\"showid\" disabled=\"disabled\" >\n";
-	$sql = "SELECT showname, budget.* FROM shows, budget WHERE budget.id = {$id} AND budget.showid = shows.showid LIMIT 1;";
+	$sql = "SELECT showname, {$MYSQL_PREFIX}budget.* FROM {$MYSQL_PREFIX}shows, {$MYSQL_PREFIX}budget WHERE {$MYSQL_PREFIX}budget.id = {$id} AND {$MYSQL_PREFIX}budget.showid = {$MYSQL_PREFIX}shows.showid LIMIT 1;";
 	$result = mysql_query($sql, $db);
 	$row = mysql_fetch_array($result);
 	$html .= "<option value=\"{$row['showid']}\">{$row['showname']}</option>\n";
@@ -76,8 +76,8 @@ function budget_delform($id) {
 }
 
 function budget_add() {
-	GLOBAL $db;
-	$sql  = "INSERT INTO budget ( showid, price, vendor, dscr, date ) VALUES ( {$_REQUEST['showid']} , '{$_REQUEST['price']}' , ";
+	GLOBAL $db, $MYSQL_PREFIX;
+	$sql  = "INSERT INTO {$MYSQL_PREFIX}budget ( showid, price, vendor, dscr, date ) VALUES ( {$_REQUEST['showid']} , '{$_REQUEST['price']}' , ";
         if ( ($_REQUEST['vendor'] == "--NEW--") && !($_REQUEST['vendornew'] == "") ) {
 		$sql .= "'{$_REQUEST['vendornew']}' , ";
 	} else { $sql .= "'{$_REQUEST['vendor']}' , "; }
@@ -87,8 +87,8 @@ function budget_add() {
 }
 
 function budget_edit_do($id) {
-	GLOBAL $db;
-	$sql  = "UPDATE budget SET price = '{$_REQUEST['price']}' , vendor = ";
+	GLOBAL $db, $MYSQL_PREFIX;
+	$sql  = "UPDATE {$MYSQL_PREFIX}budget SET price = '{$_REQUEST['price']}' , vendor = ";
         if ( ($_REQUEST['vendor'] == "--NEW--") && !($_REQUEST['vendornew'] == "") ) {
                 $sql .= "'{$_REQUEST['vendornew']}' , ";
         } else { $sql .= "'{$_REQUEST['vendor']}' , "; }
@@ -98,15 +98,15 @@ function budget_edit_do($id) {
 }
 
 function budget_del_do($id) {
-	GLOBAL $db;
-	$sql = "DELETE FROM budget WHERE id = {$id}";
+	GLOBAL $db, $MYSQL_PREFIX;
+	$sql = "DELETE FROM {$MYSQL_BUDGET}budget WHERE id = {$id}";
 	$result = mysql_query($sql, $db);
 	thrower("Expense #{$id} Removed");
 }
 
 function budget_viewselect() {
-	GLOBAL $db;
-	$sql = "SELECT showid, showname FROM shows ORDER BY created DESC";
+	GLOBAL $db, $MYSQL_PREFIX;
+	$sql = "SELECT showid, showname FROM {$MYSQL_PREFIX}shows ORDER BY created DESC";
 	$result = mysql_query($sql, $db);
 	$html  = "<h2>View Budget</h2>";
 	$html .= "<div id=\"genform\"><form method=\"post\" action=\"/view-budget\">\n";
@@ -120,8 +120,8 @@ function budget_viewselect() {
 }
 
 function budget_view($showid) {
-	GLOBAL $db, $user_name;
-        $sql = "SELECT * FROM shows WHERE showid = {$showid}";
+	GLOBAL $db, $user_name, $MYSQL_PREFIX;
+        $sql = "SELECT * FROM {$MYSQL_PREFIX}shows WHERE showid = {$showid}";
         $editshow = perms_checkperm($user_name, "editshow");
 	$editbudget = perms_checkperm($user_name, "editbudget"); 
         $result = mysql_query($sql, $db); 
@@ -139,7 +139,7 @@ function budget_view($showid) {
 	$html .= $editbudget ? "<th>Edit</th>" : "";
 	$html .= $editbudget ? "<th>Del</th>" : "";
 	$html .= "</tr>\n";
-	$sql = "SELECT * FROM budget WHERE showid = {$showid} ORDER BY date ASC, vendor ASC";
+	$sql = "SELECT * FROM {$MYSQL_PREFIX}budget WHERE showid = {$showid} ORDER BY date ASC, vendor ASC";
 	$result = mysql_query($sql, $db); $intr = 0; $tot = 0;
 	while ( $row = mysql_fetch_array($result) ) {
 		$intr++;
@@ -156,7 +156,7 @@ function budget_view($showid) {
 
 	$html .= "<h2>Payroll Expenses</h2><table id=\"budget\">\n";
 	$html .= "<tr><th>Employee</th><th>Days Worked</th><th>Price</th></tr>\n";
-	$sql = "SELECT SUM(worked) as days, CONCAT(first, ' ', last) as name FROM users u, hours h WHERE u.userid = h.userid AND h.showid = {$showid} GROUP BY h.userid ORDER BY last ASC";
+	$sql = "SELECT SUM(worked) as days, CONCAT(first, ' ', last) as name FROM {$MYSQL_PREFIX}users u, {$MYSQL_PREFIX}hours h WHERE u.userid = h.userid AND h.showid = {$showid} GROUP BY h.userid ORDER BY last ASC";
 	$result = mysql_query($sql, $db);
 	$tot = 0; $intr = 0;
 	while ( $row = mysql_fetch_array($result) ) {
