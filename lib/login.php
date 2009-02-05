@@ -1,7 +1,7 @@
 <?php
 
 function islogin() {
-	GLOBAL $LOGIN_DEBUG;
+	GLOBAL $LOGIN_DEBUG, $MYSQL_PREFIX;
 
 	if ( !islogin_cookieexist() ) { $retty = array(0, islogin_form()); }	
 	else {
@@ -12,7 +12,7 @@ function islogin() {
 }
 
 function islogin_cookieexist() {
-	GLOBAL $LOGIN_DEBUG;
+	GLOBAL $LOGIN_DEBUG, $MYSQL_PREFIX;
 	if ( !isset($_SESSION['tdtracuser']) ) { return 0; }
 	if ( !isset($_SESSION['tdtracpass']) ) { return 0; }
 	if ( $LOGIN_DEBUG ) { echo "DEBUG: Cookie Found!\n"; }
@@ -20,11 +20,11 @@ function islogin_cookieexist() {
 }
 
 function islogin_cookietest() {
-	GLOBAL $db;
+	GLOBAL $db, $MYSQL_PREFIX;
         $checkname = $_SESSION['tdtracuser'];
 	$checkpass = $_SESSION['tdtracpass'];
 
-	$sql = "SELECT password FROM users WHERE username = '{$checkname}' LIMIT 1";
+	$sql = "SELECT password FROM {$MYSQL_PREFIX}users WHERE username = '{$checkname}' LIMIT 1";
         $result = mysql_query($sql, $db);
 
 	$row = mysql_fetch_array($result);
@@ -49,11 +49,11 @@ function islogin_logout() {
 }
 
 function islogin_dologin() {
-	GLOBAL $db;
+	GLOBAL $db, $MYSQL_PREFIX;
 	$checkname = $_REQUEST['tracuser'];
 	$checkpass = $_REQUEST['tracpass'];
 
-	$sql = "SELECT password, active, chpass FROM users WHERE username = '{$checkname}' LIMIT 1";
+	$sql = "SELECT password, active, chpass FROM {$MYSQL_PREFIX}users WHERE username = '{$checkname}' LIMIT 1";
         $result = mysql_query($sql, $db);
 
 	$row = mysql_fetch_array($result);

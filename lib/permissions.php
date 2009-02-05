@@ -1,8 +1,8 @@
 <?php
 
 function perms_getgroups($username) {
-	GLOBAL $db;
-	$sql = "SELECT groupname FROM groupnames gn, usergroups ug, users u WHERE username = '{$username}' AND u.userid = ug.userid AND ug.groupid = gn.groupid";
+	GLOBAL $db, $MYSQL_PREFIX;
+	$sql = "SELECT groupname FROM {$MYSQL_PREFIX}groupnames gn, {$MYSQL_PREFIX}usergroups ug, {$MYSQL_PREFIX}users u WHERE username = '{$username}' AND u.userid = ug.userid AND ug.groupid = gn.groupid";
 	$result = mysql_query($sql, $db);
 	while ( $row = mysql_fetch_array($result) ) {
 	   $retty[] = $row['groupname'];
@@ -11,8 +11,8 @@ function perms_getgroups($username) {
 }
 
 function perms_checkperm($username, $permission) {
-	GLOBAL $db;
-	$sql = "SELECT permcan FROM permissions pm, usergroups ug, users u WHERE username = '{$username}' AND u.userid = ug.userid AND ug.groupid = pm.groupid AND pm.permid = '{$permission}'";
+	GLOBAL $db, $MYSQL_PREFIX;
+	$sql = "SELECT permcan FROM {$MYSQL_PREFIX}permissions pm, {$MYSQL_PREFIX}usergroups ug, {$MYSQL_PREFIX}users u WHERE username = '{$username}' AND u.userid = ug.userid AND ug.groupid = pm.groupid AND pm.permid = '{$permission}'";
         $result = mysql_query($sql, $db);
 	if ( mysql_num_rows($result) < 1 ) { return 0; }
 	while ( $row = mysql_fetch_array($result)) {
@@ -22,24 +22,24 @@ function perms_checkperm($username, $permission) {
 }
 
 function perms_isemp($username) {
-	GLOBAL $db;
-	$sql = "SELECT groupid FROM usergroups ug, users u WHERE username = '{$username}' AND u.userid = ug.userid AND ug.groupid = 4";
+	GLOBAL $db, $MYSQL_PREFIX;
+	$sql = "SELECT groupid FROM {$MYSQL_PREFIX}usergroups ug, {$MYSQL_PREFIX}users u WHERE username = '{$username}' AND u.userid = ug.userid AND ug.groupid = 4";
 	$result = mysql_query($sql, $db);
 	if ( mysql_num_rows($result) > 0 ) { return 1; }
 	return 0;
 }
 
 function perms_isadmin($username) {
-	GLOBAL $db;
-	$sql = "SELECT groupid FROM usergroups ug, users u WHERE username = '{$username}' AND u.userid = ug.userid AND ug.groupid = 1";
+	GLOBAL $db, $MYSQL_PREFIX;
+	$sql = "SELECT groupid FROM {$MYSQL_PREFIX}usergroups ug, {$MYSQL_PREFIX}users u WHERE username = '{$username}' AND u.userid = ug.userid AND ug.groupid = 1";
 	$result = mysql_query($sql, $db);
 	if ( mysql_num_rows($result) > 0 ) { return 1; }
 	return 0;
 }
 
 function perms_getgroupid($group) {
-	GLOBAL $db;
-	$sql = "SELECT groupid FROM groupnames WHERE groupname = '{$group}' LIMIT 1;";
+	GLOBAL $db, $MYSQL_PREFIX;
+	$sql = "SELECT groupid FROM {$MYSQL_PREFIX}groupnames WHERE groupname = '{$group}' LIMIT 1;";
 	$result = mysql_query($sql, $db);
 	$row = mysql_fetch_array($result);
 	return $row['groupid'];
@@ -50,8 +50,8 @@ function perms_no() {
 }
 
 function perms_editpickform() {
-	GLOBAL $db;
-	$sql = "SELECT groupname FROM groupnames";
+	GLOBAL $db, $MYSQL_PREFIX;
+	$sql = "SELECT groupname FROM {$MYSQL_PREFIX}groupnames";
 	$result = mysql_query($sql, $db);
 	$html  = "<h2>Select Group</h2><div id=\"genform\"><form method=\"post\" action=\"/edit-perms\">\n";
         $html .= "<input type=\"hidden\" name=\"editgroupperm\" value=\"true\" />\n";
@@ -64,13 +64,13 @@ function perms_editpickform() {
 }
 
 function perms_editform() {
-	GLOBAL $db, $TDTRAC_PERMS;
+	GLOBAL $db, $TDTRAC_PERMS, $MYSQL_PREFIX;
 	$grpname = $_REQUEST['groupname'];
 	$grpid = perms_getgroupid($grpname);
 	$html  = "<h2>Set {$grpname} ({$grpid}) Permissions</h2><p style=\"text-align: right\">T&nbsp;&nbsp;&nbsp;/&nbsp;&nbsp;&nbsp;F</p>\n";
 	$html .= "<div class=\"genform\"><form method=\"post\" action=\"edit-perms\">\n";
 	$html .= "<input type=\"hidden\" name=\"grpid\" value=\"{$grpid}\" />\n";
-	$sql = "SELECT permid, permcan FROM permissions pm WHERE groupid = {$grpid}";
+	$sql = "SELECT permid, permcan FROM {$MYSQL_PREFIX}permissions pm WHERE groupid = {$grpid}";
 	$result = mysql_query($sql, $db);
 	while ( $row = mysql_fetch_array($result) ) {
 		$pname = $row['permid']; $pvalue = $row['permcan'];
@@ -89,19 +89,19 @@ function perms_editform() {
 }
 
 function perms_save($grpid) {
-	GLOBAL $db, $TDTRAC_PERMS;
-	$sql = "DELETE FROM permissions WHERE groupid = {$grpid}";
+	GLOBAL $db, $TDTRAC_PERMS, $MYSQL_PREFIX;
+	$sql = "DELETE FROM {$MYSQL_PREFIX}permissions WHERE groupid = {$grpid}";
 	$result = mysql_query($sql, $db);
 	foreach ( $TDTRAC_PERMS as $perm ) {
-		$sql = "INSERT INTO permissions (groupid, permid, permcan) VALUES ({$grpid}, '{$perm}', {$_REQUEST[$perm]})";
+		$sql = "INSERT INTO {$MYSQL_PREFIX}permissions (groupid, permid, permcan) VALUES ({$grpid}, '{$perm}', {$_REQUEST[$perm]})";
 		mysql_query($sql, $db);
 	}
 	thrower("Permissions Updated");
 }
 
 function perms_view() {
-	GLOBAL $db, $TDTRAC_PERMS;
-	$sql = "SELECT groupname, permid FROM groupnames gn, permissions pm WHERE pm.groupid = gn.groupid AND pm.permcan = 1 ORDER BY groupname";
+	GLOBAL $db, $TDTRAC_PERMS, $MYSQL_PREFIX;
+	$sql = "SELECT groupname, permid FROM {$MYSQL_PREFIX}groupnames gn, {$MYSQL_PREFIX}permissions pm WHERE pm.groupid = gn.groupid AND pm.permcan = 1 ORDER BY groupname";
 	$result = mysql_query($sql, $db);
 	while ( $row = mysql_fetch_array($result) ) {
 		$disperm[$row['groupname']][] = $row['permid'];
@@ -109,7 +109,7 @@ function perms_view() {
 	$html = "";
 	foreach ( $disperm as $name => $value ) {
 		$html .= "<h2>Permissions For {$name}</h2><p>  ";
-		$sql = "SELECT u.username FROM users u, groupnames gn, usergroups ug WHERE gn.groupname = '{$name}' AND gn.groupid = ug.groupid AND ug.userid = u.userid ORDER BY username ASC";
+		$sql = "SELECT u.username FROM {$MYSQL_PREFIX}users u, {$MYSQL_PREFIX}groupnames gn, {$MYSQL_PREFIX}usergroups ug WHERE gn.groupname = '{$name}' AND gn.groupid = ug.groupid AND ug.userid = u.userid ORDER BY username ASC";
 		$result = mysql_query($sql, $db);
 		while ( $row = mysql_fetch_array($result) ) {
 			$html .= "{$row['username']}, ";
@@ -125,7 +125,7 @@ function perms_view() {
 }
 
 function perms_adduser_form() {
-	GLOBAL $db;
+	GLOBAL $db, $MYSQL_PREFIX;
 	$html  = "<h2>Add User</h2>\n";
 	$html .= "<div id=\"genform\"><form method=\"post\" action=\"add-user\">\n";
 	$html .= "<div class=\"frmele\">User Name: <input type=\"text\" name=\"username\" size=\"35\" /></div>\n";
@@ -135,7 +135,7 @@ function perms_adduser_form() {
 	$html .= "<div class=\"frmele\">Phone: <input type=\"text\" name=\"phone\" size=\"35\" /></div>\n";
 	$html .= "<div class=\"frmele\">E-Mail: <input type=\"text\" name=\"email\" size=\"35\" /></div>\n";
 	$html .= "<div class=\"frmele\">Group: <select style=\"width: 25em\" name=\"groupid\" />\n";
-        $sql = "SELECT groupname, groupid FROM groupnames ORDER BY groupid DESC;";
+        $sql = "SELECT groupname, groupid FROM {$MYSQL_PREFIX}groupnames ORDER BY groupid DESC;";
         $result = mysql_query($sql, $db);
         while ( $row = mysql_fetch_array($result) ) {
                 $html .= "<option value=\"{$row['groupid']}\">{$row['groupname']}</option>\n";
@@ -146,11 +146,11 @@ function perms_adduser_form() {
 }
 
 function perms_adduser_do() {
-	GLOBAL $db;
-	$sql = "INSERT INTO users ( username, first, last, password, phone, email ) VALUES ( '{$_REQUEST['username']}' , '{$_REQUEST['first']}' , '{$_REQUEST['last']}' , '{$_REQUEST['password']}' , '{$_REQUEST['phone']}' , '{$_REQUEST['email']}' )";
+	GLOBAL $db, $MYSQL_PREFIX;
+	$sql = "INSERT INTO {$MYSQL_PREFIX}users ( username, first, last, password, phone, email ) VALUES ( '{$_REQUEST['username']}' , '{$_REQUEST['first']}' , '{$_REQUEST['last']}' , '{$_REQUEST['password']}' , '{$_REQUEST['phone']}' , '{$_REQUEST['email']}' )";
 	$result = mysql_query($sql, $db);
 	$userid = mysql_insert_id($db);
-	$sql2 = "INSERT INTO usergroups ( userid, groupid ) VALUES ( '{$userid}' , '{$_REQUEST['groupid']}' )";
+	$sql2 = "INSERT INTO {$MYSQL_PREFIX}usergroups ( userid, groupid ) VALUES ( '{$userid}' , '{$_REQUEST['groupid']}' )";
 	$result2 = mysql_query($sql2, $db);
 	thrower("User Added");
 }
@@ -165,19 +165,19 @@ function perms_changepass_form() {
 }
 
 function perms_changepass_do() {
-	GLOBAL $db, $user_name;
+	GLOBAL $db, $user_name, $MYSQL_PREFIX;
 	if ( $_REQUEST['newpass1'] == $_REQUEST['newpass2'] ) {
 		if ( strlen($_REQUEST['newpass1']) < 4 ) { thrower("Password must be at least 5 characters"); }
 		if ( strlen($_REQUEST['newpass1']) > 15 ) { thrower("Password may not exceed 15 characters"); }
-		$sql = "UPDATE users SET chpass = 0 , password = '{$_REQUEST['newpass1']}' WHERE username = '{$user_name}' LIMIT 1";
+		$sql = "UPDATE {$MYSQL_PREFIX}users SET chpass = 0 , password = '{$_REQUEST['newpass1']}' WHERE username = '{$user_name}' LIMIT 1";
 		$result = mysql_query($sql, $db);
 		thrower("Password Changed - Please Re-Login");
 	} else { thrower("Password Mismatch - Not Changed"); }
 }	
 
 function perms_viewuser() {
-	GLOBAL $db;
-	$sql = "SELECT * FROM users ORDER BY last ASC, first ASC";
+	GLOBAL $db, $MYSQL_PREFIX;
+	$sql = "SELECT * FROM {$MYSQL_PREFIX}users ORDER BY last ASC, first ASC";
 	$result = mysql_query($sql, $db); $html = "";
 	while ( $row = mysql_fetch_array($result) ) {
 		$html .= "<h2>User: {$row['first']} {$row['last']}</h2><p><ul>\n";
@@ -200,8 +200,8 @@ function perms_viewuser() {
 }
 
 function perms_edituser_form($id) {
-	GLOBAL $db;
-	$sql = "SELECT u.*, groupid FROM users u, usergroups ug WHERE u.userid = ug.userid AND u.userid = {$id} LIMIT 1";
+	GLOBAL $db, $MYSQL_PREFIX;
+	$sql = "SELECT u.*, groupid FROM {$MYSQL_PREFIX}users u, {$MYSQL_PREFIX}usergroups ug WHERE u.userid = ug.userid AND u.userid = {$id} LIMIT 1";
 	$result = mysql_query($sql, $db);
 	$row = mysql_fetch_array($result);
 	$html  = "<h2>Edit User</h2>\n";
@@ -215,7 +215,7 @@ function perms_edituser_form($id) {
 	$html .= "<div class=\"frmele\">E-Mail: <input type=\"text\" name=\"email\" size=\"35\" value=\"{$row['email']}\" /></div>\n";
 
 	$html .= "<div class=\"frmele\">Group: <select style=\"width: 25em\" name=\"groupid\" />\n";
-	$sql = "SELECT groupname, groupid FROM groupnames ORDER BY groupid DESC;";
+	$sql = "SELECT groupname, groupid FROM {$MYSQL_PREFIX}groupnames ORDER BY groupid DESC;";
 	$result2 = mysql_query($sql, $db);
 	while ( $row2 = mysql_fetch_array($result2) ) {
 		$html .= "<option value=\"{$row2['groupid']}\"";
@@ -229,24 +229,24 @@ function perms_edituser_form($id) {
 }
 
 function perms_edituser_do($id) {
-	GLOBAL $db;
-	$sql   = "UPDATE users SET password = '{$_REQUEST['password']}' , username = '{$_REQUEST['username']}' , last = '{$_REQUEST['last']}' , first = '{$_REQUEST['first']}' , phone = '{$_REQUEST['phone']}' , email = '{$_REQUEST['email']}' , active = '";
+	GLOBAL $db, $MYSQL_PREFIX;
+	$sql   = "UPDATE {$MYSQL_PREFIX}users SET password = '{$_REQUEST['password']}' , username = '{$_REQUEST['username']}' , last = '{$_REQUEST['last']}' , first = '{$_REQUEST['first']}' , phone = '{$_REQUEST['phone']}' , email = '{$_REQUEST['email']}' , active = '";
 	$sql  .= ( $_REQUEST['active'] == "y" ) ? "1" : "0";
 	$sql  .= "' WHERE userid = '{$id}' LIMIT 1";
-	$sql2  = "UPDATE usergroups SET groupid = {$_REQUEST['groupid']} WHERE userid = '{$id}'";
+	$sql2  = "UPDATE {$MYSQL_PREFIX}usergroups SET groupid = {$_REQUEST['groupid']} WHERE userid = '{$id}'";
 	$result = mysql_query($sql, $db);
 	$result = mysql_query($sql2, $db);
 	thrower("User #{$id} Updated");
 }
 
 function perms_groupform() {
-	GLOBAL $db;
+	GLOBAL $db, $MYSQL_PREFIX;
 	$html  = "<h2>Add A Group</h2>\n";
 	$html .= "<div id=\"genform\"><form method=\"POST\" action=\"/groups\">\n";
 	$html .= "<div class=\"frmele\">Group Name: <input type=\"text\" name=\"newgroup\" size=\"35\" /></div>\n";
 	$html .= "<div class=\"frmele\"><input type=\"submit\" value=\"Add Group\" /></div></form></div>\n";
 	
-	$sql = "SELECT groupname, groupid FROM groupnames WHERE 1 ORDER BY groupid";
+	$sql = "SELECT groupname, groupid FROM {$MYSQL_PREFIX}groupnames WHERE 1 ORDER BY groupid";
 	$result = mysql_query($sql, $db);
 	$html .= "<h2>Rename Group</h2>\n";
 	$html .= "<div id=\"genform\"><form method=\"POST\" action=\"/groups\">\n";
@@ -261,15 +261,15 @@ function perms_groupform() {
 }
 
 function perms_group_add() {
-	GLOBAL $db;
-	$sql = "INSERT INTO groupnames (groupname) VALUES ('{$_REQUEST['newgroup']}')";
+	GLOBAL $db, $MYSQL_PREFIX;
+	$sql = "INSERT INTO {$MYSQL_PREFIX}groupnames (groupname) VALUES ('{$_REQUEST['newgroup']}')";
 	$request = mysql_query($sql, $db);
 	thrower("Group \"{$_REQUEST['newgroup']}\" Added");
 }
 
 function perms_group_ren() {
-	GLOBAL $db;
-	$sql = "UPDATE groupnames SET groupname = '{$_REQUEST['newname']}' WHERE groupid = {$_REQUEST['oldname']}";
+	GLOBAL $db, $MYSQL_PREFIX;
+	$sql = "UPDATE {$MYSQL_PREFIX}groupnames SET groupname = '{$_REQUEST['newname']}' WHERE groupid = {$_REQUEST['oldname']}";
 	$request = mysql_query($sql, $db);
 	thrower("Group Renamed to \"{$_REQUEST['newname']}\"");
 }
