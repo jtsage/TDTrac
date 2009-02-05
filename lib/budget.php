@@ -134,7 +134,9 @@ function budget_view($showid) {
         $html .= "<li><strong>Dates</strong>: {$row['dates']}</li>\n";
         $html .= "</ul></p>\n";
 
-	$html .= "<h2>Materials Expenses</h2><table id=\"budget\">\n";
+	$html .= "<h2>Materials Expenses</h2><br />";
+        $html .= "<div style=\"float: right\">[<a href=\"/email-budget?id={$row['showid']}\">E-Mail To Self</a>]</div>\n";
+        $html .= "<table id=\"budget\">\n";
 	$html .= "<tr><th>Date</th><th>Vendor</th><th>Description</th><th>Price</th>";
 	$html .= $editbudget ? "<th>Edit</th>" : "";
 	$html .= $editbudget ? "<th>Del</th>" : "";
