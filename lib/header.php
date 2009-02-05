@@ -29,7 +29,7 @@ $html = <<<ENN
 ENN;
 
 if ( $login[0] ) { 
-	$html .= "<strong>Loggen In User:</strong> {$login[1]} <strong>Group:</strong> "; 
+	$html .= "<strong>Loggen In User:</strong> {$login[1]} (ID: ".perms_getidbyname($login[1]).") <strong>Group:</strong> "; 
 	$groups = perms_getgroups($login[1]);
 	foreach ( $groups as $group ) { $html .= "{$group} "; }
 }
