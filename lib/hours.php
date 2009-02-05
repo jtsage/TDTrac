@@ -142,6 +142,10 @@ function hours_view($userid) {
 	$sql .= ($_REQUEST['sdate'] <> "") ? " AND h.date >= '{$_REQUEST['sdate']}'" : "";
 	$sql .= ($_REQUEST['edate'] <> "") ? " AND h.date <= '{$_REQUEST['edate']}'" : "";
         $sql .= " ORDER BY last ASC, date DESC";
+	$maillink  = "/email-hours?id={$userid}&sdate=";
+        $maillink .= ($_REQUEST['sdate'] <> "" ) ? $_REQUEST['sdate'] : "0";
+        $maillink .= "&edate=";
+	$maillink .= ($_REQUEST['edate'] <> "" ) ? $_REQUEST['edate'] : "0";
 	$result = mysql_query($sql, $db);
 	while ( $row = mysql_fetch_array($result) ) {
 		$dbarray[$row['name']][] = $row;
@@ -149,6 +153,7 @@ function hours_view($userid) {
 	$html = "";
 	foreach ( $dbarray as $key => $data ) {
 		$html .= "<h2>Hours Worked For {$key}</h2><p>\n";
+		$html .= "<div style=\"float: right\">[<a href=\"{$maillink}\">E-Mail to Self</a>]</div>\n";
 		$html .= ($_REQUEST['sdate'] <> "" ) ? "Start Date: {$_REQUEST['sdate']}\n" : "";
 		$html .= ( $_REQUEST['sdate'] <> "" && $_REQUEST['edate'] <> "" ) ? "<br />" : "";
 		$html .= ($_REQUEST['edate'] <> "" ) ? "Ending Date: {$_REQUEST['edate']}" : "";

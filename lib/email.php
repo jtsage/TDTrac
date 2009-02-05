@@ -43,6 +43,61 @@ function email_budget($showid) {
 	return $html;
 }
 
+function email_hours($userid, $sdate, $edate) {
+        GLOBAL $db, $user_name, $MYSQL_PREFIX;
+        $sql1 = "SELECT email FROM {$MYSQL_PREFIX}users WHERE username = '{$user_name}'";
+        $resul1 = mysql_query($sql1, $db);
+        $row1 = mysql_fetch_array($resul1);
+        $sendto = $row1['email'];
+        mysql_free_result($resul1);
+        if ( $userid == 0 && perms_isemp($user_name) ) { return perms_no(); }
+        $sql  = "SELECT CONCAT(first, ' ', last) as name, worked, date, showname, h.id as hid FROM {$MYSQL_PREFIX}users u, {$MYSQL_PREFIX}shows s, {$MYSQL_PREFIX}hours h WHERE ";
+        $sql .= "u.userid = h.userid AND s.showid = h.showid";
+        $sql .= ($userid <> 0) ? " AND u.userid = '{$userid}'" : "";
+        $sql .= ($sdate <> 0) ? " AND h.date >= '{$sdate}'" : "";
+        $sql .= ($edate <> 0) ? " AND h.date <= '{$edate}'" : "";
+        $sql .= " ORDER BY last ASC, date DESC";
+
+        $result = mysql_query($sql, $db);
+        while ( $row = mysql_fetch_array($result) ) {
+                $dbarray[$row['name']][] = $row;
+        }
+        $body = "";
+	$html = "";
+	$html .= "<h2>Hours Worked Report</h2><p>\n";
+        $html .= ($sdate <> 0 ) ? "Start Date: {$sdate}\n" : "";
+        $html .= ($sdate <> 0 && $edate <> 0 ) ? "<br />" : "";
+        $html .= ($edate <> 0 ) ? "Ending Date: {$edate}" : "";
+
+        $subject = "TDTrac Hours Worked: ";
+	$subject .= $userid == 0 ? "All Employees, " : "Employee Number {$userid}, ";
+	$subject .= ($sdate <> 0 ) ? "Start Date: {$sdate}" : "";
+        $subject .= ($sdate <> 0 && $edate <> 0 ) ? ", " : "";
+        $subject .= ($edate <> 0 ) ? "Ending Date: {$edate}" : "";
+
+        $headers  = 'MIME-Version: 1.0' . "\r\n";
+        $headers .= 'Content-type: text/html; charset=iso-8859-1' . "\r\n";
+
+        foreach ( $dbarray as $key => $data ) {
+		$html .= "<br />Included Hours For: {$key}\n";
+                $body .= "<h2>Hours Worked For {$key}</h2><p>\n";
+                $body .= ($sdate <> 0 ) ? "Start Date: {$sdate}\n" : "";
+                $body .= ($sdate <> 0 && $edate <> 0 ) ? "<br />" : "";
+                $body .= ($edate <> 0 ) ? "Ending Date: {$edate}" : "";
+                $body .= "</p><pre>\n";
+                $body .= "Date\t\tDays Worked\tShow\n";
+                $tot = 0;
+                foreach ( $data as $num => $line ) {
+                        $tot += $line['worked'];
+                        $body .= "{$line['date']}\t{$line['worked']}\t\t{$line['showname']}\n";
+                }
+                $body .= "-=- TOTAL -=-\t{$tot}\n";
+                $body .= "</pre>";
+        }
+	mail($sendto, $subject, $body, $headers);
+        return $html;
+}
+
 
 
 ?>
