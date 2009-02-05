@@ -80,9 +80,14 @@ function hours_del ($hid) {
 }
 
 function hours_add_do() {
-	GLOBAL $db, $MYSQL_PREFIX;
+	GLOBAL $db, $MYSQL_PREFIX, $user_name;
 	$sql = "INSERT INTO {$MYSQL_PREFIX}hours ( userid, showid, date, worked ) VALUES ( '{$_REQUEST['userid']}' , '{$_REQUEST['showid']}' , '{$_REQUEST['date']}' , '{$_REQUEST['worked']}' )";
+	$fromid = perms_getidbyname($user_name);
+	$toid = ($fromid == $_REQUEST['userid']) ? 1 : $_REQUEST['userid'];
+	$msg = "{$user_name} Added Hours: {$_REQUEST['worked']} for {$_REQUEST['date']}";
+        $msgsql = "INSERT INTO {$MYSQL_PREFIX}msg ( toid, fromid, body ) VALUES ( '{$toid}', '{$fromid}', '{$msg}')";
 	$result = mysql_query($sql, $db);
+	$result = mysql_query($msgsql, $db);
 	thrower("Hours Added");
 }
 
