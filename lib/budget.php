@@ -10,8 +10,9 @@ function budget_addform() {
 		$html .= "<option value=\"{$row['showid']}\">{$row['showname']}</option>\n";
 	}
 	$html .= "</select></div>";
-	$html .= "<div class=\"frmele\">Date: <input type=\"text\" size=\"18\" name=\"date\" id=\"date\" style=\"margin-right: 2px\" />\n";
-	$html .= "<a href=\"#\" onClick=\"cal.select(document.forms['form1'].date,'anchor1','yyyy-MM-dd'); return false;\" name=\"anchor1\" id=\"anchor1\">[calendar popup]</a></div>\n";
+	$html .= "<div class=\"frmele\">Date: <input type=\"text\" size=\"22\" name=\"date\" id=\"date\" style=\"margin-right: 2px\" />\n";
+	$html .= "<a href=\"#\" onClick=\"cal.select(document.forms['form1'].date,'anchor1','yyyy-MM-dd'); return false;\" name=\"anchor1\" id=\"anchor1\">[cal]</a>";
+	$html .= " <a href=\"#\" onClick=\"document.forms['form1'].date.value='".date("Y-m-d")."'\">[today]</a></div>\n";
 	$html .= "<div class=\"frmele\">New Vendor: <input type=\"text\" size=\"35\" name=\"vendornew\" /></div>\n";
 	$html .= "<div class=\"frmele\">Old Vendor: <select style=\"width: 25em\" name=\"vendor\" />\n";
 	$html .= "<option value=\"--NEW--\">^--NEW</option>\n";
