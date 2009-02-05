@@ -167,3 +167,18 @@ INSERT INTO `users` (`userid`, `username`, `first`, `last`, `phone`, `email`, `s
 (1, 'admin', 'Administrative', 'User', 0, '', '2009-01-17 00:00:00', 'password', 1),
 (2, 'guest', 'Guest', 'User', 0, '', '2009-01-17 00:00:01', 'guest', 0);
 
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `msg`
+--
+
+CREATE TABLE IF NOT EXISTS `msg` (
+  `id` SMALLINT UNSIGNED NOT NULL auto_increment,
+  `toid` SMALLINT UNSIGNED NOT NULL ,
+  `fromid` SMALLINT UNSIGNED NOT NULL ,
+  `body` VARCHAR( 255 ) NOT NULL ,
+  `stamp` timestamp NOT NULL default CURRENT_TIMESTAMP,
+  PRIMARY KEY ( `id` ) ,
+  INDEX ( `toid` )
+) ENGINE = MYISAM DEFAULT CHARSET=latin1 COMMENT='Program Internal Messages';
