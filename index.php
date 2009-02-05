@@ -13,7 +13,7 @@ $page_title = preg_replace("/\?.+$/", "", $page_title);
 if ( $page_title == "" ) { $page_title = "home"; }
 require_once("lib/header.php");
 
-if ( isset($_SESSION['infodata']) ) { echo "<div id=\"infobox\">{$_SESSION['infodata']}</div>"; unset($_SESSION['infodata']); }
+if ( isset($_SESSION['infodata']) ) { echo "<div id=\"infobox\"><span style=\"font-size: .7em\">{$_SESSION['infodata']}</span></div>"; unset($_SESSION['infodata']); }
 
 if ( !$login[0] ) { print $login[1]; } else { $user_name = $login[1]; }
 
