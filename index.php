@@ -2,7 +2,7 @@
 ob_start(); session_start(); 
 
 ## PROGRAM DETAILS. DO NOT EDIT UNLESS YOU KNOW WHAT YOU ARE DOING
-$TDTRAC_VERSION = "0.0.9b";
+$TDTRAC_VERSION = "1.0.0beta1";
 $TDTRAC_PERMS = array("addshow", "editshow", "viewshow", "addbudget", "editbudget", "viewbudget", "addhours", "edithours", "viewhours", "adduser");
 
 require_once("config.php");
@@ -114,6 +114,19 @@ if ( $login[0] ) {
                 else { echo hours_del($match[1]); }
         } else { echo perms_no(); }
         break;
+    case "msg-view":
+	echo msg_sent_view();
+   	break;
+    case "msg-read":
+	echo msg_inbox_view();
+	break;
+    case "msg-delete":
+	preg_match("/.+\?id=(\d+)$/", $_SERVER['REQUEST_URI'], $match);
+	msg_delete($match[1]);
+	break;
+    case "msg-clean":
+	msg_clear_inbox();
+	break;
     case "change-pass":
 	if ( $user_name <> "guest" ) {
 		if ($_SERVER['REQUEST_METHOD'] == "POST") { perms_changepass_do(); }
