@@ -1,6 +1,8 @@
 <?php
 function display_home($username) {
-	$html  = "<h2>Payroll Tracking</h2><p><ul>\n";
+	$html  = "";
+	$html .= msg_check();
+	$html .= "<h2>Payroll Tracking</h2><p><ul>\n";
 	$html .= ( perms_checkperm($username, 'addhours') ) ? "<li><a href=\"/add-hours\">Add Hours Worked</a></li>\n" : "";
 	$html .= ( perms_checkperm($username, 'viewhours') ) ? "<li><a href=\"/view-hours\">View Hours Worked</a></li>\n" : "";
 	$html .= "</ul></p>\n";
