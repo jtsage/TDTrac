@@ -11,15 +11,15 @@ function show_add_form() {
 }
 
 function show_add_do() {
-	GLOBAL $db;
-	$sql = "INSERT INTO shows ( showname, company, venue, dates ) VALUES ( '{$_REQUEST['showname']}', '{$_REQUEST['company']}', '{$_REQUEST['venue']}', '{$_REQUEST['dates']}' )";
+	GLOBAL $db, $MYSQL_PREFIX;
+	$sql = "INSERT INTO {$MYSQL_PREFIX}shows ( showname, company, venue, dates ) VALUES ( '{$_REQUEST['showname']}', '{$_REQUEST['company']}', '{$_REQUEST['venue']}', '{$_REQUEST['dates']}' )";
 	$result = mysql_query($sql, $db);
 	thrower("Show {$_REQUEST['showname']} Added");
 }
 
 function show_view() {
-	GLOBAL $db, $user_name;
-	$sql = "SELECT * FROM shows ORDER BY created DESC";
+	GLOBAL $db, $user_name, $MYSQL_PREFIX;
+	$sql = "SELECT * FROM {$MYSQL_PREFIX}shows ORDER BY created DESC";
 	$result = mysql_query($sql, $db);
 	$editlink = perms_isadmin($user_name);
 	$html = "";
@@ -35,8 +35,8 @@ function show_view() {
 }
 
 function show_edit_form($showid) {
-	GLOBAL $db;
-	$sql = "SELECT showname, company, venue, dates FROM shows WHERE showid = {$showid} LIMIT 1";
+	GLOBAL $db, $MYSQL_PREFIX;
+	$sql = "SELECT showname, company, venue, dates FROM {$MYSQL_PREFIX}shows WHERE showid = {$showid} LIMIT 1";
 	$result = mysql_query($sql, $db);
 	$row = mysql_fetch_array($result);
         $html  = "<h2>Edit A Show</h2>\n";
@@ -51,8 +51,8 @@ function show_edit_form($showid) {
 }
 
 function show_edit_do($showid) {
-	GLOBAL $db;
-	$sql = "UPDATE shows SET showname='{$_REQUEST['showname']}' , company='{$_REQUEST['company']}' , venue='{$_REQUEST['venue']}' , dates='{$_REQUEST['dates']}' WHERE showid = {$showid}";
+	GLOBAL $db, $MYSQL_PREFIX;
+	$sql = "UPDATE {$MYSQL_PREFIX}shows SET showname='{$_REQUEST['showname']}' , company='{$_REQUEST['company']}' , venue='{$_REQUEST['venue']}' , dates='{$_REQUEST['dates']}' WHERE showid = {$showid}";
 	$result = mysql_query($sql, $db);
 	thrower("Show {$_REQUEST['showname']} Updated");
 }
