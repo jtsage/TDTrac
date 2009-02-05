@@ -10,6 +10,22 @@ function perms_getgroups($username) {
 	return $retty;
 }
 
+function perms_getidbyname($username) {
+	GLOBAL $db, $MYSQL_PREFIX;
+	$sql = "SELECT userid FROM {$MYSQL_PREFIX}users WHERE username = '{$username}'";
+	$result = mysql_query($sql, $db);
+	$row = mysql_fetch_array($result);
+	return $row['userid'];
+}
+
+function perms_getfnamebyid($userid) {
+        GLOBAL $db, $MYSQL_PREFIX;
+        $sql = "SELECT first FROM {$MYSQL_PREFIX}users WHERE userid = {$userid}";
+        $result = mysql_query($sql, $db);
+        $row = mysql_fetch_array($result);
+        return $row['first'];
+}
+
 function perms_checkperm($username, $permission) {
 	GLOBAL $db, $MYSQL_PREFIX;
 	$sql = "SELECT permcan FROM {$MYSQL_PREFIX}permissions pm, {$MYSQL_PREFIX}usergroups ug, {$MYSQL_PREFIX}users u WHERE username = '{$username}' AND u.userid = ug.userid AND ug.groupid = pm.groupid AND pm.permid = '{$permission}'";
