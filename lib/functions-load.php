@@ -6,6 +6,7 @@ require_once("show.php");
 require_once("home.php");
 require_once("budget.php");
 require_once("hours.php");
+require_once("email.php");
 
 function thrower($msg) {
 	GLOBAL $TDTRAC_SITE;

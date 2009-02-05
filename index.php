@@ -66,6 +66,12 @@ if ( $login[0] ) {
 		else { echo budget_editform($match[1]); }
 	} else { echo perms_no(); }
 	break;
+    case "email-budget":
+        preg_match("/.+\?id=(\d+)$/", $_SERVER['REQUEST_URI'], $match);
+        if ( perms_checkperm($user_name, 'editbudget') ) {
+                echo email_budget($match[1]); 
+        } else { echo perms_no(); }
+        break;
     case "del-budget":
 	preg_match("/.+\?id=(\d+)$/", $_SERVER['REQUEST_URI'], $match);
 	if ( perms_checkperm($user_name, 'editbudget') ) {
