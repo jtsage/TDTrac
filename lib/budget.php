@@ -43,7 +43,7 @@ function budget_editform($id) {
 	$html .= "<div class=\"frmele\">New Vendor: <input type=\"text\" size=\"35\" name=\"vendornew\" value=\"{$row['vendor']}\"/></div>\n";
 	$html .= "<div class=\"frmele\">Old Vendor: <select style=\"width: 25em\" name=\"vendor\" />\n";
 	$html .= "<option value=\"--NEW--\">^--NEW</option>\n";
-        $sql = "SELECT vendor FROM `{$MYSQL_PREFX}budget` GROUP BY vendor ORDER BY COUNT(vendor) DESC, vendor ASC";
+        $sql = "SELECT vendor FROM `{$MYSQL_PREFIX}budget` GROUP BY vendor ORDER BY COUNT(vendor) DESC, vendor ASC";
         $result2 = mysql_query($sql, $db);
         while ( $row2 = mysql_fetch_array($result2) ) {
                 $html .= "<option value=\"{$row['vendor']}\">{$row['vendor']}</option>\n";

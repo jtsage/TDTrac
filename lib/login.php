@@ -49,7 +49,7 @@ function islogin_logout() {
 }
 
 function islogin_dologin() {
-	GLOBAL $db, $MYSQL_PREFIX;
+	GLOBAL $db, $MYSQL_PREFIX, $TDTRAC_SITE;
 	$checkname = $_REQUEST['tracuser'];
 	$checkpass = $_REQUEST['tracpass'];
 
@@ -62,7 +62,7 @@ function islogin_dologin() {
 		$infodata = "Login Successful";
 		$_SESSION['tdtracuser'] = $checkname;
 		$_SESSION['tdtracpass'] = md5("havesomesalt".$checkpass);
-    if ( $row['chpass'] <> 0 ) { $infodata = "Login Successful, Please Change Your Password!"; header("Location: http://td.jtsage.com/change-pass"); ob_flush();} }
+    if ( $row['chpass'] <> 0 ) { $infodata = "Login Successful, Please Change Your Password!"; header("Location: {$TDTRAC_SITE}change-pass"); ob_flush();} }
 	else {
 		$infodata = "Login Failed!";
 	}
