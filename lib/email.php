@@ -44,7 +44,7 @@ function email_budget($showid) {
 }
 
 function email_hours($userid, $sdate, $edate) {
-        GLOBAL $db, $user_name, $MYSQL_PREFIX;
+        GLOBAL $db, $user_name, $MYSQL_PREFIX, $TDTRAC_DAYRATE;
         $sql1 = "SELECT email FROM {$MYSQL_PREFIX}users WHERE username = '{$user_name}'";
         $resul1 = mysql_query($sql1, $db);
         $row1 = mysql_fetch_array($resul1);
@@ -85,7 +85,7 @@ function email_hours($userid, $sdate, $edate) {
                 $body .= ($sdate <> 0 && $edate <> 0 ) ? "<br />" : "";
                 $body .= ($edate <> 0 ) ? "Ending Date: {$edate}" : "";
                 $body .= "</p><pre>\n";
-                $body .= "Date\t\tDays Worked\tShow\n";
+                $body .= "Date\t\t".(($TDTRAC_DAYRATE)?"Days":"Hours")." Worked\tShow\n";
                 $tot = 0;
                 foreach ( $data as $num => $line ) {
                         $tot += $line['worked'];
