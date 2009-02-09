@@ -1,7 +1,7 @@
 <?php
 
 function hours_add () {
-	GLOBAL $db, $user_name, $MYSQL_PREFIX;
+	GLOBAL $db, $user_name, $MYSQL_PREFIX, $TDTRAC_DAYRATE;
 	$html  = "<h2>Add Payroll Record</h2>\n";
 	$html .= "<div id=\"genform\"><form method=\"post\" action=\"add-hours\" name=\"form1\">\n";
 	$html .= "<div class=\"frmele\">Employee: <select name=\"userid\" style=\"width: 25em\" >\n";
@@ -23,7 +23,7 @@ function hours_add () {
         $html .= "<div class=\"frmele\">Date: <input type=\"text\" size=\"22\" name=\"date\" id=\"date\" style=\"margin-right: 2px\" />\n";
         $html .= "<a href=\"#\" onClick=\"cal.select(document.forms['form1'].date,'anchor1','yyyy-MM-dd'); return false;\" name=\"anchor1\" id=\"anchor1\">[cal]</a>\n";
 	$html .= " <a href=\"#\" onClick=\"document.forms['form1'].date.value='".date("Y-m-d")."'\">[today]</a></div>\n";
-	$html .= "<div class=\"frmele\">Days Worked: <input type=\"text\" size=\"35\" name=\"worked\" /></div>\n";
+	$html .= "<div class=\"frmele\">".(($TDTRAC_DAYRATE)?"Days":"Hours")." Worked: <input type=\"text\" size=\"35\" name=\"worked\" /></div>\n";
 	$html .= "<div class=\"frmele\"><input type=\"submit\" value=\"Add Hours\" /></div>\n";
 	$html .= "</form></div>\n";
 	return $html;
@@ -31,7 +31,7 @@ function hours_add () {
 
 
 function hours_edit ($hid) {
-	GLOBAL $db, $user_name, $MYSQL_PREFIX;
+	GLOBAL $db, $user_name, $MYSQL_PREFIX, $TDTRAC_DAYRATE;
 	$sql .= "SELECT h.*, CONCAT(first, ' ', last) as name FROM {$MYSQL_PREFIX}hours h, {$MYSQL_PREFIX}users u WHERE h.userid = u.userid AND h.id = {$hid} LIMIT 1";
 	$result = mysql_query($sql, $db);
 	$recd = mysql_fetch_array($result);
@@ -52,14 +52,14 @@ function hours_edit ($hid) {
         $html .= "</select></div>";
         $html .= "<div class=\"frmele\">Date: <input type=\"text\" size=\"18\" name=\"date\" id=\"date\" style=\"margin-right: 2px\" value=\"{$recd['date']}\" />\n";
         $html .= "<a href=\"#\" onClick=\"cal.select(document.forms['form1'].date,'anchor1','yyyy-MM-dd'); return false;\" name=\"anchor1\" id=\"anchor1\">[calendar popup]</a></div>\n";
-	$html .= "<div class=\"frmele\">Days Worked: <input type=\"text\" size=\"35\" name=\"worked\" value=\"{$recd['worked']}\" /></div>\n";
+	$html .= "<div class=\"frmele\">".(($TDTRAC_DAYRATE)?"Days":"Hours")." Worked: <input type=\"text\" size=\"35\" name=\"worked\" value=\"{$recd['worked']}\" /></div>\n";
 	$html .= "<div class=\"frmele\"><input type=\"submit\" value=\"Commit\" /></div>\n";
 	$html .= "</form></div>\n"; 
 	return $html;
 }
 
 function hours_del ($hid) {
-	GLOBAL $db, $user_name, $MYSQL_PREFIX;
+	GLOBAL $db, $user_name, $MYSQL_PREFIX, $TDTRAC_DAYRATE;
 	$sql .= "SELECT h.*, CONCAT(first, ' ', last) as name, showname FROM {$MYSQL_PREFIX}hours h, {$MYSQL_PREFIX}users u, {$MYSQL_PREFIX}shows s WHERE h.userid = u.userid AND h.showid = s.showid AND h.id = {$hid} LIMIT 1";
 	$result = mysql_query($sql, $db);
 	$recd = mysql_fetch_array($result);
@@ -74,7 +74,7 @@ function hours_del ($hid) {
         $html .= "</select></div>";
         $html .= "<div class=\"frmele\">Date: <input type=\"text\" size=\"18\" name=\"date\" id=\"date\" style=\"margin-right: 2px\" value=\"{$recd['date']}\" disabled=\"disabled\" />\n";
         $html .= "<a href=\"#\" onClick=\"cal.select(document.forms['form1'].date,'anchor1','yyyy-MM-dd'); return false;\" name=\"anchor1\" id=\"anchor1\">[calendar popup]</a></div>\n";
-	$html .= "<div class=\"frmele\">Days Worked: <input type=\"text\" size=\"35\" name=\"worked\" value=\"{$recd['worked']}\" disabled=\"disabled\" /></div>\n";
+	$html .= "<div class=\"frmele\">".(($TDTRAC_DAYRATE)?"Days":"Hours")." Worked: <input type=\"text\" size=\"35\" name=\"worked\" value=\"{$recd['worked']}\" disabled=\"disabled\" /></div>\n";
 	$html .= "<div class=\"frmele\"><input type=\"submit\" value=\"Delete\" /></div>\n";
 	$html .= "</form></div>\n"; 
 	return $html;
@@ -141,7 +141,7 @@ function hours_view_pick() {
 }
 
 function hours_view($userid) {
-	GLOBAL $db, $user_name, $MYSQL_PREFIX;
+	GLOBAL $db, $user_name, $MYSQL_PREFIX, $TDTRAC_DAYRATE;
 	if ( $userid == 0 && perms_isemp($user_name) ) { return perms_no(); }
 	$canedit = perms_checkperm($user_name, "edithours");
 	$sql  = "SELECT CONCAT(first, ' ', last) as name, worked, date, showname, h.id as hid FROM {$MYSQL_PREFIX}users u, {$MYSQL_PREFIX}shows s, {$MYSQL_PREFIX}hours h WHERE ";
@@ -166,7 +166,7 @@ function hours_view($userid) {
 		$html .= ( $_REQUEST['sdate'] <> "" && $_REQUEST['edate'] <> "" ) ? "<br />" : "";
 		$html .= ($_REQUEST['edate'] <> "" ) ? "Ending Date: {$_REQUEST['edate']}" : "";
 		$html .= "</p><table id=\"budget\">\n";
-		$html .= "<tr><th style=\"width: 15em\">Date</th><th>Show</th><th style=\"width:15em\">Days Worked</th>";
+		$html .= "<tr><th style=\"width: 15em\">Date</th><th>Show</th><th style=\"width:15em\">".(($TDTRAC_DAYRATE)?"Days":"Hours")." Worked</th>";
 		$html .= ( $canedit ) ? "<th style=\"width: 35px\">Edit</th><th style=\"width: 35px\">Del</th></tr>\n" : "</tr>\n";
 		$tot = 0;
 		foreach ( $data as $num => $line ) {
