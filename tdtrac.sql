@@ -155,6 +155,8 @@ CREATE TABLE IF NOT EXISTS `users` (
   `since` timestamp NOT NULL default CURRENT_TIMESTAMP,
   `password` varchar(15) NOT NULL,
   `active` tinyint(4) unsigned NOT NULL default '1',
+  `chpass` tinyint(4) unsigned NOT NULL default '1',
+  `payroll` tinyint(4) unsigned NOT NULL default '1',
   PRIMARY KEY  (`userid`),
   KEY `username` (`username`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=latin1 COMMENT='Program User Table' AUTO_INCREMENT=3 ;

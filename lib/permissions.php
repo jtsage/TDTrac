@@ -198,7 +198,8 @@ function perms_viewuser() {
 	while ( $row = mysql_fetch_array($result) ) {
 		$html .= "<h2>User: {$row['first']} {$row['last']}</h2><p><ul>\n";
 		$html .= "<div style=\"float: right\">[<a href=\"/edit-user?id={$row['userid']}\">Edit</a>]</div>\n";
-		$html .= "<li>Internal UserID: <strong>{$row['userid']}</strong> (Active: <input type=\"checkbox\" disabled=\"disabled\"".(($row['active'])?" checked=\"checked\" ":"").">)</li>\n";
+		$html .= "<li>Internal UserID: <strong>{$row['userid']}</strong> (Active: <input type=\"checkbox\" disabled=\"disabled\"".(($row['active'])?" checked=\"checked\" ":"").">)\n";
+		$html .= " (On Payroll: <input type=\"checkbox\" disabled=\"disabled\"".(($row['payroll'])?" checked=\"checked\" ":"").">)</li>\n";
 		$html .= "<li>User Name: <strong>{$row['username']}</strong></li>\n";
 		$html .= "<li>Group : <strong>\n";
         	$groups = perms_getgroups($row['username']);
@@ -240,6 +241,7 @@ function perms_edituser_form($id) {
 	}
 	$html .= "</select></div>";
 	$html .= "<div class=\"frmele\">User Active: <input type=\"checkbox\" name=\"active\" value=\"y\"".(($row['active'])?" checked=\"checked\" ":"")."/></div>\n";
+	$html .= "<div class=\"frmele\">User On Payroll: <input type=\"checkbox\" name=\"payroll\" value=\"y\"".(($row['payroll'])?" checked=\"checked\" ":"")."/></div>\n";
 	$html .= "<div class=\"frmele\"><input type=\"submit\" value=\"Commit\" /></div></form></div>\n";
 	return $html;
 }
@@ -248,6 +250,8 @@ function perms_edituser_do($id) {
 	GLOBAL $db, $MYSQL_PREFIX;
 	$sql   = "UPDATE {$MYSQL_PREFIX}users SET password = '{$_REQUEST['password']}' , username = '{$_REQUEST['username']}' , last = '{$_REQUEST['last']}' , first = '{$_REQUEST['first']}' , phone = '{$_REQUEST['phone']}' , email = '{$_REQUEST['email']}' , active = '";
 	$sql  .= ( $_REQUEST['active'] == "y" ) ? "1" : "0";
+        $sql  .= "', payroll = '";
+	$sql  .= ( $_REQUEST['payroll'] == "y" ) ? "1" : "0";
 	$sql  .= "' WHERE userid = '{$id}' LIMIT 1";
 	$sql2  = "UPDATE {$MYSQL_PREFIX}usergroups SET groupid = {$_REQUEST['groupid']} WHERE userid = '{$id}'";
 	$result = mysql_query($sql, $db);

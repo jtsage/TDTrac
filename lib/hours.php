@@ -7,7 +7,7 @@ function hours_add () {
 	$html .= "<div class=\"frmele\">Employee: <select name=\"userid\" style=\"width: 25em\" >\n";
 	$sql  = "SELECT u.userid, CONCAT(first, ' ', last) as name FROM {$MYSQL_PREFIX}users u, {$MYSQL_PREFIX}usergroups ug WHERE";
 	$sql .= perms_isemp($user_name) ? " username = '{$user_name}' AND" : "";
-	$sql .= " active = 1 AND groupid = 4 AND ug.userid = u.userid ORDER BY last ASC"; //die($sql);
+	$sql .= " active = 1 AND payroll = 1 AND ug.userid = u.userid ORDER BY last ASC"; //die($sql);
 	$result = mysql_query($sql, $db);
 	while ( $row = mysql_fetch_array($result) ) {
 		$html .= "<option value=\"{$row['userid']}\">{$row['name']}</option>\n";
@@ -112,9 +112,9 @@ function hours_view_pick() {
 	$html = "<h2>View By Employee</h2>";
 	$html .= "<div id=\"genform\"><form method=\"post\" action=\"view-hours\" name=\"form1\">\n";
         $html .= "<div class=\"frmele\">Employee: <select name=\"userid\" style=\"width: 25em\" >\n";
-        $sql  = "SELECT userid, CONCAT(first, ' ', last) as name {$MYSQL_PREFIX}FROM users WHERE";
+        $sql  = "SELECT userid, CONCAT(first, ' ', last) as name FROM {$MYSQL_PREFIX}users WHERE";
         $sql .= perms_isemp($user_name) ? " username = '{$user_name}' AND" : "";
-        $sql .= " userid <> 3 AND userid <> 2 ORDER BY last ASC";
+        $sql .= " payroll = 1 ORDER BY last ASC";
         $result = mysql_query($sql, $db);
         while ( $row = mysql_fetch_array($result) ) {
                 $html .= "<option value=\"{$row['userid']}\">{$row['name']}</option>\n";
