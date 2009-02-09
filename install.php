@@ -51,12 +51,16 @@ switch ($page_title) {
 		$fh = fopen($filename, 'a');
 		fwrite($fh, "<?php\n");
 		fwrite($fh, "\$TDTRAC_CPNY = \"{$_REQUEST['cpny']}\";\n");
-		fwrite($fh, "\$TDTRAC_SITE = \"{$_REQUEST['site']}\";\n?>\n");
+		fwrite($fh, "\$TDTRAC_SITE = \"{$_REQUEST['site']}\";\n");
+		fwrite($fh, "\$TDTRAC_DAYRATE = \"{$_REQUEST['dayrate']}\";\n");
+		fwrite($fh, "\$TDTRAC_PAYRATE = \"{$_REQUEST['payrate']}\";\n?>\n");
 		header("Location: install.php");
 	} else {
 		echo "<div id=\"genform\"><form method=\"post\" action=\"install.php?site\" name=\"form1\">\n";
 		echo "<div class=\"frmele\">Site Name: <input type=\"text\" size=\"35\" name=\"cpny\" value=\"{$TDTRAC_CPNY}\"/></div>\n";
 		echo "<div class=\"frmele\">Site URL: <input type=\"text\" size=\"35\" name=\"site\" value=\"{$TDTRAC_SITE}\"/></div>\n";
+		echo "<div class=\"frmele\">Day Rate Payroll ( 1 = yes, 0 = no ): <input type=\"text\" size=\"35\" name=\"dayrate\" value=\"{$TDTRAC_DAYRATE}\"/></div>\n";
+		echo "<div class=\"frmele\">Day / Hourly Pay Rate: <input type=\"text\" size=\"35\" name=\"payrate\" value=\"{$TDTRAC_PAYRATE}\"/></div>\n";
         	echo "<div class=\"frmele\"><input type=\"submit\" value=\"Save Values\" /></div>\n";
         	echo "</form></div>\n";
 	}
@@ -96,6 +100,10 @@ switch ($page_title) {
 	echo "<ul>\n";
 	echo "<li><b>Site Name::</b> {$TDTRAC_CPNY}</li>\n";
 	echo "<li><b>Site URL::</b> {$TDTRAC_SITE}</li>\n";
+	echo "<li><b>Day Rate Payroll::</b> ";
+        echo ($TDTRAC_DAYRATE) ? "YES" : "NO";
+	echo "</li>\n";
+	echo "<li><b>Per Day/Hour Pay Rate::</b> \${$TDTRAC_PAYRATE}</li>\n";
 	echo "</ul></li></ul>\n";
 	echo "<ul><li>Checking Files...<ul>\n";
 	  // Check File Exists
