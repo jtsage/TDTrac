@@ -121,7 +121,7 @@ function budget_viewselect() {
 }
 
 function budget_view($showid) {
-	GLOBAL $db, $user_name, $MYSQL_PREFIX;
+	GLOBAL $db, $user_name, $MYSQL_PREFIX, $TDTRAC_DAYRATE, $TDTRAC_PAYRATE;
         $sql = "SELECT * FROM {$MYSQL_PREFIX}shows WHERE showid = {$showid}";
         $editshow = perms_checkperm($user_name, "editshow");
 	$editbudget = perms_checkperm($user_name, "editbudget"); 
@@ -158,16 +158,16 @@ function budget_view($showid) {
 	$html .= "</table>\n";
 
 	$html .= "<h2>Payroll Expenses</h2><table id=\"budget\">\n";
-	$html .= "<tr><th>Employee</th><th>Days Worked</th><th>Price</th></tr>\n";
+	$html .= "<tr><th>Employee</th><th>".(($TDTRAC_DAYRATE)?"Days":"Hours")." Worked</th><th>Price</th></tr>\n";
 	$sql = "SELECT SUM(worked) as days, CONCAT(first, ' ', last) as name FROM {$MYSQL_PREFIX}users u, {$MYSQL_PREFIX}hours h WHERE u.userid = h.userid AND h.showid = {$showid} GROUP BY h.userid ORDER BY last ASC";
 	$result = mysql_query($sql, $db);
 	$tot = 0; $intr = 0;
 	while ( $row = mysql_fetch_array($result) ) {
 		$intr++;
 		$tot += $row['days'];
-		$html .= "<tr".((($intr % 2) == 0 ) ? " class=\"odd\"" : "")."><td>{$row['name']}</td><td>{$row['days']}</td><td style=\"text-align: right\">$" . number_format($row['days'] * 75, 2) . "</td></tr>\n";
+		$html .= "<tr".((($intr % 2) == 0 ) ? " class=\"odd\"" : "")."><td>{$row['name']}</td><td>{$row['days']}</td><td style=\"text-align: right\">$" . number_format($row['days'] * $TDTRAC_PAYRATE, 2) . "</td></tr>\n";
 	}
-	$html .= "<tr style=\"background-color: #FFCCFF\"><td></td><td>{$tot}</td><td style=\"text-align: right\">$" . number_format($tot * 75, 2) . "</td></tr>\n";
+	$html .= "<tr style=\"background-color: #FFCCFF\"><td></td><td>{$tot}</td><td style=\"text-align: right\">$" . number_format($tot * $TDTRAC_PAYRATE, 2) . "</td></tr>\n";
 	$html .= "</table>\n";
         return $html;
 
