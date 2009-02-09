@@ -89,6 +89,7 @@ $sql_users .= "  `since` timestamp NOT NULL default CURRENT_TIMESTAMP,";
 $sql_users .= "  `password` varchar(15) NOT NULL,";
 $sql_users .= "  `active` tinyint(4) unsigned NOT NULL default '1',";
 $sql_users .= "  `chpass` tinyint(4) unsigned NOT NULL default '1',";
+$sql_users .= "  `payroll` tinyint(4) unsigned NOT NULL default '1',";
 $sql_users .= "  PRIMARY KEY  (`userid`),";
 $sql_users .= "  KEY `username` (`username`)";
 $sql_users .= ") ENGINE=MyISAM  DEFAULT CHARSET=latin1 COMMENT='Program User Table' AUTO_INCREMENT=3 ;";
