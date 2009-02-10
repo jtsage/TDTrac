@@ -33,7 +33,7 @@ function email_budget($showid) {
         $result = mysql_query($sql, $db); $intr = 0; $tot = 0; $last = "";
         while ( $row = mysql_fetch_array($result) ) {
 		if ( $last != "" && $last != $row['category'] ) { 
-			$body .= "-=- {$row['category']} SUB-TOTAL -=-\t" . number_format($subtot, 2) . "\n"; $subtot = 0; }
+			$body .= "-=- {$last} SUB-TOTAL -=-\t" . number_format($subtot, 2) . "\n"; $subtot = 0; }
                 $intr++;
                 $body .= "{$row['date']}\t".number_format($row['price'], 2)."\t{$row['vendor']}\t{$row['category']}\t{$row['dscr']}\n";
                 $tot += $row['price']; $subtot += $row['price'];
