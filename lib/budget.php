@@ -55,7 +55,7 @@ function budget_editform($id) {
         $sql = "SELECT vendor FROM `{$MYSQL_PREFIX}budget` GROUP BY vendor ORDER BY COUNT(vendor) DESC, vendor ASC";
         $result2 = mysql_query($sql, $db);
         while ( $row2 = mysql_fetch_array($result2) ) {
-                $html .= "<option value=\"{$row['vendor']}\">{$row['vendor']}</option>\n";
+                $html .= "<option value=\"{$row2['vendor']}\">{$row2['vendor']}</option>\n";
         }
 	$html .= "</select></div>\n";
         $html .= "<div class=\"frmele\">New Category: <input type=\"text\" size=\"35\" name=\"categorynew\" value=\"{$row['category']}\"/></div>\n";
@@ -64,7 +64,7 @@ function budget_editform($id) {
         $sql = "SELECT category FROM `{$MYSQL_PREFIX}budget` GROUP BY category ORDER BY COUNT(category) DESC, category ASC";
         $result2 = mysql_query($sql, $db);
         while ( $row2 = mysql_fetch_array($result2) ) {
-                $html .= "<option value=\"{$row['category']}\">{$row['category']}</option>\n";
+                $html .= "<option value=\"{$row2['category']}\">{$row2['category']}</option>\n";
         }
         $html .= "</select></div>\n";
 	$html .= "<div class=\"frmele\">Description: <input type=\"text\" size=\"35\" name=\"dscr\" value=\"{$row['dscr']}\" /></div>\n";
