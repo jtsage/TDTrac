@@ -3,18 +3,18 @@ function budget_addform() {
 	GLOBAL $db, $MYSQL_PREFIX;
 	$html  = "<h2>Add Budget Expense</h2>\n";
 	$html .= "<div id=\"genform\"><form method=\"post\" action=\"add-budget\" name=\"form1\">\n";
-	$html .= "<div class=\"frmele\">Show: <select tabindex=\"1\" style=\"width: 25em;\" name=\"showid\">\n";
+	$html .= "<div class=\"frmele\" title=\"Show to charge against\">Show: <select tabindex=\"1\" style=\"width: 25em;\" name=\"showid\">\n";
 	$sql = "SELECT showname, showid FROM {$MYSQL_PREFIX}shows ORDER BY created DESC;";
 	$result = mysql_query($sql, $db);
 	while ( $row = mysql_fetch_array($result) ) {
 		$html .= "<option value=\"{$row['showid']}\">{$row['showname']}</option>\n";
 	}
 	$html .= "</select></div>";
-	$html .= "<div class=\"frmele\">Date: <input type=\"text\" size=\"22\" name=\"date\" id=\"date\" style=\"margin-right: 2px\" />\n";
+	$html .= "<div class=\"frmele\" title=\"Date of charge\">Date: <input type=\"text\" size=\"22\" name=\"date\" id=\"date\" style=\"margin-right: 2px\" />\n";
 	$html .= "<a href=\"#\" onClick=\"cal.select(document.forms['form1'].date,'anchor1','yyyy-MM-dd'); return false;\" name=\"anchor1\" id=\"anchor1\">[cal]</a>";
 	$html .= " <a href=\"#\" onClick=\"document.forms['form1'].date.value='".date("Y-m-d")."'\">[today]</a></div>\n";
-	$html .= "<div class=\"frmele\">New Vendor: <input type=\"text\" size=\"35\" name=\"vendornew\" /></div>\n";
-	$html .= "<div class=\"frmele\">Old Vendor: <select style=\"width: 25em\" name=\"vendor\" />\n";
+	$html .= "<div class=\"frmele\" title=\"New Vendor for charge, or select below\">New Vendor: <input type=\"text\" size=\"35\" name=\"vendornew\" /></div>\n";
+	$html .= "<div class=\"frmele\" title=\"Exisiting Vendor for charge (Takes Presedence)\">Old Vendor: <select style=\"width: 25em\" name=\"vendor\" />\n";
 	$html .= "<option value=\"--NEW--\">^--NEW</option>\n";
         $sql = "SELECT vendor FROM `{$MYSQL_PREFIX}budget` GROUP BY vendor ORDER BY COUNT(vendor) DESC, vendor ASC";
         $result = mysql_query($sql, $db);
@@ -22,8 +22,17 @@ function budget_addform() {
                 $html .= "<option value=\"{$row['vendor']}\">{$row['vendor']}</option>\n";
         }
 	$html .= "</select></div>\n";
-	$html .= "<div class=\"frmele\">Description: <input type=\"text\" size=\"35\" name=\"dscr\" /></div>\n";
-	$html .= "<div class=\"frmele\">Price: $<input type=\"text\" size=\"34\" name=\"price\" /></div>\n";
+        $html .= "<div class=\"frmele\" title=\"New Category for charge, or select below\">New Category: <input type=\"text\" size=\"35\" name=\"categorynew\" /></div>\n";
+        $html .= "<div class=\"frmele\" title=\"Exisiting Category for charge (Takes Presedence)\">Old Category: <select style=\"width: 25em\" name=\"category\" />\n";
+        $html .= "<option value=\"--NEW--\">^--NEW</option>\n";
+        $sql = "SELECT category FROM `{$MYSQL_PREFIX}budget` GROUP BY category ORDER BY COUNT(category) DESC, category ASC";
+        $result = mysql_query($sql, $db);
+        while ( $row = mysql_fetch_array($result) ) {
+                $html .= "<option value=\"{$row['category']}\">{$row['category']}</option>\n";
+        }
+        $html .= "</select></div>\n";
+	$html .= "<div class=\"frmele\" title=\"Description of charge\">Description: <input type=\"text\" size=\"35\" name=\"dscr\" /></div>\n";
+	$html .= "<div class=\"frmele\" title=\"Amount of charge, without dollar sign\">Price: $<input type=\"text\" size=\"34\" name=\"price\" /></div>\n";
 	$html .= "<div class=\"frmele\"><input type=\"submit\" value=\"Add Expense\" /></div></form></div>\n";
 	return $html;
 }
@@ -46,9 +55,18 @@ function budget_editform($id) {
         $sql = "SELECT vendor FROM `{$MYSQL_PREFIX}budget` GROUP BY vendor ORDER BY COUNT(vendor) DESC, vendor ASC";
         $result2 = mysql_query($sql, $db);
         while ( $row2 = mysql_fetch_array($result2) ) {
-                $html .= "<option value=\"{$row['vendor']}\">{$row['vendor']}</option>\n";
+                $html .= "<option value=\"{$row2['vendor']}\">{$row2['vendor']}</option>\n";
         }
 	$html .= "</select></div>\n";
+        $html .= "<div class=\"frmele\">New Category: <input type=\"text\" size=\"35\" name=\"categorynew\" value=\"{$row['category']}\"/></div>\n";
+        $html .= "<div class=\"frmele\">Old Category: <select style=\"width: 25em\" name=\"category\" />\n";
+        $html .= "<option value=\"--NEW--\">^--NEW</option>\n";
+        $sql = "SELECT category FROM `{$MYSQL_PREFIX}budget` GROUP BY category ORDER BY COUNT(category) DESC, category ASC";
+        $result2 = mysql_query($sql, $db);
+        while ( $row2 = mysql_fetch_array($result2) ) {
+                $html .= "<option value=\"{$row2['category']}\">{$row2['category']}</option>\n";
+        }
+        $html .= "</select></div>\n";
 	$html .= "<div class=\"frmele\">Description: <input type=\"text\" size=\"35\" name=\"dscr\" value=\"{$row['dscr']}\" /></div>\n";
 	$html .= "<div class=\"frmele\">Price: $<input type=\"text\" size=\"34\" name=\"price\" value=\"{$row['price']}\" /></div>\n";
 	$html .= "<input type=\"hidden\" name=\"id\" value=\"{$id}\" />\n";
@@ -68,7 +86,8 @@ function budget_delform($id) {
 	$html .= "</select></div>";
 	$html .= "<div class=\"frmele\">Date: <input type=\"text\" size=\"18\" name=\"date\" id=\"date\" style=\"margin-right: 2px\" value=\"{$row['date']}\" disabled=\"disabled\" />\n";
 	$html .= "<a href=\"#\" onClick=\"cal.select(document.forms['form1'].date,'anchor1','yyyy-MM-dd'); return false;\" name=\"anchor1\" id=\"anchor1\">[calendar popup]</a></div>\n";
-	$html .= "<div class=\"frmele\">New Vendor: <input type=\"text\" size=\"35\" name=\"vendornew\" value=\"{$row['vendor']}\" disabled=\"disabled\" /></div>\n";
+	$html .= "<div class=\"frmele\">Vendor: <input type=\"text\" size=\"35\" name=\"vendornew\" value=\"{$row['vendor']}\" disabled=\"disabled\" /></div>\n";
+	$html .= "<div class=\"frmele\">Category: <input type=\"text\" size=\"35\" name=\"categorynew\" value=\"{$row['category']}\" disabled=\"disabled\" /></div>\n";
 	$html .= "<div class=\"frmele\">Description: <input type=\"text\" size=\"35\" name=\"dscr\" value=\"{$row['dscr']}\" disabled=\"disabled\" /></div>\n";
 	$html .= "<div class=\"frmele\">Price: $<input type=\"text\" size=\"34\" name=\"price\" value=\"{$row['price']}\" disabled=\"disabled\" /></div>\n";
 	$html .= "<input type=\"hidden\" name=\"id\" value=\"{$id}\" />\n";
@@ -78,10 +97,13 @@ function budget_delform($id) {
 
 function budget_add() {
 	GLOBAL $db, $MYSQL_PREFIX;
-	$sql  = "INSERT INTO {$MYSQL_PREFIX}budget ( showid, price, vendor, dscr, date ) VALUES ( {$_REQUEST['showid']} , '{$_REQUEST['price']}' , ";
+	$sql  = "INSERT INTO {$MYSQL_PREFIX}budget ( showid, price, vendor, category, dscr, date ) VALUES ( {$_REQUEST['showid']} , '{$_REQUEST['price']}' , ";
         if ( ($_REQUEST['vendor'] == "--NEW--") && !($_REQUEST['vendornew'] == "") ) {
 		$sql .= "'{$_REQUEST['vendornew']}' , ";
 	} else { $sql .= "'{$_REQUEST['vendor']}' , "; }
+        if ( ($_REQUEST['category'] == "--NEW--") && !($_REQUEST['categorynew'] == "") ) {
+                $sql .= "'{$_REQUEST['categorynew']}' , ";
+        } else { $sql .= "'{$_REQUEST['category']}' , "; }
 	$sql .= "'{$_REQUEST['dscr']}' , '{$_REQUEST['date']}' )";
 	$result = mysql_query($sql, $db);
 	thrower("Expense Added");
@@ -93,6 +115,10 @@ function budget_edit_do($id) {
         if ( ($_REQUEST['vendor'] == "--NEW--") && !($_REQUEST['vendornew'] == "") ) {
                 $sql .= "'{$_REQUEST['vendornew']}' , ";
         } else { $sql .= "'{$_REQUEST['vendor']}' , "; }
+	$sql .= "category =";
+        if ( ($_REQUEST['category'] == "--NEW--") && !($_REQUEST['categorynew'] == "") ) {
+                $sql .= "'{$_REQUEST['categorynew']}' , ";
+        } else { $sql .= "'{$_REQUEST['category']}' , "; }
         $sql .= "dscr = '{$_REQUEST['dscr']}' , date = '{$_REQUEST['date']}' WHERE id = {$id}";
 	$result = mysql_query($sql, $db);
 	thrower("Expense #{$id} Updated");
@@ -138,23 +164,29 @@ function budget_view($showid) {
 	$html .= "<h2>Materials Expenses</h2><br />";
         $html .= "<div style=\"float: right\">[<a href=\"/email-budget?id={$row['showid']}\">E-Mail To Self</a>]</div>\n";
         $html .= "<table id=\"budget\">\n";
-	$html .= "<tr><th>Date</th><th>Vendor</th><th>Description</th><th>Price</th>";
+	$html .= "<tr><th>Date</th><th>Vendor</th><th>Category</th><th>Description</th><th>Price</th>";
 	$html .= $editbudget ? "<th>Edit</th>" : "";
 	$html .= $editbudget ? "<th>Del</th>" : "";
 	$html .= "</tr>\n";
-	$sql = "SELECT * FROM {$MYSQL_PREFIX}budget WHERE showid = {$showid} ORDER BY date ASC, vendor ASC";
+	$sql = "SELECT * FROM {$MYSQL_PREFIX}budget WHERE showid = {$showid} ORDER BY category ASC, date ASC, vendor ASC";
 	$result = mysql_query($sql, $db); $intr = 0; $tot = 0;
+	$last = "";
 	while ( $row = mysql_fetch_array($result) ) {
+		if ( $last != "" && $last != $row['category'] ) {
+			$html .= "<tr style=\"background-color: #DDCCDD\"><td></td><td></td><td>{$last}</td><td style=\"text-align: center\">-=- SUB-TOTAL -=-</td><td style=\"text-align: right\">$" . number_format($subtot, 2) . "</td></tr>\n"; $subtot = 0;
+		} 
 		$intr++;
-		$html .= "<tr".((($intr % 2) == 0 ) ? " class=\"odd\"" : "")."><td>{$row['date']}</td><td>{$row['vendor']}</td><td>{$row['dscr']}</td><td style=\"text-align: right\">$";
-                $tot += $row['price'];
+		$html .= "<tr".((($intr % 2) == 0 ) ? " class=\"odd\"" : "")."><td>{$row['date']}</td><td>{$row['vendor']}</td><td>{$row['category']}</td><td>{$row['dscr']}</td><td style=\"text-align: right\">$";
+                $tot += $row['price']; $subtot += $row['price'];
 		$html .= number_format($row['price'], 2);
 		$html .= "</td>";
 		$html .= $editbudget ? "<td style=\"text-align: center\"><a href=\"/edit-budget?id={$row['id']}\">[-]</a></td>" : "";
 		$html .= $editbudget ? "<td style=\"text-align: center\"><a href=\"/del-budget?id={$row['id']}\">[x]</a></td>" : "";
 		$html .= "</tr>\n";
+		$last = $row['category'];
 	}
-	$html .= "<tr style=\"background-color: #FFCCFF\"><td></td><td></td><td style=\"text-align: center\">-=- TOTAL -=-</td><td style=\"text-align: right\">$" . number_format($tot, 2) . "</td></tr>\n";
+	$html .= "<tr style=\"background-color: #DDCCDD\"><td></td><td></td><td>{$last}</td><td style=\"text-align: center\">-=- SUB-TOTAL -=-</td><td style=\"text-align: right\">$" . number_format($subtot, 2) . "</td></tr>\n";
+	$html .= "<tr style=\"background-color: #FFCCFF\"><td></td><td></td><td></td><td style=\"text-align: center\">-=- TOTAL -=-</td><td style=\"text-align: right\">$" . number_format($tot, 2) . "</td></tr>\n";
 	$html .= "</table>\n";
 
 	$html .= "<h2>Payroll Expenses</h2><table id=\"budget\">\n";
