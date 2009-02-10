@@ -7,6 +7,7 @@ $sql_budget .= "  `id` int(10) unsigned NOT NULL auto_increment,";
 $sql_budget .= "  `showid` smallint(5) unsigned NOT NULL,";
 $sql_budget .= "  `price` float NOT NULL,";
 $sql_budget .= "  `vendor` varchar(35) NOT NULL,";
+$sql_budget .= "  `category` VARCHAR( 35 ) NULL,";
 $sql_budget .= "  `dscr` varchar(65) NOT NULL,";
 $sql_budget .= "  `date` date NOT NULL,";
 $sql_budget .= "  PRIMARY KEY  (`id`),";

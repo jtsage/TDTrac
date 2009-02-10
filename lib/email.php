@@ -29,13 +29,17 @@ function email_budget($showid) {
 
         $body .= "<h2>Materials Expenses</h2><pre>\n";
         $body .= "Date\t\tPrice\tVendor\tDescription\n";
-        $sql = "SELECT * FROM {$MYSQL_PREFIX}budget WHERE showid = {$showid} ORDER BY date ASC, vendor ASC";
-        $result = mysql_query($sql, $db); $intr = 0; $tot = 0;
+        $sql = "SELECT * FROM {$MYSQL_PREFIX}budget WHERE showid = {$showid} ORDER BY category ASC, date ASC, vendor ASC";
+        $result = mysql_query($sql, $db); $intr = 0; $tot = 0; $last = "";
         while ( $row = mysql_fetch_array($result) ) {
+		if ( $last != "" && $last != $row['category'] ) { 
+			$body .= "-=- {$row['category']} SUB-TOTAL -=-\t" . number_format($subtot, 2) . "\n"; $subtot = 0; }
                 $intr++;
-                $body .= "{$row['date']}\t".number_format($row['price'], 2)."\t{$row['vendor']}\t{$row['dscr']}\n";
-                $tot += $row['price'];
+                $body .= "{$row['date']}\t".number_format($row['price'], 2)."\t{$row['vendor']}\t{$row['category']}\t{$row['dscr']}\n";
+                $tot += $row['price']; $subtot += $row['price'];
+		$last = $row['category'];
         }
+        $body .= "-=- {$last} SUB-TOTAL -=-\t" . number_format($subtot, 2) . "\n";
         $body .= "-=- TOTAL -=-\t" . number_format($tot, 2) . "\n";
         $body .= "</pre>\n";
 
