@@ -126,7 +126,7 @@ function budget_edit_do($id) {
 
 function budget_del_do($id) {
 	GLOBAL $db, $MYSQL_PREFIX;
-	$sql = "DELETE FROM {$MYSQL_BUDGET}budget WHERE id = {$id}";
+	$sql = "DELETE FROM {$MYSQL_PREFIX}budget WHERE id = {$id}";
 	$result = mysql_query($sql, $db);
 	thrower("Expense #{$id} Removed");
 }
