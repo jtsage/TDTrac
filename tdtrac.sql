@@ -24,6 +24,7 @@ CREATE TABLE IF NOT EXISTS `budget` (
   `showid` smallint(5) unsigned NOT NULL,
   `price` float NOT NULL,
   `vendor` varchar(35) NOT NULL,
+  `category` varchar(35) NULL,
   `dscr` varchar(65) NOT NULL,
   `date` date NOT NULL,
   PRIMARY KEY  (`id`),
