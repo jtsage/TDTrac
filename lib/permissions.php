@@ -162,8 +162,8 @@ function perms_adduser_form() {
 }
 
 function perms_adduser_do() {
-	GLOBAL $db, $MYSQL_PREFIX;
-	$sql = "INSERT INTO {$MYSQL_PREFIX}users ( username, first, last, password, phone, email ) VALUES ( '{$_REQUEST['username']}' , '{$_REQUEST['first']}' , '{$_REQUEST['last']}' , '{$_REQUEST['password']}' , '{$_REQUEST['phone']}' , '{$_REQUEST['email']}' )";
+	GLOBAL $db, $MYSQL_PREFIX, $TDTRAC_PAYRATE;
+	$sql = "INSERT INTO {$MYSQL_PREFIX}users ( username, first, last, password, phone, email, payrate ) VALUES ( '{$_REQUEST['username']}' , '{$_REQUEST['first']}' , '{$_REQUEST['last']}' , '{$_REQUEST['password']}' , '{$_REQUEST['phone']}' , '{$_REQUEST['email']}' , '{$TDTRAC_PAYRATE}')";
 	$result = mysql_query($sql, $db);
 	$userid = mysql_insert_id($db);
 	$sql2 = "INSERT INTO {$MYSQL_PREFIX}usergroups ( userid, groupid ) VALUES ( '{$userid}' , '{$_REQUEST['groupid']}' )";
@@ -199,7 +199,8 @@ function perms_viewuser() {
 		$html .= "<h2>User: {$row['first']} {$row['last']}</h2><p><ul>\n";
 		$html .= "<div style=\"float: right\">[<a href=\"/edit-user?id={$row['userid']}\">Edit</a>]</div>\n";
 		$html .= "<li>Internal UserID: <strong>{$row['userid']}</strong> (Active: <input type=\"checkbox\" disabled=\"disabled\"".(($row['active'])?" checked=\"checked\" ":"").">)\n";
-		$html .= " (On Payroll: <input type=\"checkbox\" disabled=\"disabled\"".(($row['payroll'])?" checked=\"checked\" ":"").">)</li>\n";
+		$html .= " (On Payroll: <input type=\"checkbox\" disabled=\"disabled\"".(($row['payroll'])?" checked=\"checked\" ":"").">)\n";
+		$html .= " (Notify of Employee add Payroll: <input type=\"checkbox\" disabled=\"disabled\"".(($row['notify'])?" checked=\"checked\" ":"").">)</li>\n";
 		$html .= "<li>User Name: <strong>{$row['username']}</strong></li>\n";
 		$html .= "<li>Group : <strong>\n";
         	$groups = perms_getgroups($row['username']);
@@ -211,6 +212,7 @@ function perms_viewuser() {
 		if ( !is_null($row['email']) && $row['email'] <> "" ) {
 			$html .= "<li>E-Mail Address: <a href=\"mailto:{$row['email']}\"><strong>{$row['email']}</strong></a></li>\n";
 		}
+		$html .= "<li>Pay Rate: \$" . number_format($row['payrate'], 2) . "</li>";
 		$html .= "</ul></p>\n";
 	}
 	return $html;
@@ -226,6 +228,7 @@ function perms_edituser_form($id) {
 	$html .= "<input type=\"hidden\" name=\"id\" value=\"{$id}\" />\n";
 	$html .= "<div class=\"frmele\">User Name: <input type=\"text\" name=\"username\" size=\"35\" value=\"{$row['username']}\" /></div>\n";
 	$html .= "<div class=\"frmele\">Password: <input type=\"text\" name=\"password\" size=\"35\" value=\"{$row['password']}\" /></div>\n";
+	$html .= "<div class=\"frmele\">Pay Rate: <input type=\"text\" name=\"payrate\" size=\"35\" value=\"{$row['payrate']}\" /></div>\n";
 	$html .= "<div class=\"frmele\">First Name: <input type=\"text\" name=\"first\" size=\"35\" value=\"{$row['first']}\" /></div>\n";
 	$html .= "<div class=\"frmele\">Last Name: <input type=\"text\" name=\"last\" size=\"35\" value=\"{$row['last']}\" /></div>\n";
 	$html .= "<div class=\"frmele\">Phone: <input type=\"text\" name=\"phone\" size=\"35\" value=\"{$row['phone']}\" /></div>\n";
@@ -242,16 +245,19 @@ function perms_edituser_form($id) {
 	$html .= "</select></div>";
 	$html .= "<div class=\"frmele\">User Active: <input type=\"checkbox\" name=\"active\" value=\"y\"".(($row['active'])?" checked=\"checked\" ":"")."/></div>\n";
 	$html .= "<div class=\"frmele\">User On Payroll: <input type=\"checkbox\" name=\"payroll\" value=\"y\"".(($row['payroll'])?" checked=\"checked\" ":"")."/></div>\n";
+	$html .= "<div class=\"frmele\">Admin Notify on Employee Add of Payroll: <input type=\"checkbox\" name=\"notify\" value=\"y\"".(($row['notify'])?" checked=\"checked\" ":"")."/></div>\n";
 	$html .= "<div class=\"frmele\"><input type=\"submit\" value=\"Commit\" /></div></form></div>\n";
 	return $html;
 }
 
 function perms_edituser_do($id) {
 	GLOBAL $db, $MYSQL_PREFIX;
-	$sql   = "UPDATE {$MYSQL_PREFIX}users SET password = '{$_REQUEST['password']}' , username = '{$_REQUEST['username']}' , last = '{$_REQUEST['last']}' , first = '{$_REQUEST['first']}' , phone = '{$_REQUEST['phone']}' , email = '{$_REQUEST['email']}' , active = '";
+	$sql   = "UPDATE {$MYSQL_PREFIX}users SET password = '{$_REQUEST['password']}' , username = '{$_REQUEST['username']}' , last = '{$_REQUEST['last']}' , first = '{$_REQUEST['first']}' , phone = '{$_REQUEST['phone']}' , email = '{$_REQUEST['email']}' , payrate = '{$_REQUEST['payrate']}' , active = '";
 	$sql  .= ( $_REQUEST['active'] == "y" ) ? "1" : "0";
         $sql  .= "', payroll = '";
 	$sql  .= ( $_REQUEST['payroll'] == "y" ) ? "1" : "0";
+	$sql  .= "', notify = '";
+	$sql  .= ( $_REQUEST['notify'] == "y" ) ? "1" : "0";
 	$sql  .= "' WHERE userid = '{$id}' LIMIT 1";
 	$sql2  = "UPDATE {$MYSQL_PREFIX}usergroups SET groupid = {$_REQUEST['groupid']} WHERE userid = '{$id}'";
 	$result = mysql_query($sql, $db);
