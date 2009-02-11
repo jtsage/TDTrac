@@ -180,3 +180,19 @@ text-decoration:none;}
 
 a:hover{
 color:#20684E;}
+
+table.cal {
+	font-size: .8em;
+	text-align: center;
+	border: 1px solid black;
+	margin-right: 105px;
+	margin-left: auto;
+}
+
+tr.dates td {
+	text-align: center; 
+}
+
+tr.dates a { 
+	color: #333333;
+}

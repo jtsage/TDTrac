@@ -11,8 +11,11 @@ function budget_addform() {
 	}
 	$html .= "</select></div>";
 	$html .= "<div class=\"frmele\" title=\"Date of charge\">Date: <input type=\"text\" size=\"22\" name=\"date\" id=\"date\" style=\"margin-right: 2px\" />\n";
-	$html .= "<a href=\"#\" onClick=\"cal.select(document.forms['form1'].date,'anchor1','yyyy-MM-dd'); return false;\" name=\"anchor1\" id=\"anchor1\">[cal]</a>";
-	$html .= " <a href=\"#\" onClick=\"document.forms['form1'].date.value='".date("Y-m-d")."'\">[today]</a></div>\n";
+        $html .= "<a href=\"#\" onClick=\"tdt_show_calendar(".(date(n)-1).",".date(Y).",'pickcal','date')\">[cal]</a>\n";
+        $html .= " <a href=\"#\" onClick=\"document.forms['form1'].date.value='".date("Y-m-d")."'\">[today]</a></div>\n";
+        $html .= "<div class=\"frmele\" id=\"pickcal\"></div>\n";
+
+
 	$html .= "<div class=\"frmele\" title=\"New Vendor for charge, or select below\">New Vendor: <input type=\"text\" size=\"35\" name=\"vendornew\" /></div>\n";
 	$html .= "<div class=\"frmele\" title=\"Exisiting Vendor for charge (Takes Presedence)\">Old Vendor: <select style=\"width: 25em\" name=\"vendor\" />\n";
 	$html .= "<option value=\"--NEW--\">^--NEW</option>\n";
@@ -48,7 +51,10 @@ function budget_editform($id) {
 	$html .= "<option value=\"{$row['showid']}\">{$row['showname']}</option>\n";
 	$html .= "</select></div>";
 	$html .= "<div class=\"frmele\">Date: <input type=\"text\" size=\"18\" name=\"date\" id=\"date\" style=\"margin-right: 2px\" value=\"{$row['date']}\" />\n";
-	$html .= "<a href=\"#\" onClick=\"cal.select(document.forms['form1'].date,'anchor1','yyyy-MM-dd'); return false;\" name=\"anchor1\" id=\"anchor1\">[calendar popup]</a></div>\n";
+        $html .= "<a href=\"#\" onClick=\"tdt_show_calendar(".(date(n)-1).",".date(Y).",'pickcal','date')\">[calendar popup]</a></div>\n";
+        $html .= "<div class=\"frmele\" id=\"pickcal\"></div>\n";
+
+
 	$html .= "<div class=\"frmele\">New Vendor: <input type=\"text\" size=\"35\" name=\"vendornew\" value=\"{$row['vendor']}\"/></div>\n";
 	$html .= "<div class=\"frmele\">Old Vendor: <select style=\"width: 25em\" name=\"vendor\" />\n";
 	$html .= "<option value=\"--NEW--\">^--NEW</option>\n";
@@ -85,7 +91,7 @@ function budget_delform($id) {
 	$html .= "<option value=\"{$row['showid']}\">{$row['showname']}</option>\n";
 	$html .= "</select></div>";
 	$html .= "<div class=\"frmele\">Date: <input type=\"text\" size=\"18\" name=\"date\" id=\"date\" style=\"margin-right: 2px\" value=\"{$row['date']}\" disabled=\"disabled\" />\n";
-	$html .= "<a href=\"#\" onClick=\"cal.select(document.forms['form1'].date,'anchor1','yyyy-MM-dd'); return false;\" name=\"anchor1\" id=\"anchor1\">[calendar popup]</a></div>\n";
+	$html .= "<a href=\"#\">[calendar popup]</a></div>\n";
 	$html .= "<div class=\"frmele\">Vendor: <input type=\"text\" size=\"35\" name=\"vendornew\" value=\"{$row['vendor']}\" disabled=\"disabled\" /></div>\n";
 	$html .= "<div class=\"frmele\">Category: <input type=\"text\" size=\"35\" name=\"categorynew\" value=\"{$row['category']}\" disabled=\"disabled\" /></div>\n";
 	$html .= "<div class=\"frmele\">Description: <input type=\"text\" size=\"35\" name=\"dscr\" value=\"{$row['dscr']}\" disabled=\"disabled\" /></div>\n";
