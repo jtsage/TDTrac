@@ -21,8 +21,11 @@ function hours_add () {
         }
         $html .= "</select></div>";
         $html .= "<div class=\"frmele\">Date: <input type=\"text\" size=\"22\" name=\"date\" id=\"date\" style=\"margin-right: 2px\" />\n";
-        $html .= "<a href=\"#\" onClick=\"cal.select(document.forms['form1'].date,'anchor1','yyyy-MM-dd'); return false;\" name=\"anchor1\" id=\"anchor1\">[cal]</a>\n";
+	
+        $html .= "<a href=\"#\" onClick=\"tdt_show_calendar(".(date(n)-1).",".date(Y).",'pickcal','date')\">[cal]</a>\n";
 	$html .= " <a href=\"#\" onClick=\"document.forms['form1'].date.value='".date("Y-m-d")."'\">[today]</a></div>\n";
+	$html .= "<div class=\"frmele\" id=\"pickcal\"></div>\n";
+
 	$html .= "<div class=\"frmele\">".(($TDTRAC_DAYRATE)?"Days":"Hours")." Worked: <input type=\"text\" size=\"35\" name=\"worked\" /></div>\n";
 	$html .= "<div class=\"frmele\"><input type=\"submit\" value=\"Add Hours\" /></div>\n";
 	$html .= "</form></div>\n";
@@ -51,7 +54,8 @@ function hours_edit ($hid) {
         }
         $html .= "</select></div>";
         $html .= "<div class=\"frmele\">Date: <input type=\"text\" size=\"18\" name=\"date\" id=\"date\" style=\"margin-right: 2px\" value=\"{$recd['date']}\" />\n";
-        $html .= "<a href=\"#\" onClick=\"cal.select(document.forms['form1'].date,'anchor1','yyyy-MM-dd'); return false;\" name=\"anchor1\" id=\"anchor1\">[calendar popup]</a></div>\n";
+        $html .= "<a href=\"#\" onClick=\"tdt_show_calendar(".(date(n)-1).",".date(Y).",'pickcal','date')\">[calendar popup]</a></div>\n";
+	$html .= "<div class=\"frmele\" id=\"pickcal\"></div>\n";
 	$html .= "<div class=\"frmele\">".(($TDTRAC_DAYRATE)?"Days":"Hours")." Worked: <input type=\"text\" size=\"35\" name=\"worked\" value=\"{$recd['worked']}\" /></div>\n";
 	$html .= "<div class=\"frmele\"><input type=\"submit\" value=\"Commit\" /></div>\n";
 	$html .= "</form></div>\n"; 
@@ -73,7 +77,7 @@ function hours_del ($hid) {
         $html .= "<option value=\"{$recd['showid']}\">{$recd['showname']}</option>\n";
         $html .= "</select></div>";
         $html .= "<div class=\"frmele\">Date: <input type=\"text\" size=\"18\" name=\"date\" id=\"date\" style=\"margin-right: 2px\" value=\"{$recd['date']}\" disabled=\"disabled\" />\n";
-        $html .= "<a href=\"#\" onClick=\"cal.select(document.forms['form1'].date,'anchor1','yyyy-MM-dd'); return false;\" name=\"anchor1\" id=\"anchor1\">[calendar popup]</a></div>\n";
+        $html .= "<a href=\"#\">[calendar popup]</a></div>\n";
 	$html .= "<div class=\"frmele\">".(($TDTRAC_DAYRATE)?"Days":"Hours")." Worked: <input type=\"text\" size=\"35\" name=\"worked\" value=\"{$recd['worked']}\" disabled=\"disabled\" /></div>\n";
 	$html .= "<div class=\"frmele\"><input type=\"submit\" value=\"Delete\" /></div>\n";
 	$html .= "</form></div>\n"; 
@@ -120,21 +124,30 @@ function hours_view_pick() {
                 $html .= "<option value=\"{$row['userid']}\">{$row['name']}</option>\n";
         }
         $html .= "</select></div>\n";
-        $html .= "<div class=\"frmele\">Start Date: <input type=\"text\" size=\"18\" name=\"sdate\" id=\"sdate\" style=\"margin-right: 2px\" />\n";
-        $html .= "<a href=\"#\" onClick=\"cal.select(document.forms['form1'].sdate,'anchor1','yyyy-MM-dd'); return false;\" name=\"anchor1\" id=\"anchor1\">[calendar popup]</a></div>\n";
-        $html .= "<div class=\"frmele\">End Date: <input type=\"text\" size=\"22\" name=\"edate\" id=\"edate\" style=\"margin-right: 2px\" />\n";
-        $html .= "<a href=\"#\" onClick=\"cal.select(document.forms['form1'].edate,'anchor2','yyyy-MM-dd'); return false;\" name=\"anchor2\" id=\"anchor2\">[cal]</a>";
-        $html .= " <a href=\"#\" onClick=\"document.forms['form1'].edate.value='".date("Y-m-d")."'\">[today]</a></div>\n";
+        $html .= "<div class=\"frmele\">Start Date: <input type=\"text\" size=\"18\" name=\"sdate\" id=\"sdate1\" style=\"margin-right: 2px\" />\n";
+        $html .= "<a href=\"#\" onClick=\"tdt_show_calendar(".(date(n)-1).",".date(Y).",'pickcal1','sdate1')\">[calendar popup]</a></div>\n";
+        $html .= "<div class=\"frmele\" id=\"pickcal1\"></div>\n";
+
+        $html .= "<div class=\"frmele\">End Date: <input type=\"text\" size=\"22\" name=\"edate\" id=\"edate1\" style=\"margin-right: 2px\" />\n";
+        $html .= "<a href=\"#\" onClick=\"tdt_show_calendar(".(date(n)-1).",".date(Y).",'pickcal2','edate1')\">[cal]</a>\n";
+        $html .= " <a href=\"#\" onClick=\"document.forms['form1'].edate1.value='".date("Y-m-d")."'\">[today]</a></div>\n";
+        $html .= "<div class=\"frmele\" id=\"pickcal2\"></div>\n";
+
 	$html .= "<div class=\"frmele\">Leave Dates Blank to See All \n";
 	$html .= "<input type=\"submit\" value=\"View Hours\" /></div></form></div>\n";
 	if ( perms_isemp($user_name) ) { return $html; }
         $html .= "<h2>View Dated Report</h2>";
         $html .= "<div id=\"genform\"><form method=\"post\" action=\"view-hours\" name=\"form2\">\n";
-        $html .= "<div class=\"frmele\">Start Date: <input type=\"text\" size=\"18\" name=\"sdate\" id=\"sdate\" style=\"margin-right: 2px\" />\n";
-        $html .= "<a href=\"#\" onClick=\"cal.select(document.forms['form2'].sdate,'anchor1','yyyy-MM-dd'); return false;\" name=\"anchor1\" id=\"anchor1\">[calendar popup]</a></div>\n";
-        $html .= "<div class=\"frmele\">End Date: <input type=\"text\" size=\"22\" name=\"edate\" id=\"edate\" style=\"margin-right: 2px\" />\n";
-        $html .= "<a href=\"#\" onClick=\"cal.select(document.forms['form2'].edate,'anchor2','yyyy-MM-dd'); return false;\" name=\"anchor2\" id=\"anchor2\">[cal]</a>";
-        $html .= " <a href=\"#\" onClick=\"document.forms['form2'].edate.value='".date("Y-m-d")."'\">[today]</a></div>\n";
+
+        $html .= "<div class=\"frmele\">Start Date: <input type=\"text\" size=\"18\" name=\"sdate\" id=\"sdate2\" style=\"margin-right: 2px\" />\n";
+        $html .= "<a href=\"#\" onClick=\"tdt_show_calendar(".(date(n)-1).",".date(Y).",'pickcal3','sdate2')\">[calendar popup]</a></div>\n";
+        $html .= "<div class=\"frmele\" id=\"pickcal3\"></div>\n";
+
+        $html .= "<div class=\"frmele\">End Date: <input type=\"text\" size=\"22\" name=\"edate\" id=\"edate2\" style=\"margin-right: 2px\" />\n";
+        $html .= "<a href=\"#\" onClick=\"tdt_show_calendar(".(date(n)-1).",".date(Y).",'pickcal4','edate2')\">[cal]</a>\n";
+        $html .= " <a href=\"#\" onClick=\"document.forms['form2'].edate2.value='".date("Y-m-d")."'\">[today]</a></div>\n";
+        $html .= "<div class=\"frmele\" id=\"pickcal4\"></div>\n";
+
 	$html .= "<div class=\"frmele\">Leave Dates Blank to See All \n";
 	$html .= "<input type=\"submit\" value=\"View Hours\" /></div></form></div>\n";
 	return $html;	
