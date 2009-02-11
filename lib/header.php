@@ -7,10 +7,7 @@ $html = <<<ENN
 <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
 <title>TDTrac{$TDTRAC_CPNY}:v{$TDTRAC_VERSION} - {$page_title}</title>
 <link href="style.css" rel="stylesheet" type="text/css" />
-<script type="text/javascript" src="CalendarPopup.js"></script>
-<script type="text/javascript">
-	var cal = new CalendarPopup(); 
-</script>
+<script type="text/javascript" src="TDTracCalendar.js"></script>
 </head>
 
 <body>
