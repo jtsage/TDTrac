@@ -197,15 +197,16 @@ function budget_view($showid) {
 
 	$html .= "<h2>Payroll Expenses</h2><table id=\"budget\">\n";
 	$html .= "<tr><th>Employee</th><th>".(($TDTRAC_DAYRATE)?"Days":"Hours")." Worked</th><th>Price</th></tr>\n";
-	$sql = "SELECT SUM(worked) as days, CONCAT(first, ' ', last) as name FROM {$MYSQL_PREFIX}users u, {$MYSQL_PREFIX}hours h WHERE u.userid = h.userid AND h.showid = {$showid} GROUP BY h.userid ORDER BY last ASC";
+	$sql = "SELECT SUM(worked) as days, payrate, CONCAT(first, ' ', last) as name FROM {$MYSQL_PREFIX}users u, {$MYSQL_PREFIX}hours h WHERE u.userid = h.userid AND h.showid = {$showid} GROUP BY h.userid ORDER BY last ASC";
 	$result = mysql_query($sql, $db);
-	$tot = 0; $intr = 0;
+	$tot = 0; $intr = 0; $mtot = 0;
 	while ( $row = mysql_fetch_array($result) ) {
 		$intr++;
 		$tot += $row['days'];
-		$html .= "<tr".((($intr % 2) == 0 ) ? " class=\"odd\"" : "")."><td>{$row['name']}</td><td>{$row['days']}</td><td style=\"text-align: right\">$" . number_format($row['days'] * $TDTRAC_PAYRATE, 2) . "</td></tr>\n";
+		$mtot += $row['days'] * $row['payrate'];
+		$html .= "<tr".((($intr % 2) == 0 ) ? " class=\"odd\"" : "")."><td>{$row['name']}</td><td>{$row['days']}</td><td style=\"text-align: right\">$" . number_format($row['days'] * $row['payrate'], 2) . "</td></tr>\n";
 	}
-	$html .= "<tr style=\"background-color: #FFCCFF\"><td></td><td>{$tot}</td><td style=\"text-align: right\">$" . number_format($tot * $TDTRAC_PAYRATE, 2) . "</td></tr>\n";
+	$html .= "<tr style=\"background-color: #FFCCFF\"><td></td><td>{$tot}</td><td style=\"text-align: right\">$" . number_format($mtot, 2) . "</td></tr>\n";
 	$html .= "</table>\n";
         return $html;
 
