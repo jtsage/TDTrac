@@ -158,6 +158,8 @@ CREATE TABLE IF NOT EXISTS `users` (
   `active` tinyint(4) unsigned NOT NULL default '1',
   `chpass` tinyint(4) unsigned NOT NULL default '1',
   `payroll` tinyint(4) unsigned NOT NULL default '1',
+  `payrate` double NULL,
+  `notify` tinyint(4) unsigned NOT NULL default '0',
   PRIMARY KEY  (`userid`),
   KEY `username` (`username`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=latin1 COMMENT='Program User Table' AUTO_INCREMENT=3 ;

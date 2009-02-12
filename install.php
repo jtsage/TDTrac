@@ -2,7 +2,7 @@
 ob_start(); session_start(); 
 
 ## PROGRAM DETAILS. DO NOT EDIT UNLESS YOU KNOW WHAT YOU ARE DOING
-$TDTRAC_VERSION = "1.0.0beta2";
+$TDTRAC_VERSION = "1.0.0";
 $TDTRAC_PERMS = array("addshow", "editshow", "viewshow", "addbudget", "editbudget", "viewbudget", "addhours", "edithours", "viewhours", "adduser");
 $INSTALL_FILES = array(
 	"index.php",
@@ -60,7 +60,7 @@ switch ($page_title) {
 		echo "<div class=\"frmele\">Site Name: <input type=\"text\" size=\"35\" name=\"cpny\" value=\"{$TDTRAC_CPNY}\"/></div>\n";
 		echo "<div class=\"frmele\">Site URL: <input type=\"text\" size=\"35\" name=\"site\" value=\"{$TDTRAC_SITE}\"/></div>\n";
 		echo "<div class=\"frmele\">Day Rate Payroll ( 1 = yes, 0 = no ): <input type=\"text\" size=\"35\" name=\"dayrate\" value=\"{$TDTRAC_DAYRATE}\"/></div>\n";
-		echo "<div class=\"frmele\">Day / Hourly Pay Rate: <input type=\"text\" size=\"35\" name=\"payrate\" value=\"{$TDTRAC_PAYRATE}\"/></div>\n";
+		echo "<div class=\"frmele\">Default Day / Hourly Pay Rate: <input type=\"text\" size=\"35\" name=\"payrate\" value=\"{$TDTRAC_PAYRATE}\"/></div>\n";
         	echo "<div class=\"frmele\"><input type=\"submit\" value=\"Save Values\" /></div>\n";
         	echo "</form></div>\n";
 	}
