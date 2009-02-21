@@ -2,7 +2,7 @@
 ob_start(); session_start(); 
 
 ## PROGRAM DETAILS. DO NOT EDIT UNLESS YOU KNOW WHAT YOU ARE DOING
-$TDTRAC_VERSION = "1.0.0";
+$TDTRAC_VERSION = "1.0.1";
 $TDTRAC_PERMS = array("addshow", "editshow", "viewshow", "addbudget", "editbudget", "viewbudget", "addhours", "edithours", "viewhours", "adduser");
 
 require_once("config.php");
@@ -22,7 +22,11 @@ switch ($page_title) {
     case "login":
 	islogin_dologin();
 	break;
-  case "logout":
+    case "pwremind":
+	if ($_SERVER['REQUEST_METHOD'] == "POST") { echo email_pwsend(); 
+	} else { echo islogin_pwform(); }
+	break;
+    case "logout":
 	islogin_logout();
 	break;
 }
