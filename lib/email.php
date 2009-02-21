@@ -102,6 +102,37 @@ function email_hours($userid, $sdate, $edate) {
         return $html;
 }
 
+function email_pwsend() {
+	GLOBAL $db, $MYSQL_PREFIX;
+	$html = "<h2>Password Reminder</h2>";
+	if ( !($_REQUEST["tracemail"]) || $_REQUEST["tracemail"] == "" ) { 
+		$html .= "<p>No E-Mail Address Supplied!</p>";
+	} else {
+		$sql = "SELECT username, password FROM {$MYSQL_PREFIX}users WHERE email = '{$_REQUEST["tracemail"]}'";
+		$result = mysql_query($sql, $db);
+		if ( mysql_num_rows($result) == 0 ) { $html .= "<p>E-Mail Address Not Found In Database!</p>\n"; }
+		else {
+			$body = "TDTrac Password Reminder:<br /><br />\n";
+			while ( $row = mysql_fetch_array($result) ) {
+				$body .= "Username: {$row['username']}<br />\n";
+				$body .= "Password: {$row['password']}<br /><br />\n";
+			}
+			$body .= "Note: For security pusposes, you should change this password when you first log in!<br />\n";
+	        	$subject = "TDTrac Password Reminder";
+
+		        $headers  = 'MIME-Version: 1.0' . "\r\n";
+		        $headers .= 'Content-type: text/html; charset=iso-8859-1' . "\r\n";
+
+			$sendto = $_REQUEST['tracemail'];
+
+			mail($sendto, $subject, $body, $headers);
+
+			$html .= "<p>Password Reminder Sent!</p>\n";
+		}
+	}
+	return $html;
+
+}
 
 
 ?>
