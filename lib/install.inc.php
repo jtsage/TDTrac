@@ -117,4 +117,17 @@ $sql_msg .= ") ENGINE = MYISAM DEFAULT CHARSET=latin1 COMMENT='Program Internal 
 
 $msg_result = mysql_query($sql_msg, $db);
 
+$sql_tdtrac =    "CREATE TABLE IF NOT EXISTS `{$MYSQL_PREFIX}tdtrac` (  
+  `id` int(10) unsigned NOT NULL auto_increment,
+  `name` varchar(10) NOT NULL,
+  `value` varchar(35) NOT NULL,
+    PRIMARY KEY  (`id`)
+  ) ENGINE=MyISAM  DEFAULT CHARSET=latin1;";
+
+$tdtrac_result = mysql_query($sql_tdtrac, $db);
+
+$ins_tdtrac = "INSERT INTO `{$MYSQL_PREFIX}tdtrac` (`name`, `value`) VALUES ( 'version', '1.1.0' )";
+
+$tdtracins_result = mysql_query($ins_tdtrac, $db);
+
 ?>
