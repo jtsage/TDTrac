@@ -1,6 +1,6 @@
 <?php
 function msg_check() {
-	GLOBAL $db, $MYSQL_PREFIX, $user_name;
+	GLOBAL $db, $MYSQL_PREFIX, $user_name, $TDTRAC_SITE;
 	$html  = "";
 	$html .= "<div id=\"infobox\"><span style=\"font-size: .7em\">";
 	$userid = perms_getidbyname($user_name);
@@ -13,14 +13,14 @@ function msg_check() {
 	mysql_free_result($result1);
 	mysql_free_result($result2);
 	$ret = 0;
-	if ( !is_null($row1['num']) && $row1['num'] > 0 ) { $html .= "You Have {$row1['num']} Unread Messages Waiting (<a href=\"/msg-read\">[-Read-]</a>)<br />"; $ret = 1; }
-	if ( !is_null($row2['num']) && $row2['num'] > 0 ) { $html .= "You Have {$row2['num']} Sent Messages Waiting (<a href=\"/msg-view\">[-View-]</a>)"; $ret = 1; }
+	if ( !is_null($row1['num']) && $row1['num'] > 0 ) { $html .= "You Have {$row1['num']} Unread Messages Waiting (<a href=\"{$TDTRAC_SITE}msg-read\">[-Read-]</a>)<br />"; $ret = 1; }
+	if ( !is_null($row2['num']) && $row2['num'] > 0 ) { $html .= "You Have {$row2['num']} Sent Messages Waiting (<a href=\"{$TDTRAC_SITE}msg-view\">[-View-]</a>)"; $ret = 1; }
 	$html .= "</span></div>\n";
 	if ( $ret ) { return $html; } else { return ""; }
 }
 
 function msg_sent_view() {
-	GLOBAL $db, $user_name, $MYSQL_PREFIX;
+	GLOBAL $db, $user_name, $MYSQL_PREFIX, $TDTRAC_SITE;
 	$userid = perms_getidbyname($user_name);
 	$cannuke = perms_isadmin($user_name);
 	$sql = "SELECT id, toid, body, DATE_FORMAT(stamp, '%m-%d-%y %h:%i %p') as wtime FROM {$MYSQL_PREFIX}msg WHERE fromid = {$userid} ORDER BY stamp DESC";
@@ -33,26 +33,26 @@ function msg_sent_view() {
 		$html .= "<tr><td>{$row['wtime']}</td><td>";
 		$html .= perms_getfnamebyid($row['toid']);
 		$html .= "</td><td>{$row['body']}</td>";
-		$html .= ($cannuke) ? "<td align=\"center\"><a href=\"/msg-delete?id={$row['id']}\">[x]</a></td></tr>\n" : "</tr>\n";
+		$html .= ($cannuke) ? "<td align=\"center\"><a href=\"{$TDTRAC_SITE}msg-delete&id={$row['id']}\">[x]</a></td></tr>\n" : "</tr>\n";
 	}
 	$html .= "</table></p>\n";
 	return $html;
 }
 
 function msg_inbox_view() {
-        GLOBAL $db, $user_name, $MYSQL_PREFIX;
+        GLOBAL $db, $user_name, $MYSQL_PREFIX, $TDTRAC_SITE;
         $userid = perms_getidbyname($user_name);
         $sql = "SELECT id, fromid, body, DATE_FORMAT(stamp, '%m-%d-%y %h:%i %p') as wtime FROM {$MYSQL_PREFIX}msg WHERE toid = {$userid} ORDER BY stamp DESC";
         $result = mysql_query($sql, $db);
         $html  = "<h2>Message Inbox</h2><p>";
-	$html .= "<div style=\"float: right\">[<a href=\"/msg-clean\">Clear Inbox</a>]</div>\n";
+	$html .= "<div style=\"float: right\">[<a href=\"{$TDTRAC_SITE}msg-clean\">Clear Inbox</a>]</div>\n";
         $html .= "<table id=\"budget\">\n";
         $html .= "<tr><th>Date</th><th>Sender</th><th>Message</th><th>Delete</th></tr>\n";
         while ( $row = mysql_fetch_array($result) ) {
                 $html .= "<tr><td>{$row['wtime']}</td><td>";
                 $html .= perms_getfnamebyid($row['fromid']);
                 $html .= "</td><td>{$row['body']}</td>";
-                $html .= "<td align=\"center\"><a href=\"/msg-delete?id={$row['id']}\">[x]</a></td></tr>\n";
+                $html .= "<td align=\"center\"><a href=\"{$TDTRAC_SITE}msg-delete&id={$row['id']}\">[x]</a></td></tr>\n";
         }
         $html .= "</table></p>\n";
         return $html;
