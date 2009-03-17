@@ -1,9 +1,9 @@
 <?php
 
 function hours_add () {
-	GLOBAL $db, $user_name, $MYSQL_PREFIX, $TDTRAC_DAYRATE;
+	GLOBAL $db, $user_name, $MYSQL_PREFIX, $TDTRAC_DAYRATE, $TDTRAC_SITE;
 	$html  = "<h2>Add Payroll Record</h2>\n";
-	$html .= "<div id=\"genform\"><form method=\"post\" action=\"add-hours\" name=\"form1\">\n";
+	$html .= "<div id=\"genform\"><form method=\"post\" action=\"{$TDTRAC_SITE}add-hours\" name=\"form1\">\n";
 	$html .= "<div class=\"frmele\">Employee: <select name=\"userid\" style=\"width: 25em\" >\n";
 	$sql  = "SELECT u.userid, CONCAT(first, ' ', last) as name FROM {$MYSQL_PREFIX}users u, {$MYSQL_PREFIX}usergroups ug WHERE";
 	$sql .= perms_isemp($user_name) ? " username = '{$user_name}' AND" : "";
@@ -34,12 +34,12 @@ function hours_add () {
 
 
 function hours_edit ($hid) {
-	GLOBAL $db, $user_name, $MYSQL_PREFIX, $TDTRAC_DAYRATE;
+	GLOBAL $db, $user_name, $MYSQL_PREFIX, $TDTRAC_DAYRATE, $TDTRAC_SITE;
 	$sql .= "SELECT h.*, CONCAT(first, ' ', last) as name FROM {$MYSQL_PREFIX}hours h, {$MYSQL_PREFIX}users u WHERE h.userid = u.userid AND h.id = {$hid} LIMIT 1";
 	$result = mysql_query($sql, $db);
 	$recd = mysql_fetch_array($result);
 	$html  = "<h2>Edit Payroll Record</h2>\n";
-	$html .= "<div id=\"genform\"><form method=\"post\" action=\"edit-hours\" name=\"form1\">\n";
+	$html .= "<div id=\"genform\"><form method=\"post\" action=\"{$TDTRAC_SITE}edit-hours\" name=\"form1\">\n";
 	$html .= "<input type=\"hidden\" name=\"id\" value=\"{$hid}\" />\n";
 	$html .= "<div class=\"frmele\">Employee: <select name=\"userid\" style=\"width: 25em\" >\n";
 	$html .= "<option value=\"{$recd['userid']}\">{$recd['name']}</option>\n";
@@ -63,12 +63,12 @@ function hours_edit ($hid) {
 }
 
 function hours_del ($hid) {
-	GLOBAL $db, $user_name, $MYSQL_PREFIX, $TDTRAC_DAYRATE;
+	GLOBAL $db, $user_name, $MYSQL_PREFIX, $TDTRAC_DAYRATE, $TDTRAC_SITE;
 	$sql .= "SELECT h.*, CONCAT(first, ' ', last) as name, showname FROM {$MYSQL_PREFIX}hours h, {$MYSQL_PREFIX}users u, {$MYSQL_PREFIX}shows s WHERE h.userid = u.userid AND h.showid = s.showid AND h.id = {$hid} LIMIT 1";
 	$result = mysql_query($sql, $db);
 	$recd = mysql_fetch_array($result);
 	$html  = "<h2>Delete Payroll Record</h2>\n";
-	$html .= "<div id=\"genform\"><form method=\"post\" action=\"del-hours\" name=\"form1\">\n";
+	$html .= "<div id=\"genform\"><form method=\"post\" action=\"{$TDTRAC_SITE}del-hours\" name=\"form1\">\n";
 	$html .= "<input type=\"hidden\" name=\"id\" value=\"{$hid}\" />\n";
 	$html .= "<div class=\"frmele\">Employee: <select name=\"userid\" style=\"width: 25em\" disabled=\"disabled\" >\n";
 	$html .= "<option value=\"{$recd['userid']}\">{$recd['name']}</option>\n";
@@ -122,9 +122,9 @@ function hours_del_do($id) {
 
 
 function hours_view_pick() {
-	GLOBAL $db, $user_name, $MYSQL_PREFIX;
+	GLOBAL $db, $user_name, $MYSQL_PREFIX, $TDTRAC_SITE;
 	$html = "<h2>View By Employee</h2>";
-	$html .= "<div id=\"genform\"><form method=\"post\" action=\"view-hours\" name=\"form1\">\n";
+	$html .= "<div id=\"genform\"><form method=\"post\" action=\"{$TDTRAC_SITE}view-hours\" name=\"form1\">\n";
         $html .= "<div class=\"frmele\">Employee: <select name=\"userid\" style=\"width: 25em\" >\n";
         $sql  = "SELECT userid, CONCAT(first, ' ', last) as name FROM {$MYSQL_PREFIX}users WHERE";
         $sql .= perms_isemp($user_name) ? " username = '{$user_name}' AND" : "";
@@ -164,7 +164,7 @@ function hours_view_pick() {
 }
 
 function hours_view($userid) {
-	GLOBAL $db, $user_name, $MYSQL_PREFIX, $TDTRAC_DAYRATE;
+	GLOBAL $db, $user_name, $MYSQL_PREFIX, $TDTRAC_DAYRATE, $TDTRAC_SITE;
 	if ( $userid == 0 && perms_isemp($user_name) ) { return perms_no(); }
 	$canedit = perms_checkperm($user_name, "edithours");
 	$sql  = "SELECT CONCAT(first, ' ', last) as name, worked, date, showname, h.id as hid FROM {$MYSQL_PREFIX}users u, {$MYSQL_PREFIX}shows s, {$MYSQL_PREFIX}hours h WHERE ";
@@ -173,7 +173,7 @@ function hours_view($userid) {
 	$sql .= ($_REQUEST['sdate'] <> "") ? " AND h.date >= '{$_REQUEST['sdate']}'" : "";
 	$sql .= ($_REQUEST['edate'] <> "") ? " AND h.date <= '{$_REQUEST['edate']}'" : "";
         $sql .= " ORDER BY last ASC, date DESC";
-	$maillink  = "/email-hours?id={$userid}&sdate=";
+	$maillink  = "{$TDTRAC_SITE}email-hours&id={$userid}&sdate=";
         $maillink .= ($_REQUEST['sdate'] <> "" ) ? $_REQUEST['sdate'] : "0";
         $maillink .= "&edate=";
 	$maillink .= ($_REQUEST['edate'] <> "" ) ? $_REQUEST['edate'] : "0";
@@ -195,8 +195,8 @@ function hours_view($userid) {
 		foreach ( $data as $num => $line ) {
 			$tot += $line['worked'];
 			$html .= "<tr".(($num % 2 <> 0)?" class=\"odd\"":"")."><td>{$line['date']}</td><td>{$line['showname']}</td><td style=\"text-align: right\">{$line['worked']}</td>";
-			$html .= ( $canedit ) ? "<td style=\"text-align: center\"><a href=\"edit-hours?id={$line['hid']}\">[-]</a></td>" : "";
-			$html .= ( $canedit ) ? "<td style=\"text-align: center\"><a href=\"del-hours?id={$line['hid']}\">[x]</a></td>" : "";
+			$html .= ( $canedit ) ? "<td style=\"text-align: center\"><a href=\"{$TDTRAC_SITE}edit-hours&id={$line['hid']}\">[-]</a></td>" : "";
+			$html .= ( $canedit ) ? "<td style=\"text-align: center\"><a href=\"{$TDTRAC_SITE}del-hours&id={$line['hid']}\">[x]</a></td>" : "";
 			$html .= "</tr>\n";
 		}
 		$html .= "<tr style=\"background-color: #FFCCFF\"><td></td><td style=\"text-align: center\">-=- TOTAL -=-</td><td style=\"text-align: right\">{$tot}</td></tr>\n";

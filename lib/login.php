@@ -35,17 +35,19 @@ function islogin_cookietest() {
 
 
 function islogin_form() {
-	$html  = '<div id="loginform"><form method="post" action="/login">';
+        GLOBAL $TDTRAC_SITE;
+	$html  = "<div id=\"loginform\"><form method=\"post\" action=\"{$TDTRAC_SITE}login\">";
 	$html .= '<div style="text-align: right">User Name: <input type="text" size="20" name="tracuser" /></div>';
 	$html .= '<div style="text-align: right">Password: <input type="password" size="20" name="tracpass" /></div>';
 	$html .= '<div style="text-align: right"><input type="submit" value="Login" /></div></form>';
-	$html .= '<div style="text-align: right">[-<a href="/pwremind">Forgot Password?</a>-]</div></div>';
+	$html .= "<div style=\"text-align: right\">[-<a href=\"{$TDTRAC_SITE}pwremind\">Forgot Password?</a>-]</div></div>";
 	return $html;
 }
 
 function islogin_pwform() {
+        GLOBAL $TDTRAC_SITE;
 	$html  = '<h2>Send Password Via E-Mail</h2>';
-        $html .= '<div id="loginform"><form method="post" action="/pwremind">';
+        $html .= "<div id=\"loginform\"><form method=\"post\" action=\"{$TDTRAC_SITE}pwremind\">";
         $html .= '<div style="text-align: right">E-Mail Address: <input type="text" size="20" name="tracemail" /></div>';
         $html .= '<div style="text-align: right"><input type="submit" value="Send Reminder" /></div></form></div>';
         return $html;

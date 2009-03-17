@@ -1,8 +1,8 @@
 <?php
 function budget_addform() {
-	GLOBAL $db, $MYSQL_PREFIX;
+	GLOBAL $db, $MYSQL_PREFIX, $TDTRAC_SITE;
 	$html  = "<h2>Add Budget Expense</h2>\n";
-	$html .= "<div id=\"genform\"><form method=\"post\" action=\"add-budget\" name=\"form1\">\n";
+	$html .= "<div id=\"genform\"><form method=\"post\" action=\"{$TDTRAC_SITE}add-budget\" name=\"form1\">\n";
 	$html .= "<div class=\"frmele\" title=\"Show to charge against\">Show: <select tabindex=\"1\" style=\"width: 25em;\" name=\"showid\">\n";
 	$sql = "SELECT showname, showid FROM {$MYSQL_PREFIX}shows ORDER BY created DESC;";
 	$result = mysql_query($sql, $db);
@@ -41,9 +41,9 @@ function budget_addform() {
 }
 
 function budget_editform($id) {
-	GLOBAL $db, $MYSQL_PREFIX;
+	GLOBAL $db, $MYSQL_PREFIX, $TDTRAC_SITE;
 	$html  = "<h2>Edit Budget Expense</h2>\n";
-	$html .= "<div id=\"genform\"><form method=\"post\" action=\"edit-budget\" name=\"form1\">\n";
+	$html .= "<div id=\"genform\"><form method=\"post\" action=\"{$TDTRAC_SITE}edit-budget\" name=\"form1\">\n";
 	$html .= "<div class=\"frmele\">Show: <select tabindex=\"1\" style=\"width: 25em;\" name=\"showid\">\n";
 	$sql = "SELECT showname, {$MYSQL_PREFIX}budget.* FROM {$MYSQL_PREFIX}shows, {$MYSQL_PREFIX}budget WHERE {$MYSQL_PREFIX}budget.id = {$id} AND {$MYSQL_PREFIX}budget.showid = {$MYSQL_PREFIX}shows.showid LIMIT 1;";
 	$result = mysql_query($sql, $db);
@@ -81,9 +81,9 @@ function budget_editform($id) {
 }
 
 function budget_delform($id) {
-	GLOBAL $db, $MYSQL_PREFIX;
+	GLOBAL $db, $MYSQL_PREFIX, $TDTRAC_SITE;
 	$html  = "<h2>Remove Budget Expense</h2>\n";
-	$html .= "<div id=\"genform\"><form method=\"post\" action=\"del-budget\" name=\"form1\">\n";
+	$html .= "<div id=\"genform\"><form method=\"post\" action=\"{$TDTRAC_SITE}del-budget\" name=\"form1\">\n";
 	$html .= "<div class=\"frmele\">Show: <select tabindex=\"1\" style=\"width: 25em;\" name=\"showid\" disabled=\"disabled\" >\n";
 	$sql = "SELECT showname, {$MYSQL_PREFIX}budget.* FROM {$MYSQL_PREFIX}shows, {$MYSQL_PREFIX}budget WHERE {$MYSQL_PREFIX}budget.id = {$id} AND {$MYSQL_PREFIX}budget.showid = {$MYSQL_PREFIX}shows.showid LIMIT 1;";
 	$result = mysql_query($sql, $db);
@@ -138,11 +138,11 @@ function budget_del_do($id) {
 }
 
 function budget_viewselect() {
-	GLOBAL $db, $MYSQL_PREFIX;
+	GLOBAL $db, $MYSQL_PREFIX, $TDTRAC_SITE;
 	$sql = "SELECT showid, showname FROM {$MYSQL_PREFIX}shows ORDER BY created DESC";
 	$result = mysql_query($sql, $db);
 	$html  = "<h2>View Budget</h2>";
-	$html .= "<div id=\"genform\"><form method=\"post\" action=\"/view-budget\">\n";
+	$html .= "<div id=\"genform\"><form method=\"post\" action=\"{$TDTRAC_SITE}view-budget\">\n";
 	$html .= "<div class=\"frmele\"><select style=\"width: 25em\" name=\"showid\">\n";
 	while ( $row = mysql_fetch_array($result) ) {
 		$html .= "<option value=\"{$row['showid']}\">{$row['showname']}</option>\n";
@@ -153,7 +153,7 @@ function budget_viewselect() {
 }
 
 function budget_view($showid) {
-	GLOBAL $db, $user_name, $MYSQL_PREFIX, $TDTRAC_DAYRATE, $TDTRAC_PAYRATE;
+	GLOBAL $db, $user_name, $MYSQL_PREFIX, $TDTRAC_DAYRATE, $TDTRAC_PAYRATE, $TDTRAC_SITE;
         $sql = "SELECT * FROM {$MYSQL_PREFIX}shows WHERE showid = {$showid}";
         $editshow = perms_checkperm($user_name, "editshow");
 	$editbudget = perms_checkperm($user_name, "editbudget"); 
@@ -161,14 +161,14 @@ function budget_view($showid) {
         $html = "";
         $row = mysql_fetch_array($result);
         $html .= "<h2>{$row['showname']}</h2><p><ul>\n";
-        $html .= $editshow ? "<div style=\"float: right\">[<a href=\"/edit-show?id={$row['showid']}\">Edit</a>]</div>\n" : "";
+        $html .= $editshow ? "<div style=\"float: right\">[<a href=\"{$TDTRAC_SITE}edit-show&id={$row['showid']}\">Edit</a>]</div>\n" : "";
         $html .= "<li><strong>Company</strong>: {$row['company']}</li>\n";
         $html .= "<li><strong>Venue</strong>: {$row['venue']}</li>\n";
         $html .= "<li><strong>Dates</strong>: {$row['dates']}</li>\n";
         $html .= "</ul></p>\n";
 
 	$html .= "<h2>Materials Expenses</h2><br />";
-        $html .= "<div style=\"float: right\">[<a href=\"/email-budget?id={$row['showid']}\">E-Mail To Self</a>]</div>\n";
+        $html .= "<div style=\"float: right\">[<a href=\"{$TDTRAC_SITE}email-budget&id={$row['showid']}\">E-Mail To Self</a>]</div>\n";
         $html .= "<table id=\"budget\">\n";
 	$html .= "<tr><th>Date</th><th>Vendor</th><th>Category</th><th>Description</th><th>Price</th>";
 	$html .= $editbudget ? "<th>Edit</th>" : "";
@@ -186,8 +186,8 @@ function budget_view($showid) {
                 $tot += $row['price']; $subtot += $row['price'];
 		$html .= number_format($row['price'], 2);
 		$html .= "</td>";
-		$html .= $editbudget ? "<td style=\"text-align: center\"><a href=\"/edit-budget?id={$row['id']}\">[-]</a></td>" : "";
-		$html .= $editbudget ? "<td style=\"text-align: center\"><a href=\"/del-budget?id={$row['id']}\">[x]</a></td>" : "";
+		$html .= $editbudget ? "<td style=\"text-align: center\"><a href=\"{$TDTRAC_SITE}edit-budget&id={$row['id']}\">[-]</a></td>" : "";
+		$html .= $editbudget ? "<td style=\"text-align: center\"><a href=\"{$TDTRAC_SITE}del-budget&id={$row['id']}\">[x]</a></td>" : "";
 		$html .= "</tr>\n";
 		$last = $row['category'];
 	}
