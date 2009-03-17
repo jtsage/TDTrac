@@ -28,14 +28,17 @@ function email_budget($showid) {
 	$headers .= 'Content-type: text/html; charset=iso-8859-1' . "\r\n";
 
         $body .= "<h2>Materials Expenses</h2><pre>\n";
-        $body .= "Date\t\tPrice\tVendor\tDescription\n";
+        $body .= "Date\t\tPrice\tPending\tReimburse\tVendor\tDescription\n";
         $sql = "SELECT * FROM {$MYSQL_PREFIX}budget WHERE showid = {$showid} ORDER BY category ASC, date ASC, vendor ASC";
         $result = mysql_query($sql, $db); $intr = 0; $tot = 0; $last = "";
         while ( $row = mysql_fetch_array($result) ) {
 		if ( $last != "" && $last != $row['category'] ) { 
 			$body .= "-=- {$last} SUB-TOTAL -=-\t" . number_format($subtot, 2) . "\n"; $subtot = 0; }
                 $intr++;
-                $body .= "{$row['date']}\t".number_format($row['price'], 2)."\t{$row['vendor']}\t{$row['category']}\t{$row['dscr']}\n";
+                $body .= "{$row['date']}\t".number_format($row['price'], 2)."\t";
+                $body .= (($row['pending'] == 1) ? "YES" : "NO") . "\t";
+                $body .= (($row['needrepay'] == 1) ? (($row['didrepay'] == 1) ? "PAID" : "UNPAID") : "N/A") . "\t";
+                $body .= "{$row['vendor']}\t{$row['category']}\t{$row['dscr']}\n";
                 $tot += $row['price']; $subtot += $row['price'];
 		$last = $row['category'];
         }

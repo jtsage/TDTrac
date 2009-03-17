@@ -63,10 +63,15 @@ if ( $login[0] ) {
 	break;
     case "view-budget":
 	if ( perms_checkperm($user_name, 'viewbudget') ) {
-		if ( $_SERVER['REQUEST_METHOD'] == "POST" ) { echo budget_view($_REQUEST['showid']); }
+		if ( $_SERVER['REQUEST_METHOD'] == "POST" ) { echo budget_view($_REQUEST['showid'],0); }
 		else { echo budget_viewselect(); }
 	} else { echo perms_no(); }
 	break;
+    case "view-budget-special":
+        if ( perms_checkperm($user_name, 'viewbudget') ) {
+                echo budget_view_special($_REQUEST['stype']); 
+        } else { echo perms_no(); }
+        break;
     case "edit-budget":
 	if ( perms_checkperm($user_name, 'editbudget') ) {
 		if ($_SERVER['REQUEST_METHOD'] == "POST") { budget_edit_do($_REQUEST['id']); }

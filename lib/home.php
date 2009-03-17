@@ -10,6 +10,10 @@ function display_home($username) {
 	$html .= "<h2>Budget Tracking</h2><p><ul>\n";
 	$html .= ( perms_checkperm($username, 'addbudget') ) ? "<li><a href=\"{$TDTRAC_SITE}add-budget\">Add Budget Expense</a></li>\n" : "";
 	$html .= ( perms_checkperm($username, 'viewbudget') ) ? "<li><a href=\"{$TDTRAC_SITE}view-budget\">View Budgets</a></li>\n" : "";
+	$html .= ( perms_checkperm($username, 'viewbudget') ) ? "<li><a href=\"{$TDTRAC_SITE}view-budget-special&stype=1\">View Budgets (payment pending items only, all shows)</a></li>\n" : "";
+	$html .= ( perms_checkperm($username, 'viewbudget') ) ? "<li><a href=\"{$TDTRAC_SITE}view-budget-special&stype=2\">View Budgets (reimbursment items only, all shows)</a></li>\n" : "";
+	$html .= ( perms_checkperm($username, 'viewbudget') ) ? "<li><a href=\"{$TDTRAC_SITE}view-budget-special&stype=3\">View Budgets (reimbursment recieved items only, all shows)</a></li>\n" : "";
+	$html .= ( perms_checkperm($username, 'viewbudget') ) ? "<li><a href=\"{$TDTRAC_SITE}view-budget-special&stype=4\">View Budgets (reimbursment not recieved items only, all shows)</a></li>\n" : "";
 	$html .= "</ul></p>\n";
 	$html .= "<h2>Show Information</h2><p><ul>\n";
 	$html .= ( perms_checkperm($username, 'addshow') ) ? "<li><a href=\"{$TDTRAC_SITE}add-show\">Add Show</a></li>\n" : "";
