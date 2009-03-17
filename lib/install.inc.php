@@ -12,7 +12,7 @@ $sql_budget .= "  `dscr` varchar(65) NOT NULL,";
 $sql_budget .= "  `date` date NOT NULL,";
 $sql_budget .= "  `pending` tinyint(4) unsigned NOT NULL default '0',";
 $sql_budget .= "  `needrepay` tinyint(4) unsigned NOT NULL default '0',";
-$sql_budget .= "  `didrepay` tinyint(4) unsigned NOT NULL default '0',";
+$sql_budget .= "  `gotrepay` tinyint(4) unsigned NOT NULL default '0',";
 $sql_budget .= "  PRIMARY KEY  (`id`),";
 $sql_budget .= "  KEY `showid` (`showid`,`vendor`)";
 $sql_budget .= ") ENGINE=MyISAM  DEFAULT CHARSET=latin1;";
