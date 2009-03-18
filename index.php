@@ -2,14 +2,19 @@
 ob_start(); session_start(); 
 
 ## PROGRAM DETAILS. DO NOT EDIT UNLESS YOU KNOW WHAT YOU ARE DOING
-$TDTRAC_VERSION = "1.0.1";
+$TDTRAC_VERSION = "1.2.0";
 $TDTRAC_PERMS = array("addshow", "editshow", "viewshow", "addbudget", "editbudget", "viewbudget", "addhours", "edithours", "viewhours", "adduser");
 
 require_once("config.php");
 require_once("lib/functions-load.php");
+if ( !file_exists(".htaccess") ) { $TDTRAC_SITE .= "index.php?action="; }
+
 $login = islogin();
-$page_title = substr($_SERVER['REQUEST_URI'], 1); 
-$page_title = preg_replace("/\?.+$/", "", $page_title);
+
+$page_title = $_REQUEST['action'];
+
+//$page_title = substr($_SERVER['REQUEST_URI'], 1); 
+//$page_title = preg_replace("/\?.+$/", "", $page_title);
 if ( $page_title == "" ) { $page_title = "home"; }
 require_once("lib/header.php");
 
@@ -44,10 +49,9 @@ if ( $login[0] ) {
 	} else { echo perms_no(); }
 	break;
     case "edit-show":
-	preg_match("/.+\?id=(\d+)$/", $_SERVER['REQUEST_URI'], $match);
 	if ( perms_checkperm($user_name, 'editshow') ) {
 		if ($_SERVER['REQUEST_METHOD'] == "POST") { show_edit_do($_REQUEST['showid']); }
-		else { echo show_edit_form($match[1]); }
+		else { echo show_edit_form($_REQUEST['id']); }
 	} else { echo perms_no(); }
 	break;
 
@@ -59,28 +63,30 @@ if ( $login[0] ) {
 	break;
     case "view-budget":
 	if ( perms_checkperm($user_name, 'viewbudget') ) {
-		if ( $_SERVER['REQUEST_METHOD'] == "POST" ) { echo budget_view($_REQUEST['showid']); }
+		if ( $_SERVER['REQUEST_METHOD'] == "POST" ) { echo budget_view($_REQUEST['showid'],0); }
 		else { echo budget_viewselect(); }
 	} else { echo perms_no(); }
 	break;
+    case "view-budget-special":
+        if ( perms_checkperm($user_name, 'viewbudget') ) {
+                echo budget_view_special($_REQUEST['stype']); 
+        } else { echo perms_no(); }
+        break;
     case "edit-budget":
-	preg_match("/.+\?id=(\d+)$/", $_SERVER['REQUEST_URI'], $match);
 	if ( perms_checkperm($user_name, 'editbudget') ) {
 		if ($_SERVER['REQUEST_METHOD'] == "POST") { budget_edit_do($_REQUEST['id']); }
-		else { echo budget_editform($match[1]); }
+		else { echo budget_editform($_REQUEST['id']); }
 	} else { echo perms_no(); }
 	break;
     case "email-budget":
-        preg_match("/.+\?id=(\d+)$/", $_SERVER['REQUEST_URI'], $match);
         if ( perms_checkperm($user_name, 'viewbudget') ) {
-                echo email_budget($match[1]); 
+                echo email_budget($_REQUEST['id']); 
         } else { echo perms_no(); }
         break;
     case "del-budget":
-	preg_match("/.+\?id=(\d+)$/", $_SERVER['REQUEST_URI'], $match);
 	if ( perms_checkperm($user_name, 'editbudget') ) {
 		if ($_SERVER['REQUEST_METHOD'] == "POST") { budget_del_do($_REQUEST['id']); }
-		else { echo budget_delform($match[1]); }
+		else { echo budget_delform($_REQUEST['id']); }
 	} else { echo perms_no(); }
 	break;
     case "add-hours":
@@ -98,24 +104,36 @@ if ( $login[0] ) {
                 else { echo hours_view_pick(); }
         } else { echo perms_no(); }
         break;
+    case "view-hours-unpaid":
+        if ( perms_checkperm($user_name, 'addhours') ) {
+		echo hours_view_unpaid(); 
+        } else { echo perms_no(); }
+        break;
+    case "hours-set-paid":
+        if ( perms_isadmin($user_name) ) {
+                hours_set_paid($_REQUEST['id']);
+        } else { echo perms_no(); }
+        break;
     case "edit-hours":
-        preg_match("/.+\?id=(\d+)$/", $_SERVER['REQUEST_URI'], $match);
         if ( perms_checkperm($user_name, 'edithours') ) {
                 if ($_SERVER['REQUEST_METHOD'] == "POST") { hours_edit_do($_REQUEST['id']); }
-                else { echo hours_edit($match[1]); }
+                else { echo hours_edit($_REQUEST['id']); }
         } else { echo perms_no(); }
         break;
     case "email-hours":
-        preg_match("/.+\?id=(\d+)&sdate=(.+)&edate=(.+)$/", $_SERVER['REQUEST_URI'], $match);
         if ( perms_checkperm($user_name, 'viewhours') ) {
-                echo email_hours($match[1], $match[2], $match[3]);
+                echo email_hours($_REQUEST['id'], $_REQUEST['sdate'], $_REQUEST['edate']);
+        } else { echo perms_no(); }
+        break;
+    case "email-hours-unpaid":
+        if ( perms_isadmin($user_name) ) {
+                echo email_hours_unpaid();
         } else { echo perms_no(); }
         break;
     case "del-hours":
-        preg_match("/.+\?id=(\d+)$/", $_SERVER['REQUEST_URI'], $match);
         if ( perms_checkperm($user_name, 'edithours') ) {
                 if ($_SERVER['REQUEST_METHOD'] == "POST") { hours_del_do($_REQUEST['id']); }
-                else { echo hours_del($match[1]); }
+                else { echo hours_del($_REQUEST['id']); }
         } else { echo perms_no(); }
         break;
     case "msg-view":
@@ -125,8 +143,7 @@ if ( $login[0] ) {
 	echo msg_inbox_view();
 	break;
     case "msg-delete":
-	preg_match("/.+\?id=(\d+)$/", $_SERVER['REQUEST_URI'], $match);
-	msg_delete($match[1]);
+	msg_delete($_REQUEST['id']);
 	break;
     case "msg-clean":
 	msg_clear_inbox();
@@ -144,9 +161,8 @@ if ( $login[0] ) {
 	break;
     case "edit-user" :
         if ( perms_isadmin($user_name) ) {
-	        preg_match("/.+\?id=(\d+)$/", $_SERVER['REQUEST_URI'], $match);
                 if ($_SERVER['REQUEST_METHOD'] == "POST") { perms_edituser_do($_REQUEST['id']); }
-                else { echo perms_edituser_form($match[1]); }
+                else { echo perms_edituser_form($_REQUEST['id']); }
         } else { echo perms_no(); }
         break;
     case "groups" :

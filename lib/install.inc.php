@@ -10,6 +10,9 @@ $sql_budget .= "  `vendor` varchar(35) NOT NULL,";
 $sql_budget .= "  `category` VARCHAR( 35 ) NULL,";
 $sql_budget .= "  `dscr` varchar(65) NOT NULL,";
 $sql_budget .= "  `date` date NOT NULL,";
+$sql_budget .= "  `pending` tinyint(4) unsigned NOT NULL default '0',";
+$sql_budget .= "  `needrepay` tinyint(4) unsigned NOT NULL default '0',";
+$sql_budget .= "  `gotrepay` tinyint(4) unsigned NOT NULL default '0',";
 $sql_budget .= "  PRIMARY KEY  (`id`),";
 $sql_budget .= "  KEY `showid` (`showid`,`vendor`)";
 $sql_budget .= ") ENGINE=MyISAM  DEFAULT CHARSET=latin1;";
@@ -35,6 +38,7 @@ $sql_hours .= "  `userid` smallint(5) unsigned NOT NULL,";
 $sql_hours .= "  `showid` smallint(5) unsigned NOT NULL,";
 $sql_hours .= "  `date` date NOT NULL,";
 $sql_hours .= "  `worked` float NOT NULL,";
+$sql_hours .= "  `submitted` tinyint(4) unsigned NOT NULL DEFAULT '0',";
 $sql_hours .= "  PRIMARY KEY  (`id`),";
 $sql_hours .= "  KEY `userid` (`userid`,`showid`)";
 $sql_hours .= ") ENGINE=MyISAM  DEFAULT CHARSET=latin1;";
@@ -116,5 +120,18 @@ $sql_msg .= "  INDEX ( `toid` )";
 $sql_msg .= ") ENGINE = MYISAM DEFAULT CHARSET=latin1 COMMENT='Program Internal Messages';";
 
 $msg_result = mysql_query($sql_msg, $db);
+
+$sql_tdtrac =    "CREATE TABLE IF NOT EXISTS `{$MYSQL_PREFIX}tdtrac` (  
+  `id` int(10) unsigned NOT NULL auto_increment,
+  `name` varchar(10) NOT NULL,
+  `value` varchar(35) NOT NULL,
+    PRIMARY KEY  (`id`)
+  ) ENGINE=MyISAM  DEFAULT CHARSET=latin1;";
+
+$tdtrac_result = mysql_query($sql_tdtrac, $db);
+
+$ins_tdtrac = "INSERT INTO `{$MYSQL_PREFIX}tdtrac` (`name`, `value`) VALUES ( 'version', '1.1.0' )";
+
+$tdtracins_result = mysql_query($ins_tdtrac, $db);
 
 ?>

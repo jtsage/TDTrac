@@ -66,10 +66,10 @@ function perms_no() {
 }
 
 function perms_editpickform() {
-	GLOBAL $db, $MYSQL_PREFIX;
+	GLOBAL $db, $MYSQL_PREFIX, $TDTRAC_SITE;
 	$sql = "SELECT groupname FROM {$MYSQL_PREFIX}groupnames";
 	$result = mysql_query($sql, $db);
-	$html  = "<h2>Select Group</h2><div id=\"genform\"><form method=\"post\" action=\"/edit-perms\">\n";
+	$html  = "<h2>Select Group</h2><div id=\"genform\"><form method=\"post\" action=\"{$TDTRAC_SITE}edit-perms\">\n";
         $html .= "<input type=\"hidden\" name=\"editgroupperm\" value=\"true\" />\n";
 	$html .= "<div class=\"frmele\"><select name=\"groupname\">";
 	while ( $row = mysql_fetch_array($result) ) {
@@ -80,11 +80,11 @@ function perms_editpickform() {
 }
 
 function perms_editform() {
-	GLOBAL $db, $TDTRAC_PERMS, $MYSQL_PREFIX;
+	GLOBAL $db, $TDTRAC_PERMS, $MYSQL_PREFIX, $TDTRAC_SITE;
 	$grpname = $_REQUEST['groupname'];
 	$grpid = perms_getgroupid($grpname);
 	$html  = "<h2>Set {$grpname} ({$grpid}) Permissions</h2><p style=\"text-align: right\">T&nbsp;&nbsp;&nbsp;/&nbsp;&nbsp;&nbsp;F</p>\n";
-	$html .= "<div class=\"genform\"><form method=\"post\" action=\"edit-perms\">\n";
+	$html .= "<div class=\"genform\"><form method=\"post\" action=\"{$TDTRAC_SITE}edit-perms\">\n";
 	$html .= "<input type=\"hidden\" name=\"grpid\" value=\"{$grpid}\" />\n";
 	$sql = "SELECT permid, permcan FROM {$MYSQL_PREFIX}permissions pm WHERE groupid = {$grpid}";
 	$result = mysql_query($sql, $db);
@@ -141,9 +141,9 @@ function perms_view() {
 }
 
 function perms_adduser_form() {
-	GLOBAL $db, $MYSQL_PREFIX;
+	GLOBAL $db, $MYSQL_PREFIX, $TDTRAC_SITE;
 	$html  = "<h2>Add User</h2>\n";
-	$html .= "<div id=\"genform\"><form method=\"post\" action=\"add-user\">\n";
+	$html .= "<div id=\"genform\"><form method=\"post\" action=\"{$TDTRAC_SITE}add-user\">\n";
 	$html .= "<div class=\"frmele\">User Name: <input type=\"text\" name=\"username\" size=\"35\" /></div>\n";
 	$html .= "<div class=\"frmele\">Password: <input type=\"text\" name=\"password\" size=\"35\" /></div>\n";
 	$html .= "<div class=\"frmele\">First Name: <input type=\"text\" name=\"first\" size=\"35\" /></div>\n";
@@ -172,8 +172,9 @@ function perms_adduser_do() {
 }
 
 function perms_changepass_form() {
+        GLOBAL $TDTRAC_SITE;
 	$html  = "<h2>Change Password</h2>\n";
-	$html .= "<div id=\"genform\"><form method=\"post\" action=\"change-pass\">\n";
+	$html .= "<div id=\"genform\"><form method=\"post\" action=\"{$TDTRAC_SITE}change-pass\">\n";
 	$html .= "<div class=\"frmele\">New Password: <input name=\"newpass1\" type=\"password\" size=\"35\" value=\"\" /></div>\n";
 	$html .= "<div class=\"frmele\">Verify New Password: <input name=\"newpass2\" type=\"password\" size=\"35\" value=\"\" /></div>\n";
 	$html .= "<div class=\"frmele\"><input type=\"submit\" value=\"Change Password\" /></div></form></div>\n";
@@ -192,12 +193,12 @@ function perms_changepass_do() {
 }	
 
 function perms_viewuser() {
-	GLOBAL $db, $MYSQL_PREFIX;
+	GLOBAL $db, $MYSQL_PREFIX, $TDTRAC_SITE;
 	$sql = "SELECT * FROM {$MYSQL_PREFIX}users ORDER BY last ASC, first ASC";
 	$result = mysql_query($sql, $db); $html = "";
 	while ( $row = mysql_fetch_array($result) ) {
 		$html .= "<h2>User: {$row['first']} {$row['last']}</h2><p><ul>\n";
-		$html .= "<div style=\"float: right\">[<a href=\"/edit-user?id={$row['userid']}\">Edit</a>]</div>\n";
+		$html .= "<div style=\"float: right\">[<a href=\"{$TDTRAC_SITE}edit-user&id={$row['userid']}\">Edit</a>]</div>\n";
 		$html .= "<li>Internal UserID: <strong>{$row['userid']}</strong> (Active: <input type=\"checkbox\" disabled=\"disabled\"".(($row['active'])?" checked=\"checked\" ":"").">)\n";
 		$html .= " (On Payroll: <input type=\"checkbox\" disabled=\"disabled\"".(($row['payroll'])?" checked=\"checked\" ":"").">)\n";
 		$html .= " (Notify of Employee add Payroll: <input type=\"checkbox\" disabled=\"disabled\"".(($row['notify'])?" checked=\"checked\" ":"").">)</li>\n";
@@ -219,12 +220,12 @@ function perms_viewuser() {
 }
 
 function perms_edituser_form($id) {
-	GLOBAL $db, $MYSQL_PREFIX;
+	GLOBAL $db, $MYSQL_PREFIX, $TDTRAC_SITE;
 	$sql = "SELECT u.*, groupid FROM {$MYSQL_PREFIX}users u, {$MYSQL_PREFIX}usergroups ug WHERE u.userid = ug.userid AND u.userid = {$id} LIMIT 1";
 	$result = mysql_query($sql, $db);
 	$row = mysql_fetch_array($result);
 	$html  = "<h2>Edit User</h2>\n";
-	$html .= "<div id=\"genform\"><form method=\"post\" action=\"edit-user\">\n";
+	$html .= "<div id=\"genform\"><form method=\"post\" action=\"{$TDTRAC_SITE}edit-user\">\n";
 	$html .= "<input type=\"hidden\" name=\"id\" value=\"{$id}\" />\n";
 	$html .= "<div class=\"frmele\">User Name: <input type=\"text\" name=\"username\" size=\"35\" value=\"{$row['username']}\" /></div>\n";
 	$html .= "<div class=\"frmele\">Password: <input type=\"text\" name=\"password\" size=\"35\" value=\"{$row['password']}\" /></div>\n";
@@ -266,16 +267,16 @@ function perms_edituser_do($id) {
 }
 
 function perms_groupform() {
-	GLOBAL $db, $MYSQL_PREFIX;
+	GLOBAL $db, $MYSQL_PREFIX, $TDTRAC_SITE;
 	$html  = "<h2>Add A Group</h2>\n";
-	$html .= "<div id=\"genform\"><form method=\"POST\" action=\"/groups\">\n";
+	$html .= "<div id=\"genform\"><form method=\"POST\" action=\"{$TDTRAC_SITE}groups\">\n";
 	$html .= "<div class=\"frmele\">Group Name: <input type=\"text\" name=\"newgroup\" size=\"35\" /></div>\n";
 	$html .= "<div class=\"frmele\"><input type=\"submit\" value=\"Add Group\" /></div></form></div>\n";
 	
 	$sql = "SELECT groupname, groupid FROM {$MYSQL_PREFIX}groupnames WHERE 1 ORDER BY groupid";
 	$result = mysql_query($sql, $db);
 	$html .= "<h2>Rename Group</h2>\n";
-	$html .= "<div id=\"genform\"><form method=\"POST\" action=\"/groups\">\n";
+	$html .= "<div id=\"genform\"><form method=\"POST\" action=\"{$TDTRAC_SITE}groups\">\n";
 	$html .= "<div class=\"frmele\">Current Name: <select name=\"oldname\" style=\"width: 25em\">\n";
 	while ( $row = mysql_fetch_array($result) ) {
 		$html .= "<option value=\"{$row['groupid']}\">{$row['groupname']}</option>\n";
