@@ -52,6 +52,7 @@ $V120ADDS = array(
   "ALTER TABLE `{$MYSQL_PREFIX}budget` ADD pending tinyint(4) unsigned NOT NULL DEFAULT '0'",
   "ALTER TABLE `{$MYSQL_PREFIX}budget` ADD needrepay tinyint(4) unsigned NOT NULL DEFAULT '0'",
   "ALTER TABLE `{$MYSQL_PREFIX}budget` ADD gotrepay tinyint(4) unsigned NOT NULL DEFAULT '0'",
+  "ALTER TABLE `{$MYSQL_PREFIX}hours` ADD submitted tinyint(4) unsigned NOT NULL DEFAULT '0'";
   "INSERT INTO `{$MYSQL_PREFIX}tdtrac` (`name`, `value`) VALUES ( 'version', '1.2.0' )"
 );  
 

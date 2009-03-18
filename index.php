@@ -104,6 +104,16 @@ if ( $login[0] ) {
                 else { echo hours_view_pick(); }
         } else { echo perms_no(); }
         break;
+    case "view-hours-unpaid":
+        if ( perms_checkperm($user_name, 'addhours') ) {
+		echo hours_view_unpaid(); 
+        } else { echo perms_no(); }
+        break;
+    case "hours-set-paid":
+        if ( perms_isadmin($user_name) ) {
+                hours_set_paid($_REQUEST['id']);
+        } else { echo perms_no(); }
+        break;
     case "edit-hours":
         if ( perms_checkperm($user_name, 'edithours') ) {
                 if ($_SERVER['REQUEST_METHOD'] == "POST") { hours_edit_do($_REQUEST['id']); }
@@ -113,6 +123,11 @@ if ( $login[0] ) {
     case "email-hours":
         if ( perms_checkperm($user_name, 'viewhours') ) {
                 echo email_hours($_REQUEST['id'], $_REQUEST['sdate'], $_REQUEST['edate']);
+        } else { echo perms_no(); }
+        break;
+    case "email-hours-unpaid":
+        if ( perms_isadmin($user_name) ) {
+                echo email_hours_unpaid();
         } else { echo perms_no(); }
         break;
     case "del-hours":
