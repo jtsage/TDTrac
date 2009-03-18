@@ -131,7 +131,7 @@ $sql_tdtrac =    "CREATE TABLE IF NOT EXISTS `{$MYSQL_PREFIX}tdtrac` (
 
 $tdtrac_result = mysql_query($sql_tdtrac, $db);
 
-$ins_tdtrac = "INSERT INTO `{$MYSQL_PREFIX}tdtrac` (`name`, `value`) VALUES ( 'version', '1.1.0' )";
+$ins_tdtrac = "INSERT INTO `{$MYSQL_PREFIX}tdtrac` (`name`, `value`) VALUES ( 'version', '1.1.0' ), ( 'version', '1.2.0'), ( 'version', '1.2.1')";
 
 $tdtracins_result = mysql_query($ins_tdtrac, $db);
 
