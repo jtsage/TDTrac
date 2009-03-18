@@ -37,11 +37,12 @@ function perms_checkperm($username, $permission) {
 	return 0;
 }
 
-function perms_isemp($username) {
+function perms_isemp($username) { // Not group dependant.  Actually checks 'limithours' property.
 	GLOBAL $db, $MYSQL_PREFIX;
-	$sql = "SELECT groupid FROM {$MYSQL_PREFIX}usergroups ug, {$MYSQL_PREFIX}users u WHERE username = '{$username}' AND u.userid = ug.userid AND ug.groupid = 4";
+	$sql = "SELECT limithours FROM {$MYSQL_PREFIX}users u WHERE username = '{$username}' LIMIT 1";
 	$result = mysql_query($sql, $db);
-	if ( mysql_num_rows($result) > 0 ) { return 1; }
+	$line = mysql_fetch_array($result);
+	if ( $line['limithours'] == 1 ) { return 1; }
 	return 0;
 }
 
@@ -199,9 +200,10 @@ function perms_viewuser() {
 	while ( $row = mysql_fetch_array($result) ) {
 		$html .= "<h2>User: {$row['first']} {$row['last']}</h2><p><ul>\n";
 		$html .= "<div style=\"float: right\">[<a href=\"{$TDTRAC_SITE}edit-user&id={$row['userid']}\">Edit</a>]</div>\n";
-		$html .= "<li>Internal UserID: <strong>{$row['userid']}</strong> (Active: <input type=\"checkbox\" disabled=\"disabled\"".(($row['active'])?" checked=\"checked\" ":"").">)\n";
-		$html .= " (On Payroll: <input type=\"checkbox\" disabled=\"disabled\"".(($row['payroll'])?" checked=\"checked\" ":"").">)\n";
-		$html .= " (Notify of Employee add Payroll: <input type=\"checkbox\" disabled=\"disabled\"".(($row['notify'])?" checked=\"checked\" ":"").">)</li>\n";
+		$html .= "<li>Internal UserID: <strong>{$row['userid']}</strong><ul><li> (Active: <input type=\"checkbox\" disabled=\"disabled\"".(($row['active'])?" checked=\"checked\" ":"").">)</li>\n";
+		$html .= "<li>(On Payroll: <input type=\"checkbox\" disabled=\"disabled\"".(($row['payroll'])?" checked=\"checked\" ":"").">)</li>\n";
+		$html .= "<li>(Add / View / Edit only Own Hours: <input type=\"checkbox\" disabled=\"disabled\"".(($row['limithours'])?" checked=\"checked\" ":"").">)</li>\n";
+		$html .= "<li>(Notify of Employee add Payroll: <input type=\"checkbox\" disabled=\"disabled\"".(($row['notify'])?" checked=\"checked\" ":"").">)</li></ul></li>\n";
 		$html .= "<li>User Name: <strong>{$row['username']}</strong></li>\n";
 		$html .= "<li>Group : <strong>\n";
         	$groups = perms_getgroups($row['username']);
@@ -246,6 +248,7 @@ function perms_edituser_form($id) {
 	$html .= "</select></div>";
 	$html .= "<div class=\"frmele\">User Active: <input type=\"checkbox\" name=\"active\" value=\"y\"".(($row['active'])?" checked=\"checked\" ":"")."/></div>\n";
 	$html .= "<div class=\"frmele\">User On Payroll: <input type=\"checkbox\" name=\"payroll\" value=\"y\"".(($row['payroll'])?" checked=\"checked\" ":"")."/></div>\n";
+        $html .= "<div class=\"frmele\">Add / Edit / View only Own hours: <input type=\"checkbox\" name=\"limithours\" value=\"y\"".(($row['limithours'])?" checked=\"checked\" ":"")."/></div>\n";
 	$html .= "<div class=\"frmele\">Admin Notify on Employee Add of Payroll: <input type=\"checkbox\" name=\"notify\" value=\"y\"".(($row['notify'])?" checked=\"checked\" ":"")."/></div>\n";
 	$html .= "<div class=\"frmele\"><input type=\"submit\" value=\"Commit\" /></div></form></div>\n";
 	return $html;
@@ -257,6 +260,8 @@ function perms_edituser_do($id) {
 	$sql  .= ( $_REQUEST['active'] == "y" ) ? "1" : "0";
         $sql  .= "', payroll = '";
 	$sql  .= ( $_REQUEST['payroll'] == "y" ) ? "1" : "0";
+	$sql  .= "', limithours = '";
+	$sql  .= ( $_REQUEST['limithours'] == "y" ) ? "1" : "0";
 	$sql  .= "', notify = '";
 	$sql  .= ( $_REQUEST['notify'] == "y" ) ? "1" : "0";
 	$sql  .= "' WHERE userid = '{$id}' LIMIT 1";
@@ -273,7 +278,7 @@ function perms_groupform() {
 	$html .= "<div class=\"frmele\">Group Name: <input type=\"text\" name=\"newgroup\" size=\"35\" /></div>\n";
 	$html .= "<div class=\"frmele\"><input type=\"submit\" value=\"Add Group\" /></div></form></div>\n";
 	
-	$sql = "SELECT groupname, groupid FROM {$MYSQL_PREFIX}groupnames WHERE 1 ORDER BY groupid";
+	$sql = "SELECT groupname, groupid FROM {$MYSQL_PREFIX}groupnames WHERE groupid > 1 ORDER BY groupid";
 	$result = mysql_query($sql, $db);
 	$html .= "<h2>Rename Group</h2>\n";
 	$html .= "<div id=\"genform\"><form method=\"POST\" action=\"{$TDTRAC_SITE}groups\">\n";

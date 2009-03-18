@@ -2,7 +2,7 @@
 ob_start(); session_start(); 
 
 ## PROGRAM DETAILS. DO NOT EDIT UNLESS YOU KNOW WHAT YOU ARE DOING
-$TDTRAC_VERSION = "1.2.0";
+$TDTRAC_VERSION = "1.2.1";
 $TDTRAC_PERMS = array("addshow", "editshow", "viewshow", "addbudget", "editbudget", "viewbudget", "addhours", "edithours", "viewhours", "adduser");
 $INSTALL_FILES = array(
 	"index.php",
@@ -52,9 +52,13 @@ $V120ADDS = array(
   "ALTER TABLE `{$MYSQL_PREFIX}budget` ADD pending tinyint(4) unsigned NOT NULL DEFAULT '0'",
   "ALTER TABLE `{$MYSQL_PREFIX}budget` ADD needrepay tinyint(4) unsigned NOT NULL DEFAULT '0'",
   "ALTER TABLE `{$MYSQL_PREFIX}budget` ADD gotrepay tinyint(4) unsigned NOT NULL DEFAULT '0'",
-  "ALTER TABLE `{$MYSQL_PREFIX}hours` ADD submitted tinyint(4) unsigned NOT NULL DEFAULT '0'";
+  "ALTER TABLE `{$MYSQL_PREFIX}hours` ADD submitted tinyint(4) unsigned NOT NULL DEFAULT '0'",
   "INSERT INTO `{$MYSQL_PREFIX}tdtrac` (`name`, `value`) VALUES ( 'version', '1.2.0' )"
 );  
+$V121ADDS = array(
+  "ALTER TABLE `{$MYSQL_PREFIX}users` ADD limithours tinyint(4) unsigned NOT NULL DEFAULT '1'",
+  "INSERT INTO `{$MYSQL_PREFIX}tdtrac` (`name`, `value`) VALUES ( 'version', '1.2.1' )"
+);
 
 switch ($page_title) {
     case "doinstall" :
@@ -145,16 +149,23 @@ switch ($page_title) {
 		$didinstall = 1;
 	}
 	else { // POST 1.1.0 UPGRADE
-		$found120 = 0;
+		$found120 = 0; $found121 = 0;
 		$sql = "SELECT name, value FROM `{$MYSQL_PREFIX}tdtrac` WHERE name = 'version' ORDER BY id DESC";
 		$result = mysql_query($sql,$db);
 		while ( $verline = mysql_fetch_array($result) ) {
 			if ( $verline['value'] == "1.2.0" ) { $found120 = 1; }
+			if ( $verline['value'] == "1.2.1" ) { $found121 = 1; }
 		} 
 		if ( !$found120 ) { // 1.2.0 UPGRADE
 			foreach ( $V120ADDS as $thissql ) { $result = mysql_query($thissql, $db); echo mysql_error(); }
                         echo "<li style=\"color: green\"><b>UPGRADE::</b> Upgraded to version 1.2.0</li>"; $didinstall = 1;
 		} else { echo "<li style=\"color: green\"><b>VERSION::</b> 1.2.0 confirmed</li>\n"; }
+
+		if ( $found120 && !$found121 ) { // 1.2.0 UPGRADE
+			foreach ( $V121ADDS as $thissql ) { $result = mysql_query($thissql, $db); echo mysql_error(); }
+                        echo "<li style=\"color: green\"><b>UPGRADE::</b> Upgraded to version 1.2.1</li>"; $didinstall = 1;
+		} else { echo "<li style=\"color: green\"><b>VERSION::</b> 1.2.1 confirmed</li>\n"; }
+
 	}
 	
 	
