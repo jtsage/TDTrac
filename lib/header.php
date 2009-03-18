@@ -1,5 +1,5 @@
 <?php
-GLOBAL $TDTRAC_VERSION, $TDTRAC_CPNY, $TDTRAC_SITE, $page_title, $login;
+GLOBAL $TDTRAC_VERSION, $TDTRAC_CPNY, $TDTRAC_SITE, $TDTRAC_HELP, $page_title, $login;
 $html = <<<ENN
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
@@ -16,6 +16,7 @@ $html = <<<ENN
 <li><a href="{$TDTRAC_SITE}home">Home</a></li>
 <li><a href="{$TDTRAC_SITE}change-pass">Change Password</a></li>
 <li><a href="{$TDTRAC_SITE}logout">Logout</a></li>
+<li><a href="#" onClick="javascript:window.open('{$TDTRAC_HELP}{$page_title}')">Help (popup)</a></li>
 </ul>
 </div>
 </div>
