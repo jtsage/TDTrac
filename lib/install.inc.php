@@ -38,6 +38,7 @@ $sql_hours .= "  `userid` smallint(5) unsigned NOT NULL,";
 $sql_hours .= "  `showid` smallint(5) unsigned NOT NULL,";
 $sql_hours .= "  `date` date NOT NULL,";
 $sql_hours .= "  `worked` float NOT NULL,";
+$sql_hours .= "  `submitted` tinyint(4) unsigned NOT NULL DEFAULT '0',";
 $sql_hours .= "  PRIMARY KEY  (`id`),";
 $sql_hours .= "  KEY `userid` (`userid`,`showid`)";
 $sql_hours .= ") ENGINE=MyISAM  DEFAULT CHARSET=latin1;";
