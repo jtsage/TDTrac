@@ -2,7 +2,7 @@
 ob_start(); session_start(); 
 
 ## PROGRAM DETAILS. DO NOT EDIT UNLESS YOU KNOW WHAT YOU ARE DOING
-$TDTRAC_VERSION = "1.0.1";
+$TDTRAC_VERSION = "1.2.0";
 $TDTRAC_PERMS = array("addshow", "editshow", "viewshow", "addbudget", "editbudget", "viewbudget", "addhours", "edithours", "viewhours", "adduser");
 $INSTALL_FILES = array(
 	"index.php",
@@ -20,6 +20,7 @@ $INSTALL_FILES = array(
 	"./lib/permissions.php", 
 	"./lib/show.php" );
 $INSTALL_TABLES = array(
+        "tdtrac",
 	"users",
 	"budget",
 	"groupnames",
@@ -34,7 +35,10 @@ $page_title = substr($_SERVER['REQUEST_URI'], 1);
 preg_match("/install.php\?(.+)$/", $page_title, $match);
 $page_title = $match[1];
 if ( $page_title == "" || $page_title == "install.php" ) { $page_title = "home"; }
+$page_title_bak = $page_title;
+$page_title = "installer " . $page_title;
 require_once("lib/header.php");
+$page_title = $page_title_bak;
 
 echo "<h2>TDTrac{$TDTRAC_VERSION} Installer</h2>\n";
 $sqllink = 1; $noinstall = 0;

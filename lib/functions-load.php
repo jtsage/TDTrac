@@ -12,7 +12,7 @@ require_once("messaging.php");
 function thrower($msg) {
 	GLOBAL $TDTRAC_SITE;
 	$_SESSION['infodata'] = $msg;
-	header("Location: {$TDTRAC_SITE}");
+	header("Location: {$TDTRAC_SITE}home");
 }
 
 

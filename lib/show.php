@@ -1,7 +1,8 @@
 <?php
 function show_add_form() {
+        GLOBAL $TDTRAC_SITE;
 	$html  = "<h2>Add A Show</h2>\n";
-	$html .= "<div id=\"genform\"><form method=\"post\" action=\"/add-show\">\n";
+	$html .= "<div id=\"genform\"><form method=\"post\" action=\"{$TDTRAC_SITE}add-show\">\n";
 	$html .= "<div class=\"frmele\">Show Name:<input type=\"text\" size=\"35\" name=\"showname\" /></div>\n";
 	$html .= "<div class=\"frmele\">Show Company:<input type=\"text\" size=\"35\" name=\"company\" /></div>\n";
 	$html .= "<div class=\"frmele\">Show Venue:<input type=\"text\" size=\"35\" name=\"venue\" /></div>\n";
@@ -35,12 +36,12 @@ function show_view() {
 }
 
 function show_edit_form($showid) {
-	GLOBAL $db, $MYSQL_PREFIX;
+	GLOBAL $db, $MYSQL_PREFIX, $TDTRAC_SITE;
 	$sql = "SELECT showname, company, venue, dates FROM {$MYSQL_PREFIX}shows WHERE showid = {$showid} LIMIT 1";
 	$result = mysql_query($sql, $db);
 	$row = mysql_fetch_array($result);
         $html  = "<h2>Edit A Show</h2>\n";
-        $html .= "<div id=\"genform\"><form method=\"post\" action=\"/edit-show\">\n";
+        $html .= "<div id=\"genform\"><form method=\"post\" action=\"{$TDTRAC_SITE}edit-show\">\n";
         $html .= "<div class=\"frmele\">Show Name:<input type=\"text\" size=\"35\" name=\"showname\" value=\"{$row['showname']}\" /></div>\n";
         $html .= "<div class=\"frmele\">Show Company:<input type=\"text\" size=\"35\" name=\"company\" value=\"{$row['company']}\" /></div>\n";
         $html .= "<div class=\"frmele\">Show Venue:<input type=\"text\" size=\"35\" name=\"venue\" value=\"{$row['venue']}\" /></div>\n";

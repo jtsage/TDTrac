@@ -28,14 +28,17 @@ function email_budget($showid) {
 	$headers .= 'Content-type: text/html; charset=iso-8859-1' . "\r\n";
 
         $body .= "<h2>Materials Expenses</h2><pre>\n";
-        $body .= "Date\t\tPrice\tVendor\tDescription\n";
+        $body .= "Date\t\tPrice\tPending\tReimburse\tVendor\tDescription\n";
         $sql = "SELECT * FROM {$MYSQL_PREFIX}budget WHERE showid = {$showid} ORDER BY category ASC, date ASC, vendor ASC";
         $result = mysql_query($sql, $db); $intr = 0; $tot = 0; $last = "";
         while ( $row = mysql_fetch_array($result) ) {
 		if ( $last != "" && $last != $row['category'] ) { 
 			$body .= "-=- {$last} SUB-TOTAL -=-\t" . number_format($subtot, 2) . "\n"; $subtot = 0; }
                 $intr++;
-                $body .= "{$row['date']}\t".number_format($row['price'], 2)."\t{$row['vendor']}\t{$row['category']}\t{$row['dscr']}\n";
+                $body .= "{$row['date']}\t".number_format($row['price'], 2)."\t";
+                $body .= (($row['pending'] == 1) ? "YES" : "NO") . "\t";
+                $body .= (($row['needrepay'] == 1) ? (($row['didrepay'] == 1) ? "PAID" : "UNPAID") : "N/A") . "\t";
+                $body .= "{$row['vendor']}\t{$row['category']}\t{$row['dscr']}\n";
                 $tot += $row['price']; $subtot += $row['price'];
 		$last = $row['category'];
         }
@@ -55,7 +58,7 @@ function email_hours($userid, $sdate, $edate) {
         $sendto = $row1['email'];
         mysql_free_result($resul1);
         if ( $userid == 0 && perms_isemp($user_name) ) { return perms_no(); }
-        $sql  = "SELECT CONCAT(first, ' ', last) as name, worked, date, showname, h.id as hid FROM {$MYSQL_PREFIX}users u, {$MYSQL_PREFIX}shows s, {$MYSQL_PREFIX}hours h WHERE ";
+        $sql  = "SELECT CONCAT(first, ' ', last) as name, worked, date, showname, h.submitted, h.id as hid FROM {$MYSQL_PREFIX}users u, {$MYSQL_PREFIX}shows s, {$MYSQL_PREFIX}hours h WHERE ";
         $sql .= "u.userid = h.userid AND s.showid = h.showid";
         $sql .= ($userid <> 0) ? " AND u.userid = '{$userid}'" : "";
         $sql .= ($sdate <> 0) ? " AND h.date >= '{$sdate}'" : "";
@@ -74,6 +77,62 @@ function email_hours($userid, $sdate, $edate) {
         $html .= ($edate <> 0 ) ? "Ending Date: {$edate}" : "";
 
         $subject = "TDTrac Hours Worked: ";
+	$subject .= $userid == 0 ? "All Employees, " : "Employee Number {$userid}, ";
+	$subject .= ($sdate <> 0 ) ? "Start Date: {$sdate}" : "";
+        $subject .= ($sdate <> 0 && $edate <> 0 ) ? ", " : "";
+        $subject .= ($edate <> 0 ) ? "Ending Date: {$edate}" : "";
+
+        $headers  = 'MIME-Version: 1.0' . "\r\n";
+        $headers .= 'Content-type: text/html; charset=iso-8859-1' . "\r\n";
+
+        foreach ( $dbarray as $key => $data ) {
+		$html .= "<br />Included Hours For: {$key}\n";
+                $body .= "<h2>Hours Worked For {$key}</h2><p>\n";
+                $body .= ($sdate <> 0 ) ? "Start Date: {$sdate}\n" : "";
+                $body .= ($sdate <> 0 && $edate <> 0 ) ? "<br />" : "";
+                $body .= ($edate <> 0 ) ? "Ending Date: {$edate}" : "";
+                $body .= "</p><pre>\n";
+                $body .= "Date\t\t".(($TDTRAC_DAYRATE)?"Days":"Hours")." Worked\tPaid\tShow\n";
+                $tot = 0;
+                foreach ( $data as $num => $line ) {
+                        $tot += $line['worked'];
+                        $body .= "{$line['date']}\t{$line['worked']}\t\t".(($line['submitted'] == 1) ? "YES" : "NO")."\t{$line['showname']}\n";
+                }
+                $body .= "-=- TOTAL -=-\t{$tot}\n";
+                $body .= "</pre>";
+        }
+	mail($sendto, $subject, $body, $headers);
+        return $html;
+}
+
+function email_hours_unpaid() {
+        GLOBAL $db, $user_name, $MYSQL_PREFIX, $TDTRAC_DAYRATE;
+        $sql1 = "SELECT email FROM {$MYSQL_PREFIX}users WHERE username = '{$user_name}'";
+        $resul1 = mysql_query($sql1, $db);
+        $row1 = mysql_fetch_array($resul1);
+        $sendto = $row1['email'];
+        mysql_free_result($resul1);
+        $userid == 0;
+        if ( $userid == 0 && perms_isemp($user_name) ) { return perms_no(); }
+        $sql  = "SELECT CONCAT(first, ' ', last) as name, worked, date, showname, h.id as hid FROM {$MYSQL_PREFIX}users u, {$MYSQL_PREFIX}shows s, {$MYSQL_PREFIX}hours h WHERE ";
+        $sql .= "u.userid = h.userid AND s.showid = h.showid AND h.submitted = 0";
+        $sql .= ($userid <> 0) ? " AND u.userid = '{$userid}'" : "";
+        $sql .= ($sdate <> 0) ? " AND h.date >= '{$sdate}'" : "";
+        $sql .= ($edate <> 0) ? " AND h.date <= '{$edate}'" : "";
+        $sql .= " ORDER BY last ASC, date DESC";
+
+        $result = mysql_query($sql, $db);
+        while ( $row = mysql_fetch_array($result) ) {
+                $dbarray[$row['name']][] = $row;
+        }
+        $body = "";
+	$html = "";
+	$html .= "<h2>Payment Owed Hours Worked Report</h2><p>\n";
+        $html .= ($sdate <> 0 ) ? "Start Date: {$sdate}\n" : "";
+        $html .= ($sdate <> 0 && $edate <> 0 ) ? "<br />" : "";
+        $html .= ($edate <> 0 ) ? "Ending Date: {$edate}" : "";
+
+        $subject = "TDTrac Payment Owed Hours Worked: ";
 	$subject .= $userid == 0 ? "All Employees, " : "Employee Number {$userid}, ";
 	$subject .= ($sdate <> 0 ) ? "Start Date: {$sdate}" : "";
         $subject .= ($sdate <> 0 && $edate <> 0 ) ? ", " : "";

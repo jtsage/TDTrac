@@ -27,6 +27,9 @@ CREATE TABLE IF NOT EXISTS `budget` (
   `category` varchar(35) NULL,
   `dscr` varchar(65) NOT NULL,
   `date` date NOT NULL,
+  `pending` tinyint(4) unsigned NOT NULL default '0',
+  `needrepay` tinyint(4) unsigned NOT NULL default '0',
+  `didrepay` tinyint(4) unsigned NOT NULL default '0',
   PRIMARY KEY  (`id`),
   KEY `showid` (`showid`,`vendor`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=latin1;
@@ -187,3 +190,24 @@ CREATE TABLE IF NOT EXISTS `msg` (
   PRIMARY KEY ( `id` ) ,
   INDEX ( `toid` )
 ) ENGINE = MYISAM DEFAULT CHARSET=latin1 COMMENT='Program Internal Messages';
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `tdtrac`
+--
+
+CREATE TABLE IF NOT EXISTS `tdtrac` (  
+  `id` int(10) unsigned NOT NULL auto_increment,
+  `name` varchar(10) NOT NULL,
+  `value` varchar(35) NOT NULL,
+    PRIMARY KEY  (`id`)
+  ) ENGINE=MyISAM  DEFAULT CHARSET=latin1;
+
+--
+-- Dumping data for table `tdtrac`
+--
+
+INSERT INTO `tdtrac` (`name`, `value`) VALUES ( 'version', '1.1.0' ), ( 'version', '1.2.0' );
+
+-- END
