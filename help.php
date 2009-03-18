@@ -5,6 +5,10 @@
 <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
 <title>TDTracHELP - <?php echo $node; ?></title>
 <link href="../style.css" rel="stylesheet" type="text/css" />
+<style type="text/css">
+ul li { font-weight: bold; }
+ul li ul li { font-weight: normal; }
+</style>
 </head>
 
 <body>

@@ -73,8 +73,130 @@ $helpnode['edit-hours'][] = "<li>Date<ul><li>The date of the hours worked.  The 
 $helpnode['edit-hours'][] = "<li>Hours Worked<ul><li>Number of hours worked.  In day rate mode, number of days worked (title will update accordingly</li></ul></li>\n";
 $helpnode['edit-hours'][] = "<li>Hours Paid Out<ul><li>Toggle whether the hours have been paid to the employee.</li></ul></li></ul></p>\n";
 
+$helpnode['add-show'][] = "<h2>Add Show Form</h2>\n";
+$helpnode['add-show'][] = "<p>Allows the addition of a new show or job name for budget and payroll items.<ul><li>Show Name<ul><li>The Name of the show or job.</li></ul></li>\n";
+$helpnode['add-show'][] = "<li>Show Company<ul><li>The name of the associated company for this show or job.  Largely unused now, may be used in the future for per-company budget and labor reports.</li></ul></li>\n";
+$helpnode['add-show'][] = "<li>Show Venue<ul><li>The venue or location associated with this show or job.  Currently for informational purposes only</li></ul></li>\n";
+$helpnode['add-show'][] = "<li>Show Dates<ul><li>The dates for this show or job.  Currently for informational purposes only.</li></ul></li></ul></p>\n";
 
+$helpnode['edit-show'][] = "<h2>Edit Show Form</h2>\n";
+$helpnode['edit-show'][] = "<p>Allows editing the detail of a show or job for budget and payroll items.<ul><li>Show Name<ul><li>The Name of the show or job.</li></ul></li>\n";
+$helpnode['edit-show'][] = "<li>Show Company<ul><li>The name of the associated company for this show or job.  Largely unused now, may be used in the future for per-company budget and labor reports.</li></ul></li>\n";
+$helpnode['edit-show'][] = "<li>Show Venue<ul><li>The venue or location associated with this show or job.  Currently for informational purposes only</li></ul></li>\n";
+$helpnode['edit-show'][] = "<li>Show Dates<ul><li>The dates for this show or job.  Currently for informational purposes only.</li></ul></li></ul></p>\n";
 
+$helpnode['view-show'][] = "<h2>View Shows</h2>\n";
+$helpnode['view-show'][] = "<p>Displays all shows or job names, past or present, in the reverse order of which they were added.  This is always the sort order for shows.<ul><li>Edit Link<ul><li>Allows editing the show name, venue, company, and dates.</li></ul></li></ul></p>\n";
 
+$helpnode['add-user'][] = "<h2>Add User Form</h2>\n";
+$helpnode['add-user'][] = "<p>Allows adding a user to the system.<ul><li>User Name<ul><li>The username, or login name for the user.</li></ul></li>\n";
+$helpnode['add-user'][] = "<li>Password<ul><li>An initial password for the user.  Users are encouraged to change their password on first successful login.</li></ul></li>\n";
+$helpnode['add-user'][] = "<li>First Name<ul><li>The user's first name.</li></ul></li>\n";
+$helpnode['add-user'][] = "<li>Last Name<ul><li>The user's last name.</li></ul></li>\n";
+$helpnode['add-user'][] = "<li>Phone<ul><li>The user's phone number.  For informational purposes only.</li></ul></li>\n";
+$helpnode['add-user'][] = "<li>E-Mail<ul><li>The user's e-mail address, used in the 'e-mail to self' links throughout the site.</li></ul></li>\n";
+$helpnode['add-user'][] = "<li>Group<ul><li>The user's permission group.  Special group 'employee' limits the add hours form to only the logged in user.  Special group 'admin' gives full access to all features.</li></ul></li></ul></p>\n";
 
-?>
+$helpnode['edit-user'][] = "<h2>Edit User Form</h2>\n";
+$helpnode['edit-user'][] = "<p>Allows adding a user to the system.<ul><li>User Name<ul><li>The username, or login name for the user.</li></ul></li>\n";
+$helpnode['edit-user'][] = "<li>Password<ul><li>An initial password for the user.  Users are encouraged to change their password on first successful login.</li></ul></li>\n";
+$helpnode['edit-user'][] = "<li>Payrate<ul><li>The user's pay rate, by day or by hour dependant on install configuration.</li></ul></li>\n";
+$helpnode['edit-user'][] = "<li>First Name<ul><li>The user's first name.</li></ul></li>\n";
+$helpnode['edit-user'][] = "<li>Last Name<ul><li>The user's last name.</li></ul></li>\n";
+$helpnode['edit-user'][] = "<li>Phone<ul><li>The user's phone number.  For informational purposes only.</li></ul></li>\n";
+$helpnode['edit-user'][] = "<li>E-Mail<ul><li>The user's e-mail address, used in the 'e-mail to self' links throughout the site.</li></ul></li>\n";
+$helpnode['edit-user'][] = "<li>Group<ul><li>The user's permission group.  Special group 'employee' limits the add hours form to only the logged in user.  Special group 'admin' gives full access to all features.</li></ul></li>\n";
+$helpnode['edit-user'][] = "<li>User Active<ul><li>The user's status.  Inactive users appear in no reports, pick lists, or are allowed to login.</li></ul></li>\n";
+$helpnode['view-user'][] = "<li>Add / Edit / View only Own Hours<ul><li>Limit user to only viewing, adding, and editing thier own hours.</li></ul></li>\n";
+$helpnode['edit-user'][] = "<li>User on Payroll<ul><li>The user's payroll status. Active payroll users appear in the add payroll hours picklist.</li></ul></li>\n";
+$helpnode['edit-user'][] = "<li>Admin Notify on Employee Add of Payroll<ul><li>When toggeled on, a user in the employee group adding hours will trigger a message sent to this user to let them know of the action.  Particularly useful for admins, shop or shift managers, etc.</li></ul></li></ul></p>\n";
+
+$helpnode['view-user'][] = "<h2>View Users</h2>\n";
+$helpnode['view-user'][] = "<p>Displays all system users, sorted by last name.<ul><li>User Name<ul><li>The username, or login name for the user.</li></ul></li>\n";
+$helpnode['view-user'][] = "<li>Payrate<ul><li>The user's pay rate, by day or by hour dependant on install configuration.</li></ul></li>\n";
+$helpnode['view-user'][] = "<li>Phone<ul><li>The user's phone number.  For informational purposes only.</li></ul></li>\n";
+$helpnode['view-user'][] = "<li>E-Mail<ul><li>The user's e-mail address, used in the 'e-mail to self' links throughout the site.</li></ul></li>\n";
+$helpnode['view-user'][] = "<li>Group<ul><li>The user's permission group.  Special group 'employee' limits the add hours form to only the logged in user.  Special group 'admin' gives full access to all features.</li></ul></li>\n";
+$helpnode['view-user'][] = "<li>User Active<ul><li>The user's status.  Inactive users appear in no reports, pick lists, or are allowed to login.</li></ul></li>\n";
+$helpnode['view-user'][] = "<li>User on Payroll<ul><li>The user's payroll status. Active payroll users appear in the add payroll hours picklist.</li></ul></li>\n";
+$helpnode['view-user'][] = "<li>Add / Edit / View only Own Hours<ul><li>Limit user to only viewing, adding, and editing thier own hours.</li></ul></li>\n";
+$helpnode['view-user'][] = "<li>Admin Notify on Employee Add of Payroll<ul><li>When toggeled on, a user in the employee group adding hours will trigger a message sent to this user to let them know of the action.  Particularly useful for admins, shop or shift managers, etc.</li></ul></li>\n";
+$helpnode['view-user'][] = "<li>Edit Link<ul><li>Allows editting of the user's details.</li></ul></li></ul></p>\n";
+
+$helpnode['edit-perms'][] = "<h2>Edit Permissions Pick List</h2>\n";
+$helpnode['edit-perms'][] = "<p>Allows the choice of which group to edit permissions for.</p>\n";
+$helpnode['edit-perms'][] = "<h2>Permissions Descriptions</h2>\n";
+$helpnode['edit-perms'][] = "<p><ul><li>addshow<ul><li>Can Add New Shows / Jobs</li></ul></li>\n";
+$helpnode['edit-perms'][] = "<li>viewshow<ul><li>Can View Current and Past Shows / Jobs</li></ul></li>\n";
+$helpnode['edit-perms'][] = "<li>editshow<ul><li>Can Edit Shows / Jobs information</li></ul></li>\n";
+$helpnode['edit-perms'][] = "<li>addbudget<ul><li>Can Add Expenses</li></ul></li>\n";
+$helpnode['edit-perms'][] = "<li>editbudget<ul><li>Can Edit or Delete Expenses Information</li></ul></li>\n";
+$helpnode['edit-perms'][] = "<li>viewbudget<ul><li>Can View budget details, including the labor cost overview</li></ul></li>\n";
+$helpnode['edit-perms'][] = "<li>addhours<ul><li>Can Add Hours for employees on payroll<ul><li><strong>NOTE:</strong> they can only add hours for themselves if set in user record</li></ul></li></ul></li>\n";
+$helpnode['edit-perms'][] = "<li>edithours<ul><li>Can Edit or Delete Hours for employees on payroll<ul><li><strong>NOTE:</strong> they can only edit thier own hours if set in user record</li></ul></li></ul></li>\n";
+$helpnode['edit-perms'][] = "<li>viewhours<ul><li>Can View Labor reports<ul><li><strong>NOTE:</strong> they can only view thier own hours if set in user record</li></ul></li></ul></li>\n";
+$helpnode['edit-perms'][] = "<li>adduser<ul><li>Can Add New Users / Employees to the program</li></ul></li>\n";
+$helpnode['edit-perms'][] = "<li>NOTE<ul><li>Editing permissions, Adding, and Editing groups is restricted to people in the 'admin' group.</li></ul></li></ul></p>\n";
+
+$helpnode['view-perms'][] = "<h2>View Permissions Pick List</h2>\n";
+$helpnode['view-perms'][] = "<p>Shows permissions by group.  Only permissions set as 'true' are shown.  False is the default state.</p>\n";
+$helpnode['view-perms'][] = "<h2>Permissions Descriptions</h2>\n";
+$helpnode['view-perms'][] = "<p><ul><li>addshow<ul><li>Can Add New Shows / Jobs</li></ul></li>\n";
+$helpnode['view-perms'][] = "<li>viewshow<ul><li>Can View Current and Past Shows / Jobs</li></ul></li>\n";
+$helpnode['view-perms'][] = "<li>editshow<ul><li>Can Edit Shows / Jobs information</li></ul></li>\n";
+$helpnode['view-perms'][] = "<li>addbudget<ul><li>Can Add Expenses</li></ul></li>\n";
+$helpnode['view-perms'][] = "<li>editbudget<ul><li>Can Edit or Delete Expenses Information</li></ul></li>\n";
+$helpnode['view-perms'][] = "<li>viewbudget<ul><li>Can View budget details, including the labor cost overview</li></ul></li>\n";
+$helpnode['view-perms'][] = "<li>addhours<ul><li>Can Add Hours for employees on payroll<ul><li><strong>NOTE:</strong> they can only add hours for themselves if set in user record</li></ul></li></ul></li>\n";
+$helpnode['view-perms'][] = "<li>edithours<ul><li>Can Edit or Delete Hours for employees on payroll<ul><li><strong>NOTE:</strong> they can only edit thier own hours if set in user record</li></ul></li></ul></li>\n";
+$helpnode['view-perms'][] = "<li>viewhours<ul><li>Can View Labor reports<ul><li><strong>NOTE:</strong> they can only view thier own hours if set in user record</li></ul></li></ul></li>\n";
+$helpnode['view-perms'][] = "<li>adduser<ul><li>Can Add New Users / Employees to the program</li></ul></li>\n";
+$helpnode['view-perms'][] = "<li>NOTE<ul><li>Editing permissions, Adding, and Editing groups is restricted to people in the 'admin' group.</li></ul></li></ul></p>\n";
+
+$helpnode['groups'][] = "<h2>Groups on TDTrac</h2>\n";
+$helpnode['groups'][] = "<p>This page allows the renaming of groups and addition of new groups.  Groups are nothing more than permission sets.  You may have as many groups as you like, and as of version 1.2.1, groups names are largely meaningless, they have no intrinsic permissions.  You cannot rename the admin group, as it is a system group.</p>\n";
+
+$helpnode['pwremind'][] = "<h2>Password Reminder</h2>\n";
+$helpnode['pwremind'][] = "<p>This will send the login details associated with the entered e-mail address to that e-mail.  If you do not recieve an e-mail, or can't remember your e-mail, please contact your administrator.  If you are the administrator, and this installation is hosted on tdtrac.com, please contact the management via the homepage.</p>\n";
+
+$helpnode['add-budget'][] = "<h2>Add Budget Expense Form</h2>\n";
+$helpnode['add-budget'][] = "<p>Allows the addition of a new budget item<ul><li>Show<ul><li>Name of the show or job.</li></ul></li>\n";
+$helpnode['add-budget'][] = "<li>Date<ul><li>Date of charge.  The 'today' link will fill in the current day, the 'cal' link displays a javascript calendar.</li></ul></li>\n";
+$helpnode['add-budget'][] = "<li>New Vendor<ul><li>The name of the vendor - or:</li></ul></li>\n";
+$helpnode['add-budget'][] = "<li>Old Vendor<ul><li>The name of the vendor, from past charges.  Displayed with most popular vendors first.  Overrides the above.</li></ul></li>\n";
+$helpnode['add-budget'][] = "<li>New Category<ul><li>The name of a category for the charge - or:</li></ul></li>\n";
+$helpnode['add-budget'][] = "<li>Old Category<ul><li>The name of a category from past charges.  Displayed with most popular categories first.  Overrides the above.</li></ul></li>\n";
+$helpnode['add-budget'][] = "<li>Description<ul><li>A description of the charge.</li></ul></li>\n";
+$helpnode['add-budget'][] = "<li>Price<ul><li>The amount of the charge, in dollars.</li></ul></li>\n";
+$helpnode['add-budget'][] = "<li>Pending Payment<ul><li>Toggle on for charges that have been approved, but not yet cleared on any credit card of bank account.</li></ul></li>\n";
+$helpnode['add-budget'][] = "<li>Reimbursment Charge<ul><li>Toggle on for charges that need to be reimbursed to cash or personal credit cards.</li></ul></li>\n";
+$helpnode['add-budget'][] = "<li>Reimbursment Recieved<ul><li>Toggle on for reimbursment charges that have been paid out.</li></ul></li></ul></p>\n";
+
+$helpnode['edit-budget'][] = "<h2>Edit Budget Expense Form</h2>\n";
+$helpnode['edit-budget'][] = "<p>Allows the editing of a budget item<ul><li>Show<ul><li>Name of the show or job.</li></ul></li>\n";
+$helpnode['edit-budget'][] = "<li>Date<ul><li>Date of charge.  The 'today' link will fill in the current day, the 'cal' link displays a javascript calendar.</li></ul></li>\n";
+$helpnode['edit-budget'][] = "<li>New Vendor<ul><li>The name of the vendor - or:</li></ul></li>\n";
+$helpnode['edit-budget'][] = "<li>Old Vendor<ul><li>The name of the vendor, from past charges.  Displayed with most popular vendors first.  Overrides the above.</li></ul></li>\n";
+$helpnode['edit-budget'][] = "<li>New Category<ul><li>The name of a category for the charge - or:</li></ul></li>\n";
+$helpnode['edit-budget'][] = "<li>Old Category<ul><li>The name of a category from past charges.  Displayed with most popular categories first.  Overrides the above.</li></ul></li>\n";
+$helpnode['edit-budget'][] = "<li>Description<ul><li>A description of the charge.</li></ul></li>\n";
+$helpnode['edit-budget'][] = "<li>Price<ul><li>The amount of the charge, in dollars.</li></ul></li>\n";
+$helpnode['edit-budget'][] = "<li>Pending Payment<ul><li>Toggle on for charges that have been approved, but not yet cleared on any credit card of bank account.</li></ul></li>\n";
+$helpnode['edit-budget'][] = "<li>Reimbursment Charge<ul><li>Toggle on for charges that need to be reimbursed to cash or personal credit cards.</li></ul></li>\n";
+$helpnode['edit-budget'][] = "<li>Reimbursment Recieved<ul><li>Toggle on for reimbursment charges that have been paid out.</li></ul></li></ul></p>\n";
+
+$helpnode['del-hours'][] = "<h2>Delete Payroll Expense</h2>\n";
+$helpnode['del-hours'][] = "<p>Confirmation for payroll expense delete.</p>\n";
+
+$helpnode['del-budget'][] = "<h2>Delete Budget Expense</h2>\n";
+$helpnode['del-budget'][] = "<p>Confirmation for budget expense delete.</p>\n";
+
+$helpnode['view-budget'][] = "<h2>View Budget Expenses Pick List</h2>\n";
+$helpnode['view-budget'][] = "<p>Choose the show you wish to see associated budget expenses for</p>\n";
+$helpnode['view-budget'][] = "<h2>Budget Expense Report</h2>\n";
+$helpnode['view-budget'][] = "<p>This shows all items, vendors, categories, descriptions, prices, pending status, and reimbursment status of each shows budgets.  It also shows the show or job details, and a shortened labor summary for the show or job.</p>\n";
+
+$helpnode['view-budget-special'][] = "<h2>Budget Expense Special Report</h2>\n";
+$helpnode['view-budget-special'][] = "<p>This shows all items, vendors, categories, descriptions, prices, pending status, and reimbursment status of all shows budgets.</p>\n";
+$helpnode['view-budget-special'][] = "<p>Additionally, this view is limited to one of the following:<ul><li>Pending payment budget items</li><li>All Reimbursment type charges</li><li>Reimbursment still needed charges</li><li>Reimbursment recieved items</li></p>\n";
+
