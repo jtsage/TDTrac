@@ -9,11 +9,11 @@ Permissions Information:
     * viewbudget :: Can View budget details, including the labor cost overview
 
     * addhours   :: Can Add Hours for employees on payroll
-	x NOTE: if in the 'employee' group, they can only add hours for themselves
+	x NOTE: if set to limit in user profile, they can only add hours for themselves
     * edithours  :: Can Edit or Delete Hours for employees on payroll
-	x NOTE: if in the 'employee' group, they can only edit thier own hours
+	x NOTE: if set to limit in user profile, they can only edit thier own hours
     * viewhours  :: Can View Labor reports
-	x NOTE: if in the 'employee' group, they can only view thier own hours
+	x NOTE: if set to limit in user profile, they can only view thier own hours
 
     * adduser    :: Can Add New Users / Employees to the program
 
