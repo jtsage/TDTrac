@@ -97,6 +97,7 @@ $sql_users .= "  `chpass` tinyint(4) unsigned NOT NULL default '1',";
 $sql_users .= "  `payroll` tinyint(4) unsigned NOT NULL default '1',";
 $sql_users .= "  `payrate` double NULL ,";
 $sql_users .= "  `notify` tinyint(4) NOT NULL default '0',"
+$sql_users .= "  `limithours` tinyint(4) NOT NULL default '0',"
 $sql_users .= "  PRIMARY KEY  (`userid`),";
 $sql_users .= "  KEY `username` (`username`)";
 $sql_users .= ") ENGINE=MyISAM  DEFAULT CHARSET=latin1 COMMENT='Program User Table' AUTO_INCREMENT=3 ;";
