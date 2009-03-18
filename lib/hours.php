@@ -57,7 +57,7 @@ function hours_edit ($hid) {
         $html .= "<a href=\"#\" onClick=\"tdt_show_calendar(".(date(n)-1).",".date(Y).",'pickcal','date')\">[calendar popup]</a></div>\n";
 	$html .= "<div class=\"frmele\" id=\"pickcal\"></div>\n";
 	$html .= "<div class=\"frmele\">".(($TDTRAC_DAYRATE)?"Days":"Hours")." Worked: <input type=\"text\" size=\"35\" name=\"worked\" value=\"{$recd['worked']}\" /></div>\n";
-        $html .= "<div class=\"frmele\">Pending Payment: <input type=\"checkbox\" name=\"submitted\" value=\"y\" ".(($row['submitted'] == 1) ? "checked=\"checked\"" : "")." /></div>";
+        $html .= "<div class=\"frmele\">Hours Paid Out: <input type=\"checkbox\" name=\"submitted\" value=\"y\" ".(($row['submitted'] == 1) ? "checked=\"checked\"" : "")." /></div>";
 	$html .= "<div class=\"frmele\"><input type=\"submit\" value=\"Commit\" /></div>\n";
 	$html .= "</form></div>\n"; 
 	return $html;
