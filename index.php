@@ -2,7 +2,8 @@
 ob_start(); session_start(); 
 
 ## PROGRAM DETAILS. DO NOT EDIT UNLESS YOU KNOW WHAT YOU ARE DOING
-$TDTRAC_VERSION = "1.2.1";
+$TDTRAC_VERSION = "1.2.2";
+$TDTRAC_DBVER = "1.2.1";
 $TDTRAC_PERMS = array("addshow", "editshow", "viewshow", "addbudget", "editbudget", "viewbudget", "addhours", "edithours", "viewhours", "adduser");
 
 require_once("config.php");
@@ -94,6 +95,12 @@ if ( $login[0] ) {
         if ( perms_checkperm($user_name, 'addhours') ) {
                 if ( $_SERVER['REQUEST_METHOD'] == "POST" ) { hours_add_do(); }
                 else { echo hours_add(); }
+        } else { echo perms_no(); }
+        break;
+    case "remind-hours":
+        if ( perms_isadmin($user_name) ) {
+                if ( $_SERVER['REQUEST_METHOD'] == "POST" ) { echo hours_remind_do(); }
+                else { echo hours_remind_pick(); }
         } else { echo perms_no(); }
         break;
     case "view-hours":

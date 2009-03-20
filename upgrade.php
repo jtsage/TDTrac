@@ -2,10 +2,12 @@
 ob_start(); session_start(); 
 
 ## PROGRAM DETAILS. DO NOT EDIT UNLESS YOU KNOW WHAT YOU ARE DOING
-$TDTRAC_VERSION = "1.2.1";
+$TDTRAC_VERSION = "1.2.2";
 $TDTRAC_PERMS = array("addshow", "editshow", "viewshow", "addbudget", "editbudget", "viewbudget", "addhours", "edithours", "viewhours", "adduser");
 $INSTALL_FILES = array(
 	"index.php",
+	"help.php",
+	"./lib/helpnodes.php",
 	"./lib/install.inc.php",
 	"./lib/budget.php",
 	"./lib/dbaseconfig.php",
@@ -20,6 +22,7 @@ $INSTALL_FILES = array(
 	"./lib/permissions.php", 
 	"./lib/show.php" );
 $INSTALL_TABLES = array(
+	"tdtrac",
 	"users",
 	"budget",
 	"groupnames",
