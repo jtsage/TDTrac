@@ -60,11 +60,11 @@ function islogin_logout() {
 }
 
 function islogin_dologin() {
-	GLOBAL $db, $MYSQL_PREFIX, $TDTRAC_SITE;
+	GLOBAL $db, $MYSQL_PREFIX, $TDTRAC_SITE, $TDTRAC_DBVER;
 	$checkname = $_REQUEST['tracuser'];
 	$checkpass = $_REQUEST['tracpass'];
 
-	$sql = "SELECT password, active, chpass FROM {$MYSQL_PREFIX}users WHERE username = '{$checkname}' LIMIT 1";
+	$sql = "SELECT userid, password, active, chpass FROM {$MYSQL_PREFIX}users WHERE username = '{$checkname}' LIMIT 1";
         $result = mysql_query($sql, $db);
 
 	$row = mysql_fetch_array($result);
@@ -73,10 +73,19 @@ function islogin_dologin() {
 		$infodata = "Login Successful";
 		$_SESSION['tdtracuser'] = $checkname;
 		$_SESSION['tdtracpass'] = md5("havesomesalt".$checkpass);
-    if ( $row['chpass'] <> 0 ) { $infodata = "Login Successful, Please Change Your Password!"; header("Location: {$TDTRAC_SITE}change-pass"); ob_flush();} }
+		if ( $row['userid'] == 1 ) { //CHECK UPGRADE STATUS ON ADMIN LOGIN (USER #1)
+			$sql2 = "SELECT value FROM {$MYSQL_PREFIX}tdtrac WHERE name = 'version' AND value = '{$TDTRAC_DBVER}'";
+			$res2 = mysql_query($sql2, $db);
+			if ( mysql_num_rows($res2) < 1 ) { $infodata .= "<br><strong>WARNING:</strong> Database not up-to-date, please run upgrade script!"; }
+		}
+    		if ( $row['chpass'] <> 0 ) { 
+			$infodata = "Login Successful, Please Change Your Password!"; header("Location: {$TDTRAC_SITE}change-pass"); ob_flush();
+		} 
+	}
 	else {
 		$infodata = "Login Failed!";
 	}
+
 	thrower($infodata);
 }
 
