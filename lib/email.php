@@ -49,6 +49,26 @@ function email_budget($showid) {
 	mail($sendto, $subject, $body, $headers);
 	return $html;
 }
+function email_remind($userid, $duedate, $sdate, $edate) {
+	GLOBAL $db, $MYSQL_PREFIX, $TDTRAC_SITE;
+        $sql1 = "SELECT CONCAT(first, ' ', last) as name, username, email, password FROM {$MYSQL_PREFIX}users WHERE userid = '{$userid}'";
+        $resul1 = mysql_query($sql1, $db);
+        $row1 = mysql_fetch_array($resul1);
+        $sendto = $row1['email'];
+
+        $subject = "TDTrac Hours Are Due: {$duedate}";	
+
+        $headers  = 'MIME-Version: 1.0' . "\r\n";
+        $headers .= 'Content-type: text/html; charset=iso-8859-1' . "\r\n";
+
+	$body  = "<p>This e-mail is being sent to you to remind you that hours for the payperiod of {$sdate} true {$edate} are due on {$duedate}.  Please take a moment to log into the system and update or double check your hours.<br />";
+	$body .= "<br />As a reminder, your <strong>username:</strong> {$row1['username']} and <strong>password:</strong> {$row1['password']} for <a href=\"{$TDTRAC_SITE}home\">{$TDTRAC_SITE}home</a></p>";
+
+	$html = "Sent Reminder to: {$row1['name']}<br />\n";
+
+	mail($sendto, $subject, $body, $headers);
+        return $html;
+}
 
 function email_hours($userid, $sdate, $edate) {
         GLOBAL $db, $user_name, $MYSQL_PREFIX, $TDTRAC_DAYRATE;

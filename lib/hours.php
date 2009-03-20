@@ -256,4 +256,45 @@ function hours_set_paid($userid) {
         $uname = perms_getfnamebyid($userid);
         thrower("Hours for {$name} (ID:{$userid}) Marked Paid");
 }
+
+function hours_remind_pick() {
+	GLOBAL $db, $MYSQL_PREFIX, $TDTRAC_SITE;
+	$sql = "SELECT CONCAT(first, ' ', last) as name, userid FROM {$MYSQL_PREFIX}users WHERE payroll = 1 ORDER BY last DESC";
+	$result = mysql_query($sql, $db);
+	$html  = "<h2>Send Hours Due Reminder to Employees</h2>\n";
+        $html .= "<div id=\"genform\"><form method=\"post\" action=\"{$TDTRAC_SITE}remind-hours\" name=\"form2\">\n";
+
+        $html .= "<div class=\"frmele\">Hours Due Date: <input type=\"text\" size=\"18\" name=\"duedate\" id=\"duedate\" style=\"margin-right: 2px\" />\n";
+        $html .= "<a href=\"#\" onClick=\"tdt_show_calendar(".(date(n)-1).",".date(Y).",'pickcal2','duedate')\">[calendar popup]</a></div>\n";
+        $html .= "<div class=\"frmele\" id=\"pickcal2\"></div>\n";
+
+        $html .= "<br /><div class=\"frmele\">Start Date of Pay Period: <input type=\"text\" size=\"18\" name=\"sdate\" id=\"sdate2\" style=\"margin-right: 2px\" />\n";
+        $html .= "<a href=\"#\" onClick=\"tdt_show_calendar(".(date(n)-1).",".date(Y).",'pickcal3','sdate2')\">[calendar popup]</a></div>\n";
+        $html .= "<div class=\"frmele\" id=\"pickcal3\"></div>\n";
+
+        $html .= "<div class=\"frmele\">End Date of Pay Period: <input type=\"text\" size=\"22\" name=\"edate\" id=\"edate2\" style=\"margin-right: 2px\" />\n";
+        $html .= "<a href=\"#\" onClick=\"tdt_show_calendar(".(date(n)-1).",".date(Y).",'pickcal4','edate2')\">[cal]</a>\n";
+        $html .= " <a href=\"#\" onClick=\"document.forms['form2'].edate2.value='".date("Y-m-d")."'\">[today]</a></div>\n";
+        $html .= "<div class=\"frmele\" id=\"pickcal4\"></div>\n";
+
+	$html .= "<br /><div class=\"frmele\"><strong>Employees to remind:</strong><br />";
+	while ( $row = mysql_fetch_array($result) ) {
+		$html .= "{$row['name']} <input type=\"checkbox\" name=\"toremind[]\" value=\"{$row['userid']}\" /><br />";
+	}
+	$html .= "</div>\n";
+	$html .= "<div class=\"frmele\"><input type=\"submit\" value=\"Send Reminders\" /></div></form></div>\n";
+
+	return $html;
+}
+
+function hours_remind_do() {
+	GLOBAL $db, $MYSQL_PREFIX, $TDTRAC_SITE;
+	$html  = "<h2>Sending Reminders</h2><p>";
+	foreach ( $_REQUEST['toremind'] as $remid ) {
+		$html .= email_remind($remid, $_REQUEST['duedate'], $_REQUEST['sdate'], $_REQUEST['edate']);
+	}
+	$html .= "</p>\n";
+	return $html;
+}
+
 ?>

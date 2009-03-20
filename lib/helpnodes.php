@@ -19,7 +19,8 @@ $helpnode['home'][] = "<h2>Menu Items</h2>\n";
 $helpnode['home'][] = "<ul><li>Payroll Tracking<ul>\n";
 $helpnode['home'][] = "<li>Add Hours Worked - Add Hours or Days worked by an employee.</li>\n";
 $helpnode['home'][] = "<li>View Hours Worked - View Hours or Days worked by an employee or employees in a date range.</li>\n";
-$helpnode['home'][] = "<li>View Hours Worked (unpaid) - View all Hours or Days worked by employees that have not yet been paid.</li></ul></li>\n";
+$helpnode['home'][] = "<li>View Hours Worked (unpaid) - View all Hours or Days worked by employees that have not yet been paid.</li>\n";
+$helpnode['home'][] = "<li>Send 'please submit hours' Reminder to Employees - Send a reminder e-mail to selected employees for them to log in and submit hours.</li></ul></li>\n";
 $helpnode['home'][] = "<li>Budget Tracking<ul>\n";
 $helpnode['home'][] = "<li>Add Budget Expense</li>\n";
 $helpnode['home'][] = "<li>View Budgets - View budgets on a per show basis, including labor budget</li>\n";
@@ -72,6 +73,9 @@ $helpnode['edit-hours'][] = "<li>Show<ul><li>The associated show name for these 
 $helpnode['edit-hours'][] = "<li>Date<ul><li>The date of the hours worked.  The 'today' link will fill in the current day.  The 'cal' link presents a javascript popup calendar.</li></ul></li>\n";
 $helpnode['edit-hours'][] = "<li>Hours Worked<ul><li>Number of hours worked.  In day rate mode, number of days worked (title will update accordingly</li></ul></li>\n";
 $helpnode['edit-hours'][] = "<li>Hours Paid Out<ul><li>Toggle whether the hours have been paid to the employee.</li></ul></li></ul></p>\n";
+
+$helpnode['remind-hours'][] = "<h2>Remind Employees to Submit Hours</h2>\n";
+$helpnode['remind-hours'][] = "<p>Select the employees you wish to have recieve a server-generated e-mail asking them to log in and submit their hours before the specified due date for the pay period between the two dates listed.</p>\n";
 
 $helpnode['add-show'][] = "<h2>Add Show Form</h2>\n";
 $helpnode['add-show'][] = "<p>Allows the addition of a new show or job name for budget and payroll items.<ul><li>Show Name<ul><li>The Name of the show or job.</li></ul></li>\n";
