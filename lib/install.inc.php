@@ -98,6 +98,7 @@ $sql_users .= "  `payroll` tinyint(4) unsigned NOT NULL default '1',";
 $sql_users .= "  `payrate` double NULL ,";
 $sql_users .= "  `notify` tinyint(4) NOT NULL default '0',"
 $sql_users .= "  `limithours` tinyint(4) NOT NULL default '0',"
+$sql_users .= "  `lastlogin` timestamp,"
 $sql_users .= "  PRIMARY KEY  (`userid`),";
 $sql_users .= "  KEY `username` (`username`)";
 $sql_users .= ") ENGINE=MyISAM  DEFAULT CHARSET=latin1 COMMENT='Program User Table' AUTO_INCREMENT=3 ;";
@@ -131,7 +132,7 @@ $sql_tdtrac =    "CREATE TABLE IF NOT EXISTS `{$MYSQL_PREFIX}tdtrac` (
 
 $tdtrac_result = mysql_query($sql_tdtrac, $db);
 
-$ins_tdtrac = "INSERT INTO `{$MYSQL_PREFIX}tdtrac` (`name`, `value`) VALUES ( 'version', '1.1.0' ), ( 'version', '1.2.0'), ( 'version', '1.2.1')";
+$ins_tdtrac = "INSERT INTO `{$MYSQL_PREFIX}tdtrac` (`name`, `value`) VALUES ( 'version', '1.1.0' ), ( 'version', '1.2.0'), ( 'version', '1.2.1'), ( 'version', '1.2.2')";
 
 $tdtracins_result = mysql_query($ins_tdtrac, $db);
 

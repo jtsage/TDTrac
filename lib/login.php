@@ -64,15 +64,18 @@ function islogin_dologin() {
 	$checkname = $_REQUEST['tracuser'];
 	$checkpass = $_REQUEST['tracpass'];
 
-	$sql = "SELECT userid, password, active, chpass FROM {$MYSQL_PREFIX}users WHERE username = '{$checkname}' LIMIT 1";
+	$sql = "SELECT userid, password, active, chpass, DATE_FORMAT(lastlogin, '%b %D %h:%i %p') AS lastlog FROM {$MYSQL_PREFIX}users WHERE username = '{$checkname}' LIMIT 1";
         $result = mysql_query($sql, $db);
 
 	$row = mysql_fetch_array($result);
 	if ( $row['active'] == 0 ) { thrower("User Account is Locked!"); }
 	if ( $row['password'] == $checkpass ) { 
-		$infodata = "Login Successful";
+		$infodata  = "Login Successful";
+		$infodata .= "<br />Last Login: {$row['lastlog']}";
 		$_SESSION['tdtracuser'] = $checkname;
 		$_SESSION['tdtracpass'] = md5("havesomesalt".$checkpass);
+		$setlastloginsql = "UPDATE {$MYSQL_PREFIX}users SET lastlogin = CURRENT_TIMESTAMP WHERE userid = {$row['userid']}";
+		$setlastloginres = mysql_query($setlastloginsql, $db);
 		if ( $row['userid'] == 1 ) { //CHECK UPGRADE STATUS ON ADMIN LOGIN (USER #1)
 			$sql2 = "SELECT value FROM {$MYSQL_PREFIX}tdtrac WHERE name = 'version' AND value = '{$TDTRAC_DBVER}'";
 			$res2 = mysql_query($sql2, $db);
