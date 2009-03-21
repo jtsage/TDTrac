@@ -195,12 +195,12 @@ function perms_changepass_do() {
 
 function perms_viewuser() {
 	GLOBAL $db, $MYSQL_PREFIX, $TDTRAC_SITE;
-	$sql = "SELECT * FROM {$MYSQL_PREFIX}users ORDER BY last ASC, first ASC";
+	$sql = "SELECT *, DATE_FORMAT(lastlogin, '%b %D %h:%i %p') AS lastlog FROM {$MYSQL_PREFIX}users ORDER BY last ASC, first ASC";
 	$result = mysql_query($sql, $db); $html = "";
 	while ( $row = mysql_fetch_array($result) ) {
 		$html .= "<h2>User: {$row['first']} {$row['last']}</h2><p><ul>\n";
 		$html .= "<div style=\"float: right\">[<a href=\"{$TDTRAC_SITE}edit-user&id={$row['userid']}\">Edit</a>]</div>\n";
-		$html .= "<li>Internal UserID: <strong>{$row['userid']}</strong><ul><li> (Active: <input type=\"checkbox\" disabled=\"disabled\"".(($row['active'])?" checked=\"checked\" ":"").">)</li>\n";
+		$html .= "<li>Internal UserID: <strong>{$row['userid']}</strong> (Last Login: {$row['lastlog']})<ul><li> (Active: <input type=\"checkbox\" disabled=\"disabled\"".(($row['active'])?" checked=\"checked\" ":"").">)</li>\n";
 		$html .= "<li>(On Payroll: <input type=\"checkbox\" disabled=\"disabled\"".(($row['payroll'])?" checked=\"checked\" ":"").">)</li>\n";
 		$html .= "<li>(Add / View / Edit only Own Hours: <input type=\"checkbox\" disabled=\"disabled\"".(($row['limithours'])?" checked=\"checked\" ":"").">)</li>\n";
 		$html .= "<li>(Notify of Employee add Payroll: <input type=\"checkbox\" disabled=\"disabled\"".(($row['notify'])?" checked=\"checked\" ":"").">)</li></ul></li>\n";
