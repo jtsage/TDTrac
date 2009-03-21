@@ -62,6 +62,11 @@ $V121ADDS = array(
   "ALTER TABLE `{$MYSQL_PREFIX}users` ADD limithours tinyint(4) unsigned NOT NULL DEFAULT '1'",
   "INSERT INTO `{$MYSQL_PREFIX}tdtrac` (`name`, `value`) VALUES ( 'version', '1.2.1' )"
 );
+$V122ADDS = array(
+  "ALTER TABLE `{$MYSQL_PREFIX}users` ADD lastlogin timestamp",
+  "INSERT INTO `{$MYSQL_PREFIX}tdtrac` (`name`, `value`) VALUES ( 'version', '1.2.2' )"
+);
+  
 
 switch ($page_title) {
     case "doinstall" :
@@ -152,25 +157,29 @@ switch ($page_title) {
 		$didinstall = 1;
 	}
 	else { // POST 1.1.0 UPGRADE
-		$found120 = 0; $found121 = 0;
+		$found120 = 0; $found121 = 0; $found122 = 0;
 		$sql = "SELECT name, value FROM `{$MYSQL_PREFIX}tdtrac` WHERE name = 'version' ORDER BY id DESC";
 		$result = mysql_query($sql,$db);
 		while ( $verline = mysql_fetch_array($result) ) {
 			if ( $verline['value'] == "1.2.0" ) { $found120 = 1; }
-			if ( $verline['value'] == "1.2.1" ) { $found121 = 1; }
+			if ( $verline['value'] == "1.2.1" ) { $found121 = 1; $found120 = 1;}
+			if ( $verline['value'] == "1.2.2" ) { $found122 = 1; $found121 = 1; $found120 = 1;}
 		} 
 		if ( !$found120 ) { // 1.2.0 UPGRADE
 			foreach ( $V120ADDS as $thissql ) { $result = mysql_query($thissql, $db); echo mysql_error(); }
                         echo "<li style=\"color: green\"><b>UPGRADE::</b> Upgraded to version 1.2.0</li>"; $didinstall = 1;
 		} else { echo "<li style=\"color: green\"><b>VERSION::</b> 1.2.0 confirmed</li>\n"; }
 
-		if ( $found120 && !$found121 ) { // 1.2.0 UPGRADE
+		if ( $found120 && !$found121 ) { // 1.2.1 UPGRADE
 			foreach ( $V121ADDS as $thissql ) { $result = mysql_query($thissql, $db); echo mysql_error(); }
                         echo "<li style=\"color: green\"><b>UPGRADE::</b> Upgraded to version 1.2.1</li>"; $didinstall = 1;
 		} else { echo "<li style=\"color: green\"><b>VERSION::</b> 1.2.1 confirmed</li>\n"; }
 
-	}
-	
+		if ( $found120 && $found121 && !$found122 ) { // 1.2.2 UPGRADE
+			foreach ( $V122ADDS as $thissql ) { $result = mysql_query($thissql, $db); echo mysql_error(); }
+                	echo "<li style=\"color: green\"><b>UPGRADE::</b> Upgraded to version 1.2.2</li>"; $didinstall = 1;
+		} else { echo "<li style=\"color: green\"><b>VERSION::</b> 1.2.2 confirmed</li>\n"; }
+	}	
 	
 	echo "</ul></li></ul><div style=\"text-align: center\">\n";
 	if ( $didinstall ) { 
