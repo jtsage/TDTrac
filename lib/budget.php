@@ -166,7 +166,7 @@ function budget_viewselect() {
 }
 function budget_view_special($onlytype) {
         GLOBAL $db, $MYSQL_PREFIX;
-        $sql = "SELECT showid FROM {$MYSQL_PREFIX}shows WHERE 1";
+        $sql = "SELECT showid FROM {$MYSQL_PREFIX}shows WHERE 1 ORDER BY showid DESC";
         $rest = mysql_query($sql, $db);
         $newhtml = "";
         if ( $onlytype == 1 ) { $newhtml .= "<h2>Pending Payment Budget Items</h2>\n"; }
