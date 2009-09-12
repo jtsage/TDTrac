@@ -4,7 +4,7 @@ function budget_addform() {
 	$html  = "<h2>Add Budget Expense</h2>\n";
 	$html .= "<div id=\"genform\"><form method=\"post\" action=\"{$TDTRAC_SITE}add-budget\" name=\"form1\">\n";
 	$html .= "<div class=\"frmele\" title=\"Show to charge against\">Show: <select tabindex=\"1\" style=\"width: 25em;\" name=\"showid\">\n";
-	$sql = "SELECT showname, showid FROM {$MYSQL_PREFIX}shows ORDER BY created DESC;";
+	$sql = "SELECT showname, showid FROM {$MYSQL_PREFIX}shows WHERE closed = 0 ORDER BY created DESC;";
 	$result = mysql_query($sql, $db);
 	while ( $row = mysql_fetch_array($result) ) {
 		$html .= "<option value=\"{$row['showid']}\">{$row['showname']}</option>\n";
@@ -166,7 +166,7 @@ function budget_viewselect() {
 }
 function budget_view_special($onlytype) {
         GLOBAL $db, $MYSQL_PREFIX;
-        $sql = "SELECT showid FROM {$MYSQL_PREFIX}shows WHERE 1 ORDER BY showid DESC";
+        $sql = "SELECT showid FROM {$MYSQL_PREFIX}shows WHERE closed = 0 ORDER BY showid DESC";
         $rest = mysql_query($sql, $db);
         $newhtml = "";
         if ( $onlytype == 1 ) { $newhtml .= "<h2>Pending Payment Budget Items</h2>\n"; }
