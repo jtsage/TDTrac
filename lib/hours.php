@@ -14,7 +14,7 @@ function hours_add () {
 	}
 	$html .= "</select></div>\n";
         $html .= "<div class=\"frmele\">Show: <select tabindex=\"1\" style=\"width: 25em;\" name=\"showid\">\n";
-        $sql = "SELECT showname, showid FROM {$MYSQL_PREFIX}shows ORDER BY created DESC;";
+        $sql = "SELECT showname, showid FROM {$MYSQL_PREFIX}shows WHERE closed = 0 ORDER BY created DESC;";
         $result = mysql_query($sql, $db);
         while ( $row = mysql_fetch_array($result) ) {
                 $html .= "<option value=\"{$row['showid']}\">{$row['showname']}</option>\n";
