@@ -1,5 +1,5 @@
 <?php
-$MYSQL_SERVER = "localhost";
+$MYSQL_SERVER = "mysql.jtsage.com";
 $MYSQL_USER = "tdtrac";
 $MYSQL_PASS = "tdtrac";
 $MYSQL_DATABASE = "tdtrac";

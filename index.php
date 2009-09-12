@@ -2,8 +2,8 @@
 ob_start(); session_start(); 
 
 ## PROGRAM DETAILS. DO NOT EDIT UNLESS YOU KNOW WHAT YOU ARE DOING
-$TDTRAC_VERSION = "1.2.2";
-$TDTRAC_DBVER = "1.2.2";
+$TDTRAC_VERSION = "1.2.4";
+$TDTRAC_DBVER = "1.2.4";
 $TDTRAC_PERMS = array("addshow", "editshow", "viewshow", "addbudget", "editbudget", "viewbudget", "addhours", "edithours", "viewhours", "adduser");
 
 require_once("config.php");
