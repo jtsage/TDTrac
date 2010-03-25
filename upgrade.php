@@ -2,7 +2,7 @@
 ob_start(); session_start(); 
 
 ## PROGRAM DETAILS. DO NOT EDIT UNLESS YOU KNOW WHAT YOU ARE DOING
-$TDTRAC_VERSION = "1.2.4";
+$TDTRAC_VERSION = "1.2.5";
 $TDTRAC_PERMS = array("addshow", "editshow", "viewshow", "addbudget", "editbudget", "viewbudget", "addhours", "edithours", "viewhours", "adduser");
 $INSTALL_FILES = array(
 	"index.php",
@@ -69,6 +69,11 @@ $V122ADDS = array(
 $V124ADDS = array(
   "ALTER TABLE `{$MYSQL_PREFIX}shows` ADD closed tinyint(4) unsigned NOT NULL DEFAULT '0'",
   "INSERT INTO `{$MYSQL_PREFIX}tdtrac` (`name`, `value`) VALUES ( 'version', '1.2.4' )"
+);
+$V125ADDS = array(
+  "ALTER TABLE `{$MYSQL_PREFIX}budget` ADD tax float NOT NULL DEFAULT '0'",
+  "INSERT INTO `{$MYSQL_PREFIX}tdtrac` (`name`, `value`) VALUES ( 'version', '1.2.5' )",
+  "INSERT INTO `{$MYSQL_PREFIX}msg` (`toid`, `fromid`, `body`) VALUES ('1', '1', 'Updated to v1.2.5 :: Added Tax Tracking')"
 );
   
 
@@ -161,7 +166,7 @@ switch ($page_title) {
 		$didinstall = 1;
 	}
 	else { // POST 1.1.0 UPGRADE
-		$found120 = 0; $found121 = 0; $found122 = 0; $found124 = 0;
+		$found120 = 0; $found121 = 0; $found122 = 0; $found124 = 0; $found125 = 0;
 		$sql = "SELECT name, value FROM `{$MYSQL_PREFIX}tdtrac` WHERE name = 'version' ORDER BY id DESC";
 		$result = mysql_query($sql,$db);
 		while ( $verline = mysql_fetch_array($result) ) {
@@ -169,6 +174,7 @@ switch ($page_title) {
 			if ( $verline['value'] == "1.2.1" ) { $found121 = 1; $found120 = 1;}
 			if ( $verline['value'] == "1.2.2" ) { $found122 = 1; $found121 = 1; $found120 = 1;}
 			if ( $verline['value'] == "1.2.4" ) { $found124 = 1; $found122 = 1; $found121 = 1; $found120 = 1; }
+			if ( $verline['value'] == "1.2.5" ) { $found125 = 1; $found124 = 1; $found122 = 1; $found121 = 1; $found120 = 1; }
 		} 
 		if ( !$found120 ) { // 1.2.0 UPGRADE
 			foreach ( $V120ADDS as $thissql ) { $result = mysql_query($thissql, $db); echo mysql_error(); }
@@ -189,6 +195,12 @@ switch ($page_title) {
                         foreach ( $V124ADDS as $thissql ) { $result = mysql_query($thissql, $db); echo mysql_error(); }
                         echo "<li style=\"color: green\"><b>UPGRADE::</b> Upgraded to version 1.2.4</li>"; $didinstall = 1;
                 } else { echo "<li style=\"color: green\"><b>VERSION::</b> 1.2.4 confirmed</li>\n"; }
+
+                if ( $found120 && $found121 && $found122 && $found124 && !$found125 ) { // 1.2.5 UPGRADE
+                        foreach ( $V125ADDS as $thissql ) { $result = mysql_query($thissql, $db); echo mysql_error(); }
+                        echo "<li style=\"color: green\"><b>UPGRADE::</b> Upgraded to version 1.2.5</li>"; $didinstall = 1;
+                } else { echo "<li style=\"color: green\"><b>VERSION::</b> 1.2.5 confirmed</li>\n"; }
+
 	}	
 	
 	echo "</ul></li></ul><div style=\"text-align: center\">\n";
