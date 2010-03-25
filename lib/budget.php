@@ -36,6 +36,7 @@ function budget_addform() {
         $html .= "</select></div>\n";
 	$html .= "<div class=\"frmele\" title=\"Description of charge\">Description: <input type=\"text\" size=\"35\" name=\"dscr\" /></div>\n";
 	$html .= "<div class=\"frmele\" title=\"Amount of charge, without dollar sign\">Price: $<input type=\"text\" size=\"34\" name=\"price\" /></div>\n";
+	$html .= "<div class=\"frmele\" title=\"Amount of tax, if paid, without dollar sign\">Tax: $<input type=\"text\" size=\"34\" name=\"tax\" /></div>\n";
         $html .= "<div class=\"frmele\">Pending Payment: <input type=\"checkbox\" name=\"pending\" value=\"y\"/></div>";
         $html .= "<div class=\"frmele\">Reimbursable Charge: <input type=\"checkbox\" name=\"needrepay\" value=\"y\"/></div>";
         $html .= "<div class=\"frmele\">Reimbursment Recieved: <input type=\"checkbox\" name=\"gotrepay\" value=\"y\"/></div>";
@@ -78,6 +79,7 @@ function budget_editform($id) {
         $html .= "</select></div>\n";
 	$html .= "<div class=\"frmele\">Description: <input type=\"text\" size=\"35\" name=\"dscr\" value=\"{$row['dscr']}\" /></div>\n";
 	$html .= "<div class=\"frmele\">Price: $<input type=\"text\" size=\"34\" name=\"price\" value=\"{$row['price']}\" /></div>\n";
+	$html .= "<div class=\"frmele\">Tax: $<input type=\"text\" size=\"34\" name=\"tax\" value=\"{$row['tax']}\" /></div>\n";
         $html .= "<div class=\"frmele\">Pending Payment: <input type=\"checkbox\" name=\"pending\" value=\"y\" ".(($row['pending'] == 1) ? "checked=\"checked\"" : "")."/></div>";
         $html .= "<div class=\"frmele\">Reimbursable Charge: <input type=\"checkbox\" name=\"needrepay\" value=\"y\" ".(($row['needrepay'] == 1) ? "checked=\"checked\"" : "")."/></div>";
         $html .= "<div class=\"frmele\">Reimbursment Recieved: <input type=\"checkbox\" name=\"gotrepay\" value=\"y\" ".(($row['gotrepay'] == 1) ? "checked=\"checked\"" : "")."/></div>";
@@ -102,6 +104,7 @@ function budget_delform($id) {
 	$html .= "<div class=\"frmele\">Category: <input type=\"text\" size=\"35\" name=\"categorynew\" value=\"{$row['category']}\" disabled=\"disabled\" /></div>\n";
 	$html .= "<div class=\"frmele\">Description: <input type=\"text\" size=\"35\" name=\"dscr\" value=\"{$row['dscr']}\" disabled=\"disabled\" /></div>\n";
 	$html .= "<div class=\"frmele\">Price: $<input type=\"text\" size=\"34\" name=\"price\" value=\"{$row['price']}\" disabled=\"disabled\" /></div>\n";
+	$html .= "<div class=\"frmele\">Tax: $<input type=\"text\" size=\"34\" name=\"tax\" value=\"{$row['tax']}\" disabled=\"disabled\" /></div>\n";
         $html .= "<div class=\"frmele\">Pending Payment: <input type=\"checkbox\" name=\"pending\" value=\"y\" ".(($row['pending'] == 1) ? "checked=\"checked\"" : "")." disabled=\"disabled\"/></div>";
         $html .= "<div class=\"frmele\">Reimbursable Charge: <input type=\"checkbox\" name=\"needrepay\" value=\"y\" ".(($row['needrepay'] == 1) ? "checked=\"checked\"" : "")." disabled=\"disabled\"/></div>";
         $html .= "<div class=\"frmele\">Reimbursment Recieved: <input type=\"checkbox\" name=\"gotrepay\" value=\"y\" ".(($row['gotrepay'] == 1) ? "checked=\"checked\"" : "")." disabled=\"disabled\"/></div>";
@@ -112,7 +115,8 @@ function budget_delform($id) {
 
 function budget_add() {
 	GLOBAL $db, $MYSQL_PREFIX;
-	$sql  = "INSERT INTO {$MYSQL_PREFIX}budget ( showid, price, vendor, category, dscr, date, pending, needrepay, gotrepay ) VALUES ( {$_REQUEST['showid']} , '{$_REQUEST['price']}' , ";
+	$taxxed = ( $_REQUEST['tax'] > 0 ) ? $_REQUEST['tax'] : 0;
+	$sql  = "INSERT INTO {$MYSQL_PREFIX}budget ( showid, price, tax, vendor, category, dscr, date, pending, needrepay, gotrepay ) VALUES ( {$_REQUEST['showid']} , '{$_REQUEST['price']}' , '{$taxxed}' , ";
         if ( ($_REQUEST['vendor'] == "--NEW--") && !($_REQUEST['vendornew'] == "") ) {
 		$sql .= "'{$_REQUEST['vendornew']}' , ";
 	} else { $sql .= "'{$_REQUEST['vendor']}' , "; }
@@ -126,7 +130,7 @@ function budget_add() {
 
 function budget_edit_do($id) {
 	GLOBAL $db, $MYSQL_PREFIX;
-	$sql  = "UPDATE {$MYSQL_PREFIX}budget SET price = '{$_REQUEST['price']}' , vendor = ";
+	$sql  = "UPDATE {$MYSQL_PREFIX}budget SET price = '{$_REQUEST['price']}' , tax = '{$_REQUEST['tax']}' , vendor = ";
         if ( ($_REQUEST['vendor'] == "--NEW--") && !($_REQUEST['vendornew'] == "") ) {
                 $sql .= "'{$_REQUEST['vendornew']}' , ";
         } else { $sql .= "'{$_REQUEST['vendor']}' , "; }
@@ -200,14 +204,14 @@ function budget_view($showid, $onlytype) {
         $html .= "</ul></p>\n";
 
 	$sql = "SELECT * FROM {$MYSQL_PREFIX}budget WHERE showid = {$showid}{$sqlwhere} ORDER BY category ASC, date ASC, vendor ASC";
-	$result = mysql_query($sql, $db); $intr = 0; $tot = 0;
+	$result = mysql_query($sql, $db); $intr = 0; $tot = 0; $tottax = 0;
         if ( mysql_num_rows($result) < 1 ) { return $html; }
         if ( $onlytype == 0 ) {
         	$html .= "<h2>Materials Expenses</h2><br />";
                 $html .= "<div style=\"float: right\">[<a href=\"{$TDTRAC_SITE}email-budget&id={$row['showid']}\">E-Mail To Self</a>]</div>\n";
         }
         $html .= "<table id=\"budget\">\n";
-	$html .= "<tr><th>Date</th><th>Vendor</th><th>Category</th><th>Description</th><th>Price</th>";
+	$html .= "<tr><th>Date</th><th>Vendor</th><th>Category</th><th>Description</th><th>Price</th><th>Tax</th>";
 	$html .= "<th>Pending</th><th>Reimpurse</th>\n";
 	$html .= $editbudget ? "<th>Edit</th>" : "";
 	$html .= $editbudget ? "<th>Del</th>" : "";
@@ -215,22 +219,24 @@ function budget_view($showid, $onlytype) {
 	$last = "";
 	while ( $row = mysql_fetch_array($result) ) {
 		if ( $last != "" && $last != $row['category'] ) {
-			$html .= "<tr style=\"background-color: #DDCCDD\"><td></td><td></td><td>{$last}</td><td style=\"text-align: center\">-=- SUB-TOTAL -=-</td><td style=\"text-align: right\">$" . number_format($subtot, 2) . "</td></tr>\n"; $subtot = 0;
+			$html .= "<tr style=\"background-color: #DDCCDD\"><td></td><td></td><td>{$last}</td><td style=\"text-align: center\">-=- SUB-TOTAL -=-</td><td style=\"text-align: right\">$" . number_format($subtot, 2) . "</td><td style=\"text-align: right\">$".number_format($subtax,2)."</td></tr>\n"; $subtot = 0; $subtax = 0;
 		} 
 		$intr++;
 		$html .= "<tr".((($intr % 2) == 0 ) ? " class=\"odd\"" : "")."><td>{$row['date']}</td><td>{$row['vendor']}</td><td>{$row['category']}</td><td>{$row['dscr']}</td><td style=\"text-align: right\">$";
+                $tottax += $row['tax']; $subtax += $row['tax'];
                 $tot += $row['price']; $subtot += $row['price'];
 		$html .= number_format($row['price'], 2);
-		$html .= "</td>";
-                $html .= "<td style=\"text-align: center\">" . (($row['pending'] == 1) ? "YES" : "NO") . "</td>";
+		$html .= "</td><td style=\"text-align: right\">$";
+                $html .= number_format($row['tax'], 2);
+                $html .= "</td><td style=\"text-align: center\">" . (($row['pending'] == 1) ? "YES" : "NO") . "</td>";
                 $html .= "<td style=\"text-align: center\">" . (($row['needrepay'] == 1) ? (($row['gotrepay'] == 1) ? "PAID" : "UNPAID") : "N/A") . "</td>";
 		$html .= $editbudget ? "<td style=\"text-align: center\"><a href=\"{$TDTRAC_SITE}edit-budget&id={$row['id']}\">[-]</a></td>" : "";
 		$html .= $editbudget ? "<td style=\"text-align: center\"><a href=\"{$TDTRAC_SITE}del-budget&id={$row['id']}\">[x]</a></td>" : "";
 		$html .= "</tr>\n";
 		$last = $row['category'];
 	}
-	$html .= "<tr style=\"background-color: #DDCCDD\"><td></td><td></td><td>{$last}</td><td style=\"text-align: center\">-=- SUB-TOTAL -=-</td><td style=\"text-align: right\">$" . number_format($subtot, 2) . "</td></tr>\n";
-	$html .= "<tr style=\"background-color: #FFCCFF\"><td></td><td></td><td></td><td style=\"text-align: center\">-=- TOTAL -=-</td><td style=\"text-align: right\">$" . number_format($tot, 2) . "</td></tr>\n";
+	$html .= "<tr style=\"background-color: #DDCCDD\"><td></td><td></td><td>{$last}</td><td style=\"text-align: center\">-=- SUB-TOTAL -=-</td><td style=\"text-align: right\">$" . number_format($subtot, 2) . "</td><td style=\"text-align: right\">$".number_format($subtax,2)."</td></tr>\n";
+	$html .= "<tr style=\"background-color: #FFCCFF\"><td></td><td></td><td></td><td style=\"text-align: center\">-=- TOTAL -=-</td><td style=\"text-align: right\">$" . number_format($tot, 2) . "</td><td style=\"text-align: right\">$".number_format($tottax,2)."</td></tr>\n";
 	$html .= "</table>\n";
         if ( $onlytype > 0 ) { return $html; }
 	$html .= "<h2>Payroll Expenses</h2><table id=\"budget\">\n";
