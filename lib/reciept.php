@@ -19,6 +19,7 @@ function rcpt_check() {
 		$result = mysql_query($sql, $db);
 		if ( mysql_num_rows($result) > 0 ) {
 			$num = mysql_fetch_array($result);
+			if ( $num['num'] < 1 ) { return ""; }
 			$html .= "You have {$num['num']} Unhandled Reciepts Waiting (<a href=\"{$TDTRAC_SITE}rcpt\">[-View-]</a>)";
 		}
 		$html .= "</span></div>\n";
