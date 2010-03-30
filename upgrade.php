@@ -77,15 +77,15 @@ $V125ADDS = array(
   "INSERT INTO `{$MYSQL_PREFIX}msg` (`toid`, `fromid`, `body`) VALUES ('1', '1', 'Updated to v1.2.5 :: Added Tax Tracking')"
 );
 $V126ADDS = array(
-  "CREATE TABLE IF NOT EXISTS {$MYSQL_PREFIX}rcpts` (
-  `imgid` MEDIUMINT UNSIGNED NOT NULL AUTO_INCREMENT ,
-  `type` VARCHAR( 100 ) NOT NULL ,
-  `name` VARCHAR( 25 ) NOT NULL ,
-  `data` MEDIUMBLOB NOT NULL,
-  `added` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `handled` TINYINT UNSIGNED NOT NULL DEFAULT  '0',
-  PRIMARY KEY  (`imgid`)
-  ) ENGINE = MYISAM ;",
+  "CREATE TABLE IF NOT EXISTS `{$MYSQL_PREFIX}rcpts` (
+    `imgid` mediumint(8) unsigned NOT NULL AUTO_INCREMENT,
+    `type` varchar(100) NOT NULL,
+    `name` varchar(25) NOT NULL,
+    `data` mediumblob NOT NULL,
+    `added` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `handled` tinyint(3) unsigned NOT NULL DEFAULT '0',
+    PRIMARY KEY (`imgid`)
+  ) ENGINE=MyISAM  DEFAULT CHARSET=latin1;",
   "ALTER TABLE `{$MYSQL_PREFIX}budget` ADD  `imgid` MEDIUMINT UNSIGNED NOT NULL DEFAULT '0'",
   "INSERT INTO `{$MYSQL_PREFIX}tdtrac` (`name`, `value`) VALUES ( 'version', '1.2.6' )",
   "INSERT INTO `{$MYSQL_PREFIX}msg` (`toid`, `fromid`, `body`) VALUES ('1', '1', 'Updated to v1.2.6 :: Added Reciept by E-Mail Tracking')"
