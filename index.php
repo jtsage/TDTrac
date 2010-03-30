@@ -39,6 +39,12 @@ switch ($page_title) {
 }
 if ( $login[0] ) {
   switch($page_title) {
+    case "rcpt":
+	if ( perms_checkperm($user_name, 'addbudget') ) {
+		if ($_SERVER['REQUEST_METHOD'] == "POST") { rcpt_add_do(); }
+		else { echo rcpt_view(); }
+	} else { echo perms_no(); }
+	break;
     case "add-show":
 	if ( perms_checkperm($user_name, 'addshow') ) {
 		if ($_SERVER['REQUEST_METHOD'] == "POST") { show_add_do(); }
