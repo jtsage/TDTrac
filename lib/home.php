@@ -3,6 +3,7 @@ function display_home($username) {
         GLOBAL $TDTRAC_SITE;
 	$html  = "";
 	$html .= msg_check();
+	$html .= rcpt_check();
 	$html .= "<h2>Payroll Tracking</h2><p><ul>\n";
 	$html .= ( perms_checkperm($username, 'addhours') ) ? "<li><a href=\"{$TDTRAC_SITE}add-hours\">Add Hours Worked</a></li>\n" : "";
 	$html .= ( perms_checkperm($username, 'viewhours') ) ? "<li><a href=\"{$TDTRAC_SITE}view-hours\">View Hours Worked</a></li>\n" : "";
