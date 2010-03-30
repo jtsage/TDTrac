@@ -14,6 +14,7 @@ $sql_budget .= "  `pending` tinyint(4) unsigned NOT NULL default '0',";
 $sql_budget .= "  `needrepay` tinyint(4) unsigned NOT NULL default '0',";
 $sql_budget .= "  `gotrepay` tinyint(4) unsigned NOT NULL default '0',";
 $sql_budget .= "  `tax` float NOT NULL default '0',";
+$sql_budget .= "  `imgid` MEDIUMINT UNSIGNED NOT NULL DEFAULT '0',";
 $sql_budget .= "  PRIMARY KEY  (`id`),";
 $sql_budget .= "  KEY `showid` (`showid`,`vendor`)";
 $sql_budget .= ") ENGINE=MyISAM  DEFAULT CHARSET=latin1;";
@@ -134,7 +135,18 @@ $sql_tdtrac =    "CREATE TABLE IF NOT EXISTS `{$MYSQL_PREFIX}tdtrac` (
 
 $tdtrac_result = mysql_query($sql_tdtrac, $db);
 
-$ins_tdtrac = "INSERT INTO `{$MYSQL_PREFIX}tdtrac` (`name`, `value`) VALUES ( 'version', '1.1.0' ), ( 'version', '1.2.0'), ( 'version', '1.2.1'), ( 'version', '1.2.2'), ( 'version', '1.2.4'), ( 'version', '1.2.5')";
+$sql_rcpts = "CREATE TABLE IF NOT EXISTS {$MYSQL_PREFIX}rcpts` (
+  `imgid` MEDIUMINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY ,
+  `type` VARCHAR( 100 ) NOT NULL ,
+  `name` VARCHAR( 25 ) NOT NULL ,
+  `data` MEDIUMBLOB NOT NULL,
+  `added` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `handled` TINYINT UNSIGNED NOT NULL DEFAULT  '0'
+  ) ENGINE = MYISAM ;";
+
+$rcpts_result = mysql_query($sql_rcpts, $db);
+
+$ins_tdtrac = "INSERT INTO `{$MYSQL_PREFIX}tdtrac` (`name`, `value`) VALUES ( 'version', '1.1.0' ), ( 'version', '1.2.0'), ( 'version', '1.2.1'), ( 'version', '1.2.2'), ( 'version', '1.2.4'), ( 'version', '1.2.5'), ( 'version', '1.2.6')";
 
 $tdtracins_result = mysql_query($ins_tdtrac, $db);
 
