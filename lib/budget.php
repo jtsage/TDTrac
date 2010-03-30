@@ -220,6 +220,7 @@ function budget_view($showid, $onlytype) {
         $html .= "<table id=\"budget\">\n";
 	$html .= "<tr><th>Date</th><th>Vendor</th><th>Category</th><th>Description</th><th>Price</th><th>Tax</th>";
 	$html .= "<th>Pending</th><th>Reimpurse</th>\n";
+	$html .= "<th>Reciept</th>";
 	$html .= $editbudget ? "<th>Edit</th>" : "";
 	$html .= $editbudget ? "<th>Del</th>" : "";
         $html .= "</tr>\n";
@@ -237,6 +238,7 @@ function budget_view($showid, $onlytype) {
                 $html .= number_format($row['tax'], 2);
                 $html .= "</td><td style=\"text-align: center\">" . (($row['pending'] == 1) ? "YES" : "NO") . "</td>";
                 $html .= "<td style=\"text-align: center\">" . (($row['needrepay'] == 1) ? (($row['gotrepay'] == 1) ? "PAID" : "UNPAID") : "N/A") . "</td>";
+		$html .= ( $row['imgid'] > 0 ) ? "<td style=\"text-align: center\"><a href=\"/rcpt.php?imgid={$row['imgid']}&hires\" target=\"_blank\">[^]</a></td>" : "<td style=\"text-align: center; font-size: .7em;\">none</td>";
 		$html .= $editbudget ? "<td style=\"text-align: center\"><a href=\"{$TDTRAC_SITE}edit-budget&id={$row['id']}\">[-]</a></td>" : "";
 		$html .= $editbudget ? "<td style=\"text-align: center\"><a href=\"{$TDTRAC_SITE}del-budget&id={$row['id']}\">[x]</a></td>" : "";
 		$html .= "</tr>\n";
