@@ -26,8 +26,8 @@ if ( !$login[0] ) { // Not Logged In
 			$input_width = imagesx($image_sql);
 			$input_height = imagesy($image_sql);
 			
-			$display_factor = ( $image_width > $image_height ) ? $image_width / 400 : $image_height / 400;
-			$save_factor = ( $image_width > $image_height ) ? $image_width / 900 : $image_height / 900;
+			$display_factor = ( $image_width > $image_height ) ? $input_width / 400 : $input_height / 400;
+			$save_factor = ( $image_width > $image_height ) ? $input_width / 900 : $input_height / 900;
 			
 			$display_width = $input_width / $display_factor;
 			$display_height = $input_height / $display_factor;
@@ -52,7 +52,43 @@ if ( !$login[0] ) { // Not Logged In
 				} else { $option_rotate = false; }
 			}
 			
+			if ( !$option_hires ) {
+				$image_scaled = imagecreatetruecolor($display_width, $display_height);
 			
+				$worked = imagecopyresampled($image_scaled, $image_sql, 0, 0, 0, 0, $display_width, $display_height, $input_width, $input_height);
+			
+				if ( $option_save ) {
+					$save_scaled = imagecreatetruecolor($save_width, $save_height);
+					$worked = imagecopyresampled($save_scaled, $image_sql, 0, 0, 0, 0, $save_width, $save_height, $input_width, $input_height);
+				}
+			
+				if ( $option_rotate ) {
+					$image_display = rotateImage($image_scaled, $option_deg);
+					if ( $option_save ) { $save_finished = rotateImage($save_scaled, $option_deg); }
+				} else {
+					$image_display = $image_scaled;
+					if ( $option_save ) { $save_finished = $save_scaled; }
+				}
+			}
+			
+			if ( $option_save) {
+				ob_clean();
+				imagejpeg($save_finished, null, 85);
+				$imageblob = ob_get_contents();
+			
+				$sql = "UPDATE {$MYSQL_PREFIX}rcpts SET data = '" . mysql_real_escape_string($imageblob) . "' WHERE imgid = {$_REQUEST['imgid']}";
+				$result = mysql_query($sql, $db);
+			}
+			
+			ob_clean();
+			imagejpeg($image_display, null, 85);
+			$imagedatasize = ob_get_length();
+			$imagedata = ob_get_contents();
+			
+			header("Content-Type: image/jpeg");
+			header("Content-Length: {$imagedatasize}");
+			header("Content-Disposition: inline; filename=rcpt-{$_REQUEST['imgid']}.jpg");
+			echo $imagedata;
 			
 		} else { // Bad Image, show 404
 			$quickdrop = fopen("./images/rcpt-404.jpg", 'rb');
@@ -71,6 +107,31 @@ if ( !$login[0] ) { // Not Logged In
 		header("Content-Disposition: inline; filename=error.jpg");
 		fpassthru($quickdrop);
 	}
+}
+
+function rotateImage($img, $rotation) {
+  $width = imagesx($img);
+  $height = imagesy($img);
+  switch($rotation) {
+    case 90: $newimg= @imagecreatetruecolor($height , $width );break;
+    case 180: $newimg= @imagecreatetruecolor($width , $height );break;
+    case 270: $newimg= @imagecreatetruecolor($height , $width );break;
+    case 0: return $img;break;
+    case 360: return $img;break;
+  }
+  if($newimg) { 
+    for($i = 0;$i < $width ; $i++) { 
+      for($j = 0;$j < $height ; $j++) {
+        $reference = imagecolorat($img,$i,$j);
+        switch($rotation) {
+          case 90: if(!@imagesetpixel($newimg, ($height - 1) - $j, $i, $reference )){return false;}break;
+          case 180: if(!@imagesetpixel($newimg, $width - $i, ($height - 1) - $j, $reference )){return false;}break;
+          case 270: if(!@imagesetpixel($newimg, $j, $width - $i, $reference )){return false;}break;
+        }
+      } 
+    } return $newimg; 
+  } 
+  return false;
 }
 
 
