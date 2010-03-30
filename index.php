@@ -41,7 +41,7 @@ if ( $login[0] ) {
   switch($page_title) {
     case "rcpt":
 	if ( perms_checkperm($user_name, 'addbudget') ) {
-		if ($_SERVER['REQUEST_METHOD'] == "POST") { rcpt_add_do(); }
+		if ($_SERVER['REQUEST_METHOD'] == "POST") { rcpt_do(); }
 		else { echo rcpt_view(); }
 	} else { echo perms_no(); }
 	break;
