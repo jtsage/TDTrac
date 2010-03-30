@@ -18,15 +18,31 @@ function rcpt_check() {
 	}
 }
 
+function rcpt_nuke() {
+	GLOBAL $db, $MYSQL_PREFIX;
+	if ( isset($_REQUEST['imgid']) && is_numeric($_REQUEST['imgid']) ) {
+		$sql = "DELETE FROM {$MYSQL_PREFIX}rcpts WHERE imgid = {$_REQUEST['imgid']}";
+		$result = mysql_query($sql, $db);
+		thrower("Reciept Image Deleted");
+	} else {
+		thrower("Invalid Reciept Image");
+	}
+}
+
 function rcpt_view() {
 	GLOBAL $db, $MYSQL_PREFIX, $user_name, $TDTRAC_SITE;
 	$html = "";
 	$html .= "<div id=\"rcptbox\">";
+	$sql = "SELECT count(imgid) as num FROM {$MYSQL_PREFIX}rcpts WHERE handled = 0";
+	$result = mysql_query($sql, $db);
+	$line = mysql_fetch_array($result);
+	$total = $line['num'];
 	if ( isset($_REQUEST['num']) ) {
 		$sql = "SELECT imgid, added FROM {$MYSQL_PREFIX}rcpts WHERE handled = 0 ORDER BY added ASC LIMIT {$_REQUEST['num']},1"; $thisnum = $_REQUEST['num'] + 1;
 	} else {
 		$sql = "SELECT imgid, added FROM {$MYSQL_PREFIX}rcpts WHERE handled = 0 ORDER BY added ASC LIMIT 1;"; $thisnum = 1;
 	}
+	$html .= "<span id=\"rcptnum\">Reciept No. <strong>{$thisnum}</strong> of <strong>{$total}</strong></span><br />";
 	$result = mysql_query($sql, $db);
 	$line = mysql_fetch_array($result);
 	$html .= "<img id=\"rcptimg\" name=\"rcptimg\" src=\"rcpt.php?imgid={$line['imgid']}\"><br><span id=\"rcptdate\"><strong>Added:</strong>{$line['added']}</span>";
@@ -38,6 +54,7 @@ function rcpt_view() {
 	$html .= "<a title=\"Rotate Original 90deg Clockwise\" href=\"javascript:document['rcptimg'].src='rcpt.php?imgid={$line['imgid']}&rotate=90';document.links['rcptsave'].href='rcpt.php?imgid={$line['imgid']}&rotate=90&save';return true;\"><img src=\"images/rcpt-cw.jpg\"></a>";
 	$html .= "<br />[-<a title=\"Delete This Reciept\" href=\"/rcpt-delete&imgid={$line['imgid']}\">Nuke</a>-] [-<a title=\"Skip this Reciept for Now\" href=\"/rcpt&num={$thisnum}\">Skip</a>-]";
 	$html .= "</div></div>";
+	$html .= budget_addform($line['imgid']);
 	return $html;
 }
 
