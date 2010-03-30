@@ -1,6 +1,6 @@
 <?php
 GLOBAL $MYSQL_PREFIX, $db;
-
+//This is version 1.2.5
 
 $sql_budget  = "CREATE TABLE IF NOT EXISTS `{$MYSQL_PREFIX}budget` (";
 $sql_budget .= "  `id` int(10) unsigned NOT NULL auto_increment,";
@@ -13,6 +13,8 @@ $sql_budget .= "  `date` date NOT NULL,";
 $sql_budget .= "  `pending` tinyint(4) unsigned NOT NULL default '0',";
 $sql_budget .= "  `needrepay` tinyint(4) unsigned NOT NULL default '0',";
 $sql_budget .= "  `gotrepay` tinyint(4) unsigned NOT NULL default '0',";
+$sql_budget .= "  `tax` float NOT NULL default '0',";
+$sql_budget .= "  `imgid` MEDIUMINT UNSIGNED NOT NULL DEFAULT '0',";
 $sql_budget .= "  PRIMARY KEY  (`id`),";
 $sql_budget .= "  KEY `showid` (`showid`,`vendor`)";
 $sql_budget .= ") ENGINE=MyISAM  DEFAULT CHARSET=latin1;";
@@ -63,6 +65,7 @@ $sql_shows .= "  `company` varchar(35) NOT NULL,";
 $sql_shows .= "  `venue` varchar(35) default NULL,";
 $sql_shows .= "  `dates` text,";
 $sql_shows .= "  `created` timestamp NOT NULL default CURRENT_TIMESTAMP,";
+$sql_shows .= "   closed tinyint(4) unsigned NOT NULL DEFAULT '0',";
 $sql_shows .= "  PRIMARY KEY  (`showid`),";
 $sql_shows .= "  KEY `showname` (`showname`)";
 $sql_shows .= ") ENGINE=MyISAM  DEFAULT CHARSET=latin1;";
@@ -96,9 +99,9 @@ $sql_users .= "  `active` tinyint(4) unsigned NOT NULL default '1',";
 $sql_users .= "  `chpass` tinyint(4) unsigned NOT NULL default '1',";
 $sql_users .= "  `payroll` tinyint(4) unsigned NOT NULL default '1',";
 $sql_users .= "  `payrate` double NULL ,";
-$sql_users .= "  `notify` tinyint(4) NOT NULL default '0',"
-$sql_users .= "  `limithours` tinyint(4) NOT NULL default '0',"
-$sql_users .= "  `lastlogin` timestamp,"
+$sql_users .= "  `notify` tinyint(4) NOT NULL default '0',";
+$sql_users .= "  `limithours` tinyint(4) NOT NULL default '0',";
+$sql_users .= "  `lastlogin` timestamp,";
 $sql_users .= "  PRIMARY KEY  (`userid`),";
 $sql_users .= "  KEY `username` (`username`)";
 $sql_users .= ") ENGINE=MyISAM  DEFAULT CHARSET=latin1 COMMENT='Program User Table' AUTO_INCREMENT=3 ;";
@@ -132,7 +135,18 @@ $sql_tdtrac =    "CREATE TABLE IF NOT EXISTS `{$MYSQL_PREFIX}tdtrac` (
 
 $tdtrac_result = mysql_query($sql_tdtrac, $db);
 
-$ins_tdtrac = "INSERT INTO `{$MYSQL_PREFIX}tdtrac` (`name`, `value`) VALUES ( 'version', '1.1.0' ), ( 'version', '1.2.0'), ( 'version', '1.2.1'), ( 'version', '1.2.2')";
+$sql_rcpts = "CREATE TABLE IF NOT EXISTS {$MYSQL_PREFIX}rcpts` (
+  `imgid` MEDIUMINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY ,
+  `type` VARCHAR( 100 ) NOT NULL ,
+  `name` VARCHAR( 25 ) NOT NULL ,
+  `data` MEDIUMBLOB NOT NULL,
+  `added` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `handled` TINYINT UNSIGNED NOT NULL DEFAULT  '0'
+  ) ENGINE = MYISAM ;";
+
+$rcpts_result = mysql_query($sql_rcpts, $db);
+
+$ins_tdtrac = "INSERT INTO `{$MYSQL_PREFIX}tdtrac` (`name`, `value`) VALUES ( 'version', '1.1.0' ), ( 'version', '1.2.0'), ( 'version', '1.2.1'), ( 'version', '1.2.2'), ( 'version', '1.2.4'), ( 'version', '1.2.5'), ( 'version', '1.2.6')";
 
 $tdtracins_result = mysql_query($ins_tdtrac, $db);
 
