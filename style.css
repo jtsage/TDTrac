@@ -196,3 +196,8 @@ tr.dates td {
 tr.dates a { 
 	color: #333333;
 }
+
+#rcptbox {
+	text-align: center;
+	float: left;
+}
