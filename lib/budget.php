@@ -1,5 +1,5 @@
 <?php
-function budget_addform() {
+function budget_addform($rcpt = 0) {
 	GLOBAL $db, $MYSQL_PREFIX, $TDTRAC_SITE;
 	$html  = "<h2>Add Budget Expense</h2>\n";
 	$html .= "<div id=\"genform\"><form method=\"post\" action=\"{$TDTRAC_SITE}add-budget\" name=\"form1\">\n";
@@ -40,18 +40,20 @@ function budget_addform() {
         $html .= "<div class=\"frmele\">Pending Payment: <input type=\"checkbox\" name=\"pending\" value=\"y\"/></div>";
         $html .= "<div class=\"frmele\">Reimbursable Charge: <input type=\"checkbox\" name=\"needrepay\" value=\"y\"/></div>";
         $html .= "<div class=\"frmele\">Reimbursment Recieved: <input type=\"checkbox\" name=\"gotrepay\" value=\"y\"/></div>";
-	$html .= "<div class=\"frmele\"><input type=\"submit\" value=\"Add Expense\" /></div></form></div>\n";
+	$html .= "<div class=\"frmele\"><input type=\"hidden\" name=\"rcptid\" value=\"{$rcpt}\" /><input type=\"submit\" value=\"Add Expense\" /></div></form></div>\n";
 	return $html;
 }
 
 function budget_editform($id) {
 	GLOBAL $db, $MYSQL_PREFIX, $TDTRAC_SITE;
 	$html  = "<h2>Edit Budget Expense</h2>\n";
-	$html .= "<div id=\"genform\"><form method=\"post\" action=\"{$TDTRAC_SITE}edit-budget\" name=\"form1\">\n";
-	$html .= "<div class=\"frmele\">Show: <select tabindex=\"1\" style=\"width: 25em;\" name=\"showid\">\n";
 	$sql = "SELECT showname, {$MYSQL_PREFIX}budget.* FROM {$MYSQL_PREFIX}shows, {$MYSQL_PREFIX}budget WHERE {$MYSQL_PREFIX}budget.id = {$id} AND {$MYSQL_PREFIX}budget.showid = {$MYSQL_PREFIX}shows.showid LIMIT 1;";
 	$result = mysql_query($sql, $db);
 	$row = mysql_fetch_array($result);
+	if ( $row['imgid'] > 0 ) {
+		$html .= "<div id=\"rcptbox\"><br /><br /><a href=\"rcpt.php?imgid={$row['imgid']}&hires\" title=\"Zoom In (new window)\" target=\"_blank\"><img src=\"rcpt.php?imgid={$row['imgid']}\" /></a></div>\n"; }
+	$html .= "<div id=\"genform\"><form method=\"post\" action=\"{$TDTRAC_SITE}edit-budget\" name=\"form1\">\n";
+	$html .= "<div class=\"frmele\">Show: <select tabindex=\"1\" style=\"width: 25em;\" name=\"showid\">\n";
 	$html .= "<option value=\"{$row['showid']}\">{$row['showname']}</option>\n";
 	$html .= "</select></div>";
 	$html .= "<div class=\"frmele\">Date: <input type=\"text\" size=\"18\" name=\"date\" id=\"date\" style=\"margin-right: 2px\" value=\"{$row['date']}\" />\n";
@@ -116,7 +118,8 @@ function budget_delform($id) {
 function budget_add() {
 	GLOBAL $db, $MYSQL_PREFIX;
 	$taxxed = ( $_REQUEST['tax'] > 0 ) ? $_REQUEST['tax'] : 0;
-	$sql  = "INSERT INTO {$MYSQL_PREFIX}budget ( showid, price, tax, vendor, category, dscr, date, pending, needrepay, gotrepay ) VALUES ( {$_REQUEST['showid']} , '{$_REQUEST['price']}' , '{$taxxed}' , ";
+	$rcptid = ( $_REQUEST['rcptid'] > 0 ) ? $_REQUEST['rcptid'] : 0;
+	$sql  = "INSERT INTO {$MYSQL_PREFIX}budget ( showid, price, tax, imgid, vendor, category, dscr, date, pending, needrepay, gotrepay ) VALUES ( {$_REQUEST['showid']} , '{$_REQUEST['price']}' , '{$taxxed}' , '{$rcptid}' , ";
         if ( ($_REQUEST['vendor'] == "--NEW--") && !($_REQUEST['vendornew'] == "") ) {
 		$sql .= "'{$_REQUEST['vendornew']}' , ";
 	} else { $sql .= "'{$_REQUEST['vendor']}' , "; }
@@ -125,6 +128,10 @@ function budget_add() {
         } else { $sql .= "'{$_REQUEST['category']}' , "; }
 	$sql .= "'{$_REQUEST['dscr']}' , '{$_REQUEST['date']}' , ".(($_REQUEST['pending'] == "y") ? "1" : "0")." , ".(($_REQUEST['needrepay'] == "y") ? "1" : "0")." , ".(($_REQUEST['gotrepay'] == "y") ? "1" : "0")." )";
 	$result = mysql_query($sql, $db);
+	if ( $rcptid > 0 ) {
+		$sql = "UPDATE {$MYSQL_PREFIX}rcpts SET handled = '1' WHERE imgid = '{$rcptid}'";
+		$result = mysql_query($sql, $db);
+	}
 	thrower("Expense Added");
 }
 

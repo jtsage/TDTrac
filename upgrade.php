@@ -2,7 +2,7 @@
 ob_start(); session_start(); 
 
 ## PROGRAM DETAILS. DO NOT EDIT UNLESS YOU KNOW WHAT YOU ARE DOING
-$TDTRAC_VERSION = "1.2.5";
+$TDTRAC_VERSION = "1.2.6";
 $TDTRAC_PERMS = array("addshow", "editshow", "viewshow", "addbudget", "editbudget", "viewbudget", "addhours", "edithours", "viewhours", "adduser");
 $INSTALL_FILES = array(
 	"index.php",
@@ -30,7 +30,8 @@ $INSTALL_TABLES = array(
 	"msg",
 	"permissions",
 	"shows",
-	"usergroups");
+	"usergroups",
+	"rcpts");
 	
 
 require_once("config.php");
@@ -74,6 +75,20 @@ $V125ADDS = array(
   "ALTER TABLE `{$MYSQL_PREFIX}budget` ADD tax float NOT NULL DEFAULT '0'",
   "INSERT INTO `{$MYSQL_PREFIX}tdtrac` (`name`, `value`) VALUES ( 'version', '1.2.5' )",
   "INSERT INTO `{$MYSQL_PREFIX}msg` (`toid`, `fromid`, `body`) VALUES ('1', '1', 'Updated to v1.2.5 :: Added Tax Tracking')"
+);
+$V126ADDS = array(
+  "CREATE TABLE IF NOT EXISTS {$MYSQL_PREFIX}rcpts` (
+  `imgid` MEDIUMINT UNSIGNED NOT NULL AUTO_INCREMENT ,
+  `type` VARCHAR( 100 ) NOT NULL ,
+  `name` VARCHAR( 25 ) NOT NULL ,
+  `data` MEDIUMBLOB NOT NULL,
+  `added` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `handled` TINYINT UNSIGNED NOT NULL DEFAULT  '0',
+  PRIMARY KEY  (`imgid`)
+  ) ENGINE = MYISAM ;",
+  "ALTER TABLE `{$MYSQL_PREFIX}budget` ADD  `imgid` MEDIUMINT UNSIGNED NOT NULL DEFAULT '0'",
+  "INSERT INTO `{$MYSQL_PREFIX}tdtrac` (`name`, `value`) VALUES ( 'version', '1.2.6' )",
+  "INSERT INTO `{$MYSQL_PREFIX}msg` (`toid`, `fromid`, `body`) VALUES ('1', '1', 'Updated to v1.2.6 :: Added Reciept by E-Mail Tracking')"
 );
   
 
@@ -166,7 +181,7 @@ switch ($page_title) {
 		$didinstall = 1;
 	}
 	else { // POST 1.1.0 UPGRADE
-		$found120 = 0; $found121 = 0; $found122 = 0; $found124 = 0; $found125 = 0;
+		$found120 = 0; $found121 = 0; $found122 = 0; $found124 = 0; $found125 = 0; $found126 = 0;
 		$sql = "SELECT name, value FROM `{$MYSQL_PREFIX}tdtrac` WHERE name = 'version' ORDER BY id DESC";
 		$result = mysql_query($sql,$db);
 		while ( $verline = mysql_fetch_array($result) ) {
@@ -175,6 +190,7 @@ switch ($page_title) {
 			if ( $verline['value'] == "1.2.2" ) { $found122 = 1; $found121 = 1; $found120 = 1;}
 			if ( $verline['value'] == "1.2.4" ) { $found124 = 1; $found122 = 1; $found121 = 1; $found120 = 1; }
 			if ( $verline['value'] == "1.2.5" ) { $found125 = 1; $found124 = 1; $found122 = 1; $found121 = 1; $found120 = 1; }
+			if ( $verline['value'] == "1.2.6" ) { $found125 = 1; $found124 = 1; $found122 = 1; $found121 = 1; $found120 = 1; $found126 = 1;}
 		} 
 		if ( !$found120 ) { // 1.2.0 UPGRADE
 			foreach ( $V120ADDS as $thissql ) { $result = mysql_query($thissql, $db); echo mysql_error(); }
@@ -201,6 +217,10 @@ switch ($page_title) {
                         echo "<li style=\"color: green\"><b>UPGRADE::</b> Upgraded to version 1.2.5</li>"; $didinstall = 1;
                 } else { echo "<li style=\"color: green\"><b>VERSION::</b> 1.2.5 confirmed</li>\n"; }
 
+                if ( $found120 && $found121 && $found122 && $found124 && $found125 && !$found126 ) { // 1.2.6 UPGRADE
+                        foreach ( $V126ADDS as $thissql ) { $result = mysql_query($thissql, $db); echo mysql_error(); }
+                        echo "<li style=\"color: green\"><b>UPGRADE::</b> Upgraded to version 1.2.6</li>"; $didinstall = 1;
+                } else { echo "<li style=\"color: green\"><b>VERSION::</b> 1.2.6 confirmed</li>\n"; }
 	}	
 	
 	echo "</ul></li></ul><div style=\"text-align: center\">\n";
