@@ -9,6 +9,7 @@ $helpnode['home'][] = "<ul><li>Track as many show budgets as you wish</li>\n";
 $helpnode['home'][] = "<li>Budgets can be organized by vendor, category, or even amount spent</li>\n";
 $helpnode['home'][] = "<li>Track payment pending budget items - things ordered but not cleared through any account or credit card you use</li>\n";
 $helpnode['home'][] = "<li>Track reimbursable budget items through the reciept of payment from your reimburser</li>\n";
+$helpnode['home'][] = "<li>E-Mail scanned or photographed reciepts to the tracker for safe keeping</li>\n";
 $helpnode['home'][] = "<li>Track as many active or inactive employees as you wish</li>\n";
 $helpnode['home'][] = "<li>Track which employee hours have been paid and which are outstanding</li>\n";
 $helpnode['home'][] = "<li>Configurable hourly or daily pay rate for budgeting purposes</li>\n";
@@ -159,6 +160,9 @@ $helpnode['view-perms'][] = "<li>NOTE<ul><li>Editing permissions, Adding, and Ed
 
 $helpnode['groups'][] = "<h2>Groups on TDTrac</h2>\n";
 $helpnode['groups'][] = "<p>This page allows the renaming of groups and addition of new groups.  Groups are nothing more than permission sets.  You may have as many groups as you like, and as of version 1.2.1, groups names are largely meaningless, they have no intrinsic permissions.  You cannot rename the admin group, as it is a system group.</p>\n";
+
+$helpnode['rcpt'][] = "<h2>Reciept View</h2>\n";
+$helpnode['rcpt'][] = "<p>This page allows management of e-mailed reciepts.  You may add a new record of the reciept, or associate it with an old menu item.  See the help under the Add Budget Item for a description of all the fields here</p>";
 
 $helpnode['pwremind'][] = "<h2>Password Reminder</h2>\n";
 $helpnode['pwremind'][] = "<p>This will send the login details associated with the entered e-mail address to that e-mail.  If you do not recieve an e-mail, or can't remember your e-mail, please contact your administrator.  If you are the administrator, and this installation is hosted on tdtrac.com, please contact the management via the homepage.</p>\n";

@@ -2,8 +2,8 @@
 ob_start(); session_start(); 
 
 ## PROGRAM DETAILS. DO NOT EDIT UNLESS YOU KNOW WHAT YOU ARE DOING
-$TDTRAC_VERSION = "1.2.5";
-$TDTRAC_DBVER = "1.2.5";
+$TDTRAC_VERSION = "1.2.6";
+$TDTRAC_DBVER = "1.2.6";
 $TDTRAC_PERMS = array("addshow", "editshow", "viewshow", "addbudget", "editbudget", "viewbudget", "addhours", "edithours", "viewhours", "adduser");
 
 require_once("config.php");
@@ -43,6 +43,10 @@ if ( $login[0] ) {
 	if ( perms_checkperm($user_name, 'addbudget') ) {
 		if ($_SERVER['REQUEST_METHOD'] == "POST") { rcpt_add_do(); }
 		else { echo rcpt_view(); }
+	} else { echo perms_no(); }
+	break;
+    case "rcpt-delete":
+	if ( perms_checkperm($user_name, 'addbudget') ) { rcpt_nuke(); 
 	} else { echo perms_no(); }
 	break;
     case "add-show":
