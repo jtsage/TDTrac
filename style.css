@@ -201,3 +201,10 @@ tr.dates a {
 	text-align: center;
 	float: left;
 }
+
+.tdformdrop {
+	width: 25em;
+}
+.tdformdate {
+	margin-right: 2px;
+}
