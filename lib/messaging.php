@@ -1,4 +1,21 @@
 <?php
+/**
+ * TDTrac Messaging Functions
+ * 
+ * Contains all messaging framework
+ * @package tdtrac
+ * @version 1.3.0
+ */
+
+/** 
+ * Check for messages
+ * 
+ * @global resource Database Link
+ * @global string MySQL Table Prefix
+ * @global string User Name
+ * @global string Site Address for links
+ * @return HTML Output
+ */
 function msg_check() {
 	GLOBAL $db, $MYSQL_PREFIX, $user_name, $TDTRAC_SITE;
 	$html  = "";
@@ -19,6 +36,15 @@ function msg_check() {
 	if ( $ret ) { return $html; } else { return ""; }
 }
 
+/** 
+ * View outbox
+ * 
+ * @global resource Database Link
+ * @global string User Name
+ * @global string MySQL Table Prefix
+ * @global string Site Address for links
+ * @return HTML Output
+ */
 function msg_sent_view() {
 	GLOBAL $db, $user_name, $MYSQL_PREFIX, $TDTRAC_SITE;
 	$userid = perms_getidbyname($user_name);
@@ -39,25 +65,42 @@ function msg_sent_view() {
 	return $html;
 }
 
+/** 
+ * View inbox
+ * 
+ * @global resource Database Link
+ * @global string User Name
+ * @global string MySQL Table Prefix
+ * @global string Site Address for links
+ * @return HTML Output
+ */
 function msg_inbox_view() {
-        GLOBAL $db, $user_name, $MYSQL_PREFIX, $TDTRAC_SITE;
-        $userid = perms_getidbyname($user_name);
-        $sql = "SELECT id, fromid, body, DATE_FORMAT(stamp, '%m-%d-%y %h:%i %p') as wtime FROM {$MYSQL_PREFIX}msg WHERE toid = {$userid} ORDER BY stamp DESC";
-        $result = mysql_query($sql, $db);
-        $html  = "<h2>Message Inbox</h2><p>";
+	GLOBAL $db, $user_name, $MYSQL_PREFIX, $TDTRAC_SITE;
+	$userid = perms_getidbyname($user_name);
+	$sql = "SELECT id, fromid, body, DATE_FORMAT(stamp, '%m-%d-%y %h:%i %p') as wtime FROM {$MYSQL_PREFIX}msg WHERE toid = {$userid} ORDER BY stamp DESC";
+	$result = mysql_query($sql, $db);
+	$html  = "<h2>Message Inbox</h2><p>";
 	$html .= "<div style=\"float: right\">[<a href=\"{$TDTRAC_SITE}msg-clean\">Clear Inbox</a>]</div>\n";
-        $html .= "<table id=\"budget\">\n";
-        $html .= "<tr><th>Date</th><th>Sender</th><th>Message</th><th>Delete</th></tr>\n";
-        while ( $row = mysql_fetch_array($result) ) {
-                $html .= "<tr><td>{$row['wtime']}</td><td>";
-                $html .= perms_getfnamebyid($row['fromid']);
-                $html .= "</td><td>{$row['body']}</td>";
-                $html .= "<td align=\"center\"><a href=\"{$TDTRAC_SITE}msg-delete&id={$row['id']}\">[x]</a></td></tr>\n";
-        }
-        $html .= "</table></p>\n";
-        return $html;
+	$html .= "<table id=\"budget\">\n";
+	$html .= "<tr><th>Date</th><th>Sender</th><th>Message</th><th>Delete</th></tr>\n";
+	while ( $row = mysql_fetch_array($result) ) {
+		$html .= "<tr><td>{$row['wtime']}</td><td>";
+		$html .= perms_getfnamebyid($row['fromid']);
+		$html .= "</td><td>{$row['body']}</td>";
+		$html .= "<td align=\"center\"><a href=\"{$TDTRAC_SITE}msg-delete&id={$row['id']}\">[x]</a></td></tr>\n";
+	}
+	$html .= "</table></p>\n";
+	return $html;
 }
 
+/** 
+ * Remove a message form the datebase
+ * 
+ * @global resource Database Link
+ * @global string User Name
+ * @global string MySQL Table Prefix
+ * @param integer Message ID to remove
+ */
 function msg_delete($msgid) {
 	GLOBAL $db, $user_name, $MYSQL_PREFIX;
 	$userid = perms_getidbyname($user_name);
@@ -73,6 +116,13 @@ function msg_delete($msgid) {
 	thrower("Message ID:{$msgid} Removed");
 }
 
+/** 
+ * Clear inbox
+ * 
+ * @global resource Database Link
+ * @global string User Name
+ * @global string MySQL Table Prefix
+ */
 function msg_clear_inbox() {
 	GLOBAL $db, $user_name, $MYSQL_PREFIX;
 	$userid = perms_getidbyname($user_name);
