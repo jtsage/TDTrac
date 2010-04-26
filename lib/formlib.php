@@ -110,6 +110,18 @@ class tdform {
 		return true;
 	}
 	
+	public function addPass($name = 'password', $text = null, $title = null, $preset = null, $enabled = True ) {
+		$this->members[] = array('password', $name, $text, $title, $preset);
+		if ( $title == null ) { $title = $text; }
+		$temp  = "  <div class=\"frmele\" title=\"{$title}\">{$text}: <input tabindex=\"{$this->tabindex}\" type=\"password\" class=\"tdpassword\" size=\"35\" name=\"{$name}\" ";
+		if ( $preset != null ) { $temp .= "value = \"{$preset}\" "; }
+		if ( !$enabled ) { $temp .= "disabled=\"disabled\" "; }
+		$temp .= "/></div>\n";
+		$this->html[] = $temp;
+		$this->tabindex++;
+		return true;
+	}
+	
 	public function addMoney($name = 'money', $text = null, $title = null, $preset = null, $enabled = True) {
 		$this->addText($name, $text, $title, $preset, $enabled, True);
 		return True;

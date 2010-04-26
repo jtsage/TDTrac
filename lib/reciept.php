@@ -1,5 +1,18 @@
 <?php
+/**
+ * TDTrac Reciept Functions
+ * 
+ * Contains all reciept related functions. 
+ * @package tdtrac
+ * @version 1.3.0
+ */
 
+/**
+ * Associate reciept with budget item
+ * 
+ * @global resource Datebase Link
+ * @global string MySQL Table Prefix
+ */
 function rcpt_do() {
 	GLOBAL $db, $MYSQL_PREFIX;
 	$sqla = "UPDATE {$MYSQL_PREFIX}budget SET imgid = {$_REQUEST['imgid']} WHERE id = {$_REQUEST['budid']}";
@@ -9,11 +22,20 @@ function rcpt_do() {
 	thrower("Reciept Associated with Budget Record");
 }
 
+/**
+ * Check for pending reciepts
+ * 
+ * @global resource Database Link
+ * @global string MySQL Table Prefix
+ * @global string User Name
+ * @global string Site Address for links
+ * @return string HTML Formatted information
+ */
 function rcpt_check() {
-        GLOBAL $db, $MYSQL_PREFIX, $user_name, $TDTRAC_SITE;
-        $html  = "";
-        $html .= "<div id=\"infobox\"><span style=\"font-size: .7em\">";
-        $userid = perms_getidbyname($user_name);
+	GLOBAL $db, $MYSQL_PREFIX, $user_name, $TDTRAC_SITE;
+	$html  = "";
+	$html .= "<div id=\"infobox\"><span style=\"font-size: .7em\">";
+	$userid = perms_getidbyname($user_name);
 	if ( $userid == 1 ) {
 		$sql = "SELECT COUNT(imgid) as num FROM {$MYSQL_PREFIX}rcpts WHERE handled = 0";
 		$result = mysql_query($sql, $db);
@@ -29,6 +51,12 @@ function rcpt_check() {
 	}
 }
 
+/**
+ * Remove a reciept from the database
+ * 
+ * @global resource Datebase Link
+ * @global string MySQL Table Prefix
+ */
 function rcpt_nuke() {
 	GLOBAL $db, $MYSQL_PREFIX;
 	if ( isset($_REQUEST['imgid']) && is_numeric($_REQUEST['imgid']) ) {
@@ -40,21 +68,40 @@ function rcpt_nuke() {
 	}
 }
 
+/**
+ * Show form to associate reciept with current budget record
+ * 
+ * @param integer Reciept ID
+ * @global resource Datebase Link
+ * @global string MySQL Table Prefix
+ * @return string HTML Output
+ */
 function rcpt_list_budget($rcpt = 0) {
 	GLOBAL $db, $MYSQL_PREFIX;
-	$html = "";
-	$html .= "<h2>Add to Existing Budget Item</h2>\n";
-	$html .= "<div id=\"genform\"><form method=\"post\" action=\"{$TDTRAC_SITE}rcpt\" name=\"forma\">\n";
+	$html = "<h2>Add to Existing Budget Item</h2>\n";
 	$sql = "SELECT budget.*, showname FROM {$MYSQL_PREFIX}budget as budget, {$MYSQL_PREFIX}shows as shows WHERE budget.showid = shows.showid AND budget.imgid = 0 AND shows.closed = 0 ORDER BY budget.date DESC, budget.id DESC";
 	$result = mysql_query($sql, $db);
-	$html .= "<div class=\"frmele\" title=\"Item to associate with\">Item: <select style=\"width: 35em;\" name=\"budid\">\n";
-        while ( $row = mysql_fetch_array($result) ) {
-                $html .= "<option value=\"{$row['id']}\">{$row['showname']} - {$row['date']} - {$row['vendor']} - \${$row['price']}</option>\n";
-        }
-	$html .= "</select></div><div class=\"frmele\"><input type=\"hidden\" name=\"imgid\" value=\"{$rcpt}\" /><input type=\"submit\" value=\"Associate\" /></div></form></div>\n";
+	while ( $row = mysql_fetch_array($result) ) {
+		$picklist[] = array($row['id'], "{$row['showname']} - {$row['date']} - {$row['vendor']} - \${$row['price']}");
+	}
+	
+	$form = new tdform("{$TDTRAC_SITE}rcpt", "forma");
+	$result = $form->addDrop('budid', 'Item', 'Item to associate with', $picklist, False);
+	$result = $form->addHidden('imgid', $rcpt);
+	$html .= $form->output('Associate');
+	
 	return $html;
 }
 
+/**
+ * View box for existing reciept
+ * 
+ * @global resource Database Link
+ * @global string MySQL Table Prefix
+ * @global string User Name
+ * @global string Site Address for links
+ * @return string HTML Formatted information
+ */
 function rcpt_view() {
 	GLOBAL $db, $MYSQL_PREFIX, $user_name, $TDTRAC_SITE;
 	$html = "";
