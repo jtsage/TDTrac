@@ -245,7 +245,7 @@ function budget_view($showid, $onlytype) {
 	}
 	$html .= "<table id=\"budget\">\n";
 	$html .= "<tr><th>Date</th><th>Vendor</th><th>Category</th><th>Description</th><th>Price</th><th>Tax</th>";
-	$html .= "<th>Pending</th><th>Reimpurse</th>\n";
+	$html .= "<th>Pending</th><th>Reimburse</th>\n";
 	$html .= "<th>Reciept</th>";
 	$html .= $editbudget ? "<th>Edit</th>" : "";
 	$html .= $editbudget ? "<th>Del</th>" : "";
