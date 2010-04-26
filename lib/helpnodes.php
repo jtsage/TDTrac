@@ -1,5 +1,11 @@
 <?php
-
+/**
+ * TDTrac Help Nodes
+ * 
+ * Contains help node raw data.
+ * @package tdtrac
+ * @version 1.3.0
+ */
 $helpnode['error'][] = "<h2>Error</h2><p>This help item has not yet been written.  Sorry.</p>\n";
 
 $helpnode['home'][] = "<h2>TDTrac Overview</h2>\n";

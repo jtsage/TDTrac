@@ -1,6 +1,20 @@
 <?php
+/**
+ * TDTrac Home Page View
+ * 
+ * Contains site home page, post-login.
+ * @package tdtrac
+ * @version 1.3.0
+ */
+
+/**
+ * Display homepage
+ * 
+ * @param string User Name
+ * @global string Site Address for links
+ */
 function display_home($username) {
-        GLOBAL $TDTRAC_SITE;
+	GLOBAL $TDTRAC_SITE;
 	$html  = "";
 	$html .= msg_check();
 	$html .= rcpt_check();
