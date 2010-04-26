@@ -1,6 +1,13 @@
 <?php
+/**
+ * TDTrac Install Data
+ * 
+ * Contains main program logic.
+ * @package tdtrac
+ * @version 1.3.0
+ */
 GLOBAL $MYSQL_PREFIX, $db;
-//This is version 1.2.5
+//This is version 1.2.6
 
 $sql_budget  = "CREATE TABLE IF NOT EXISTS `{$MYSQL_PREFIX}budget` (";
 $sql_budget .= "  `id` int(10) unsigned NOT NULL auto_increment,";
