@@ -59,14 +59,20 @@ function db_list($sql, $columns) {
  * 
  * @param string Name of SQL Query
  * @global string MySQL Table Prefix
+ * @global string User Name
  * @return string Query string or FALSE
  */
-function get_sql_const($name) {
-	GLOBAL $MYSQL_PREFIX;
+function get_sql_const($name, $extra = null) {
+	GLOBAL $MYSQL_PREFIX, $user_name;
 	if ( $name == "showid" ) { return "SELECT showname, showid FROM {$MYSQL_PREFIX}shows WHERE closed = 0 ORDER BY created DESC;"; }
 	if ( $name == "showidall" ) { return "SELECT showname, showid FROM {$MYSQL_PREFIX}shows WHERE 1 ORDER BY created DESC;"; }
 	if ( $name == "vendor" ) { return "SELECT vendor FROM `{$MYSQL_PREFIX}budget` GROUP BY vendor ORDER BY COUNT(vendor) DESC, vendor ASC"; }
 	if ( $name == "category" ) { return "SELECT category FROM `{$MYSQL_PREFIX}budget` GROUP BY category ORDER BY COUNT(category) DESC, category ASC"; }
+	if ( $name == "emps" ) {
+		$sql  = "SELECT u.userid, CONCAT(first, ' ', last) as name FROM {$MYSQL_PREFIX}users u, {$MYSQL_PREFIX}usergroups ug WHERE";
+		$sql .= perms_isemp($user_name) ? " username = '{$user_name}' AND" : "";
+		$sql .= " active = 1 AND payroll = 1 AND ug.userid = u.userid ORDER BY last ASC";
+		return $sql; }
 	return False;
 }
 

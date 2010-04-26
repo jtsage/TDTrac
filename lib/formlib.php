@@ -31,7 +31,7 @@ class tdform {
 		$this->tabindex = $tab;
 	}
 	
-	public function output($actioname = 'Submit') {
+	public function output($actioname = 'Submit', $extra = null) {
 		$output = "";
 		foreach ($this->html as $line) {
 			$output .= $line;
@@ -42,8 +42,10 @@ class tdform {
 				$output .= "<input type=\"hidden\" name=\"{$hide[0]}\" value=\"{$hide[1]}\" />";
 			}
 		}
-		$output .= "<input type=\"submit\" value=\"{$actioname}\" title=\"{$actioname}\"></div>\n";
+		$output .= ((!is_null($extra)) ? $extra : "");
+		$output .= "<input type=\"submit\" tabindex=\"{$this->tabindex}\" value=\"{$actioname}\" title=\"{$actioname}\"></div>\n";
 		$output .= "</form></div>\n";
+		$this->tabindex++;
 		return $output;
 	}
 	
@@ -60,17 +62,18 @@ class tdform {
 		return $this->tabindex + 1;
 	}
 
-	public function addDate($name = 'date', $text = null, $title = null, $preset = null, $enabled = True) {
+	public function addDate($name = 'date', $text = null, $title = null, $preset = null, $enabled = True, $id = null) {
 		$this->members[] = array('date', $name, $text, $title, $preset);
 		if ( $title == null ) { $title = $text; }
-		$temp  = "  <div class=\"frmele\" title=\"{$title}\">{$text}: <input tabindex=\"{$this->tabindex}\" type=\"text\" size=\"22\" name=\"{$name}\" id=\"{$name}\" class=\"tdformdate\" ";
+		if ( $id == null ) { $id = $name; }
+		$temp  = "  <div class=\"frmele\" title=\"{$title}\">{$text}: <input tabindex=\"{$this->tabindex}\" type=\"text\" size=\"22\" name=\"{$name}\" id=\"{$id}\" class=\"tdformdate\" ";
 		if ( $preset != null ) { $temp .= "value=\"{$preset}\" "; }
 		if ( !$enabled ) { $temp .= "disabled=\"disabled\" "; }
 		$temp .= "/>";
 		if ( $enabled ) {
-			$temp .= "/><a href=\"#\" onClick=\"tdt_show_calendar(".(date(n)-1).",".date(Y).",'pickcal{$name}','{$name}')\">[cal]</a>";
-			$temp .= " <a href=\"#\" onClick=\"document.forms['{$this->formname}'].{$name}.value='".date("Y-m-d")."'\">[today]</a></div>";
-			$temp .= "<div class=\"frmele\" id=\"pickcal{$name}\"></div>\n";
+			$temp .= "<a href=\"#\" onClick=\"tdt_show_calendar(".(date(n)-1).",".date(Y).",'pickcal{$id}','{$id}')\">[cal]</a>";
+			$temp .= " <a href=\"#\" onClick=\"document.forms['{$this->formname}'].{$id}.value='".date("Y-m-d")."'\">[today]</a></div>";
+			$temp .= "<div class=\"frmele\" id=\"pickcal{$id}\"></div>\n";
 		} else { $temp .= "\n"; }
 		$this->html[] = $temp;
 		$this->tabindex++;
@@ -127,6 +130,12 @@ class tdform {
 		return True;
 	}
 	
+	public function addInfo($text) {
+		$this->members[] = array('info', null, $text, null, null);
+		$this->html[] = "  <div class=\"frmele\">{$text}</div>\n";
+		return true;
+	}
+	
 	public function addHidden($name = null, $value = null) {
 		if ( $value == null || $name == null ) { return False; }
 		else {
@@ -136,10 +145,10 @@ class tdform {
 		}
 	}
 	
-	public function addCheck($name = 'check', $text = null, $title = null, $preset = False, $enabled = True) {
+	public function addCheck($name = 'check', $text = null, $title = null, $preset = False, $enabled = True, $value = 'y') {
 		$this->members[] = array('checkbox', $name, $text, $title, $preset);
 		if ( $title == null ) { $title = $text; }
-		$this->html[] = "  <div class=\"frmele\" title=\"{$title}\">{$text}: <input type=\"checkbox\" name=\"{$name}\" value=\"y\" tabindex=\"{$this->tabindex}\" ".($preset ? "checked=\"checked\"":"").(!$enabled ? "disabled=\"disabled\" ":"")." /></div>\n";
+		$this->html[] = "  <div class=\"frmele\" title=\"{$title}\">{$text}: <input type=\"checkbox\" name=\"{$name}\" value=\"{$value}\" tabindex=\"{$this->tabindex}\" ".($preset ? "checked=\"checked\"":"").(!$enabled ? "disabled=\"disabled\" ":"")." /></div>\n";
 		$this->tabindex++;
 		return true;
 	}
