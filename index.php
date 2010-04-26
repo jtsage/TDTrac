@@ -1,8 +1,15 @@
 <?php
+/**
+ * TDTrac Main Program
+ * 
+ * Contains main program logic.
+ * @package tdtrac
+ * @version 1.3.0
+ */
 ob_start(); session_start(); 
 
 ## PROGRAM DETAILS. DO NOT EDIT UNLESS YOU KNOW WHAT YOU ARE DOING
-$TDTRAC_VERSION = "1.2.6";
+$TDTRAC_VERSION = "1.3.0";
 $TDTRAC_DBVER = "1.2.6";
 $TDTRAC_PERMS = array("addshow", "editshow", "viewshow", "addbudget", "editbudget", "viewbudget", "addhours", "edithours", "viewhours", "adduser");
 
