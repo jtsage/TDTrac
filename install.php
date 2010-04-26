@@ -1,4 +1,11 @@
 <?php
+/**
+ * TDTrac Installation Program
+ * 
+ * Contains main program logic.
+ * @package tdtrac
+ * @version 1.3.0
+ */
 ob_start(); session_start(); 
 
 ## PROGRAM DETAILS. DO NOT EDIT UNLESS YOU KNOW WHAT YOU ARE DOING

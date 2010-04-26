@@ -1,4 +1,11 @@
 <?php
+/**
+ * TDTrac Reciept Viewer
+ * 
+ * Contains main program logic.
+ * @package tdtrac
+ * @version 1.3.0
+ */
 ob_start(); session_start();
 
 require_once("config.php");
@@ -109,6 +116,13 @@ if ( !$login[0] ) { // Not Logged In
 	}
 }
 
+/** 
+ * Rotate a GD Image
+ * 
+ * @param resource GD Image
+ * @param integer Rotation, either 90, 180 or 270
+ * @return resource GD Image
+ */
 function rotateImage($img, $rotation) {
   $width = imagesx($img);
   $height = imagesy($img);
