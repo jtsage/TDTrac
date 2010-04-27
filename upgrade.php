@@ -14,19 +14,22 @@ $TDTRAC_PERMS = array("addshow", "editshow", "viewshow", "addbudget", "editbudge
 $INSTALL_FILES = array(
 	"index.php",
 	"help.php",
+	"rcpt.php",
 	"./lib/helpnodes.php",
 	"./lib/install.inc.php",
 	"./lib/budget.php",
 	"./lib/dbaseconfig.php",
 	"./lib/email.php",
 	"./lib/footer.php",
+	"./lib/formlib.php",
 	"./lib/functions-load.php",
 	"./lib/header.php",
 	"./lib/home.php",
 	"./lib/hours.php",
 	"./lib/login.php",
 	"./lib/messaging.php",
-	"./lib/permissions.php", 
+	"./lib/permissions.php",
+	"./lib/reciept.php", 
 	"./lib/show.php" );
 $INSTALL_TABLES = array(
 	"tdtrac",
@@ -46,7 +49,7 @@ $page_title = "updater";
 require_once("lib/header.php");
 $page_title = "home";
 
-echo "<h2>TDTrac{$TDTRAC_VERSION} Updater</h2>\n";
+echo "<h3>TDTrac{$TDTRAC_VERSION} Updater</h3>\n";
 $sqllink = 1; $noinstall = 0;
 
 
@@ -109,7 +112,7 @@ switch ($page_title) {
 	
     
     case "home" :
-		echo "<p><ul><li>Checking Enviroment...<ul>\n";
+		echo "<div class=\"installer\"><ul><li>Checking Enviroment...<ul>\n";
 		// Config File
 		$perms = substr(sprintf('%o', fileperms("config.php")), -4);
 		echo ($perms == "0666") ? "<li style=\"color:red\"><b>FAIL::</b> config.php - World Writable - POTENTIAL UNSAFE!</li>" : "<li style=\"color:green\"><b>OK::</b> config.php - Permissions are secure</li>";
@@ -230,13 +233,13 @@ switch ($page_title) {
                 } else { echo "<li style=\"color: green\"><b>VERSION::</b> 1.2.6 confirmed</li>\n"; }
 	}	
 	
-	echo "</ul></li></ul><div style=\"text-align: center\">\n";
+	echo "</ul></li></ul></div><div style=\"text-align: center\">\n";
 	if ( $didinstall ) { 
 		echo "RELOAD THE PAGE PLEASE!\n";
 	} else {
 		echo "Nothing More To Do!\n";
 	}
-	echo "</div></p>\n";
+	echo "</div>\n";
 	break;
 }
 

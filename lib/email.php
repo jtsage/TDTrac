@@ -33,11 +33,11 @@ function email_budget($showid) {
 	$body .= "<li><strong>Dates</strong>: {$row['dates']}</li>\n";
 	$body .= "</ul></p>\n";
 
-	$html .= "<h2>{$row['showname']}</h2><p><ul>\n";
+	$html .= "<h3>{$row['showname']}</h3><ul class=\"datalist\">\n";
 	$html .= "<li><strong>Company</strong>: {$row['company']}</li>\n";
 	$html .= "<li><strong>Venue</strong>: {$row['venue']}</li>\n";
 	$html .= "<li><strong>Dates</strong>: {$row['dates']}</li>\n";
-	$html .= "</ul><br />Budget E-Mailed to: {$sendto}</p>\n";
+	$html .= "</ul><br />Budget E-Mailed to: {$sendto}\n";
 
 	$subject = "TDTrac Budget: {$row['showname']}";
 	$headers  = 'MIME-Version: 1.0' . "\r\n";
@@ -130,7 +130,7 @@ function email_hours($userid, $sdate, $edate) {
 	}
 	$body = "";
 	$html = "";
-	$html .= "<h2>Hours Worked Report</h2><p>\n";
+	$html .= "<h3>Hours Worked Report</h3><p>\n";
 	$html .= ($sdate <> 0 ) ? "Start Date: {$sdate}\n" : "";
 	$html .= ($sdate <> 0 && $edate <> 0 ) ? "<br />" : "";
 	$html .= ($edate <> 0 ) ? "Ending Date: {$edate}" : "";
@@ -194,7 +194,7 @@ function email_hours_unpaid() {
 	}
 	$body = "";
 	$html = "";
-	$html .= "<h2>Payment Owed Hours Worked Report</h2><p>\n";
+	$html .= "<h3>Payment Owed Hours Worked Report</h3><p>\n";
 	$html .= ($sdate <> 0 ) ? "Start Date: {$sdate}\n" : "";
 	$html .= ($sdate <> 0 && $edate <> 0 ) ? "<br />" : "";
 	$html .= ($edate <> 0 ) ? "Ending Date: {$edate}" : "";
@@ -210,7 +210,7 @@ function email_hours_unpaid() {
 
 	foreach ( $dbarray as $key => $data ) {
 		$html .= "<br />Included Hours For: {$key}\n";
-		$body .= "<h2>Hours Worked For {$key}</h2><p>\n";
+		$body .= "<h3>Hours Worked For {$key}</h3><p>\n";
 		$body .= ($sdate <> 0 ) ? "Start Date: {$sdate}\n" : "";
 		$body .= ($sdate <> 0 && $edate <> 0 ) ? "<br />" : "";
 		$body .= ($edate <> 0 ) ? "Ending Date: {$edate}" : "";

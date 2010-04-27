@@ -14,19 +14,22 @@ $TDTRAC_PERMS = array("addshow", "editshow", "viewshow", "addbudget", "editbudge
 $INSTALL_FILES = array(
 	"index.php",
 	"help.php",
+	"rcpt.php",
 	"./lib/helpnodes.php",
 	"./lib/install.inc.php",
 	"./lib/budget.php",
 	"./lib/dbaseconfig.php",
 	"./lib/email.php",
 	"./lib/footer.php",
+	"./lib/formlib.php",
 	"./lib/functions-load.php",
 	"./lib/header.php",
 	"./lib/home.php",
 	"./lib/hours.php",
 	"./lib/login.php",
 	"./lib/messaging.php",
-	"./lib/permissions.php", 
+	"./lib/permissions.php",
+	"./lib/reciept.php", 
 	"./lib/show.php" );
 $INSTALL_TABLES = array(
         "tdtrac",
@@ -41,6 +44,7 @@ $INSTALL_TABLES = array(
 	"rcpts");
 
 require_once("config.php");
+require_once("lib/formlib.php");
 $page_title = substr($_SERVER['REQUEST_URI'], 1); 
 preg_match("/install.php\?(.+)$/", $page_title, $match);
 $page_title = $match[1];
@@ -50,7 +54,7 @@ $page_title = "installer " . $page_title;
 require_once("lib/header.php");
 $page_title = $page_title_bak;
 
-echo "<h2>TDTrac{$TDTRAC_VERSION} Installer</h2>\n";
+echo "<h3>TDTrac{$TDTRAC_VERSION} Installer</h3>\n";
 $sqllink = 1; $noinstall = 0;
 
 switch ($page_title) {
@@ -70,40 +74,41 @@ switch ($page_title) {
 		fwrite($fh, "\$TDTRAC_PAYRATE = \"{$_REQUEST['payrate']}\";\n?>\n");
 		header("Location: install.php");
 	} else {
-		echo "<div id=\"genform\"><form method=\"post\" action=\"install.php?site\" name=\"form1\">\n";
-		echo "<div class=\"frmele\">Site Name: <input type=\"text\" size=\"35\" name=\"cpny\" value=\"{$TDTRAC_CPNY}\"/></div>\n";
-		echo "<div class=\"frmele\">Site URL: <input type=\"text\" size=\"35\" name=\"site\" value=\"{$TDTRAC_SITE}\"/></div>\n";
-		echo "<div class=\"frmele\">Day Rate Payroll ( 1 = yes, 0 = no ): <input type=\"text\" size=\"35\" name=\"dayrate\" value=\"{$TDTRAC_DAYRATE}\"/></div>\n";
-		echo "<div class=\"frmele\">Default Day / Hourly Pay Rate: <input type=\"text\" size=\"35\" name=\"payrate\" value=\"{$TDTRAC_PAYRATE}\"/></div>\n";
-        	echo "<div class=\"frmele\"><input type=\"submit\" value=\"Save Values\" /></div>\n";
-        	echo "</form></div>\n";
+		$form = new tdform("install.php?site", "form1");
+		
+		$fes = $form->addText('cpny', "Site Name", null, $TDTRAC_CPNY);
+		$fes = $form->addText('site', "Site URL", null, $TDTRAC_SITE);
+		$fes = $form->addText('dayrate', "Day Rate Payroll ( 1 = yes, 0 = no )", null, $TDTRAC_DAYRATE);
+		$fes = $form->addText('payrate', "Default Day / Hourly Pay Rate", null, $TDTRAC_PAYRATE);
+		
+		echo $form->output('Save Values');
 	}
 	break;
     case "mysql" :
 	if ( $_SERVER['REQUEST_METHOD'] == "POST" ) {
-                $filename = "config.php";
-                $fh = fopen($filename, 'a');
-                fwrite($fh, "<?php\n");
-                fwrite($fh, "\$MYSQL_SERVER = \"{$_REQUEST['server']}\";\n");
-                fwrite($fh, "\$MYSQL_USER = \"{$_REQUEST['user']}\";\n");
-                fwrite($fh, "\$MYSQL_PASS = \"{$_REQUEST['pass']}\";\n");
-                fwrite($fh, "\$MYSQL_DATABASE = \"{$_REQUEST['dbase']}\";\n");
-                fwrite($fh, "\$MYSQL_PREFIX = \"{$_REQUEST['prefix']}\";\n?>\n");
-                header("Location: install.php");
-
+		$filename = "config.php";
+		$fh = fopen($filename, 'a');
+		fwrite($fh, "<?php\n");
+		fwrite($fh, "\$MYSQL_SERVER = \"{$_REQUEST['server']}\";\n");
+		fwrite($fh, "\$MYSQL_USER = \"{$_REQUEST['user']}\";\n");
+		fwrite($fh, "\$MYSQL_PASS = \"{$_REQUEST['pass']}\";\n");
+		fwrite($fh, "\$MYSQL_DATABASE = \"{$_REQUEST['dbase']}\";\n");
+		fwrite($fh, "\$MYSQL_PREFIX = \"{$_REQUEST['prefix']}\";\n?>\n");
+		header("Location: install.php");
 	} else {
-		echo "<div id=\"genform\"><form method=\"post\" action=\"install.php?mysql\" name=\"form1\">\n";
-		echo "<div class=\"frmele\">MySQL Host: (host:port) <input type=\"text\" size=\"35\" name=\"server\" value=\"{$MYSQL_SERVER}\"/></div>\n";
-		echo "<div class=\"frmele\">Username: <input type=\"text\" size=\"35\" name=\"user\" value=\"{$MYSQL_USER}\"/></div>\n";
-		echo "<div class=\"frmele\">Password: <input type=\"text\" size=\"35\" name=\"pass\" value=\"{$MYSQL_PASS}\"/></div>\n";
-		echo "<div class=\"frmele\">Database: <input type=\"text\" size=\"35\" name=\"dbase\" value=\"{$MYSQL_DATABASE}\"/></div>\n";
-		echo "<div class=\"frmele\">Table Prefix: (prefix_) <input type=\"text\" size=\"35\" name=\"prefix\" value=\"{$MYSQL_PREFIX}\"/></div>\n";
-        	echo "<div class=\"frmele\"><input type=\"submit\" value=\"Save Values\" /></div>\n";
-        	echo "</form></div>\n";
+		$form = new tdform("install.php?mysql", "form1");
+		
+		$fes = $form->addText('server', "MySQL Host (host:port)", null, $MYSQL_SERVER);
+		$fes = $form->addText('user', "Username", null, $MYSQL_USER);
+		$fes = $form->addText('password', "Password", null, $MYSQL_PASS);
+		$fes = $form->addText('dbase', "Database", null, $MYSQL_DATABASE);
+		$fes = $form->addText('prefix', "Table Prefix (prefix_)", null, $MYSQL_PREFIX);
+		
+		echo $form->output('Save Values');
 	}
 	break;
     case "home" :
-	echo "<p><ul><li>Checking Enviroment...<ul>\n";
+	echo "<div class=\"installer\"><ul><li>Checking Enviroment...<ul>\n";
 	  // Config File
   	  $perms = substr(sprintf('%o', fileperms("config.php")), -4);
 	  echo ($perms == "0666") ? "<li style=\"color:green\"><b>OK::</b> config.php - World Writable</li>" : "<li style=\"color:red\"><b>FAIL::</b> config.php - Must be writable by webserver</li>";
@@ -158,13 +163,13 @@ switch ($page_title) {
 		}
 		echo ( !$noinstall ) ? "<li style=\"color: green\"><b>SUCCESS::</b> No Existing Tables will be clobbered</li>\n" : "";
 	  }
-	echo "</ul></li></ul><div style=\"text-align: center\">\n";
+	echo "</ul></li></ul></div><div style=\"text-align: center\">\n";
 	if ( !$noinstall ) { 
 		echo "<a href=\"install.php?doinstall\">[-Proceed With Installation-]</a>\n";
 	} else {
 		echo "Unable To Install - Please Correct Above Errors\n";
 	}
-	echo "</div></p>\n";
+	echo "</div>\n";
 	break;
 }
 
