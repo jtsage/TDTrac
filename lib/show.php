@@ -15,7 +15,7 @@
  */
 function show_add_form() {
 	GLOBAL $TDTRAC_SITE;
-	$html  = "<h2>Add A Show</h2>\n";
+	$html  = "<h3>Add A Show</h3>\n";
 	$form = new tdform("{$TDTRAC_SITE}add-show");
 	
 	$result = $form->addText('showname', 'Show Name');
@@ -55,13 +55,13 @@ function show_view() {
 	$editlink = perms_isadmin($user_name);
 	$html = "";
 	while ( $row = mysql_fetch_array($result) ) {
-		$html .= "<h2>{$row['showname']}</h2><p><ul>\n";
-		$html .= $editlink ? "<div style=\"float: right\">[<a href=\"/edit-show&id={$row['showid']}\">Edit</a>]</div>\n" : "";
-		$html .= "<li><strong>Company</strong>: {$row['company']}</li>\n";
+		$html .= "<h3>{$row['showname']}</h3>\n";
+		$html .= $editlink ? "<span class=\"overright\">[<a href=\"/edit-show&amp;id={$row['showid']}\">Edit</a>]</span>\n" : "";
+		$html .= "<ul class=\"datalist\">\n<li><strong>Company</strong>: {$row['company']}</li>\n";
 		$html .= "<li><strong>Venue</strong>: {$row['venue']}</li>\n";
 		$html .= "<li><strong>Dates</strong>: {$row['dates']}</li>\n";
 		$html .= "<li><strong>Show Record Open</strong>: " . (( $row['closed'] == 1 ) ? "NO" : "YES") . "</li>\n";
-		$html .= "</ul></p>\n";
+		$html .= "</ul>\n";
 	}
 	return $html;
 }
@@ -80,7 +80,7 @@ function show_edit_form($showid) {
 	$sql = "SELECT showname, company, venue, dates, `closed` FROM {$MYSQL_PREFIX}shows WHERE showid = {$showid} LIMIT 1";
 	$result = mysql_query($sql, $db);
 	$row = mysql_fetch_array($result);
-	$html  = "<h2>Edit A Show</h2>\n";
+	$html  = "<h3>Edit A Show</h3>\n";
 	$form = new tdform("{$TDTRAC_SITE}edit-show", "showedit");
 	
 	$fesult = $form->addText('showname', 'Show Name', null, $row['showname']);

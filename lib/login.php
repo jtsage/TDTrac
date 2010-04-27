@@ -74,8 +74,7 @@ function islogin_form() {
 	$result = $form->addText('tracuser', 'User Name');
 	$result = $form->addPass('tracpass', 'Password');
 	
-	$html .= $form->output('Login');
-	$html .= "<div style=\"text-align: right\">[-<a href=\"{$TDTRAC_SITE}pwremind\">Forgot Password?</a>-]</div>";
+	$html .= $form->output('Login', "[-<a href=\"{$TDTRAC_SITE}pwremind\">Forgot Password?</a>-] ");
 	return $html;
 }
 
@@ -87,7 +86,7 @@ function islogin_form() {
  */
 function islogin_pwform() {
 	GLOBAL $TDTRAC_SITE;
-	$html  = '<h2>Send Password Via E-Mail</h2>';
+	$html  = '<h4>Send Password Via E-Mail</h4>';
 	$form = new tdform("{$TDTRAC_SITE}pwremind", "loginform", 1, "loginform");
 	
 	$result = $form->addText('tracemail', 'E-Mail Address');

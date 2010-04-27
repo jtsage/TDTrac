@@ -34,7 +34,7 @@ function rcpt_do() {
 function rcpt_check() {
 	GLOBAL $db, $MYSQL_PREFIX, $user_name, $TDTRAC_SITE;
 	$html  = "";
-	$html .= "<div id=\"infobox\"><span style=\"font-size: .7em\">";
+	$html .= "<div class=\"infobox\"><span style=\"font-size: .7em\">";
 	$userid = perms_getidbyname($user_name);
 	if ( $userid == 1 ) {
 		$sql = "SELECT COUNT(imgid) as num FROM {$MYSQL_PREFIX}rcpts WHERE handled = 0";
