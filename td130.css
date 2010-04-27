@@ -334,6 +334,7 @@ margin-bottom: 1.5em;
 #content
 {
 padding: 0em 2.0em 0em 2.0em;
+min-height: 350px;
 }
 
 #primarycontainer
@@ -440,7 +441,7 @@ div.installer ul {
 }
 
 div.infobox {
-	width: 35%;
+	width: 380px;
 	margin-left: auto;
 	margin-right: auto;
 	border: 2px solid #ddd;
@@ -466,7 +467,7 @@ div.infobox a {
 
 #loginform {
 	text-align: right;
-	width: 30%;
+	width: 350px;
 	padding-bottom: 10px;
 }
 #loginform input {
@@ -491,7 +492,7 @@ div.infobox a {
 
 div.genform {
 	text-align: right;
-	width: 40%;
+	width: 350px;
 	padding-bottom: 10px;
 	margin-top: 5px;
 }
