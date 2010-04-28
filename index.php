@@ -98,6 +98,11 @@ if ( $login[0] ) {
 				else { echo budget_editform($_REQUEST['id']); }
 			} else { echo perms_no(); }
 			break;
+		case "view-budget-item":
+			if ( perms_checkperm($user_name, 'viewbudget') ) {
+				echo budget_viewitem($_REQUEST['id']); 
+			} else { echo perms_no(); }
+			break;
 		case "email-budget":
 			if ( perms_checkperm($user_name, 'viewbudget') ) {
 				echo email_budget($_REQUEST['id']); 
