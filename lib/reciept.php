@@ -110,7 +110,7 @@ function rcpt_view() {
 	$result = mysql_query($sql, $db);
 	$line = mysql_fetch_array($result);
 	$total = $line['num'];
-	if ( isset($_REQUEST['num']) && ($_REQUEST['num'] >= ($total - 1))  ) { thrower("Last Reciept Skipped"); } // Easier to trap later than to suppress skip link on earlier reciept.
+	if ( isset($_REQUEST['num']) && ($_REQUEST['num'] > ($total - 1))  ) { thrower("Last Reciept Skipped"); } // Easier to trap later than to suppress skip link on earlier reciept.
 	if ( isset($_REQUEST['num']) ) {
 		$sql = "SELECT imgid, added FROM {$MYSQL_PREFIX}rcpts WHERE handled = 0 ORDER BY added ASC LIMIT {$_REQUEST['num']},1"; $thisnum = $_REQUEST['num'] + 1;
 	} else {

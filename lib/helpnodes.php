@@ -50,6 +50,9 @@ $helpnode['main-hours'] = $helpnode['home'];
 $helpnode['main-show'] = $helpnode['home'];
 $helpnode['main-perms'] = $helpnode['home'];
 
+$helpnode['mail-perms'][] = "<h3>TDTracMail Subject Code</h3>\n";
+$helpnode['mail-perms'][] = "<p>This contains the easy interface to update the subject line code, and the to: address for the tdtracmail addon, a simple way to add reciepts to your tracking.  Simply send email to [the address you choose]@[your hostname] (please ask your administrator which host to use), and include the code in the subject line.  All reciepts are automaticly resized, and will await addition to the database by any user with the 'addbudget' permission.</p>";
+
 $helpnode['msg-read'][] = "<h3>Inbox View</h3>\n";
 $helpnode['msg-read'][] = "<p>The Inbox view shows any system messages that have been sent to you.<ul>\n";
 $helpnode['msg-read'][] = "<li>Clear Messages Link<ul><li>Clears all current inbox messages.  There is no 'mark as read', read messages are deleted</li></ul></li>\n";

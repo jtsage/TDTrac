@@ -10,7 +10,7 @@ ob_start(); session_start();
 
 ## PROGRAM DETAILS. DO NOT EDIT UNLESS YOU KNOW WHAT YOU ARE DOING
 $TDTRAC_VERSION = "1.3.0";
-$TDTRAC_DBVER = "1.2.6";
+$TDTRAC_DBVER = "1.3.0";
 $TDTRAC_PERMS = array("addshow", "editshow", "viewshow", "addbudget", "editbudget", "viewbudget", "addhours", "edithours", "viewhours", "adduser");
 
 require_once("config.php");
@@ -204,6 +204,14 @@ if ( $login[0] ) {
 					if ( isset($_REQUEST['newgroup']) ) { perms_group_add(); }
 					if ( isset($_REQUEST['newname']) ) { perms_group_ren(); }
 				} else { echo perms_groupform(); }
+			} else { echo perms_no(); }
+			break;
+		case "mail-perms":
+			if ( perms_isadmin($user_name) ) { 
+				if ( $_SERVER['REQUEST_METHOD'] == "POST" ) { perms_mailcode_do(); }
+				else {
+					echo perms_mailcode();
+				}
 			} else { echo perms_no(); }
 			break;
 		case "edit-perms":

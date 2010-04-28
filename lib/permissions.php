@@ -432,6 +432,41 @@ function perms_groupform() {
 }
 
 /**
+ * Form for changing the mail code (tdtracmail enabled installs)
+ * 
+ * @global resource Database Link
+ * @global string MySQL Table Prefix
+ * @return string HTML Output
+ */
+function perms_mailcode() {
+	GLOBAL $db, $MYSQL_PREFIX;
+	$html .= "<h3>Set TDTracMail Code</h3>\n";
+	$sql = "SELECT * FROM tdtracmail WHERE prefix = '{$MYSQL_PREFIX}'";
+	$result = mysql_query($sql, $db);
+	$line = mysql_fetch_array($result);
+	$form = new tdform("{$TDTRAC_SITE}mail-perms", "form1");
+	
+	$fes = $form->addText("email", "E-Mail Address", null, $line['email']);
+	$fes = $form->addText("code", "Subject Line Code", null, $line['code']);
+	$html .= $form->output('Set Code');
+	return $html;
+}
+
+/**
+ * Logic to save TDTracMail code
+ * 
+ * @global resource Database Link
+ * @global string MySQL Table Prefix
+ */
+function perms_mailcode_do() {
+	GLOBAL $db, $MYSQL_PREFIX;
+	$sql = "UPDATE tdtracmail SET code = '{$_REQUEST['code']}', email = '{$_REQUEST['email']}' WHERE prefix = '{$MYSQL_PREFIX}'";
+	$result = mysql_query($sql, $db);
+	if ( mysql_errno() ) { thrower("Code Update Failed:<br />".mysql_error()); }
+	else { thrower("Code Updated"); }
+}
+
+/**
  * Logic to add a group
  * 
  * @global resource Database Link
