@@ -54,19 +54,21 @@ class tdform {
 	 * @param string Extra text beform submit button
 	 * @return string HTML Formatted output
 	 */
-	public function output($actioname = 'Submit', $extra = null) {
+	public function output($actioname = 'Submit', $extra = null, $nobutton = False) {
 		$output = "";
 		foreach ($this->html as $line) {
 			$output .= $line;
 		}
-		$output .= "  <div class=\"frmele\">";
-		if ( is_array($this->hidden) ) {
-			foreach( $this->hidden as $hide) {
-				$output .= "<input type=\"hidden\" name=\"{$hide[0]}\" value=\"{$hide[1]}\" />";
+		if ( !$nobutton ) {
+			$output .= "  <div class=\"frmele\">";
+			if ( is_array($this->hidden) ) {
+				foreach( $this->hidden as $hide) {
+					$output .= "<input type=\"hidden\" name=\"{$hide[0]}\" value=\"{$hide[1]}\" />";
+				}
 			}
+			$output .= ((!is_null($extra)) ? $extra : "");
+			$output .= "<input type=\"submit\" class=\"subbie\" tabindex=\"{$this->tabindex}\" value=\"{$actioname}\" title=\"{$actioname}\" /></div>\n";
 		}
-		$output .= ((!is_null($extra)) ? $extra : "");
-		$output .= "<input type=\"submit\" class=\"subbie\" tabindex=\"{$this->tabindex}\" value=\"{$actioname}\" title=\"{$actioname}\" /></div>\n";
 		$output .= "</form></div>\n";
 		$this->tabindex++;
 		return $output;

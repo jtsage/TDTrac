@@ -419,11 +419,16 @@ table.datatable tr:nth-child(1) {
 }
 
 table.datatable .datatotal {
-	background-color: #E65355 !important;
+	background-color: #FFAAAA !important;
+	height: 2em;
+	border-top: 2px solid black;
 }
 
 table.datatable .datasubtotal {
-	background-color: #D753E6 !important;
+	background-color: #FFDDDD !important;
+	height: 1.6em;
+	border-bottom: 1px solid #ccc;
+	border-top: 1px solid #ccc;
 }
 
 img.ticon {

@@ -146,10 +146,10 @@ function perms_no() {
 function perms_editpickform() {
 	GLOBAL $db, $MYSQL_PREFIX, $TDTRAC_SITE;
 	$sql = "SELECT groupname FROM {$MYSQL_PREFIX}groupnames";
-	$html  = "<h2>Select Group</h2>";
+	$html  = "<h3>Select Group</h3>";
 	$form = new tdform("{$TDTRAC_SITE}edit-perms");
 	$result = $form->addHidden("editgroupperm", "true");
-	$result = $form->addDrop('groupname', "Group to Edit", null, db_list($sql, 'groupname'), False);
+	$result = $form->addDrop('groupname', "Group", null, db_list($sql, 'groupname'), False);
 	$html .= $form->output('Select');
 	return $html;
 }
@@ -167,9 +167,10 @@ function perms_editform() {
 	GLOBAL $db, $TDTRAC_PERMS, $MYSQL_PREFIX, $TDTRAC_SITE;
 	$grpname = $_REQUEST['groupname'];
 	$grpid = perms_getgroupid($grpname);
-	$html  = "<h2>Set {$grpname} ({$grpid}) Permissions</h2><p style=\"text-align: right\">T&nbsp;&nbsp;&nbsp;/&nbsp;&nbsp;&nbsp;F</p>\n";
+	$html  = "<h3>Set {$grpname} ({$grpid}) Permissions</h3>";
 	$form = new tdform("{$TDTRAC_SITE}edit-perms");
 
+	$fesult = $form->addInfo("T / F");
 	$fesult = $form->addHidden('grpid', $grpid);
 	$sql = "SELECT permid, permcan FROM {$MYSQL_PREFIX}permissions pm WHERE groupid = {$grpid}";
 	$result = mysql_query($sql, $db);
@@ -212,21 +213,21 @@ function perms_save($grpid) {
  */
 function perms_view() {
 	GLOBAL $db, $TDTRAC_PERMS, $MYSQL_PREFIX;
-	$sql = "SELECT groupname, permid FROM {$MYSQL_PREFIX}groupnames gn, {$MYSQL_PREFIX}permissions pm WHERE pm.groupid = gn.groupid AND pm.permcan = 1 ORDER BY groupname";
+	$sql = "SELECT groupname, permid FROM {$MYSQL_PREFIX}groupnames gn, {$MYSQL_PREFIX}permissions pm WHERE pm.groupid = gn.groupid AND pm.permcan = 1 ORDER BY groupname, permid";
 	$result = mysql_query($sql, $db);
 	while ( $row = mysql_fetch_array($result) ) {
 		$disperm[$row['groupname']][] = $row['permid'];
 	}
 	$html = "";
 	foreach ( $disperm as $name => $value ) {
-		$html .= "<h2>Permissions For {$name}</h2><p>  ";
+		$html .= "<h3>Permissions For {$name}</h3><p>  ";
 		$sql = "SELECT u.username FROM {$MYSQL_PREFIX}users u, {$MYSQL_PREFIX}groupnames gn, {$MYSQL_PREFIX}usergroups ug WHERE gn.groupname = '{$name}' AND gn.groupid = ug.groupid AND ug.userid = u.userid ORDER BY username ASC";
 		$result = mysql_query($sql, $db);
 		while ( $row = mysql_fetch_array($result) ) {
 			$html .= "{$row['username']}, ";
 		}
 		$html = substr($html, 0, -2);
-		$html .= "</p>\n<ul>\n"; 
+		$html .= "</p>\n<ul class=\"datalist\">\n"; 
 		foreach ( $value as $pval ) {
 			$html .= "<li>{$pval}</li>\n";
 		}
@@ -245,7 +246,7 @@ function perms_view() {
  */
 function perms_adduser_form() {
 	GLOBAL $db, $MYSQL_PREFIX, $TDTRAC_SITE;
-	$html  = "<h2>Add User</h2>\n";
+	$html  = "<h3>Add User</h3>\n";
 	$form = new tdform("{$TDTRAC_SITE}add-user");
 	
 	$result = $form->addText('username', "User Name");
@@ -285,7 +286,7 @@ function perms_adduser_do() {
  */
 function perms_changepass_form() {
 	GLOBAL $TDTRAC_SITE;
-	$html  = "<h2>Change Password</h2>\n";
+	$html  = "<h3>Change Password</h3>\n";
 	$form = new tdform("{$TDTRAC_SITE}change-pass");
 	$result = $form->addPass('newpass1', "New Password");
 	$result = $form->addPass('newpass2', "Verify New Password");
@@ -324,8 +325,8 @@ function perms_viewuser() {
 	$sql = "SELECT *, DATE_FORMAT(lastlogin, '%b %D %h:%i %p') AS lastlog FROM {$MYSQL_PREFIX}users ORDER BY last ASC, first ASC";
 	$result = mysql_query($sql, $db); $html = "";
 	while ( $row = mysql_fetch_array($result) ) {
-		$html .= "<h2>User: {$row['first']} {$row['last']}</h2><p><ul>\n";
-		$html .= "<div style=\"float: right\">[<a href=\"{$TDTRAC_SITE}edit-user&id={$row['userid']}\">Edit</a>]</div>\n";
+		$html .= "<h3>User: {$row['first']} {$row['last']}</h3><p><ul class=\"datalist\">\n";
+		$html .= "<span class=\"overright\">[<a href=\"{$TDTRAC_SITE}edit-user&id={$row['userid']}\">Edit</a>]</span>\n";
 		$html .= "<li>Internal UserID: <strong>{$row['userid']}</strong> (Last Login: {$row['lastlog']})<ul><li> (Active: <input type=\"checkbox\" disabled=\"disabled\"".(($row['active'])?" checked=\"checked\" ":"").">)</li>\n";
 		$html .= "<li>(On Payroll: <input type=\"checkbox\" disabled=\"disabled\"".(($row['payroll'])?" checked=\"checked\" ":"").">)</li>\n";
 		$html .= "<li>(Add / View / Edit only Own Hours: <input type=\"checkbox\" disabled=\"disabled\"".(($row['limithours'])?" checked=\"checked\" ":"").">)</li>\n";
@@ -361,7 +362,7 @@ function perms_edituser_form($id) {
 	$sql = "SELECT u.*, groupid FROM {$MYSQL_PREFIX}users u, {$MYSQL_PREFIX}usergroups ug WHERE u.userid = ug.userid AND u.userid = {$id} LIMIT 1";
 	$result = mysql_query($sql, $db);
 	$row = mysql_fetch_array($result);
-	$html  = "<h2>Edit User</h2>\n";
+	$html  = "<h3>Edit User</h3>\n";
 	$form = new tdform("{$TDTRAC_SITE}edit-user");
 	
 	$fesult = $form->addText('username', "User Name", null, $row['username']);
@@ -416,13 +417,13 @@ function perms_edituser_do($id) {
  */
 function perms_groupform() {
 	GLOBAL $db, $MYSQL_PREFIX, $TDTRAC_SITE;
-	$html  = "<h2>Add A Group</h2>\n";
+	$html  = "<h3>Add A Group</h3>\n";
 	$form1 = new tdform("{$TDTRAC_SITE}groups", 'form1');
 	$result = $form1->addText('newgroup', "Group Name");
 	$html .= $form1->output("Add Group");
 	
-	$html .= "<h2>Rename Group</h2>\n";
-	$form2 = new tdform("{$TDTRAC_SITE}groups", 'form2', $form1->getlasttab());
+	$html .= "<h3>Rename Group</h3>\n";
+	$form2 = new tdform("{$TDTRAC_SITE}groups", 'form2', $form1->getlasttab(), 'genform2');
 	$sql = "SELECT groupname, groupid FROM {$MYSQL_PREFIX}groupnames WHERE groupid > 1 ORDER BY groupid";
 	$result = $form2->addDrop('oldname', "Current Name", null, db_list($sql, array('groupid', 'groupname')), False);
 	$result = $form2->addText('newname', "New Name");
