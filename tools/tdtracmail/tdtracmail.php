@@ -42,14 +42,6 @@ $MYSQL_PREFIX = ""; // DON'T SET THIS HERE - LEAVE IT BLANK!
 
 /* TDTRAC-MAIL CONFIGURATION DETAILS */
 $TDT_INSTANT_EXIT = array("mailer-daemon", "postmaster", "abuse"); // Silently discard messages to these addresses. Not the best way to handle this.
-$TDT_ACCOUNT_MAP = array(
-	#array("email", "$MYSQL_PREFIX", numeric-code),
-	array("demo"	,"demo_",	1243),
-	array("pmt"	,"jtsage_",	3200),
-	array("bootleg"	,"bootleg_",	2220),
-	array("djm"	,"djm_",	2422),
-	array("nht"	,"nht_",	9600)
-	); // The account map
 $TDT_CONSTRAIN_SIZE = 900; // In pixels, the size of the largest side (x or y axis) of the saved image
 $TDT_LOG_FILE = "/var/log/tdtracmail.log"; // Location of the log file
 
@@ -94,15 +86,17 @@ if ( ! preg_match("/\@rcpts.tdtrac.com/", $destination_frommail) ) {
 	exit(67); // User not found (perma) exit code
 }
 
-foreach ( $TDT_ACCOUNT_MAP as $current_account) {
-	if ( $current_account[0] == $destination_safe ) { 
-		if ( preg_match("/{$current_account[2]}/", $message_subject) ) {
-			$goodaccount = true;
-			$MYSQL_PREFIX = $current_account[1];
-		} else {
+$sql = "SELECT * FROM tdtracmail WHERE email = '{$destination_safe}'";
+$result = mysql_query($sql, $db);
+
+if ( mysql_num_rows($result) > 0 ) {
+	$line = mysql_fetch_array($result);
+	if ( preg_match("/{$line['code']}/", $message_subject )) {
+		$goodaccount = true;
+		$MYSQL_PREFIX = $line['prefix'];
+	} else {
 			fwrite($logger, date("m.d.y H:i:s") . " :: ({$process}) :: Mail from {$message_from} passed account test, but failed the code test.\n");
 			exit(70); // Program Error (perma) exit code
-		}
 	}
 }
 
