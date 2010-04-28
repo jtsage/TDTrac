@@ -49,6 +49,7 @@ function display_home($username, $type=0) {
 			$html .= "<li><a href=\"{$TDTRAC_SITE}view-user\">View Users</a></li>\n";
 			$html .= "<li><a href=\"{$TDTRAC_SITE}edit-perms\">Edit Permissions</a></li>\n";
 			$html .= "<li><a href=\"{$TDTRAC_SITE}view-perms\">View Permissions</a></li>\n";
+			$html .= "<li><a href=\"{$TDTRAC_SITE}mail-perms\">Set TDTracMail Subject Code</a></li>\n";
 			$html .= "<li><a href=\"{$TDTRAC_SITE}groups\">Add / Edit Groups</a></li>\n";
 		}
 		$html .= "</ul>\n";
