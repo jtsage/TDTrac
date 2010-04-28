@@ -78,3 +78,27 @@ function tdt_daysInMonth(iMonth, iYear)
 {
 	return 32 - new Date(iYear, iMonth, 32).getDate();
 }
+
+
+function tdt_get_option(iValue, iId, iType) 
+{
+	if ( iValue == '--new--' ) {
+		prompter = "New " + iType + ":";
+		newOption = prompt(prompter, "");
+		
+		var newOptionIn = document.createElement('option');
+		newOptionIn.text = newOption;
+		newOptionIn.value = newOption;
+		var oldSelect = document.getElementById(iId);
+		 
+		try {
+			oldSelect.add(newOptionIn, null); // standards compliant; doesn't work in IE
+		}
+		catch(ex) {
+			oldSelect.add(newOptionIn); // IE only
+		}
+		oldSelect.selectedIndex = oldSelect.options.length - 1;
+		
+		
+	}
+}

@@ -1,5 +1,19 @@
 <?php
+/**
+ * TDTrac Login Functions
+ * 
+ * Contains all login related functions. 
+ * @package tdtrac
+ * @version 1.3.0
+ */
 
+/** 
+ * Check user's logged in status
+ * 
+ * @global bool Enable login debug controls
+ * @global string MySQL Table Prefix
+ * @return array Logged in status + login form
+ */
 function islogin() {
 	GLOBAL $LOGIN_DEBUG, $MYSQL_PREFIX;
 
@@ -11,6 +25,13 @@ function islogin() {
 	return $retty;
 }
 
+/** 
+ * Check if a user cookie exists
+ * 
+ * @global bool Enable login debug controls
+ * @global string MySQL Table Prefix
+ * @return bool Existence of cookie
+ */
 function islogin_cookieexist() {
 	GLOBAL $LOGIN_DEBUG, $MYSQL_PREFIX;
 	if ( !isset($_SESSION['tdtracuser']) ) { return 0; }
@@ -19,13 +40,20 @@ function islogin_cookieexist() {
 	return 1;
 }
 
+/** 
+ * Check user's logged in status
+ * 
+ * @global resource Database Link
+ * @global string MySQL Table Prefix
+ * @return bool True if cookie is correct and current
+ */
 function islogin_cookietest() {
 	GLOBAL $db, $MYSQL_PREFIX;
-        $checkname = $_SESSION['tdtracuser'];
+	$checkname = $_SESSION['tdtracuser'];
 	$checkpass = $_SESSION['tdtracpass'];
 
 	$sql = "SELECT password FROM {$MYSQL_PREFIX}users WHERE username = '{$checkname}' LIMIT 1";
-        $result = mysql_query($sql, $db);
+	$result = mysql_query($sql, $db);
 
 	$row = mysql_fetch_array($result);
 	mysql_free_result($result);
@@ -33,39 +61,64 @@ function islogin_cookietest() {
 	return 0;
 }
 
-
+/** 
+ * Show Login Form
+ * 
+ * @global string Address for links.
+ * @return string HTML output
+ */
 function islogin_form() {
-        GLOBAL $TDTRAC_SITE;
-	$html  = "<div id=\"loginform\"><form method=\"post\" action=\"{$TDTRAC_SITE}login\">";
-	$html .= '<div style="text-align: right">User Name: <input type="text" size="20" name="tracuser" /></div>';
-	$html .= '<div style="text-align: right">Password: <input type="password" size="20" name="tracpass" /></div>';
-	$html .= '<div style="text-align: right"><input type="submit" value="Login" /></div></form>';
-	$html .= "<div style=\"text-align: right\">[-<a href=\"{$TDTRAC_SITE}pwremind\">Forgot Password?</a>-]</div></div>";
+	GLOBAL $TDTRAC_SITE;
+	$form = new tdform("{$TDTRAC_SITE}login", "loginform", 1, "loginform");
+	
+	$result = $form->addText('tracuser', 'User Name');
+	$result = $form->addPass('tracpass', 'Password');
+	
+	$html .= $form->output('Login', "[-<a href=\"{$TDTRAC_SITE}pwremind\">Forgot Password?</a>-] ");
 	return $html;
 }
 
+/** 
+ * Show Password Reminder Form
+ * 
+ * @global string Address for links.
+ * @return string HTML output
+ */
 function islogin_pwform() {
-        GLOBAL $TDTRAC_SITE;
-	$html  = '<h2>Send Password Via E-Mail</h2>';
-        $html .= "<div id=\"loginform\"><form method=\"post\" action=\"{$TDTRAC_SITE}pwremind\">";
-        $html .= '<div style="text-align: right">E-Mail Address: <input type="text" size="20" name="tracemail" /></div>';
-        $html .= '<div style="text-align: right"><input type="submit" value="Send Reminder" /></div></form></div>';
-        return $html;
+	GLOBAL $TDTRAC_SITE;
+	$html  = '<h4>Send Password Via E-Mail</h4>';
+	$form = new tdform("{$TDTRAC_SITE}pwremind", "loginform", 1, "loginform");
+	
+	$result = $form->addText('tracemail', 'E-Mail Address');
+	
+	$html .= $form->output('Send Reminder');
+	return $html;
 }
 
+/**
+ * Log a User Out
+ */
 function islogin_logout() {
 	unset($_SESSION['tdtracuser']);
 	unset($_SESSION['tdtracpass']);
 	thrower("User Logged Out");
 }
 
+/**
+ * Log a user in
+ * 
+ * @global resource Database Link
+ * @global string MySQL Table Prefix
+ * @global string Site address for links
+ * @global string Database version string
+ */
 function islogin_dologin() {
 	GLOBAL $db, $MYSQL_PREFIX, $TDTRAC_SITE, $TDTRAC_DBVER;
 	$checkname = $_REQUEST['tracuser'];
 	$checkpass = $_REQUEST['tracpass'];
 
 	$sql = "SELECT userid, password, active, chpass, DATE_FORMAT(lastlogin, '%b %D %h:%i %p') AS lastlog FROM {$MYSQL_PREFIX}users WHERE username = '{$checkname}' LIMIT 1";
-        $result = mysql_query($sql, $db);
+	$result = mysql_query($sql, $db);
 
 	$row = mysql_fetch_array($result);
 	if ( $row['active'] == 0 ) { thrower("User Account is Locked!"); }
@@ -88,7 +141,6 @@ function islogin_dologin() {
 	else {
 		$infodata = "Login Failed!";
 	}
-
 	thrower($infodata);
 }
 
