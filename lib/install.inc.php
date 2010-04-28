@@ -153,7 +153,7 @@ $sql_rcpts = "CREATE TABLE IF NOT EXISTS {$MYSQL_PREFIX}rcpts` (
 
 $rcpts_result = mysql_query($sql_rcpts, $db);
 
-$ins_tdtrac = "INSERT INTO `{$MYSQL_PREFIX}tdtrac` (`name`, `value`) VALUES ( 'version', '1.1.0' ), ( 'version', '1.2.0'), ( 'version', '1.2.1'), ( 'version', '1.2.2'), ( 'version', '1.2.4'), ( 'version', '1.2.5'), ( 'version', '1.2.6')";
+$ins_tdtrac = "INSERT INTO `{$MYSQL_PREFIX}tdtrac` (`name`, `value`) VALUES ( 'version', '1.1.0' ), ( 'version', '1.2.0'), ( 'version', '1.2.1'), ( 'version', '1.2.2'), ( 'version', '1.2.4'), ( 'version', '1.2.5'), ( 'version', '1.2.6'), ( 'version', '1.3.0')";
 
 $tdtracins_result = mysql_query($ins_tdtrac, $db);
 
