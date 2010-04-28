@@ -559,3 +559,11 @@ tr.dates td {
 tr.dates a { 
 	color: #333333;
 }
+
+#rcptbox {
+	float: right;
+	text-align: center;
+}
+#rcptbox img {
+	border: none;
+}
