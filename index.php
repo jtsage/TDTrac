@@ -206,6 +206,14 @@ if ( $login[0] ) {
 				} else { echo perms_groupform(); }
 			} else { echo perms_no(); }
 			break;
+		case "mail-perms":
+			if ( perms_isadmin($user_name) ) { 
+				if ( $_SERVER['REQUEST_METHOD'] == "POST" ) { perms_mailcode_do(); }
+				else {
+					echo perms_mailcode();
+				}
+			} else { echo perms_no(); }
+			break;
 		case "edit-perms":
 			if ( perms_isadmin($user_name) ) { 
 				if ( $_SERVER['REQUEST_METHOD'] == "GET" ) { echo perms_editpickform(); }
