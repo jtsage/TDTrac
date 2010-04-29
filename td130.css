@@ -265,6 +265,21 @@ border-bottom: solid 1px #777777;
 border-left: 0px;
 padding: 0.15em;
 width: 10.0em;
+
+}
+#search select
+{
+border-top: solid 1px #000000;
+border-right: 0px;
+border-bottom: solid 1px #777777;
+border-left: 0px;
+padding: 0px;
+vertical-align: middle;
+width: 8em;
+margin-right: 0.5em;
+margin-bottom: 0px;
+text-align: right;
+
 }
 
 #search input.submit
@@ -281,8 +296,8 @@ vertical-align: middle;
 #headerpic
 {
 position: relative;
-height: 109px;
-background: #fff url('images/hdrpic.jpg') no-repeat top left;
+height: 87px;
+background: #fff url('images/tdtrachdr.png') no-repeat top left;
 margin-bottom: 2px;
 }
 

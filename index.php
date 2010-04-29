@@ -46,6 +46,14 @@ switch ($page_title) {
 }
 if ( $login[0] ) {
 	switch($page_title) {
+		case "search":
+			if ( perms_checkperm($user_name, 'viewbudget') ) {
+				if ( $_SERVER['REQUEST_METHOD'] == "POST" ) {
+					if ( isset($_REQUEST['stype']) && isset($_REQUEST['keywords']) && $_REQUEST['keywords'] <> "" ) { echo budget_search($_REQUEST['stype'], $_REQUEST['keywords']); }
+					else { echo display_home($user_name); }
+				} else { echo display_home($user_name); }
+			} else { echo perms_no(); }
+			break;
 		case "rcpt":
 			if ( perms_checkperm($user_name, 'addbudget') ) {
 				if ($_SERVER['REQUEST_METHOD'] == "POST") { rcpt_do(); }
