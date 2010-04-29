@@ -259,7 +259,7 @@ function budget_search($type, $keywords) {
 	} elseif ( $type == "date" ) { $sqlwhere = "date = '" . mysql_real_escape_string($keywords) . "'"; 
 	} else { $sqlwhere = "dscr LIKE '%" . mysql_real_escape_string($keywords) . "%'"; }
 	
-	$sql = "SELECT * FROM {$MYSQL_PREFIX}budget b, {$MYSQL_PREFIX}shows s WHERE b.showid = s.showid AND s.closed = 0 AND {$sqlwhere} ORDER BY b.showid DESC, category ASC, date ASC, vendor ASC";
+	$sql = "SELECT * FROM {$MYSQL_PREFIX}budget b, {$MYSQL_PREFIX}shows s WHERE b.showid = s.showid AND {$sqlwhere} ORDER BY b.showid DESC, category ASC, date ASC, vendor ASC";
 	$result = mysql_query($sql, $db);
 	
 	$html = "<h3>Search Results</h3>\n";
