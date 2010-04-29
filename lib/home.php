@@ -18,6 +18,7 @@ function display_home($username, $type=0) {
 	$html  = "";
 	$html .= msg_check();
 	$html .= rcpt_check();
+	if ( $type == 0 ) { $html .= "<br /><br /><div style=\"float: left; width: 49%\">\n"; }
 	if ( $type == 0 || $type == 1 ) {
 		$html .= "<h3>Payroll Tracking</h3><ul class=\"linklist\">\n";
 		$html .= ( perms_checkperm($username, 'addhours') ) ? "<li><a href=\"{$TDTRAC_SITE}add-hours\">Add Hours Worked</a></li>\n" : "";
@@ -36,6 +37,7 @@ function display_home($username, $type=0) {
 		$html .= ( perms_checkperm($username, 'viewbudget') ) ? "<li><a href=\"{$TDTRAC_SITE}view-budget-special&amp;stype=4\">View Budgets (reimbursment not recieved items only, all shows)</a></li>\n" : "";
 		$html .= "</ul>\n";
 	}
+	if ( $type == 0 ) { $html .= "</div>\n"; }
 	if ( $type == 0 || $type == 3 ) {
 		$html .= "<h3>Show Information</h3><ul class=\"linklist\">\n";
 		$html .= ( perms_checkperm($username, 'addshow') ) ? "<li><a href=\"{$TDTRAC_SITE}add-show\">Add Show</a></li>\n" : "";
@@ -54,7 +56,6 @@ function display_home($username, $type=0) {
 		}
 		$html .= "</ul>\n";
 	}
-
 	return $html;
 }
 
