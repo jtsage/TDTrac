@@ -74,7 +74,6 @@ class tdtable {
 	 * Create a new table
 	 * 
 	 * @param string ID of the table
-	 * @param string Title of the table
 	 * @param string Class type for the table
 	 * @param bool Use action type items
 	 */
