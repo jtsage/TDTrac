@@ -4,7 +4,8 @@
  * 
  * Contains help node raw data.
  * @package tdtrac
- * @version 1.3.0
+ * @version 1.3.1
+ * @author J.T.Sage <jtsage@gmail.com>
  */
 $helpnode['error'][] = "<h3>Error</h3><p>This help item has not yet been written.  Sorry.</p>\n";
 

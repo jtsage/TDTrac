@@ -1,0 +1,325 @@
+<?php
+/**
+ * TDTrac Table Library
+ * 
+ * Contains the table library
+ * @package tdtrac
+ * @version 1.3.1
+ * @author J.T.Sage <jtsage@gmail.com>
+ */
+
+/**
+ * TDTable Class
+ * @package tdtrac
+ */
+class tdtable {
+	/**
+	 * @var array Form Member storage
+	 */
+	public $members = null;
+	/**
+	 * @var array Formated HTML
+	 */
+	private $html = "";
+	/**
+	 * @var string Name of Form
+	 */
+	private $tablename = "";
+	/**
+	 * @var integer Current Tab Index
+	 */
+	private $currentrow = 0;
+	/**
+	 * @var bool Use actions
+	 */
+	private $actions = true;
+	/**
+	 * @var integer Subtotal on this table element
+	 */
+	private $subidx = null;
+	/**
+	 * @var array Running Subtotal (array of doubles.  Total all currency values)
+	 */
+	private $runsub = null;
+	/**
+	 * @var array Running Total (array of doubles. Total all currency values)
+	 */
+	private $runtot = null;
+	/**
+	 * @var array Header Names
+	 */
+	private $headers = null;
+	/**
+	 * @var array Alignment of elements
+	 */
+	private $align = null;
+	/**
+	 * @var array Currency Indexes
+	 */
+	private $currencyidx = null;
+	/**
+	 * @var bool Need final subtotal
+	 */
+	private $finalsub = false;
+	/**
+	 * @var array List of all actions
+	 */
+	private $actionlist = null;
+	/**
+	 * @var array List of number only currencies
+	 */
+	private $numberonly = null;
+	
+	/**
+	 * Create a new table
+	 * 
+	 * @param string ID of the table
+	 * @param string Title of the table
+	 * @param string Class type for the table
+	 * @param bool Use action type items
+	 */
+	public function __construct($id = 'tdtable', $class = 'datatable', $actions = true) {
+		$this->html[] = "<div id=\"{$id}\">\n";
+		$this->html[] = "  <table id=\"{$id}-table\" class=\"{$class}\">\n";
+		$this->tablename = $id;
+		$this->actions = $actions;
+	}
+	
+	public function output() {
+		$rhtml = "";
+		if ( $this->finalsub ) {
+			$this->doSubtotal();
+		}
+		if ( ! is_null($this->currencyidx) ) {
+			$this->doTotal();
+		}
+		foreach ( $this->html as $line ) {
+			$rhtml .= $line;
+		}
+		
+		$rhtml .= " </table>\n</div>";
+		return $rhtml;
+	}
+	
+	private function doSubtotal() {
+		$elements = count($this->headers);
+		if ( $this->actions ) { $elements++; }
+		$thisrow = array_fill(0, $elements, '<span style="display: block; text-align: center">-=-</span>');
+		foreach ( $this->currencyidx as $cidx ) {
+			$thisrow[$cidx] = "$" . number_format($this->runsub[$cidx], 2);
+			if ( $this->numberonly[$cidx] ) { $thisrow[$cidx] = $this->runsub[$cidx]; }
+			$this->runsub[$cidx] = 0;
+			$thisrow[$cidx] = "<span style=\"display: block; text-align: {$this->align[$cidx]}\">{$thisrow[$cidx]}</span>";
+		}
+		$thisrow[$this->subidx] = $this->members[$this->currentrow-1][$this->subidx];
+		if ( $this->actions ) { $thisrow[$elements-1] = ''; }
+		foreach ( $thisrow as $item ) {
+			$rhtml .= "<td>{$item}</td>";
+		}
+		$this->html[] = "<tr class=\"datasubtotal\">{$rhtml}</tr>\n";
+		return true;
+	}
+	
+	private function doTotal() {
+		$elements = count($this->headers);
+		if ( $this->actions ) { $elements++; }
+		$thisrow = array_fill(0, $elements, '<span style="display: block; text-align: center">-=-=-</span>');
+		foreach ( $this->currencyidx as $cidx ) {
+			$thisrow[$cidx] = "$" . number_format($this->runtot[$cidx], 2);
+			if ( $this->numberonly[$cidx] ) { $thisrow[$cidx] = $this->runtot[$cidx]; }
+			$thisrow[$cidx] = "<span style=\"display: block; text-align: {$this->align[$cidx]}\">{$thisrow[$cidx]}</span>";
+		}
+		if ( $this->actions ) { $thisrow[$elements-1] = ''; }
+		foreach ( $thisrow as $item ) {
+			$rhtml .= "<td>{$item}</td>";
+		}
+		$this->html[] = "<tr class=\"datatotal\">{$rhtml}</tr>\n";
+		return true;
+	}
+		
+	public function addHeader($items = null) {
+		$this->headers = $items;
+		$this->align = array_fill(0, count($this->headers), "left");
+		foreach ( $items as $item ) {
+			$thtml .= "<th>{$item}</th>";
+		}
+		if ( $this->actions ) { $thtml .= "<th>Action</th>"; }
+		$this->html[] = "  <tr>{$thtml}</tr>\n";
+		return true;
+	}
+	
+	public function addSubtotal($headername) {
+		$currentindex = 0;
+		foreach ( $this->headers as $testname ) {
+			if ( $testname == $headername ) {
+				$this->subidx = $currentindex;
+				return true;
+			} $currentindex++;
+		}
+		return false;
+	}
+	
+	public function addCurrency($headername) {
+		$currentindex = 0;
+		foreach ( $this->headers as $testname ) {
+			if ( $testname == $headername ) {
+				$this->currencyidx[] = $currentindex;
+				$this->runsub[$currentindex] = 0;
+				$this->runtot[$currentindex] = 0;
+				$this->align[$currentindex] = "right";
+				return $currentindex;
+			} $currentindex++;
+		}
+		return false;
+	}
+	
+	public function addNumber($headername) {
+		$numonly = $this->addCurrency($headername);
+		$this->numberonly[$numonly] = True;
+		return true;
+	}
+	
+	public function setAlign($headername, $alignment) {
+		$currentindex = 0;
+		foreach ( $this->headers as $testname ) {
+			if ( $testname == $headername ) {
+				$this->align[$currentindex] = $alignment;
+				return $currentindex;
+			} $currentindex++;
+		}
+		return false;
+	}
+
+	public function addRow($row = null, $raw = null) {
+		if ( is_null($row) ) { return false; }
+		if ( ! is_null($this->subidx) ) {
+			if ( $this->currentrow > 0 ) {
+				if ( $row[$this->subidx] <> $this->members[$this->currentrow-1][$this->subidx] ) {
+					$this->finalsub = true;
+					$this->doSubtotal();
+				}
+			}
+		}
+		$this->members[] = $row;
+		$drow = $row;
+		foreach ( $this->currencyidx as $cidx ) {
+			$this->runsub[$cidx] += $row[$cidx];
+			$this->runtot[$cidx] += $row[$cidx];
+			if ( ! $this->numberonly[$cidx] ) {
+				$drow[$cidx] = number_format($drow[$cidx], 2); 
+			}
+		}
+		foreach ( array_keys($drow) as $item ) {
+			$thtml .= "<td style=\"text-align: {$this->align[$item]}\">{$drow[$item]}</td>";
+		}
+		if ( $this->actions ) { $thtml .= "<td style=\"text-align: center\">" . $this->do_actions($raw) . "</td>"; }
+		if ( $this->currentrow % 2 == 0 ) {
+			$this->html[] = "   <tr class=\"tdtabevn\">{$thtml}</tr>\n";
+		} else {
+			$this->html[] = "   <tr class=\"tdtabodd\">{$thtml}</tr>\n";
+		}
+		$this->currentrow++;
+		return true;
+			
+	}
+	
+	public function addAction($name) {
+		if ( is_array($name) ) {
+			foreach ($name as $item) {
+				$this->actionlist[] = $item;
+			}
+		} else {
+			$this->actionlist[] = $name;
+		}
+	}
+	
+	private function do_actions($raw) {
+		$rethtml = "";
+		foreach ( $this->actionlist as $action ) {
+			switch ($action) {
+				case "bpend":
+					$rethtml .= $this->act_bpend($raw);
+					break;
+				case "breim":
+					$rethtml .= $this->act_breim($raw);
+					break;
+				case "rview":
+					$rethtml .= $this->act_rview($raw);
+					break;
+				case "bedit":
+					$rethtml .= $this->act_bedit($raw);
+					break;
+				case "bview":
+					$rethtml .= $this->act_bview($raw);
+					break;
+				case "bdel":
+					$rethtml .= $this->act_bdel($raw);
+					break;
+				case "pedit":
+					$rethtml .= $this->act_pedit($raw);
+					break;
+				case "pdel":
+					$rethtml .= $this->act_pdel($raw);
+					break;
+			}
+		}
+		return $rethtml;
+	}
+	
+	private function act_bpend($raw) {
+		if ( $raw['pending'] ) {
+			return "<img class=\"ticon\" src=\"/images/pending.png\" alt=\"Payment Pending\" title=\"Payment Pending\" />";
+		} else {
+			return "<img class=\"ticon\" src=\"/images/blank.png\" alt=\"Spacer\" />";
+		}
+	}
+	
+	private function act_breim($raw) {
+		if ( $raw['needrepay'] ) {
+			if ( $raw['gotrepay'] ) {
+				return "<img class=\"ticon\" src=\"/images/reim-yes.png\" title=\"Reimbursment Recieved\" alt=\"Reimbursment Recieved\" />";
+			} else {
+				return "<img class=\"ticon\" src=\"/images/reim-no.png\" title=\"Reimbursment Needed\" alt=\"Reimbursment Needed\" />";
+			}
+		} else { 
+			return "<img class=\"ticon\" src=\"/images/blank.png\" alt=\"Spacer\" />";
+		}
+	}
+	
+	private function act_rview($raw) {
+		if ( $raw['imgid'] > 0 ) {
+			return "<a href=\"/rcpt.php?imgid={$row['imgid']}&amp;hires\" target=\"_blank\"><img class=\"ticon\" src=\"/images/rcptview.png\" title=\"View Reciept (new window)\" alt=\"Show Reciept\" /></a>";
+		} else { 
+			return "<img class=\"ticon\" src=\"/images/blank.png\" alt=\"Spacer\" />";
+		}
+	}
+	
+	private function act_bview($raw) {
+		global $TDTRAC_SITE;
+		return "<a href=\"{$TDTRAC_SITE}view-budget-item&amp;id={$raw['id']}\"><img class=\"ticon\" src=\"/images/view.png\" title=\"View Budget Item Detail\" alt=\"View Item\" /></a>";
+	}
+	
+	private function act_bedit($raw) {
+		global $TDTRAC_SITE;
+		return "<a href=\"{$TDTRAC_SITE}edit-budget&amp;id={$raw['id']}\"><img class=\"ticon\" src=\"/images/edit.png\" title=\"Edit Budget Item\" alt=\"Edit Item\" /></a>";
+	}
+	
+	private function act_bdel($raw) {
+		global $TDTRAC_SITE;
+		return "<a href=\"{$TDTRAC_SITE}del-budget&amp;id={$raw['id']}\"><img class=\"ticon\" src=\"/images/delete.png\" title=\"Delete Budget Item\" alt=\"Delete Item\" /></a>";
+	}
+	
+	private function act_pedit($raw) {
+		global $TDTRAC_SITE;
+		return "<a title=\"Edit\" href=\"{$TDTRAC_SITE}edit-hours&amp;id={$raw['hid']}\"><img class=\"ticon\" src=\"images/edit.png\" alt=\"Edit\" /></a> ";
+	}
+	
+	private function act_pdel($raw) {
+		global $TDTRAC_SITE;
+		return "<a title=\"Delete\" href=\"{$TDTRAC_SITE}del-hours&amp;id={$raw['hid']}\"><img class=\"ticon\" src=\"images/delete.png\" alt=\"Delete\" /></a>";
+	}
+
+}
+
+
+?>

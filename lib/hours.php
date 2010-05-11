@@ -4,7 +4,8 @@
  * 
  * Contains all payroll related functions. 
  * @package tdtrac
- * @version 1.3.0
+ * @version 1.3.1
+ * @author J.T.Sage <jtsage@gmail.com>
  */
 
 /**
@@ -227,20 +228,17 @@ function hours_view($userid, $unpaidonly = 0) {
 		$html .= "</span><ul class=\"datalist\">\n";
 		$html .= ($_REQUEST['sdate'] <> "" ) ? "<li>Start Date: {$_REQUEST['sdate']}</li>" : "";
 		$html .= ($_REQUEST['edate'] <> "" ) ? "<li>Ending Date: {$_REQUEST['edate']}</li>" : "";
-		$html .= "</ul><table class=\"datatable\">\n";
-		$html .= "<tr><th>Date</th><th>Show</th><th>".(($TDTRAC_DAYRATE)?"Days":"Hours")." Worked</th><th>Paid</th>";
-		$html .= ( $canedit ) ? "<th>Action</th></tr>\n" : "</tr>\n";
-		$tot = 0;
+		$html .= "</ul>\n";
+		$tabl = new tdtable("hours");
+		$tabl->addHeader(array('Date', 'Show', (($TDTRAC_DAYRATE)?"Days":"Hours")." Worked", 'Paid'));
+		$tabl->addNumber((($TDTRAC_DAYRATE)?"Days":"Hours")." Worked");
+		$tabl->setAlign('Paid', "center");
+		if ( $canedit ) { $tabl->addAction(array('pedit', 'pdel')); }
+		
 		foreach ( $data as $num => $line ) {
-			$tot += $line['worked'];
-			$html .= "<tr".(($num % 2 <> 0)?" class=\"odd\"":"")."><td>{$line['date']}</td><td>{$line['showname']}</td><td style=\"text-align: right\">{$line['worked']}</td>";
-			$html .= "<td style=\"text-align: center\">" . (($line['submitted'] == 1) ? "YES" : "NO") . "</td>";
-			$html .= ( $canedit ) ? "<td style=\"text-align: center\"><a title=\"Edit\" href=\"{$TDTRAC_SITE}edit-hours&amp;id={$line['hid']}\"><img class=\"ticon\" src=\"images/edit.png\" alt=\"Edit\" /></a> " : "";
-			$html .= ( $canedit ) ? "<a title=\"Delete\" href=\"{$TDTRAC_SITE}del-hours&amp;id={$line['hid']}\"><img class=\"ticon\" src=\"images/delete.png\" alt=\"Delete\" /></a></td>" : "";
-			$html .= "</tr>\n";
+			$tabl->addRow(array($line['date'], $line['showname'], $line['worked'], (($line['submitted'] == 1) ? "YES" : "NO")), $line);
 		}
-		$html .= "<tr class=\"datatotal\"><td></td><td style=\"text-align: center\">-=- TOTAL -=-</td><td style=\"text-align: right\">{$tot}</td><td></td><td></td></tr>\n";
-		$html .= "</table>\n<br />";
+		$html .= $tabl->output();
 	}
 	return $html;
 }

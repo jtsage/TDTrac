@@ -4,7 +4,8 @@
  * 
  * Contains main program logic.
  * @package tdtrac
- * @version 1.3.0
+ * @version 1.3.1
+ * @author J.T.Sage <jtsage@gmail.com>
  */
 if ( isset($_REQUEST['node']) ) { $node = $_REQUEST['node']; } else { $node = "home"; }
 $html = <<<ENN
