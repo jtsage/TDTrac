@@ -243,7 +243,6 @@ function budget_view_special($onlytype) {
 /** 
  * Logic to display a searched item
  * 
- * @param string type
  * @param string keywords
  * @global resource Database Link
  * @global string User Name
@@ -251,14 +250,13 @@ function budget_view_special($onlytype) {
  * @global string TDTrac site address for links
  * @return string HTML output
  */
-function budget_search($type, $keywords) {
+function budget_search($keywords) {
 	GLOBAL $db, $user_name, $MYSQL_PREFIX, $TDTRAC_SITE;
-	$editbudget = perms_checkperm($user_name, "editbudget");
 	
-	if ( $type == "cat" ) { $sqlwhere = "category LIKE '%" . mysql_real_escape_string($keywords) . "%'"; 
-	} elseif ( $type == "vendor" ) { $sqlwhere = "vendor LIKE '%" . mysql_real_escape_string($keywords) . "%'"; 
-	} elseif ( $type == "date" ) { $sqlwhere = "date = '" . mysql_real_escape_string($keywords) . "'"; 
-	} else { $sqlwhere = "dscr LIKE '%" . mysql_real_escape_string($keywords) . "%'"; }
+	$sqlwhere  = "( category LIKE '%" . mysql_real_escape_string($keywords) . "%' OR "; 
+	$sqlwhere .= "vendor LIKE '%" . mysql_real_escape_string($keywords) . "%' OR "; 
+	$sqlwhere .= "date = '" . mysql_real_escape_string($keywords) . "' OR "; 
+	$sqlwhere .= "dscr LIKE '%" . mysql_real_escape_string($keywords) . "%' )";
 	
 	$sql = "SELECT * FROM {$MYSQL_PREFIX}budget b, {$MYSQL_PREFIX}shows s WHERE b.showid = s.showid AND {$sqlwhere} ORDER BY b.showid DESC, category ASC, date ASC, vendor ASC";
 	$result = mysql_query($sql, $db);
@@ -266,29 +264,18 @@ function budget_search($type, $keywords) {
 	$html = "<h3>Search Results</h3>\n";
 	if ( mysql_num_rows($result) == 0 ) { return $html . "<br /><br /><h4>No Records Found!</h4>\n"; }
 	
-	$html .= "<table id=\"sresult\" class=\"datatable\"><tr><th>Show</th><th>Category</th><th>Vendor</th><th>Description</th><th>Price</th><th>Tax</th><th>Action</th></tr>\n";
-	$lastshow = -1;
+	$tabl = new tdtable("searchresult");
+	$tabl->addHeader(array('Show', 'Date', 'Category', 'Vendor', 'Description', 'Price', 'Tax'));
+	$tabl->addSubtotal('Show');
+	$tabl->addCurrency('Price');
+	$tabl->addCurrency('Tax');
+	$tabl->addAction(array('bpend','breim','rview','bview'));
+	if ( perms_checkperm($user_name, "editbudget") ) { $tabl->addAction(array('bedit', 'bdel')); }
 	
 	while( $line = mysql_fetch_array($result) ) {
-		if ( $line['showid'] != $lastshow && $lastshow > -1 ) { 
-			$html .= "<tr class=\"datasubtotal\"><td style=\"text-align: center\">---</td><td style=\"text-align: center\">---</td><td style=\"text-align: center\">---</td><td style=\"text-align: center\">---</td><td style=\"text-align: center\">---</td><td style=\"text-align: center\">---</td><td></td></tr>\n";
-		} 
-		$html .= "<tr><td>{$line['showname']}</td><td>{$line['category']}</td><td>{$line['vendor']}</td><td>{$line['dscr']}</td>";
-		$html .= "<td style=\"text-align: right\">$";
-		$html .= number_format($line['price'], 2);
-		$html .= "</td><td style=\"text-align: right\">$";
-		$html .= number_format($line['tax'], 2);
-		$html .= "</td><td style=\"text-align: center\">";
-		$html .= (($line['pending'] == 1) ? "<img class=\"ticon\" src=\"/images/pending.png\" alt=\"Payment Pending\" title=\"Payment Pending\" />" : "<img class=\"ticon\" src=\"/images/blank.png\" alt=\"Spacer\" />");
-		$html .= (($line['needrepay'] == 1) ? (($line['gotrepay'] == 1) ? "<img class=\"ticon\" src=\"/images/reim-yes.png\" title=\"Reimbursment Recieved\" alt=\"Reimbursment Recieved\" />" : "<img class=\"ticon\" src=\"/images/reim-no.png\" title=\"Reimbursment Needed\" alt=\"Reimbursment Needed\" />") : "<img class=\"ticon\" src=\"/images/blank.png\" alt=\"Spacer\" />");
-		$html .= ( $line['imgid'] > 0 ) ? "<a href=\"/rcpt.php?imgid={$line['imgid']}&amp;hires\" target=\"_blank\"><img class=\"ticon\" src=\"/images/rcptview.png\" title=\"View Reciept (new window)\" alt=\"Show Reciept\" /></a>" : "<img class=\"ticon\" src=\"/images/blank.png\" alt=\"Spacer\" />";
-		$html .= "<a href=\"{$TDTRAC_SITE}view-budget-item&amp;id={$line['id']}\"><img class=\"ticon\" src=\"/images/view.png\" title=\"View Budget Item Detail\" alt=\"View Item\" /></a>";
-		$html .= $editbudget ? "<a href=\"{$TDTRAC_SITE}edit-budget&amp;id={$line['id']}\"><img class=\"ticon\" src=\"/images/edit.png\" title=\"Edit Budget Item\" alt=\"Edit Item\" /></a>" : "<img class=\"ticon\" src=\"/images/blank.png\" alt=\"Spacer\" />";
-		$html .= $editbudget ? "<a href=\"{$TDTRAC_SITE}del-budget&amp;id={$line['id']}\"><img class=\"ticon\" src=\"/images/delete.png\" title=\"Delete Budget Item\" alt=\"Delete Item\" /></a>" : "<img class=\"ticon\" src=\"/images/blank.png\" alt=\"Spacer\" />";
-		$html .= "</td></tr>\n";
-		$lastshow = $line['showid'];
+		$tabl->addRow(array($line['showname'], $line['date'], $line['category'], $line['vendor'], $line['dscr'], $line['price'], $line['tax']), $line);
 	}
-	$html .= "</table><br /><br />"; 
+	$html .= $tabl->output();
 	return $html;
 }
 
