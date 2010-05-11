@@ -42,7 +42,7 @@ $html .= "</h2>\n		</div>\n	</div>\n";
 if ( $login[0] ) {
 	if ( perms_checkperm($login[1], 'viewbudget') ) {
 		$html .= "		<form method=\"post\" action=\"{$TDTRAC_SITE}search\">\n		<div id=\"search\">\n";
-		$html .= "			<select tabindex=\"80\" name=\"stype\" id=\"stype\"><option value=\"dscr\">Description &asymp;</option><option value=\"cat\">Category &asymp;</option><option value=\"vendor\">Vendor &asymp;</option><option value=\"date\">Date =</option></select>\n";
+		//$html .= "			<select tabindex=\"80\" name=\"stype\" id=\"stype\"><option value=\"dscr\">Description &asymp;</option><option value=\"cat\">Category &asymp;</option><option value=\"vendor\">Vendor &asymp;</option><option value=\"date\">Date =</option></select>\n";
 		$html .= "			<input tabindex=\"81\" type=\"text\" class=\"text\" maxlength=\"64\" name=\"keywords\" />\n 			<input tabindex=\"82\" type=\"submit\" class=\"submit\" value=\"Search\" />\n		</div>\n	</form>\n";
 	}
 }
