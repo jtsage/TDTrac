@@ -26,7 +26,7 @@ class tdtable {
 	 */
 	private $tablename = "";
 	/**
-	 * @var integer Current Tab Index
+	 * @var integer Current row index
 	 */
 	private $currentrow = 0;
 	/**
@@ -85,6 +85,11 @@ class tdtable {
 		$this->actions = $actions;
 	}
 	
+	/**
+	 * Ouput the finished table
+	 * 
+	 * @return string Formatted HTML
+	 */
 	public function output() {
 		$rhtml = "";
 		if ( $this->finalsub ) {
@@ -101,6 +106,11 @@ class tdtable {
 		return $rhtml;
 	}
 	
+	/**
+	 * Compute and add a subtotal row
+	 * 
+	 * @return bool True on success
+	 */
 	private function doSubtotal() {
 		$elements = count($this->headers);
 		if ( $this->actions ) { $elements++; }
@@ -120,6 +130,11 @@ class tdtable {
 		return true;
 	}
 	
+	/**
+	 * Compute and add a total row
+	 * 
+	 * @return bool True on success
+	 */
 	private function doTotal() {
 		$elements = count($this->headers);
 		if ( $this->actions ) { $elements++; }
@@ -136,7 +151,13 @@ class tdtable {
 		$this->html[] = "<tr class=\"datatotal\">{$rhtml}</tr>\n";
 		return true;
 	}
-		
+	
+	/**
+	 * Add a list of header names to the table
+	 * 
+	 * @param array List of strings for headers
+	 * @return bool True on success
+	 */
 	public function addHeader($items = null) {
 		$this->headers = $items;
 		$this->align = array_fill(0, count($this->headers), "left");
@@ -148,6 +169,12 @@ class tdtable {
 		return true;
 	}
 	
+	/**
+	 * Denote column name for subtotal generation
+	 * 
+	 * @param string Name of column
+	 * @return bool True on success
+	 */
 	public function addSubtotal($headername) {
 		$currentindex = 0;
 		foreach ( $this->headers as $testname ) {
@@ -159,6 +186,12 @@ class tdtable {
 		return false;
 	}
 	
+	/**
+	 * Denote column contains currency (total it)
+	 * 
+	 * @param string Name of column
+	 * @return int Column number, or false on failure
+	 */
 	public function addCurrency($headername) {
 		$currentindex = 0;
 		foreach ( $this->headers as $testname ) {
@@ -173,12 +206,25 @@ class tdtable {
 		return false;
 	}
 	
+	/**
+	 * Denote column contains a numbner (total it)
+	 * 
+	 * @param string Name of column
+	 * @return bool True on sucess
+	 */
 	public function addNumber($headername) {
 		$numonly = $this->addCurrency($headername);
 		$this->numberonly[$numonly] = True;
 		return true;
 	}
 	
+	/**
+	 * Change the alignment of a column
+	 * 
+	 * @param string Name of column
+	 * @param string New alignment
+	 * @return int Index of column or False on failure
+	 */
 	public function setAlign($headername, $alignment) {
 		$currentindex = 0;
 		foreach ( $this->headers as $testname ) {
@@ -189,7 +235,14 @@ class tdtable {
 		}
 		return false;
 	}
-
+	
+	/**
+	 * Add a row to the table
+	 * 
+	 * @param array List of items in the row
+	 * @param array Raw SQL returned array
+	 * @return bool True on sucess
+	 */
 	public function addRow($row = null, $raw = null) {
 		if ( is_null($row) ) { return false; }
 		if ( ! is_null($this->subidx) ) {
@@ -223,6 +276,11 @@ class tdtable {
 			
 	}
 	
+	/**
+	 * Add an action to each table row
+	 * 
+	 * @param string Action name (or array of names)
+	 */
 	public function addAction($name) {
 		if ( is_array($name) ) {
 			foreach ($name as $item) {
@@ -233,6 +291,12 @@ class tdtable {
 		}
 	}
 	
+	/** 
+	 * Add the actions to the row (logic)
+	 * 
+	 * @param array Raw SQL array
+	 * @return string Formatted HTML
+	 */
 	private function do_actions($raw) {
 		$rethtml = "";
 		foreach ( $this->actionlist as $action ) {
@@ -266,6 +330,12 @@ class tdtable {
 		return $rethtml;
 	}
 	
+	/**
+	 * Action: Budget pending items notification
+	 * 
+	 * @param array Raw SQL Array
+	 * @return string Formatted HTML
+	 */
 	private function act_bpend($raw) {
 		if ( $raw['pending'] ) {
 			return "<img class=\"ticon\" src=\"/images/pending.png\" alt=\"Payment Pending\" title=\"Payment Pending\" />";
@@ -274,6 +344,12 @@ class tdtable {
 		}
 	}
 	
+	/**
+	 * Action: Budget reimbursment items notification
+	 * 
+	 * @param array Raw SQL Array
+	 * @return string Formatted HTML
+	 */
 	private function act_breim($raw) {
 		if ( $raw['needrepay'] ) {
 			if ( $raw['gotrepay'] ) {
@@ -286,6 +362,12 @@ class tdtable {
 		}
 	}
 	
+	/**
+	 * Action: Reciept view button
+	 * 
+	 * @param array Raw SQL Array
+	 * @return string Formatted HTML
+	 */
 	private function act_rview($raw) {
 		if ( $raw['imgid'] > 0 ) {
 			return "<a href=\"/rcpt.php?imgid={$row['imgid']}&amp;hires\" target=\"_blank\"><img class=\"ticon\" src=\"/images/rcptview.png\" title=\"View Reciept (new window)\" alt=\"Show Reciept\" /></a>";
@@ -294,32 +376,60 @@ class tdtable {
 		}
 	}
 	
+	/**
+	 * Action: Budget view item button
+	 * 
+	 * @param array Raw SQL Array
+	 * @return string Formatted HTML
+	 */
 	private function act_bview($raw) {
 		global $TDTRAC_SITE;
 		return "<a href=\"{$TDTRAC_SITE}view-budget-item&amp;id={$raw['id']}\"><img class=\"ticon\" src=\"/images/view.png\" title=\"View Budget Item Detail\" alt=\"View Item\" /></a>";
 	}
 	
+	/**
+	 * Action: Budget edit item button
+	 * 
+	 * @param array Raw SQL Array
+	 * @return string Formatted HTML
+	 */
 	private function act_bedit($raw) {
 		global $TDTRAC_SITE;
 		return "<a href=\"{$TDTRAC_SITE}edit-budget&amp;id={$raw['id']}\"><img class=\"ticon\" src=\"/images/edit.png\" title=\"Edit Budget Item\" alt=\"Edit Item\" /></a>";
 	}
 	
+	/**
+	 * Action: Budget delete item button
+	 * 
+	 * @param array Raw SQL Array
+	 * @return string Formatted HTML
+	 */
 	private function act_bdel($raw) {
 		global $TDTRAC_SITE;
 		return "<a href=\"{$TDTRAC_SITE}del-budget&amp;id={$raw['id']}\"><img class=\"ticon\" src=\"/images/delete.png\" title=\"Delete Budget Item\" alt=\"Delete Item\" /></a>";
 	}
 	
+	/**
+	 * Action: Payroll edit item button
+	 * 
+	 * @param array Raw SQL Array
+	 * @return string Formatted HTML
+	 */
 	private function act_pedit($raw) {
 		global $TDTRAC_SITE;
 		return "<a title=\"Edit\" href=\"{$TDTRAC_SITE}edit-hours&amp;id={$raw['hid']}\"><img class=\"ticon\" src=\"images/edit.png\" alt=\"Edit\" /></a> ";
 	}
 	
+	/**
+	 * Action: Payroll delete item button
+	 * 
+	 * @param array Raw SQL Array
+	 * @return string Formatted HTML
+	 */
 	private function act_pdel($raw) {
 		global $TDTRAC_SITE;
 		return "<a title=\"Delete\" href=\"{$TDTRAC_SITE}del-hours&amp;id={$raw['hid']}\"><img class=\"ticon\" src=\"images/delete.png\" alt=\"Delete\" /></a>";
 	}
-
 }
-
 
 ?>
