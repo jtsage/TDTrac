@@ -254,11 +254,13 @@ class tdtable {
 		}
 		$this->members[] = $row;
 		$drow = $row;
-		foreach ( $this->currencyidx as $cidx ) {
-			$this->runsub[$cidx] += $row[$cidx];
-			$this->runtot[$cidx] += $row[$cidx];
-			if ( ! $this->numberonly[$cidx] ) {
-				$drow[$cidx] = number_format($drow[$cidx], 2); 
+		if ( !is_null($this->currencyidx) ) {
+			foreach ( $this->currencyidx as $cidx ) {
+				$this->runsub[$cidx] += $row[$cidx];
+				$this->runtot[$cidx] += $row[$cidx];
+				if ( ! $this->numberonly[$cidx] ) {
+					$drow[$cidx] = number_format($drow[$cidx], 2); 
+				}
 			}
 		}
 		foreach ( array_keys($drow) as $item ) {
@@ -323,6 +325,9 @@ class tdtable {
 					break;
 				case "pdel":
 					$rethtml .= $this->act_pdel($raw);
+					break;
+				case "mdel":
+					$rethtml .= $this->act_mdel($raw);
 					break;
 			}
 		}
@@ -428,6 +433,17 @@ class tdtable {
 	private function act_pdel($raw) {
 		global $TDTRAC_SITE;
 		return "<a title=\"Delete\" href=\"{$TDTRAC_SITE}del-hours&amp;id={$raw['hid']}\"><img class=\"ticon\" src=\"images/delete.png\" alt=\"Delete\" /></a>";
+	}
+	
+	/**
+	 * Action: Message delete item button
+	 * 
+	 * @param array Raw SQL Array
+	 * @return string Formatted HTML
+	 */
+	private function act_mdel($raw) {
+		global $TDTRAC_SITE;
+		return "<a title=\"Delete\" href=\"{$TDTRAC_SITE}msg-delete&amp;id={$raw['id']}\"><img class=\"ticon\"  alt=\"Delete\" src=\"/images/delete.png\" /></a>";
 	}
 }
 
