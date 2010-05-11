@@ -4,7 +4,8 @@
  * 
  * Contains all reciept related functions. 
  * @package tdtrac
- * @version 1.3.0
+ * @version 1.3.1
+ * @author J.T.Sage <jtsage@gmail.com>
  */
 
 /**

@@ -4,7 +4,8 @@
  * 
  * Contains all budget related functions. 
  * @package tdtrac
- * @version 1.3.0
+ * @version 1.3.1
+ * @author J.T.Sage <jtsage@gmail.com>
  */
 
 /**
@@ -331,48 +332,34 @@ function budget_view($showid, $onlytype) {
 		$html .= "<h4>Materials Expenses</h4>";
 		$html .= "<span class=\"upright\">[<a href=\"{$TDTRAC_SITE}email-budget&amp;id={$row['showid']}\">E-Mail To Self</a>]</span>";
 	}
-	$html .= "<table id=\"budget\" class=\"datatable\">\n";
-	$html .= "<tr><th>Date</th><th>Vendor</th><th>Category</th><th>Description</th><th>Price</th><th>Tax</th>";
-	$html .= "<th>Action</th>";
-	$html .= "</tr>\n";
-	$last = "";
+	$tabl = new tdtable("budget");
+	$tabl->addHeader(array('Date', 'Vendor', 'Category', 'Description', 'Price', 'Tax'));
+	$tabl->addSubtotal('Category');
+	$tabl->addCurrency('Price');
+	$tabl->addCurrency('Tax');
+	$tabl->addAction(array('bpend','breim','rview','bview'));
+	if ( $editbudget ) { $tabl->addAction(array('bedit', 'bdel')); }
 	while ( $row = mysql_fetch_array($result) ) {
-		if ( $last != "" && $last != $row['category'] ) {
-			$html .= "<tr class=\"datasubtotal\"><td></td><td></td><td>{$last}</td><td style=\"text-align: center\">-=- SUB-TOTAL -=-</td><td style=\"text-align: right\">$" . number_format($subtot, 2) . "</td><td style=\"text-align: right\">$".number_format($subtax,2)."</td><td></td></tr>\n"; $subtot = 0; $subtax = 0;
-		} 
-		$intr++;
-		$html .= "<tr><td>{$row['date']}</td><td>{$row['vendor']}</td><td>{$row['category']}</td><td>{$row['dscr']}</td><td style=\"text-align: right\">$";
-		$tottax += $row['tax']; $subtax += $row['tax'];
-		$tot += $row['price']; $subtot += $row['price'];
-		$html .= number_format($row['price'], 2);
-		$html .= "</td><td style=\"text-align: right\">$";
-		$html .= number_format($row['tax'], 2);
-		$html .= "</td><td style=\"text-align: center\">" . (($row['pending'] == 1) ? "<img class=\"ticon\" src=\"/images/pending.png\" alt=\"Payment Pending\" title=\"Payment Pending\" />" : "<img class=\"ticon\" src=\"/images/blank.png\" alt=\"Spacer\" />");
-		$html .= (($row['needrepay'] == 1) ? (($row['gotrepay'] == 1) ? "<img class=\"ticon\" src=\"/images/reim-yes.png\" title=\"Reimbursment Recieved\" alt=\"Reimbursment Recieved\" />" : "<img class=\"ticon\" src=\"/images/reim-no.png\" title=\"Reimbursment Needed\" alt=\"Reimbursment Needed\" />") : "<img class=\"ticon\" src=\"/images/blank.png\" alt=\"Spacer\" />");
-		$html .= ( $row['imgid'] > 0 ) ? "<a href=\"/rcpt.php?imgid={$row['imgid']}&amp;hires\" target=\"_blank\"><img class=\"ticon\" src=\"/images/rcptview.png\" title=\"View Reciept (new window)\" alt=\"Show Reciept\" /></a>" : "<img class=\"ticon\" src=\"/images/blank.png\" alt=\"Spacer\" />";
-		$html .= "<a href=\"{$TDTRAC_SITE}view-budget-item&amp;id={$row['id']}\"><img class=\"ticon\" src=\"/images/view.png\" title=\"View Budget Item Detail\" alt=\"View Item\" /></a>";
-		$html .= $editbudget ? "<a href=\"{$TDTRAC_SITE}edit-budget&amp;id={$row['id']}\"><img class=\"ticon\" src=\"/images/edit.png\" title=\"Edit Budget Item\" alt=\"Edit Item\" /></a>" : "<img class=\"ticon\" src=\"/images/blank.png\" alt=\"Spacer\" />";
-		$html .= $editbudget ? "<a href=\"{$TDTRAC_SITE}del-budget&amp;id={$row['id']}\"><img class=\"ticon\" src=\"/images/delete.png\" title=\"Delete Budget Item\" alt=\"Delete Item\" /></a>" : "<img class=\"ticon\" src=\"/images/blank.png\" alt=\"Spacer\" />";
-		$html .= "</td></tr>\n";
-		$last = $row['category'];
+		$tabl->addRow(array($row['date'], $row['vendor'], $row['category'], $row['dscr'], $row['price'], $row['tax']), $row);
 	}
-	$html .= "<tr class=\"datasubtotal\"><td></td><td></td><td>{$last}</td><td style=\"text-align: center\">-=- SUB-TOTAL -=-</td><td style=\"text-align: right\">$" . number_format($subtot, 2) . "</td><td style=\"text-align: right\">$".number_format($subtax,2)."</td><td></td></tr>\n";
-	$html .= "<tr class=\"datatotal\"><td></td><td></td><td></td><td style=\"text-align: center\">-=- TOTAL -=-</td><td style=\"text-align: right\">$" . number_format($tot, 2) . "</td><td style=\"text-align: right\">$".number_format($tottax,2)."</td><td></td></tr>\n";
-	$html .= "</table>\n";
-	if ( $onlytype > 0 ) { return $html; }
-	$html .= "<br /><br /><h4>Payroll Expenses</h4><table id=\"hours\" class=\"datatable\">\n";
-	$html .= "<tr><th>Employee</th><th>".(($TDTRAC_DAYRATE)?"Days":"Hours")." Worked</th><th>Price</th></tr>\n";
+	$html .= $tabl->output();
+	
+	if ( $onlytype > 0 ) { return $html . "<br /><br /><br />"; }
+	
+	$html .= "<br /><br /><h4>Payroll Expenses</h4>\n";
+	
+	$tabl = new tdtable("hours", "datatable", False);
+	$tabl->addHeader(array('Employee',(($TDTRAC_DAYRATE)?"Days":"Hours")." Worked",'Price'));
+	$tabl->addNumber((($TDTRAC_DAYRATE)?"Days":"Hours")." Worked");
+	$tabl->addCurrency('Price');
+	
 	$sql = "SELECT SUM(worked) as days, payrate, CONCAT(first, ' ', last) as name FROM {$MYSQL_PREFIX}users u, {$MYSQL_PREFIX}hours h WHERE u.userid = h.userid AND h.showid = {$showid} GROUP BY h.userid ORDER BY last ASC";
 	$result = mysql_query($sql, $db);
-	$tot = 0; $intr = 0; $mtot = 0;
+	
 	while ( $row = mysql_fetch_array($result) ) {
-		$intr++;
-		$tot += $row['days'];
-		$mtot += $row['days'] * $row['payrate'];
-		$html .= "<tr><td>{$row['name']}</td><td>{$row['days']}</td><td style=\"text-align: right\">$" . number_format($row['days'] * $row['payrate'], 2) . "</td></tr>\n";
+		$tabl->addRow(array($row['name'], $row['days'], $row['days'] * $row['payrate']), $row);
 	}
-	$html .= "<tr class=\"datatotal\"><td></td><td>{$tot}</td><td style=\"text-align: right\">$" . number_format($mtot, 2) . "</td></tr>\n";
-	$html .= "</table><br /><br />\n";
+	$html .= $tabl->output();
 	return $html;
 }
 

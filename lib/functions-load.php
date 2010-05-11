@@ -4,11 +4,13 @@
  * 
  * Loads all other function files.
  * @package tdtrac
- * @version 1.3.0
+ * @version 1.3.1
+ * @author J.T.Sage <jtsage@gmail.com>
  */
 require_once("dbaseconfig.php");
 require_once("login.php");
 require_once("formlib.php");
+require_once("tablelib.php");
 require_once("permissions.php");
 require_once("show.php");
 require_once("home.php");
