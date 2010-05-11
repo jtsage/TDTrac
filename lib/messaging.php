@@ -49,20 +49,16 @@ function msg_check() {
 function msg_sent_view() {
 	GLOBAL $db, $user_name, $MYSQL_PREFIX, $TDTRAC_SITE;
 	$userid = perms_getidbyname($user_name);
-	$cannuke = perms_isadmin($user_name);
 	$sql = "SELECT id, toid, body, DATE_FORMAT(stamp, '%m-%d-%y %h:%i %p') as wtime FROM {$MYSQL_PREFIX}msg WHERE fromid = {$userid} ORDER BY stamp DESC";
 	$result = mysql_query($sql, $db);
 	$html  = "<h3>Message Outbox</h3>";
-	$html .= "<table class=\"datatable\">\n";
-	$html .= "<tr><th>Date</th><th>Recipient</th><th>Message</th>";
-	$html .= ($cannuke) ? "<th>Action</th></tr>\n" : "</tr>\n";
+	$tabl = new tdtable("msgoutbox", 'datatable', perms_isadmin($user_name));
+	$tabl->addHeader(array('Date', 'Recipient', 'Message'));
+	if ( perms_isadmin($user_name) ) { $tabl->addAction('mdel'); }
 	while ( $row = mysql_fetch_array($result) ) {
-		$html .= "<tr><td>{$row['wtime']}</td><td>";
-		$html .= perms_getfnamebyid($row['toid']);
-		$html .= "</td><td>{$row['body']}</td>";
-		$html .= ($cannuke) ? "<td align=\"center\"><a title=\"Delete\" href=\"{$TDTRAC_SITE}msg-delete&amp;id={$row['id']}\"><img class=\"ticon\"  alt=\"Delete\" src=\"/images/delete.png\" /></a></td></tr>\n" : "</tr>\n";
+		$tabl->addRow(array($row['wtime'], perms_getfnamebyid($row['toid']), $row['body']), $row);
 	}
-	$html .= "</table>\n";
+	$html .= $tabl->output();
 	return $html;
 }
 
@@ -82,15 +78,13 @@ function msg_inbox_view() {
 	$result = mysql_query($sql, $db);
 	$html  = "<h3>Message Inbox</h3>";
 	$html .= "<span class=\"upright\">[-<a href=\"{$TDTRAC_SITE}msg-clean\">Clear Inbox</a>-]</span>\n";
-	$html .= "<table class=\"datatable\">\n";
-	$html .= "<tr><th>Date</th><th>Sender</th><th>Message</th><th>Action</th></tr>\n";
+	$tabl = new tdtable("msginbox");
+	$tabl->addHeader(array('Date', 'Recipient', 'Message'));
+	$tabl->addAction('mdel');
 	while ( $row = mysql_fetch_array($result) ) {
-		$html .= "<tr><td>{$row['wtime']}</td><td>";
-		$html .= perms_getfnamebyid($row['fromid']);
-		$html .= "</td><td>{$row['body']}</td>";
-		$html .= "<td align=\"center\"><a title=\"Delete\" href=\"{$TDTRAC_SITE}msg-delete&amp;id={$row['id']}\"><img class=\"ticon\" alt=\"Delete\" src=\"/images/delete.png\" /></a></td></tr>\n";
+		$tabl->addRow(array($row['wtime'], perms_getfnamebyid($row['fromid']), $row['body']), $row);
 	}
-	$html .= "</table>\n";
+	$html .= $tabl->output();
 	return $html;
 }
 
