@@ -4,13 +4,14 @@
  * 
  * Contains main program logic.
  * @package tdtrac
- * @version 1.3.0
+ * @version 1.3.1
+ * @author J.T.Sage <jtsage@gmail.com>
  */
 ob_start(); session_start(); 
 
 ## PROGRAM DETAILS. DO NOT EDIT UNLESS YOU KNOW WHAT YOU ARE DOING
-$TDTRAC_VERSION = "1.3.0";
-$TDTRAC_DBVER = "1.3.0";
+$TDTRAC_VERSION = "1.3.1";
+$TDTRAC_DBVER = "1.3.1";
 $TDTRAC_PERMS = array("addshow", "editshow", "viewshow", "addbudget", "editbudget", "viewbudget", "addhours", "edithours", "viewhours", "adduser");
 
 require_once("config.php");
@@ -46,6 +47,14 @@ switch ($page_title) {
 }
 if ( $login[0] ) {
 	switch($page_title) {
+		case "search":
+			if ( perms_checkperm($user_name, 'viewbudget') ) {
+				if ( $_SERVER['REQUEST_METHOD'] == "POST" ) {
+					if ( isset($_REQUEST['keywords']) && $_REQUEST['keywords'] <> "" ) { echo budget_search($_REQUEST['keywords']); }
+					else { echo display_home($user_name); }
+				} else { echo display_home($user_name); }
+			} else { echo perms_no(); }
+			break;
 		case "rcpt":
 			if ( perms_checkperm($user_name, 'addbudget') ) {
 				if ($_SERVER['REQUEST_METHOD'] == "POST") { rcpt_do(); }
@@ -83,7 +92,7 @@ if ( $login[0] ) {
 			break;
 		case "view-budget":
 			if ( perms_checkperm($user_name, 'viewbudget') ) {
-				if ( $_SERVER['REQUEST_METHOD'] == "POST" ) { echo budget_view($_REQUEST['showid'],0); }
+				if ( isset($_REQUEST['view-bud-do']) && $_REQUEST['view-bud-do'] ) { echo budget_view($_REQUEST['showid'],0); }
 				else { echo budget_viewselect(); }
 			} else { echo perms_no(); }
 			break;
@@ -115,9 +124,44 @@ if ( $login[0] ) {
 			} else { echo perms_no(); }
 		break;
 
+		case "add-todo":
+			if ( perms_checkperm($user_name, 'addbudget')) {
+				if ( $_SERVER['REQUEST_METHOD'] == "POST" ) { echo todo_add_do(); }
+				else { echo todo_add(); }
+			} else { echo perms_no(); }
+			break;
+		case "view-todo":
+			if ( perms_checkperm($user_name, 'viewbudget')) {
+				if ( isset($_REQUEST['onlyuser']) && $_REQUEST['onlyuser'] ) { echo todo_view($user_name); }
+				elseif ( isset($_REQUEST['todouser']) ) { echo todo_view($_REQUEST['todouser'], 'user'); }
+				elseif ( isset($_REQUEST['todoshow']) ) { echo todo_view($_REQUEST['todoshow'], 'show'); }
+				elseif ( isset($_REQUEST['tododue']) ) { echo todo_view(1, 'overdue'); }
+				else { echo todo_view(); }
+			} else {
+				echo view_todo($user_name);
+			}
+			break;
+		case "edit-todo":
+			if ( perms_checkperm($user_name, 'editbudget') ) {
+				if ($_SERVER['REQUEST_METHOD'] == "POST") { todo_edit_do($_REQUEST['id']); }
+				else { echo todo_edit_form($_REQUEST['id']); }
+			} else { echo perms_no(); }
+			break;
+		case "del-todo":
+			if ( perms_checkperm($user_name, 'editbudget') ) {
+				if ($_SERVER['REQUEST_METHOD'] == "POST") { todo_del_do($_REQUEST['id']); }
+				else { echo todo_del_form($_REQUEST['id']); }
+			} else { echo perms_no(); }
+			break;
+		case "done-todo":
+			if ( isset($_REQUEST['id']) ) {
+				todo_mark_do($_REQUEST['id']); 
+			} else { echo perms_no(); }
+			break;
+
 		case "add-hours":
 			if ( perms_checkperm($user_name, 'addhours') ) {
-				if ( $_SERVER['REQUEST_METHOD'] == "POST" ) { hours_add_do(); }
+				if ( isset($_REQUEST['new-hours']) && $_REQUEST['new-hours'] ) { hours_add_do(); }
 				else { echo hours_add(); }
 			} else { echo perms_no(); }
 			break;
@@ -249,6 +293,9 @@ if ( $login[0] ) {
 			break;
 		case "main-perms":
 			echo display_home($user_name, 4);
+			break;
+		case "main-todo":
+			echo display_home($user_name, 5);
 			break;
 	}
 }

@@ -4,12 +4,13 @@
  * 
  * Contains main program logic.
  * @package tdtrac
- * @version 1.3.0
+ * @version 1.3.1
+ * @author J.T.Sage <jtsage@gmail.com>
  */
 ob_start(); session_start(); 
 
 ## PROGRAM DETAILS. DO NOT EDIT UNLESS YOU KNOW WHAT YOU ARE DOING
-$TDTRAC_VERSION = "1.3.0";
+$TDTRAC_VERSION = "1.3.1";
 $TDTRAC_PERMS = array("addshow", "editshow", "viewshow", "addbudget", "editbudget", "viewbudget", "addhours", "edithours", "viewhours", "adduser");
 $INSTALL_FILES = array(
 	"index.php",
@@ -30,6 +31,8 @@ $INSTALL_FILES = array(
 	"./lib/messaging.php",
 	"./lib/permissions.php",
 	"./lib/reciept.php", 
+	"./lib/todo.php",
+	"./lib/tablelib.php",
 	"./lib/show.php" );
 $INSTALL_TABLES = array(
         "tdtrac",
@@ -41,7 +44,8 @@ $INSTALL_TABLES = array(
 	"permissions",
 	"shows",
 	"usergroups",
-	"rcpts");
+	"rcpts",
+	"todo");
 
 require_once("config.php");
 require_once("lib/formlib.php");

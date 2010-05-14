@@ -4,7 +4,8 @@
  * 
  * Contains site header.
  * @package tdtrac
- * @version 1.3.0
+ * @version 1.3.1
+ * @author J.T.Sage <jtsage@gmail.com>
  */
 GLOBAL $TDTRAC_VERSION, $TDTRAC_CPNY, $TDTRAC_SITE, $TDTRAC_HELP, $page_title, $login;
 $html = <<<ENN
@@ -35,16 +36,28 @@ if ( $login[0] ) {
 } else {
 	$html .= "			<h2>Budget and Payroll Tracking";
 }
+
 $html .= "</h2>\n		</div>\n	</div>\n";
-$html .= "\n	<div id=\"menu\">\n		<ul>\n";
+
+if ( $login[0] ) {
+	if ( perms_checkperm($login[1], 'viewbudget') ) {
+		$html .= "		<form method=\"post\" action=\"{$TDTRAC_SITE}search\">\n		<div id=\"search\">\n";
+		//$html .= "			<select tabindex=\"80\" name=\"stype\" id=\"stype\"><option value=\"dscr\">Description &asymp;</option><option value=\"cat\">Category &asymp;</option><option value=\"vendor\">Vendor &asymp;</option><option value=\"date\">Date =</option></select>\n";
+		$html .= "			<input tabindex=\"81\" type=\"text\" class=\"text\" maxlength=\"64\" name=\"keywords\" />\n 			<input tabindex=\"82\" type=\"submit\" class=\"submit\" value=\"Search\" />\n		</div>\n	</form>\n";
+	}
+}
+
+$html .= "";
+$html .= "<div id=\"headerpic\"></div>\n	<div id=\"menu\">\n		<ul>\n";
 $html .= "			<li><a tabindex=\"90\" href=\"{$TDTRAC_SITE}home\"".(($page_title == "home")?" class=\"active\"":"").">Home</a></li>\n";
 $html .= "			<li><a tabindex=\"91\" href=\"{$TDTRAC_SITE}change-pass\"".(($page_title == "change-pass")?" class=\"active\"":"").">Change Password</a></li>\n";
 $html .= "			<li><a tabindex=\"92\" href=\"{$TDTRAC_SITE}main-budget\"".((preg_match("/budget/", $page_title))?" class=\"active\"":"").">Budget</a></li>\n";
 $html .= "			<li><a tabindex=\"93\" href=\"{$TDTRAC_SITE}main-hours\"".((preg_match("/hours/", $page_title))?" class=\"active\"":"").">Payroll</a></li>\n";
 $html .= "			<li><a tabindex=\"94\" href=\"{$TDTRAC_SITE}main-show\"".((preg_match("/show/", $page_title))?" class=\"active\"":"").">Shows</a></li>\n";
-$html .= "			<li><a tabindex=\"95\" href=\"{$TDTRAC_SITE}main-perms\"".((preg_match("/perms/", $page_title) || preg_match("/user/", $page_title))?" class=\"active\"":"").">Admin</a></li>\n";
-$html .= "			<li><a tabindex=\"96\" href=\"{$TDTRAC_SITE}logout\">Logout</a></li>\n";
-$html .= "			<li><a tabindex=\"97\" href=\"#\" onclick=\"javascript:window.open('{$TDTRAC_HELP}{$page_title}')\" >Help</a></li>\n";
+$html .= "			<li><a tabindex=\"95\" href=\"{$TDTRAC_SITE}main-todo\"".((preg_match("/todo/", $page_title))?" class=\"active\"":"").">ToDo</a></li>\n";
+$html .= "			<li><a tabindex=\"96\" href=\"{$TDTRAC_SITE}main-perms\"".((preg_match("/perms/", $page_title) || preg_match("/user/", $page_title))?" class=\"active\"":"").">Admin</a></li>\n";
+$html .= "			<li><a tabindex=\"97\" href=\"{$TDTRAC_SITE}logout\">Logout</a></li>\n";
+$html .= "			<li><a tabindex=\"98\" href=\"#\" onclick=\"javascript:window.open('{$TDTRAC_HELP}{$page_title}')\" >Help</a></li>\n";
 $html .= "		</ul>\n	</div>\n	<div id=\"menubottom\"></div>\n\n	<div id=\"content\">\n		<div id=\"normalcontent\">\n";
 
 echo $html;
