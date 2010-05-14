@@ -4,11 +4,13 @@
  * 
  * Loads all other function files.
  * @package tdtrac
- * @version 1.3.0
+ * @version 1.3.1
+ * @author J.T.Sage <jtsage@gmail.com>
  */
 require_once("dbaseconfig.php");
 require_once("login.php");
 require_once("formlib.php");
+require_once("tablelib.php");
 require_once("permissions.php");
 require_once("show.php");
 require_once("home.php");
@@ -17,6 +19,7 @@ require_once("hours.php");
 require_once("email.php");
 require_once("messaging.php");
 require_once("reciept.php");
+require_once("todo.php");
 
 /**
  * Throw a message to the user
@@ -24,10 +27,10 @@ require_once("reciept.php");
  * @param string Message to send
  * @global string Address to redirct to
  */
-function thrower($msg) {
+function thrower($msg, $loc='home') {
 	GLOBAL $TDTRAC_SITE;
 	$_SESSION['infodata'] = $msg;
-	header("Location: {$TDTRAC_SITE}home");
+	header("Location: {$TDTRAC_SITE}{$loc}");
 }
 
 /** 
@@ -73,6 +76,7 @@ function get_sql_const($name, $extra = null) {
 		$sql .= perms_isemp($user_name) ? " username = '{$user_name}' AND" : "";
 		$sql .= " active = 1 AND payroll = 1 AND ug.userid = u.userid ORDER BY last ASC";
 		return $sql; }
+	if ( $name == "todo" ) { return "SELECT u.userid, CONCAT(first, ' ', last) as name FROM {$MYSQL_PREFIX}users u WHERE active = 1 ORDER BY last ASC"; }
 	return False;
 }
 

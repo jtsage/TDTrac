@@ -4,7 +4,8 @@
  * 
  * Contains site home page, post-login.
  * @package tdtrac
- * @version 1.3.0
+ * @version 1.3.1
+ * @author J.T.Sage <jtsage@gmail.com>
  */
 
 /**
@@ -18,6 +19,8 @@ function display_home($username, $type=0) {
 	$html  = "";
 	$html .= msg_check();
 	$html .= rcpt_check();
+	$html .= todo_check();
+	if ( $type == 0 ) { $html .= "<br /><br /><div style=\"float: left; width: 49%\">\n"; }
 	if ( $type == 0 || $type == 1 ) {
 		$html .= "<h3>Payroll Tracking</h3><ul class=\"linklist\">\n";
 		$html .= ( perms_checkperm($username, 'addhours') ) ? "<li><a href=\"{$TDTRAC_SITE}add-hours\">Add Hours Worked</a></li>\n" : "";
@@ -36,10 +39,18 @@ function display_home($username, $type=0) {
 		$html .= ( perms_checkperm($username, 'viewbudget') ) ? "<li><a href=\"{$TDTRAC_SITE}view-budget-special&amp;stype=4\">View Budgets (reimbursment not recieved items only, all shows)</a></li>\n" : "";
 		$html .= "</ul>\n";
 	}
+	if ( $type == 0 ) { $html .= "<br /><br /><br /><br /><br /><br /></div>\n"; }
 	if ( $type == 0 || $type == 3 ) {
 		$html .= "<h3>Show Information</h3><ul class=\"linklist\">\n";
 		$html .= ( perms_checkperm($username, 'addshow') ) ? "<li><a href=\"{$TDTRAC_SITE}add-show\">Add Show</a></li>\n" : "";
 		$html .= ( perms_checkperm($username, 'viewshow') ) ? "<li><a href=\"{$TDTRAC_SITE}view-show\">View Shows</a></li>\n" : "";
+		$html .= "</ul>\n";
+	}
+	if ( $type == 0 || $type == 5 ) {
+		$html .= "<h3>ToDo Lists</h3><ul class=\"linklist\">\n";
+		$html .= ( perms_checkperm($username, 'addbudget') ) ? "<li><a href=\"{$TDTRAC_SITE}add-todo\">Add ToDo Item</a></li>\n" : "";
+		$html .= ( perms_checkperm($username, 'viewbudget') ) ? "<li><a href=\"{$TDTRAC_SITE}view-todo\">View ToDo Items</a></li>\n" : "";
+		$html .= "<li><a href=\"{$TDTRAC_SITE}view-todo&onlyuser=1\">View Personal ToDo Items</a></li>\n";
 		$html .= "</ul>\n";
 	}
 	if ( $type == 0 || $type == 4 ) {
@@ -54,7 +65,6 @@ function display_home($username, $type=0) {
 		}
 		$html .= "</ul>\n";
 	}
-
 	return $html;
 }
 

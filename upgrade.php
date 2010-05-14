@@ -4,12 +4,13 @@
  * 
  * Contains main program logic.
  * @package tdtrac
- * @version 1.3.0
+ * @version 1.3.1
+ * @author J.T.Sage <jtsage@gmail.com>
  */
 ob_start(); session_start(); 
 
 ## PROGRAM DETAILS. DO NOT EDIT UNLESS YOU KNOW WHAT YOU ARE DOING
-$TDTRAC_VERSION = "1.3.0";
+$TDTRAC_VERSION = "1.3.1";
 $TDTRAC_PERMS = array("addshow", "editshow", "viewshow", "addbudget", "editbudget", "viewbudget", "addhours", "edithours", "viewhours", "adduser");
 $INSTALL_FILES = array(
 	"index.php",
@@ -30,6 +31,8 @@ $INSTALL_FILES = array(
 	"./lib/messaging.php",
 	"./lib/permissions.php",
 	"./lib/reciept.php", 
+	"./lib/todo.php",
+	"./lib/tablelib.php",
 	"./lib/show.php" );
 $INSTALL_TABLES = array(
 	"tdtrac",
@@ -41,7 +44,8 @@ $INSTALL_TABLES = array(
 	"permissions",
 	"shows",
 	"usergroups",
-	"rcpts");
+	"rcpts",
+	"todo");
 	
 
 require_once("config.php");
@@ -103,6 +107,17 @@ $V126ADDS = array(
 $V130ADDS = array(
   "INSERT INTO `{$MYSQL_PREFIX}tdtrac` (`name`, `value`) VALUES ( 'version', '1.3.0' )",
   "INSERT INTO `{$MYSQL_PREFIX}msg` (`toid`, `fromid`, `body`) VALUES ('1', '1', 'Updated to v1.3.0 :: New Theme!')"
+);
+$V131ADDS = array(
+  "INSERT INTO `{$MYSQL_PREFIX}tdtrac` (`name`, `value`) VALUES ( 'version', '1.3.1' )",
+  "INSERT INTO `{$MYSQL_PREFIX}msg` (`toid`, `fromid`, `body`) VALUES ('1', '1', 'Updated to v1.3.1 :: ToDo Lists!')",
+  "CREATE TABLE IF NOT EXISTS `{$MYSQL_PREFIX}todo` (
+  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  `showid` INT UNSIGNED NOT NULL, `due` TIMESTAMP NULL DEFAULT NULL, 
+  `assigned` SMALLINT UNSIGNED NOT NULL DEFAULT '0', 
+  `dscr` TEXT NOT NULL, `priority` TINYINT NOT NULL DEFAULT '0', 
+  `added` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+  ) ENGINE = MyISAM;"
 );
   
 
@@ -195,7 +210,7 @@ switch ($page_title) {
 		$didinstall = 1;
 	}
 	else { // POST 1.1.0 UPGRADE
-		$found120 = 0; $found121 = 0; $found122 = 0; $found124 = 0; $found125 = 0; $found126 = 0; $found130 = 0;
+		$found120 = 0; $found121 = 0; $found122 = 0; $found124 = 0; $found125 = 0; $found126 = 0; $found130 = 0; $found131 = 0;
 		$sql = "SELECT name, value FROM `{$MYSQL_PREFIX}tdtrac` WHERE name = 'version' ORDER BY id DESC";
 		$result = mysql_query($sql,$db);
 		while ( $verline = mysql_fetch_array($result) ) {
@@ -206,6 +221,7 @@ switch ($page_title) {
 			if ( $verline['value'] == "1.2.5" ) { $found125 = 1; $found124 = 1; $found122 = 1; $found121 = 1; $found120 = 1; }
 			if ( $verline['value'] == "1.2.6" ) { $found125 = 1; $found124 = 1; $found122 = 1; $found121 = 1; $found120 = 1; $found126 = 1;}
 			if ( $verline['value'] == "1.3.0" ) { $found125 = 1; $found124 = 1; $found122 = 1; $found121 = 1; $found120 = 1; $found126 = 1; $found130 = 1;}
+			if ( $verline['value'] == "1.3.1" ) { $found125 = 1; $found124 = 1; $found122 = 1; $found121 = 1; $found120 = 1; $found126 = 1; $found130 = 1; $found131 = 1;}
 		} 
 		if ( !$found120 ) { // 1.2.0 UPGRADE
 			foreach ( $V120ADDS as $thissql ) { $result = mysql_query($thissql, $db); echo mysql_error(); }
@@ -214,33 +230,38 @@ switch ($page_title) {
 
 		if ( $found120 && !$found121 ) { // 1.2.1 UPGRADE
 			foreach ( $V121ADDS as $thissql ) { $result = mysql_query($thissql, $db); echo mysql_error(); }
-                        echo "<li style=\"color: green\"><b>UPGRADE::</b> Upgraded to version 1.2.1</li>"; $didinstall = 1;
+			echo "<li style=\"color: green\"><b>UPGRADE::</b> Upgraded to version 1.2.1</li>"; $didinstall = 1;
 		} else { echo "<li style=\"color: green\"><b>VERSION::</b> 1.2.1 confirmed</li>\n"; }
 
 		if ( $found120 && $found121 && !$found122 ) { // 1.2.2 UPGRADE
 			foreach ( $V122ADDS as $thissql ) { $result = mysql_query($thissql, $db); echo mysql_error(); }
-                	echo "<li style=\"color: green\"><b>UPGRADE::</b> Upgraded to version 1.2.2</li>"; $didinstall = 1;
+			echo "<li style=\"color: green\"><b>UPGRADE::</b> Upgraded to version 1.2.2</li>"; $didinstall = 1;
 		} else { echo "<li style=\"color: green\"><b>VERSION::</b> 1.2.2 confirmed</li>\n"; }
 
 		if ( $found120 && $found121 && $found122 && !$found124 ) { // 1.2.4 UPGRADE
-                        foreach ( $V124ADDS as $thissql ) { $result = mysql_query($thissql, $db); echo mysql_error(); }
-                        echo "<li style=\"color: green\"><b>UPGRADE::</b> Upgraded to version 1.2.4</li>"; $didinstall = 1;
-                } else { echo "<li style=\"color: green\"><b>VERSION::</b> 1.2.4 confirmed</li>\n"; }
+			foreach ( $V124ADDS as $thissql ) { $result = mysql_query($thissql, $db); echo mysql_error(); }
+			echo "<li style=\"color: green\"><b>UPGRADE::</b> Upgraded to version 1.2.4</li>"; $didinstall = 1;
+		} else { echo "<li style=\"color: green\"><b>VERSION::</b> 1.2.4 confirmed</li>\n"; }
 
-                if ( $found120 && $found121 && $found122 && $found124 && !$found125 ) { // 1.2.5 UPGRADE
-                        foreach ( $V125ADDS as $thissql ) { $result = mysql_query($thissql, $db); echo mysql_error(); }
-                        echo "<li style=\"color: green\"><b>UPGRADE::</b> Upgraded to version 1.2.5</li>"; $didinstall = 1;
-                } else { echo "<li style=\"color: green\"><b>VERSION::</b> 1.2.5 confirmed</li>\n"; }
+		if ( $found120 && $found121 && $found122 && $found124 && !$found125 ) { // 1.2.5 UPGRADE
+			foreach ( $V125ADDS as $thissql ) { $result = mysql_query($thissql, $db); echo mysql_error(); }
+			echo "<li style=\"color: green\"><b>UPGRADE::</b> Upgraded to version 1.2.5</li>"; $didinstall = 1;
+		} else { echo "<li style=\"color: green\"><b>VERSION::</b> 1.2.5 confirmed</li>\n"; }
 
-                if ( $found120 && $found121 && $found122 && $found124 && $found125 && !$found126 ) { // 1.2.6 UPGRADE
-                        foreach ( $V126ADDS as $thissql ) { $result = mysql_query($thissql, $db); echo mysql_error(); }
-                        echo "<li style=\"color: green\"><b>UPGRADE::</b> Upgraded to version 1.2.6</li>"; $didinstall = 1;
-                } else { echo "<li style=\"color: green\"><b>VERSION::</b> 1.2.6 confirmed</li>\n"; }
+		if ( $found120 && $found121 && $found122 && $found124 && $found125 && !$found126 ) { // 1.2.6 UPGRADE
+			foreach ( $V126ADDS as $thissql ) { $result = mysql_query($thissql, $db); echo mysql_error(); }
+			echo "<li style=\"color: green\"><b>UPGRADE::</b> Upgraded to version 1.2.6</li>"; $didinstall = 1;
+		} else { echo "<li style=\"color: green\"><b>VERSION::</b> 1.2.6 confirmed</li>\n"; }
                 
-                if ( $found120 && $found121 && $found122 && $found124 && $found125 && $found126 && !$found130 ) { // 1.3.0 UPGRADE
-                        foreach ( $V130ADDS as $thissql ) { $result = mysql_query($thissql, $db); echo mysql_error(); }
-                        echo "<li style=\"color: green\"><b>UPGRADE::</b> Upgraded to version 1.3.0</li>"; $didinstall = 1;
-                } else { echo "<li style=\"color: green\"><b>VERSION::</b> 1.3.0 confirmed</li>\n"; }
+		if ( $found120 && $found121 && $found122 && $found124 && $found125 && $found126 && !$found130 ) { // 1.3.0 UPGRADE
+			foreach ( $V130ADDS as $thissql ) { $result = mysql_query($thissql, $db); echo mysql_error(); }
+			echo "<li style=\"color: green\"><b>UPGRADE::</b> Upgraded to version 1.3.0</li>"; $didinstall = 1;
+		} else { echo "<li style=\"color: green\"><b>VERSION::</b> 1.3.0 confirmed</li>\n"; }
+		
+		if ( $found120 && $found121 && $found122 && $found124 && $found125 && $found126 && $found130 && !$found131 ) { // 1.3.1 UPGRADE
+			foreach ( $V131ADDS as $thissql ) { $result = mysql_query($thissql, $db); echo mysql_error(); }
+			echo "<li style=\"color: green\"><b>UPGRADE::</b> Upgraded to version 1.3.1</li>"; $didinstall = 1;
+		} else { echo "<li style=\"color: green\"><b>VERSION::</b> 1.3.1 confirmed</li>\n"; }
 	}	
 	
 	echo "</ul></li></ul></div><div style=\"text-align: center\">\n";
