@@ -54,9 +54,10 @@ $html .= "			<li><a tabindex=\"91\" href=\"{$TDTRAC_SITE}change-pass\"".(($page_
 $html .= "			<li><a tabindex=\"92\" href=\"{$TDTRAC_SITE}main-budget\"".((preg_match("/budget/", $page_title))?" class=\"active\"":"").">Budget</a></li>\n";
 $html .= "			<li><a tabindex=\"93\" href=\"{$TDTRAC_SITE}main-hours\"".((preg_match("/hours/", $page_title))?" class=\"active\"":"").">Payroll</a></li>\n";
 $html .= "			<li><a tabindex=\"94\" href=\"{$TDTRAC_SITE}main-show\"".((preg_match("/show/", $page_title))?" class=\"active\"":"").">Shows</a></li>\n";
-$html .= "			<li><a tabindex=\"95\" href=\"{$TDTRAC_SITE}main-perms\"".((preg_match("/perms/", $page_title) || preg_match("/user/", $page_title))?" class=\"active\"":"").">Admin</a></li>\n";
-$html .= "			<li><a tabindex=\"96\" href=\"{$TDTRAC_SITE}logout\">Logout</a></li>\n";
-$html .= "			<li><a tabindex=\"97\" href=\"#\" onclick=\"javascript:window.open('{$TDTRAC_HELP}{$page_title}')\" >Help</a></li>\n";
+$html .= "			<li><a tabindex=\"95\" href=\"{$TDTRAC_SITE}main-todo\"".((preg_match("/todo/", $page_title))?" class=\"active\"":"").">ToDo</a></li>\n";
+$html .= "			<li><a tabindex=\"96\" href=\"{$TDTRAC_SITE}main-perms\"".((preg_match("/perms/", $page_title) || preg_match("/user/", $page_title))?" class=\"active\"":"").">Admin</a></li>\n";
+$html .= "			<li><a tabindex=\"97\" href=\"{$TDTRAC_SITE}logout\">Logout</a></li>\n";
+$html .= "			<li><a tabindex=\"98\" href=\"#\" onclick=\"javascript:window.open('{$TDTRAC_HELP}{$page_title}')\" >Help</a></li>\n";
 $html .= "		</ul>\n	</div>\n	<div id=\"menubottom\"></div>\n\n	<div id=\"content\">\n		<div id=\"normalcontent\">\n";
 
 echo $html;

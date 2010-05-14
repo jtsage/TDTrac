@@ -67,6 +67,7 @@ function budget_editform($id) {
 	$fesult = $form->addCheck('needrepay', 'Reimbursable Charge', null, $row['needrepay']);
 	$fesult = $form->addCheck('gotrepay', 'Reimbursment Recieved', null, $row['gotrepay']);
 	$fesult = $form->addHidden('id', $id);
+	if ( isset($_REQUEST['redir-to']) ) { $form->addHidden('redir-to', $_REQUEST['redir-to']); }
 	$html .= $form->output('Update Expense');
 	return $html;
 }
@@ -137,6 +138,7 @@ function budget_delform($id) {
 	$fesult = $form->addCheck('needrepay', 'Reimbursable Charge', null, $row['needrepay'], False);
 	$fesult = $form->addCheck('gotrepay', 'Reimbursment Recieved', null, $row['gotrepay'], False);
 	$fesult = $form->addHidden('id', $id);
+	if ( isset($_REQUEST['redir-to']) ) { $form->addHidden('redir-to', $_REQUEST['redir-to']); }
 	$html .= $form->output('Confirm Delete');
 	
 	return $html;
@@ -178,7 +180,10 @@ function budget_edit_do($id) {
 	$sql .= " , gotrepay = ".(($_REQUEST['gotrepay'] == "y") ? "1" : "0");
 	$sql .= " WHERE id = {$id}";
 	$result = mysql_query($sql, $db);
-	thrower("Expense #{$id} Updated");
+	if ( isset($_REQUEST['redir-to']) ){
+		$cleanredit = preg_replace("/\*/", "&", $_REQUEST['redir-to']);
+		thrower("Expense #{$id} Updated", $cleanredit);
+	} else { thrower("Expense #{$id} Updated"); }
 }
 
 /**
@@ -192,7 +197,10 @@ function budget_del_do($id) {
 	GLOBAL $db, $MYSQL_PREFIX;
 	$sql = "DELETE FROM {$MYSQL_PREFIX}budget WHERE id = {$id}";
 	$result = mysql_query($sql, $db);
-	thrower("Expense #{$id} Removed");
+	if ( isset($_REQUEST['redir-to']) ){
+		$cleanredit = preg_replace("/\*/", "&", $_REQUEST['redir-to']);
+		thrower("Expense #{$id} Deleted", $cleanredit);
+	} else { thrower("Expense #{$id} Deleted"); }
 }
 
 /**
@@ -211,6 +219,7 @@ function budget_viewselect() {
 	$form = new tdform("{$TDTRAC_SITE}view-budget");
 	
 	$result = $form->addDrop('showid', 'Show Name', null, db_list(get_sql_const('showidall'), array(showid, showname)), False);
+	$result = $form->addHidden('view-bud-do', true);
 	$html .= $form->output("View Selected");
 	
 	return $html;
@@ -319,7 +328,7 @@ function budget_view($showid, $onlytype) {
 		$html .= "<h4>Materials Expenses</h4>";
 		$html .= "<span class=\"upright\">[<a href=\"{$TDTRAC_SITE}email-budget&amp;id={$row['showid']}\">E-Mail To Self</a>]</span>";
 	}
-	$tabl = new tdtable("budget");
+	$tabl = new tdtable("budget", 'datatable', true, "view-budget*showid={$showid}*view-bud-do=1");
 	$tabl->addHeader(array('Date', 'Vendor', 'Category', 'Description', 'Price', 'Tax'));
 	$tabl->addSubtotal('Category');
 	$tabl->addCurrency('Price');

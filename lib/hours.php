@@ -27,6 +27,7 @@ function hours_add () {
 	$result = $form->addDrop('showid', 'Show', null, db_list(get_sql_const('showid'), array('showid', 'showname')), False);
 	$result = $form->addDate('date', 'Date');
 	$result = $form->addText('worked', (($TDTRAC_DAYRATE)?"Days":"Hours")." Worked");
+	$result = $form->addHidden('new-hours', true);
 	
 	$html .= $form->output('Add Hours');
 	return $html;

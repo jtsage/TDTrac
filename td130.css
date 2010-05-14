@@ -446,6 +446,14 @@ table.datatable .datasubtotal {
 	border-top: 1px solid #ccc;
 }
 
+table.datatable .tododone {
+	background-color: #AAFFAA !important;
+}
+
+table.datatable .tododue {
+	background-color: #FF8888 !important;
+}
+	
 img.ticon {
 	border: none;
 }

@@ -143,7 +143,7 @@ $sql_tdtrac =    "CREATE TABLE IF NOT EXISTS `{$MYSQL_PREFIX}tdtrac` (
 
 $tdtrac_result = mysql_query($sql_tdtrac, $db);
 
-$sql_rcpts = "CREATE TABLE IF NOT EXISTS {$MYSQL_PREFIX}rcpts` (
+$sql_rcpts = "CREATE TABLE IF NOT EXISTS `{$MYSQL_PREFIX}rcpts` (
   `imgid` MEDIUMINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY ,
   `type` VARCHAR( 100 ) NOT NULL ,
   `name` VARCHAR( 25 ) NOT NULL ,
@@ -154,7 +154,17 @@ $sql_rcpts = "CREATE TABLE IF NOT EXISTS {$MYSQL_PREFIX}rcpts` (
 
 $rcpts_result = mysql_query($sql_rcpts, $db);
 
-$ins_tdtrac = "INSERT INTO `{$MYSQL_PREFIX}tdtrac` (`name`, `value`) VALUES ( 'version', '1.1.0' ), ( 'version', '1.2.0'), ( 'version', '1.2.1'), ( 'version', '1.2.2'), ( 'version', '1.2.4'), ( 'version', '1.2.5'), ( 'version', '1.2.6'), ( 'version', '1.3.0')";
+$sql_todo = "CREATE TABLE IF NOT EXISTS `{$MYSQL_PREFIX}todo` (
+  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  `showid` INT UNSIGNED NOT NULL, `due` TIMESTAMP NULL DEFAULT NULL, 
+  `assigned` SMALLINT UNSIGNED NOT NULL DEFAULT '0', 
+  `dscr` TEXT NOT NULL, `priority` TINYINT NOT NULL DEFAULT '0', 
+  `added` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+  ) ENGINE = MyISAM;";
+  
+$todo_result = mysql_query($sql_todo, $db);
+
+$ins_tdtrac = "INSERT INTO `{$MYSQL_PREFIX}tdtrac` (`name`, `value`) VALUES ( 'version', '1.1.0' ), ( 'version', '1.2.0'), ( 'version', '1.2.1'), ( 'version', '1.2.2'), ( 'version', '1.2.4'), ( 'version', '1.2.5'), ( 'version', '1.2.6'), ( 'version', '1.3.0'), ( 'version', '1.3.1' )";
 
 $tdtracins_result = mysql_query($ins_tdtrac, $db);
 
