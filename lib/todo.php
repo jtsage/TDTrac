@@ -236,7 +236,7 @@ function todo_check() {
 	$userid = perms_getidbyname($user_name);
 	$tosql = "SELECT COUNT(id) as num FROM {$MYSQL_PREFIX}todo WHERE assigned = '{$userid}' AND complete = 0";
 	$result1 = mysql_query($tosql, $db);
-	if ( mysql_num_rows($result1) > 0 ) {
+	if ( !mysql_error() && mysql_num_rows($result1) > 0 ) {
 		$row1 = mysql_fetch_array($result1);
 		mysql_free_result($result1);
 		$ret = 0;
