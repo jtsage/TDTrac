@@ -236,11 +236,13 @@ function todo_check() {
 	$userid = perms_getidbyname($user_name);
 	$tosql = "SELECT COUNT(id) as num FROM {$MYSQL_PREFIX}todo WHERE assigned = '{$userid}' AND complete = 0";
 	$result1 = mysql_query($tosql, $db);
-	$row1 = mysql_fetch_array($result1);
-	mysql_free_result($result1);
-	$ret = 0;
-	if ( !is_null($row1['num']) && $row1['num'] > 0 ) { $html .= "You Have {$row1['num']} Uncompleted Tasks Waiting (<a href=\"{$TDTRAC_SITE}view-todo&onlyuser=1\">[-View-]</a>)<br />"; $ret = 1; }
-	$html .= "</span></div>\n";
+	if ( mysql_num_rows($result1) > 0 ) {
+		$row1 = mysql_fetch_array($result1);
+		mysql_free_result($result1);
+		$ret = 0;
+		if ( !is_null($row1['num']) && $row1['num'] > 0 ) { $html .= "You Have {$row1['num']} Uncompleted Tasks Waiting (<a href=\"{$TDTRAC_SITE}view-todo&onlyuser=1\">[-View-]</a>)<br />"; $ret = 1; }
+		$html .= "</span></div>\n";
+	} else { $ret = 0; }
 	if ( $ret ) { return $html; } else { return ""; }
 }
 
