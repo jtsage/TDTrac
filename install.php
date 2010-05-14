@@ -31,6 +31,8 @@ $INSTALL_FILES = array(
 	"./lib/messaging.php",
 	"./lib/permissions.php",
 	"./lib/reciept.php", 
+	"./lib/todo.php",
+	"./lib/tablelib.php",
 	"./lib/show.php" );
 $INSTALL_TABLES = array(
         "tdtrac",
