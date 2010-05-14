@@ -42,7 +42,8 @@ $INSTALL_TABLES = array(
 	"permissions",
 	"shows",
 	"usergroups",
-	"rcpts");
+	"rcpts",
+	"todo");
 
 require_once("config.php");
 require_once("lib/formlib.php");

@@ -69,6 +69,10 @@ class tdtable {
 	 * @var array List of number only currencies
 	 */
 	private $numberonly = null;
+	/**
+	 * @var string Where we come from, for message redirect
+	 */
+	private $fromlink = false;
 	
 	/**
 	 * Create a new table
@@ -77,11 +81,12 @@ class tdtable {
 	 * @param string Class type for the table
 	 * @param bool Use action type items
 	 */
-	public function __construct($id = 'tdtable', $class = 'datatable', $actions = true) {
+	public function __construct($id = 'tdtable', $class = 'datatable', $actions = true, $from = false) {
 		$this->html[] = "<div id=\"{$id}\">\n";
 		$this->html[] = "  <table id=\"{$id}-table\" class=\"{$class}\">\n";
 		$this->tablename = $id;
 		$this->actions = $actions;
+		$this->fromlink = $from;
 	}
 	
 	/**
@@ -242,7 +247,7 @@ class tdtable {
 	 * @param array Raw SQL returned array
 	 * @return bool True on sucess
 	 */
-	public function addRow($row = null, $raw = null) {
+	public function addRow($row = null, $raw = null, $rowclass = null) {
 		if ( is_null($row) ) { return false; }
 		if ( ! is_null($this->subidx) ) {
 			if ( $this->currentrow > 0 ) {
@@ -267,10 +272,14 @@ class tdtable {
 			$thtml .= "<td style=\"text-align: {$this->align[$item]}\">{$drow[$item]}</td>";
 		}
 		if ( $this->actions ) { $thtml .= "<td style=\"text-align: center\">" . $this->do_actions($raw) . "</td>"; }
-		if ( $this->currentrow % 2 == 0 ) {
-			$this->html[] = "   <tr class=\"tdtabevn\">{$thtml}</tr>\n";
+		if ( is_null($rowclass) ) {
+			if ( $this->currentrow % 2 == 0 ) {
+				$this->html[] = "   <tr class=\"tdtabevn\">{$thtml}</tr>\n";
+			} else {
+				$this->html[] = "   <tr class=\"tdtabodd\">{$thtml}</tr>\n";
+			}
 		} else {
-			$this->html[] = "   <tr class=\"tdtabodd\">{$thtml}</tr>\n";
+			$this->html[] = "   <tr class=\"{$rowclass}\">{$thtml}</tr>\n";
 		}
 		$this->currentrow++;
 		return true;
@@ -329,6 +338,15 @@ class tdtable {
 				case "mdel":
 					$rethtml .= $this->act_mdel($raw);
 					break;
+				case "tdone":
+					$rethtml .= $this->act_tdone($raw);
+					break;
+				case "tedit":
+					$rethtml .= $this->act_tedit($raw);
+					break;
+				case "tdel":
+					$rethtml .= $this->act_tdel($raw);
+					break;
 			}
 		}
 		return $rethtml;
@@ -374,7 +392,7 @@ class tdtable {
 	 */
 	private function act_rview($raw) {
 		if ( $raw['imgid'] > 0 ) {
-			return "<a href=\"/rcpt.php?imgid={$row['imgid']}&amp;hires\" target=\"_blank\"><img class=\"ticon\" src=\"/images/rcptview.png\" title=\"View Reciept (new window)\" alt=\"Show Reciept\" /></a>";
+			return "<a href=\"/rcpt.php?imgid={$raw['imgid']}&amp;hires\" target=\"_blank\"><img class=\"ticon\" src=\"/images/rcptview.png\" title=\"View Reciept (new window)\" alt=\"Show Reciept\" /></a>";
 		} else { 
 			return "<img class=\"ticon\" src=\"/images/blank.png\" alt=\"Spacer\" />";
 		}
@@ -388,6 +406,7 @@ class tdtable {
 	 */
 	private function act_bview($raw) {
 		global $TDTRAC_SITE;
+		
 		return "<a href=\"{$TDTRAC_SITE}view-budget-item&amp;id={$raw['id']}\"><img class=\"ticon\" src=\"/images/view.png\" title=\"View Budget Item Detail\" alt=\"View Item\" /></a>";
 	}
 	
@@ -399,7 +418,8 @@ class tdtable {
 	 */
 	private function act_bedit($raw) {
 		global $TDTRAC_SITE;
-		return "<a href=\"{$TDTRAC_SITE}edit-budget&amp;id={$raw['id']}\"><img class=\"ticon\" src=\"/images/edit.png\" title=\"Edit Budget Item\" alt=\"Edit Item\" /></a>";
+		if ( $this->fromlink ) { $extra = "&redir-to={$this->fromlink}"; }
+		return "<a href=\"{$TDTRAC_SITE}edit-budget&amp;id={$raw['id']}{$extra}\"><img class=\"ticon\" src=\"/images/edit.png\" title=\"Edit Budget Item\" alt=\"Edit Item\" /></a>";
 	}
 	
 	/**
@@ -410,7 +430,8 @@ class tdtable {
 	 */
 	private function act_bdel($raw) {
 		global $TDTRAC_SITE;
-		return "<a href=\"{$TDTRAC_SITE}del-budget&amp;id={$raw['id']}\"><img class=\"ticon\" src=\"/images/delete.png\" title=\"Delete Budget Item\" alt=\"Delete Item\" /></a>";
+		if ( $this->fromlink ) { $extra = "&redir-to={$this->fromlink}"; }
+		return "<a href=\"{$TDTRAC_SITE}del-budget&amp;id={$raw['id']}{$extra}\"><img class=\"ticon\" src=\"/images/delete.png\" title=\"Delete Budget Item\" alt=\"Delete Item\" /></a>";
 	}
 	
 	/**
@@ -444,6 +465,43 @@ class tdtable {
 	private function act_mdel($raw) {
 		global $TDTRAC_SITE;
 		return "<a title=\"Delete\" href=\"{$TDTRAC_SITE}msg-delete&amp;id={$raw['id']}\"><img class=\"ticon\"  alt=\"Delete\" src=\"/images/delete.png\" /></a>";
+	}
+	
+	/**
+	 * Action: Todo delete item button
+	 * 
+	 * @param array Raw SQL Array
+	 * @return string Formatted HTML
+	 */
+	private function act_tdel($raw) {
+		global $TDTRAC_SITE;
+		if ( $this->fromlink ) { $extra = "&redir-to={$this->fromlink}"; }
+		return "<a href=\"{$TDTRAC_SITE}del-todo&amp;id={$raw['id']}{$extra}\"><img class=\"ticon\" src=\"/images/delete.png\" title=\"Delete Todo Item\" alt=\"Delete Item\" /></a>";
+	}
+	
+	/**
+	 * Action: Todo edit item button
+	 * 
+	 * @param array Raw SQL Array
+	 * @return string Formatted HTML
+	 */
+	private function act_tedit($raw) {
+		global $TDTRAC_SITE;
+		if ( $this->fromlink ) { $extra = "&redir-to={$this->fromlink}"; }
+		return "<a href=\"{$TDTRAC_SITE}edit-todo&amp;id={$raw['id']}{$extra}\"><img class=\"ticon\" src=\"/images/edit.png\" title=\"Edit Budget Item\" alt=\"Edit Item\" /></a>";
+	}
+	
+	/**
+	 * Action: Todo mark item done button
+	 * 
+	 * @param array Raw SQL Array
+	 * @return string Formatted HTML
+	 */
+	private function act_tdone($raw) {
+		global $TDTRAC_SITE;
+		if ( $this->fromlink ) { $extra = "&redir-to={$this->fromlink}"; }
+		if ( ! $raw['complete'] ) { return "<a href=\"{$TDTRAC_SITE}done-todo&amp;id={$raw['id']}{$extra}\"><img class=\"ticon\" src=\"/images/check-no.png\" title=\"Mark Todo Item Done\" alt=\"Mark Item\" /></a>"; }
+		else { return "<img class=\"ticon\" src=\"/images/check-yes.png\" title=\"Todo Item Done\" alt=\"Item Done\" />"; }
 	}
 }
 
