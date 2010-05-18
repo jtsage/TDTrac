@@ -97,6 +97,7 @@ function msg_inbox_view() {
  * @param integer Message ID to remove
  */
 function msg_delete($msgid) {
+	if ( !is_numeric($msgid) ) { thrower(perms_fail()); }
 	GLOBAL $db, $user_name, $MYSQL_PREFIX;
 	$userid = perms_getidbyname($user_name);
 	$nocheck = perms_isadmin($user_name);

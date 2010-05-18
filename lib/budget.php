@@ -48,8 +48,9 @@ function budget_addform($rcpt = 0) {
  */
 function budget_editform($id) {
 	GLOBAL $db, $MYSQL_PREFIX, $TDTRAC_SITE;
+	if ( !is_numeric($id) || $id < 1 ) { return perms_fail(); }
 	$html  = "<h3>Edit Budget Expense</h3>\n";
-	$sql = "SELECT showname, {$MYSQL_PREFIX}budget.* FROM {$MYSQL_PREFIX}shows, {$MYSQL_PREFIX}budget WHERE {$MYSQL_PREFIX}budget.id = {$id} AND {$MYSQL_PREFIX}budget.showid = {$MYSQL_PREFIX}shows.showid LIMIT 1;";
+	$sql = "SELECT showname, {$MYSQL_PREFIX}budget.* FROM `{$MYSQL_PREFIX}shows`, `{$MYSQL_PREFIX}budget` WHERE {$MYSQL_PREFIX}budget.id = {$id} AND {$MYSQL_PREFIX}budget.showid = {$MYSQL_PREFIX}shows.showid LIMIT 1;";
 	$result = mysql_query($sql, $db);
 	$row = mysql_fetch_array($result);
 	if ( $row['imgid'] > 0 ) {
@@ -83,8 +84,9 @@ function budget_editform($id) {
  */
 function budget_viewitem($id) {
 	GLOBAL $db, $MYSQL_PREFIX, $TDTRAC_SITE;
+	if ( !is_numeric($id) || $id < 1 ) { return perms_fail(); }
 	$html  = "<h3>Budget Expense</h3>\n";
-	$sql = "SELECT showname, {$MYSQL_PREFIX}budget.* FROM {$MYSQL_PREFIX}shows, {$MYSQL_PREFIX}budget WHERE {$MYSQL_PREFIX}budget.id = {$id} AND {$MYSQL_PREFIX}budget.showid = {$MYSQL_PREFIX}shows.showid LIMIT 1;";
+	$sql = "SELECT showname, {$MYSQL_PREFIX}budget.* FROM `{$MYSQL_PREFIX}shows`, `{$MYSQL_PREFIX}budget` WHERE {$MYSQL_PREFIX}budget.id = {$id} AND {$MYSQL_PREFIX}budget.showid = {$MYSQL_PREFIX}shows.showid LIMIT 1;";
 	$result = mysql_query($sql, $db);
 	$row = mysql_fetch_array($result);
 	if ( $row['imgid'] > 0 ) {
@@ -118,8 +120,9 @@ function budget_viewitem($id) {
  */
 function budget_delform($id) {
 	GLOBAL $db, $MYSQL_PREFIX, $TDTRAC_SITE;
+	if ( !is_numeric($id) || $id < 1 ) { return perms_fail(); }
 	$html  = "<h3>Remove Budget Expense</h3>\n";
-	$sql = "SELECT showname, {$MYSQL_PREFIX}budget.* FROM {$MYSQL_PREFIX}shows, {$MYSQL_PREFIX}budget WHERE {$MYSQL_PREFIX}budget.id = {$id} AND {$MYSQL_PREFIX}budget.showid = {$MYSQL_PREFIX}shows.showid LIMIT 1;";
+	$sql = "SELECT showname, {$MYSQL_PREFIX}budget.* FROM `{$MYSQL_PREFIX}shows`, `{$MYSQL_PREFIX}budget` WHERE {$MYSQL_PREFIX}budget.id = {$id} AND {$MYSQL_PREFIX}budget.showid = {$MYSQL_PREFIX}shows.showid LIMIT 1;";
 	$result = mysql_query($sql, $db);
 	$row = mysql_fetch_array($result);
 	if ( $row['imgid'] > 0 ) {
@@ -152,16 +155,34 @@ function budget_delform($id) {
  */
 function budget_add() {
 	GLOBAL $db, $MYSQL_PREFIX;
-	$taxxed = ( $_REQUEST['tax'] > 0 ) ? $_REQUEST['tax'] : 0;
-	$rcptid = ( $_REQUEST['rcptid'] > 0 ) ? $_REQUEST['rcptid'] : 0;
-	$sql  = "INSERT INTO {$MYSQL_PREFIX}budget ( showid, price, tax, imgid, vendor, category, dscr, date, pending, needrepay, gotrepay ) VALUES ( {$_REQUEST['showid']} , '{$_REQUEST['price']}' , '{$taxxed}' , '{$rcptid}' , '{$_REQUEST['vendor']}' , '{$_REQUEST['category']}' , "; 
-	$sql .= "'{$_REQUEST['dscr']}' , '{$_REQUEST['date']}' , ".(($_REQUEST['pending'] == "y") ? "1" : "0")." , ".(($_REQUEST['needrepay'] == "y") ? "1" : "0")." , ".(($_REQUEST['gotrepay'] == "y") ? "1" : "0")." )";
+	$taxxed = ( $_REQUEST['tax'] > 0 && is_numeric($_REQUEST['tax'])) ? $_REQUEST['tax'] : 0;
+	$rcptid = ( $_REQUEST['rcptid'] > 0 && is_numeric($_REQUEST['rcptid'])) ? $_REQUEST['rcptid'] : 0;
+	
+	$sqlstring  = "INSERT INTO `{$MYSQL_PREFIX}budget` ";
+	$sqlstring .= "( showid, price, tax, imgid, vendor, category, dscr, date, pending, needrepay, gotrepay )";
+	$sqlstring .= " VALUES ( '%d','%f','%f','%d','%s','%s','%s','%s','%d','%d','%d' )";
+	
+	$sql = sprintf($sqlstring,
+		intval($_REQUEST['showid']),
+		floatval($_REQUEST['price']),
+		floatval($taxxed),
+		intval($rcptid),
+		mysql_real_escape_string($_REQUEST['vendor']),
+		mysql_real_escape_string($_REQUEST['category']),
+		mysql_real_escape_string($_REQUEST['dscr']),
+		mysql_real_escape_string($_REQUEST['date']),
+		(($_REQUEST['pending'] == "y") ? "1" : "0"),
+		(($_REQUEST['needrepay'] == "y") ? "1" : "0"),
+		(($_REQUEST['gotrepay'] == "y") ? "1" : "0")
+	);
 	$result = mysql_query($sql, $db);
+	$added = mysql_insert_id();
+	
 	if ( $rcptid > 0 ) {
 		$sql = "UPDATE {$MYSQL_PREFIX}rcpts SET handled = '1' WHERE imgid = '{$rcptid}'";
 		$result = mysql_query($sql, $db);
 	}
-	thrower("Expense Added");
+	thrower("Expense #{$added} Added");
 }
 
 /**
@@ -173,12 +194,25 @@ function budget_add() {
  */
 function budget_edit_do($id) {
 	GLOBAL $db, $MYSQL_PREFIX;
-	$sql  = "UPDATE {$MYSQL_PREFIX}budget SET showid = {$_REQUEST['showid']} , price = '{$_REQUEST['price']}' , tax = '{$_REQUEST['tax']}' , vendor = '{$_REQUEST['vendor']}' , category = '{$_REQUEST['category']}' , ";
-	$sql .= "dscr = '{$_REQUEST['dscr']}' , date = '{$_REQUEST['date']}'";
-	$sql .= " , pending = ".(($_REQUEST['pending'] == "y") ? "1" : "0");
-	$sql .= " , needrepay = ".(($_REQUEST['needrepay'] == "y") ? "1" : "0");
-	$sql .= " , gotrepay = ".(($_REQUEST['gotrepay'] == "y") ? "1" : "0");
-	$sql .= " WHERE id = {$id}";
+	if ( !is_numeric($id) || $id < 1 ) { thrower(perms_fail()); }
+	
+	$sqlstring  = "UPDATE `{$MYSQL_PREFIX}budget` SET showid = '%d', price = '%f', tax = '%f' , vendor = '%s', ";
+	$sqlstring .= "category = '%s', dscr = '%s' , date = '%s', pending = '%d', needrepay = '%d', gotrepay = '%d'";
+	$sqlstring .= " WHERE id = {$id}";
+	
+	$sql = sprintf($sqlstring,
+		intval($_REQUEST['showid']),
+		floatval($_REQUEST['price']),
+		floatval($_REQUEST['tax']),
+		mysql_real_escape_string($_REQUEST['vendor']),
+		mysql_real_escape_string($_REQUEST['category']),
+		mysql_real_escape_string($_REQUEST['dscr']),
+		mysql_real_escape_string($_REQUEST['date']),
+		(($_REQUEST['pending'] == "y") ? "1" : "0"),
+		(($_REQUEST['needrepay'] == "y") ? "1" : "0"),
+		(($_REQUEST['gotrepay'] == "y") ? "1" : "0")
+	);
+
 	$result = mysql_query($sql, $db);
 	if ( isset($_REQUEST['redir-to']) ){
 		$cleanredit = preg_replace("/\*/", "&", $_REQUEST['redir-to']);
@@ -195,7 +229,8 @@ function budget_edit_do($id) {
  */
 function budget_del_do($id) {
 	GLOBAL $db, $MYSQL_PREFIX;
-	$sql = "DELETE FROM {$MYSQL_PREFIX}budget WHERE id = {$id}";
+	if ( !is_numeric($id) || $id < 1 ) { thrower(perms_fail()); }
+	$sql = "DELETE FROM `{$MYSQL_PREFIX}budget` WHERE id = '".intval($id)."'";
 	$result = mysql_query($sql, $db);
 	if ( isset($_REQUEST['redir-to']) ){
 		$cleanredit = preg_replace("/\*/", "&", $_REQUEST['redir-to']);
@@ -213,7 +248,7 @@ function budget_del_do($id) {
  */
 function budget_viewselect() {
 	GLOBAL $db, $MYSQL_PREFIX, $TDTRAC_SITE;
-	$sql = "SELECT showid, showname FROM {$MYSQL_PREFIX}shows ORDER BY created DESC";
+	$sql = "SELECT showid, showname FROM `{$MYSQL_PREFIX}shows` ORDER BY created DESC";
 	$result = mysql_query($sql, $db);
 	$html  = "<h3>View Budget</h3>";
 	$form = new tdform("{$TDTRAC_SITE}view-budget");
@@ -235,7 +270,7 @@ function budget_viewselect() {
  */
 function budget_view_special($onlytype) {
 	GLOBAL $db, $MYSQL_PREFIX;
-	$sql = "SELECT showid FROM {$MYSQL_PREFIX}shows WHERE closed = 0 ORDER BY showid DESC";
+	$sql = "SELECT showid FROM `{$MYSQL_PREFIX}shows` WHERE closed = 0 ORDER BY showid DESC";
 	$rest = mysql_query($sql, $db);
 	$newhtml = "";
 	if ( $onlytype == 1 ) { $newhtml .= "<h3>Pending Payment Budget Items</h3><br /><br />\n"; }
@@ -258,6 +293,7 @@ function budget_view_special($onlytype) {
  * @global string MySQL Table Prefix
  * @global string TDTrac site address for links
  * @return string HTML output
+ * @since 1.3.1
  */
 function budget_search($keywords) {
 	GLOBAL $db, $user_name, $MYSQL_PREFIX, $TDTRAC_SITE;
@@ -303,12 +339,13 @@ function budget_search($keywords) {
  */
 function budget_view($showid, $onlytype) {
 	GLOBAL $db, $user_name, $MYSQL_PREFIX, $TDTRAC_DAYRATE, $TDTRAC_PAYRATE, $TDTRAC_SITE;
+	if ( !is_numeric($showid) || $showid < 1 ) { return perms_fail(); }
 	if ( $onlytype == 0 ) { $sqlwhere = ""; }
 	if ( $onlytype == 1 ) { $sqlwhere = " AND pending = 1"; }
 	if ( $onlytype == 2 ) { $sqlwhere = " AND needrepay = 1"; }
 	if ( $onlytype == 3 ) { $sqlwhere = " AND gotrepay = 1"; }
 	if ( $onlytype == 4 ) { $sqlwhere = " AND needrepay = 1 AND gotrepay = 0"; }
-	$sql = "SELECT * FROM {$MYSQL_PREFIX}shows WHERE showid = {$showid}";
+	$sql = "SELECT * FROM `{$MYSQL_PREFIX}shows` WHERE showid = '".intval($showid)."'";
 	$editshow = perms_checkperm($user_name, "editshow");
 	$editbudget = perms_checkperm($user_name, "editbudget"); 
 	$result = mysql_query($sql, $db); 
@@ -340,7 +377,7 @@ function budget_view($showid, $onlytype) {
 	}
 	$html .= $tabl->output();
 	
-	if ( $onlytype > 0 ) { return $html . "<br /><br /><br />"; }
+	if ( $onlytype > 0 ) { return $html . "<br /><br /><br />"; } // Show payroll only on full budget report
 	
 	$html .= "<br /><br /><h4>Payroll Expenses</h4>\n";
 	
@@ -349,7 +386,7 @@ function budget_view($showid, $onlytype) {
 	$tabl->addNumber((($TDTRAC_DAYRATE)?"Days":"Hours")." Worked");
 	$tabl->addCurrency('Price');
 	
-	$sql = "SELECT SUM(worked) as days, payrate, CONCAT(first, ' ', last) as name FROM {$MYSQL_PREFIX}users u, {$MYSQL_PREFIX}hours h WHERE u.userid = h.userid AND h.showid = {$showid} GROUP BY h.userid ORDER BY last ASC";
+	$sql = "SELECT SUM(worked) as days, payrate, CONCAT(first, ' ', last) as name FROM {$MYSQL_PREFIX}users u, {$MYSQL_PREFIX}hours h WHERE u.userid = h.userid AND h.showid = '".intval($showid)."' GROUP BY h.userid ORDER BY last ASC";
 	$result = mysql_query($sql, $db);
 	
 	while ( $row = mysql_fetch_array($result) ) {
