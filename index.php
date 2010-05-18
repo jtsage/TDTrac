@@ -35,15 +35,15 @@ if ( !$login[0] ) { print $login[1]; } else { $user_name = $login[1]; }
 //NO AUTH OPTIONS
 switch ($page_title) {
     case "login":
-	islogin_dologin();
-	break;
+		islogin_dologin();
+		break;
     case "pwremind":
-	if ($_SERVER['REQUEST_METHOD'] == "POST") { echo email_pwsend(); 
-	} else { echo islogin_pwform(); }
-	break;
+		if ($_SERVER['REQUEST_METHOD'] == "POST") { echo email_pwsend(); 
+		} else { echo islogin_pwform(); }
+		break;
     case "logout":
-	islogin_logout();
-	break;
+		islogin_logout();
+		break;
 }
 if ( $login[0] ) {
 	switch($page_title) {
