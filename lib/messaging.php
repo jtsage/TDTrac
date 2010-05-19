@@ -1,11 +1,13 @@
 <?php
 /**
  * TDTrac Messaging Functions
+ * Data hardened since 1.3.1
  * 
  * Contains all messaging framework
  * @package tdtrac
  * @version 1.3.1
  * @author J.T.Sage <jtsage@gmail.com>
+ * @since 1.0.0beta1
  */
 
 /** 

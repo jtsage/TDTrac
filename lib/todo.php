@@ -3,6 +3,7 @@
  * TDTrac Todo List Functions
  * 
  * Contains the todo list functions
+ * Data hardened since 1.3.1
  * @package tdtrac
  * @version 1.3.1
  * @author J.T.Sage <jtsage@gmail.com>
@@ -40,7 +41,17 @@ function todo_add() {
  */
 function todo_add_do() {
 	GLOBAL $db, $MYSQL_PREFIX;
-	$sql = "INSERT INTO {$MYSQL_PREFIX}todo ( showid, priority, due, assigned, dscr ) VALUES ( '{$_REQUEST['showid']}', '{$_REQUEST['prio']}', '{$_REQUEST['date']}', '{$_REQUEST['assign']}', '".mysql_real_escape_string($_REQUEST['desc'])."' )";
+	$sqlstring  = "INSERT INTO `{$MYSQL_PREFIX}todo` ( showid, priority, due, assigned, dscr )";
+	$sqlstring .= " VALUES ( '%d', '%d', '%s', '%d', '%s' )";
+	
+	$sql = sprintf($sqlstring,
+		intval($_REQUEST['showid']),
+		intval($_REQUEST['prio']),
+		mysql_real_escape_string($_REQUEST['date']),
+		intval($_REQUEST['assign']),
+		mysql_real_escape_string($_REQUEST['desc'])
+	);
+	
 	$result = mysql_query($sql, $db);
 	thrower("ToDo Item Added");
 }
@@ -114,10 +125,20 @@ function todo_del_form($todoid) {
  */
 function todo_edit_do($id) {
 	GLOBAL $db, $MYSQL_PREFIX;
-	$sql  = "UPDATE {$MYSQL_PREFIX}todo SET showid = {$_REQUEST['showid']} , priority = {$_REQUEST['prio']} , assigned = {$_REQUEST['assign']} , ";
-	$sql .= "dscr = '{$_REQUEST['desc']}' , due = '{$_REQUEST['date']}'";
-	$sql .= " , complete = ".(($_REQUEST['complete'] == "y") ? "1" : "0");
-	$sql .= " WHERE id = {$id}";
+	if ( !is_numeric($id) || $id < 1 ) { thrower(perms_fail()); }
+	$sqlstring  = "UPDATE `{$MYSQL_PREFIX}todo` SET showid = '%d', priority = '%d', assigned = '%d',";
+	$sqlstring .= " dscr = '%s', due = '%s', complete = '%d' WHERE id = '%d'";
+	
+	$sql = sprintf($sqlstring,
+		intval($_REQUEST['showid']),
+		intval($_REQUEST['prio']),
+		intval($_REQUEST['assign']),
+		mysql_real_escape_string($_REQUEST['desc']),
+		mysql_real_escape_string($_REQUEST['date']),
+		(($_REQUEST['complete'] == "y") ? 1 : 0),
+		intval($id)
+	);
+	
 	$result = mysql_query($sql, $db);
 	if ( isset($_REQUEST['redir-to']) ){
 		$cleanredit = preg_replace("/\*/", "&", $_REQUEST['redir-to']);
@@ -134,8 +155,9 @@ function todo_edit_do($id) {
  */
 function todo_mark_do($id) {
 	GLOBAL $db, $MYSQL_PREFIX;
+	if ( !is_numeric($id) || $id < 1 ) { thrower(perms_fail()); }
 	$sql  = "UPDATE {$MYSQL_PREFIX}todo SET complete = 1 ";
-	$sql .= " WHERE id = {$id}";
+	$sql .= " WHERE id = '".intval($id)."'";
 	$result = mysql_query($sql, $db);
 	if ( isset($_REQUEST['redir-to']) ){
 		$cleanredit = preg_replace("/\*/", "&", $_REQUEST['redir-to']);
@@ -152,7 +174,8 @@ function todo_mark_do($id) {
  */
 function todo_del_do($id) {
 	GLOBAL $db, $MYSQL_PREFIX;
-	$sql  = "DELETE FROM {$MYSQL_PREFIX}todo WHERE id = {$id}";
+if ( !is_numeric($id) || $id < 1 ) { thrower(perms_fail()); }
+	$sql  = "DELETE FROM {$MYSQL_PREFIX}todo WHERE id = '".intval($id)."'";
 	$result = mysql_query($sql, $db);
 	if ( isset($_REQUEST['redir-to']) ){
 		$cleanredit = preg_replace("/\*/", "&", $_REQUEST['redir-to']);
@@ -161,7 +184,7 @@ function todo_del_do($id) {
 }
 
 /**
- * Show todo delete confirmation form
+ * Show todo views - form for pick or todo list
  * 
  * @global resource Database Link
  * @global string MySQL Table Prefix
