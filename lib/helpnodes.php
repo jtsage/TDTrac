@@ -127,7 +127,7 @@ $helpnode['edit-user'][] = "<li>Phone<ul><li>The user's phone number.  For infor
 $helpnode['edit-user'][] = "<li>E-Mail<ul><li>The user's e-mail address, used in the 'e-mail to self' links throughout the site.</li></ul></li>\n";
 $helpnode['edit-user'][] = "<li>Group<ul><li>The user's permission group.  Special group 'employee' limits the add hours form to only the logged in user.  Special group 'admin' gives full access to all features.</li></ul></li>\n";
 $helpnode['edit-user'][] = "<li>User Active<ul><li>The user's status.  Inactive users appear in no reports, pick lists, or are allowed to login.</li></ul></li>\n";
-$helpnode['view-user'][] = "<li>Add / Edit / View only Own Hours<ul><li>Limit user to only viewing, adding, and editing thier own hours.</li></ul></li>\n";
+$helpnode['edit-user'][] = "<li>Add / Edit / View only Own Hours<ul><li>Limit user to only viewing, adding, and editing thier own hours.</li></ul></li>\n";
 $helpnode['edit-user'][] = "<li>User on Payroll<ul><li>The user's payroll status. Active payroll users appear in the add payroll hours picklist.</li></ul></li>\n";
 $helpnode['edit-user'][] = "<li>Admin Notify on Employee Add of Payroll<ul><li>When toggeled on, a user in the employee group adding hours will trigger a message sent to this user to let them know of the action.  Particularly useful for admins, shop or shift managers, etc.</li></ul></li></ul></p>\n";
 
