@@ -41,7 +41,7 @@ function show_add_do() {
 	
 	$sql = sprintf($sqlstring,
 		mysql_real_escape_string($_REQUEST['showname']),
-		mysql_real_escape_string($_REQUEST['company'],
+		mysql_real_escape_string($_REQUEST['company']),
 		mysql_real_escape_string($_REQUEST['venue']),
 		mysql_real_escape_string($_REQUEST['dates'])
 	);
