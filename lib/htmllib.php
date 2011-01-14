@@ -18,6 +18,7 @@ function makePage($body = '', $title = '') {
 		$html[] = "\t\t\t\t{$fixme}";
 	}
 	$html = array_merge($html, makeFooter());
+	ob_clean(); //Hackish method to clear any extra lines / echos before html starts
 	foreach ($html as $line) {
 		echo $line . "\n";
 	}
@@ -45,12 +46,12 @@ function makeHeader($title = '') {
 	$SITE_SCRIPT[] = "\t});";
 	$SITE_SCRIPT[] = "});";
 
-
+	$html = array();
 	$html[] = '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">';
 	$html[] = '<html xmlns="http://www.w3.org/1999/xhtml">';
 	$html[] = "<head>\n\t<meta http-equiv=\"Content-Type\" content=\"text/html; charset=iso-8859-1\" />";
 	$html[] = "\t<title>TDTrac{$TDTRAC_CPNY}:v{$TDTRAC_VERSION} - {$title}</title>";
-	$html[] = "\t<link href=\"/css/td130.css\" rel=\"stylesheet\" type=\"text/css\" />";
+	$html[] = "\t<link href=\"/css/tdtrac.css\" rel=\"stylesheet\" type=\"text/css\" />";
 	$html[] = "\t<link type=\"text/css\" href=\"/css/custom-theme/jquery-ui-1.8.7.custom.css\" rel=\"stylesheet\" />";
 	$html[] = "\t<link type=\"text/css\" href=\"/css/jquery.ui.selectmenu.css\" rel=\"stylesheet\" />";
 	$html[] = "\t<script type=\"text/javascript\" src=\"/js/jquery-1.4.4.min.js\"></script>";

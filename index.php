@@ -68,16 +68,16 @@ if ( !$login[0] ) {
 			}
 
 		case "index":
-			echo makePage(display_home($user_name));
+			makePage(display_home($user_name));
 			break;
 
 		case "search":
 			if ( perms_checkperm($user_name, 'viewbudget') ) {
 				if ( $_SERVER['REQUEST_METHOD'] == "POST" ) {
 					if ( isset($_REQUEST['keywords']) && $_REQUEST['keywords'] <> "" ) { makePage(budget_search($_REQUEST['keywords']), 'Search Results'); }
-					else { echo makePage(display_home($user_name)); }
-				} else { echo makePage(display_home($user_name)); }
-			} else { echo makePage(perms_no(), 'Access Denied'); }
+					else { makePage(display_home($user_name)); }
+				} else { makePage(display_home($user_name)); }
+			} else { makePage(perms_no(), 'Access Denied'); }
 			break;
 
 		case "rcpt":
