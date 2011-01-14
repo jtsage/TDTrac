@@ -11,6 +11,7 @@ require_once("dbaseconfig.php");
 require_once("login.php");
 require_once("formlib.php");
 require_once("tablelib.php");
+require_once("htmllib.php");
 require_once("permissions.php");
 require_once("show.php");
 require_once("home.php");
@@ -27,7 +28,7 @@ require_once("todo.php");
  * @param string Message to send
  * @global string Address to redirct to
  */
-function thrower($msg, $loc='home') {
+function thrower($msg, $loc='') {
 	GLOBAL $TDTRAC_SITE;
 	$_SESSION['infodata'] = $msg;
 	header("Location: {$TDTRAC_SITE}{$loc}");

@@ -79,17 +79,16 @@ function rcpt_nuke() {
  */
 function rcpt_list_budget($rcpt = 0) {
 	GLOBAL $db, $MYSQL_PREFIX;
-	$html = "<h3>Add to Existing Budget Item</h3>\n";
 	$sql = "SELECT budget.*, showname FROM {$MYSQL_PREFIX}budget as budget, {$MYSQL_PREFIX}shows as shows WHERE budget.showid = shows.showid AND budget.imgid = 0 AND shows.closed = 0 ORDER BY budget.date DESC, budget.id DESC";
 	$result = mysql_query($sql, $db);
 	while ( $row = mysql_fetch_array($result) ) {
 		$picklist[] = array($row['id'], "{$row['showname']} - {$row['date']} - {$row['vendor']} - \${$row['price']}");
 	}
 	
-	$form = new tdform("{$TDTRAC_SITE}rcpt", "forma", 80, "genform2");
+	$form = new tdform("{$TDTRAC_SITE}rcpt", "forma", 80, "genform2", 'Add To Budget Item');
 	$result = $form->addDrop('budid', 'Item', 'Item to associate with', $picklist, False);
 	$result = $form->addHidden('imgid', $rcpt);
-	$html .= $form->output('Associate');
+	$html = $form->output('Associate');
 	
 	return $html;
 }
@@ -105,8 +104,7 @@ function rcpt_list_budget($rcpt = 0) {
  */
 function rcpt_view() {
 	GLOBAL $db, $MYSQL_PREFIX, $user_name, $TDTRAC_SITE;
-	$html = "";
-	$html .= "<div id=\"rcptbox\">";
+	$html[] = "<div id=\"rcptbox\">";
 	$sql = "SELECT count(imgid) as num FROM {$MYSQL_PREFIX}rcpts WHERE handled = 0";
 	$result = mysql_query($sql, $db);
 	$line = mysql_fetch_array($result);
@@ -117,20 +115,20 @@ function rcpt_view() {
 	} else {
 		$sql = "SELECT imgid, added FROM {$MYSQL_PREFIX}rcpts WHERE handled = 0 ORDER BY added ASC LIMIT 1;"; $thisnum = 1;
 	}
-	$html .= "<span id=\"rcptnum\">Reciept No. <strong>{$thisnum}</strong> of <strong>{$total}</strong></span><br />";
+	$html[] = "<span id=\"rcptnum\">Reciept No. <strong>{$thisnum}</strong> of <strong>{$total}</strong></span><br />";
 	$result = mysql_query($sql, $db);
 	$line = mysql_fetch_array($result);
-	$html .= "<img id=\"rcptimg\" name=\"rcptimg\" src=\"rcpt.php?imgid={$line['imgid']}\" alt=\"Reciept Image\" /><br /><span id=\"rcptdate\"><strong>Added:</strong>{$line['added']}</span>";
-	$html .= "<div id=\"rcptcontrol\">";
-	$html .= "<a title=\"Rotate Original 90deg Counter-Clockwise\" href=\"javascript:document['rcptimg'].src='rcpt.php?imgid={$line['imgid']}&amp;rotate=270';document.links['rcptsave'].href='rcpt.php?imgid={$line['imgid']}&amp;rotate=270&amp;save';return true;\"><img src=\"images/rcpt-ccw.jpg\" alt=\"Rotate CCW\" /></a>";
-	$html .= "<a title=\"Save this Image (new window)\" name=\"rcptsave\" href=\"#\" target=\"_blank\"><img src=\"images/rcpt-save.jpg\" alt=\"Save\" /></a>";
-	$html .= "<a title=\"Zoom In (new window)\" href=\"rcpt.php?imgid={$line['imgid']}&amp;hires\" target=\"_blank\"><img src=\"images/rcpt-zoom.jpg\" alt=\"Zoom\" /></a>";
-	$html .= "<a title=\"Flip Original 180deg\" href=\"javascript:document['rcptimg'].src='rcpt.php?imgid={$line['imgid']}&amp;rotate=180';document.links['rcptsave'].href='rcpt.php?imgid={$line['imgid']}&amp;rotate=180&amp;save';return true;\"><img src=\"images/rcpt-flip.jpg\" alt=\"Rotate 180\" /></a>";
-	$html .= "<a title=\"Rotate Original 90deg Clockwise\" href=\"javascript:document['rcptimg'].src='rcpt.php?imgid={$line['imgid']}&amp;rotate=90';document.links['rcptsave'].href='rcpt.php?imgid={$line['imgid']}&amp;rotate=90&amp;save';return true;\"><img src=\"images/rcpt-cw.jpg\" alt=\"Rotate CW\" /></a>";
-	$html .= "<br />[-<a title=\"Delete This Reciept\" href=\"/rcpt-delete&amp;imgid={$line['imgid']}\">Nuke</a>-] [-<a title=\"Skip this Reciept for Now\" href=\"/rcpt&amp;num={$thisnum}\">Skip</a>-]";
-	$html .= "</div></div>";
-	$html .= rcpt_list_budget($line['imgid']);
-	$html .= budget_addform($line['imgid']);
+	$html[] = "<img id=\"rcptimg\" name=\"rcptimg\" src=\"rcpt.php?imgid={$line['imgid']}\" alt=\"Reciept Image\" /><br /><span id=\"rcptdate\"><strong>Added:</strong>{$line['added']}</span>";
+	$html[] = "<div id=\"rcptcontrol\">";
+	$html[] = "<a title=\"Rotate Original 90deg Counter-Clockwise\" href=\"javascript:document['rcptimg'].src='rcpt.php?imgid={$line['imgid']}&amp;rotate=270';document.links['rcptsave'].href='rcpt.php?imgid={$line['imgid']}&amp;rotate=270&amp;save';return true;\"><img src=\"images/rcpt-ccw.jpg\" alt=\"Rotate CCW\" /></a>";
+	$html[] = "<a title=\"Save this Image (new window)\" name=\"rcptsave\" href=\"#\" target=\"_blank\"><img src=\"images/rcpt-save.jpg\" alt=\"Save\" /></a>";
+	$html[] = "<a title=\"Zoom In (new window)\" href=\"rcpt.php?imgid={$line['imgid']}&amp;hires\" target=\"_blank\"><img src=\"images/rcpt-zoom.jpg\" alt=\"Zoom\" /></a>";
+	$html[] = "<a title=\"Flip Original 180deg\" href=\"javascript:document['rcptimg'].src='rcpt.php?imgid={$line['imgid']}&amp;rotate=180';document.links['rcptsave'].href='rcpt.php?imgid={$line['imgid']}&amp;rotate=180&amp;save';return true;\"><img src=\"images/rcpt-flip.jpg\" alt=\"Rotate 180\" /></a>";
+	$html[] = "<a title=\"Rotate Original 90deg Clockwise\" href=\"javascript:document['rcptimg'].src='rcpt.php?imgid={$line['imgid']}&amp;rotate=90';document.links['rcptsave'].href='rcpt.php?imgid={$line['imgid']}&amp;rotate=90&amp;save';return true;\"><img src=\"images/rcpt-cw.jpg\" alt=\"Rotate CW\" /></a>";
+	$html[] = "<br />[-<a title=\"Delete This Reciept\" href=\"/rcpt-delete&amp;imgid={$line['imgid']}\">Nuke</a>-] [-<a title=\"Skip this Reciept for Now\" href=\"/rcpt&amp;num={$thisnum}\">Skip</a>-]";
+	$html[] = "</div></div>";
+	$html = array_merge($html, rcpt_list_budget($line['imgid']));
+	$html = array_merge($html, budget_addform($line['imgid']));
 	return $html;
 }
 

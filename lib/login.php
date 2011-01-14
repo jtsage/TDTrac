@@ -70,12 +70,12 @@ function islogin_cookietest() {
  */
 function islogin_form() {
 	GLOBAL $TDTRAC_SITE;
-	$form = new tdform("{$TDTRAC_SITE}login", "loginform", 1, "loginform");
+	$form = new tdform("{$TDTRAC_SITE}user/login", "loginform", 1, "loginform", 'Login');
 	
 	$result = $form->addText('tracuser', 'User Name');
 	$result = $form->addPass('tracpass', 'Password');
 	
-	$html .= $form->output('Login', "[-<a href=\"{$TDTRAC_SITE}pwremind\">Forgot Password?</a>-] ");
+	$html = $form->output('Login', "[-<a href=\"{$TDTRAC_SITE}user/forgot\">Forgot Password?</a>-] ");
 	return $html;
 }
 
@@ -87,12 +87,12 @@ function islogin_form() {
  */
 function islogin_pwform() {
 	GLOBAL $TDTRAC_SITE;
-	$html  = '<h4>Send Password Via E-Mail</h4>';
-	$form = new tdform("{$TDTRAC_SITE}pwremind", "loginform", 1, "loginform");
+	$html[] = '<h4>Send Password Via E-Mail</h4>';
+	$form = new tdform("{$TDTRAC_SITE}user/forgot", "loginform", 1, "loginform");
 	
 	$result = $form->addText('tracemail', 'E-Mail Address');
 	
-	$html .= $form->output('Send Reminder');
+	$html = array_merge($html, $form->output('Send Reminder'));
 	return $html;
 }
 

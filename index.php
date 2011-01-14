@@ -10,9 +10,10 @@
 ob_start(); session_start(); 
 
 ## PROGRAM DETAILS. DO NOT EDIT UNLESS YOU KNOW WHAT YOU ARE DOING
-$TDTRAC_VERSION = "1.3.1";
+$TDTRAC_VERSION = "1.4.0";
 $TDTRAC_DBVER = "1.3.1";
 $TDTRAC_PERMS = array("addshow", "editshow", "viewshow", "addbudget", "editbudget", "viewbudget", "addhours", "edithours", "viewhours", "adduser");
+$SITE_SCRIPT = array('');
 
 require_once("config.php");
 require_once("lib/functions-load.php");
@@ -21,50 +22,125 @@ if ( !file_exists(".htaccess") ) { $TDTRAC_SITE .= "index.php?action="; }
 
 $login = islogin();
 
-$page_title = $_REQUEST['action'];
+$action = preg_split("/\//", $_REQUEST['action']);
 
-//$page_title = substr($_SERVER['REQUEST_URI'], 1); 
-//$page_title = preg_replace("/\?.+$/", "", $page_title);
-if ( $page_title == "" ) { $page_title = "home"; }
-require_once("lib/header.php");
 
-if ( isset($_SESSION['infodata']) ) { echo "<div class=\"infobox\"><span style=\"font-size: .7em\">{$_SESSION['infodata']}</span></div>"; unset($_SESSION['infodata']); }
+if ( !isset($action[0]) || $action[0] == "" ) { $action[0] = 'index'; }
+if ( !isset($action[1]) || $action[1] == "" ) { $action[1] = 'index'; }
+if ( !isset($action[2]) || $action[2] == "" ) { $action[2] = 'index'; }
 
-if ( !$login[0] ) { print $login[1]; } else { $user_name = $login[1]; }
+if ( !$login[0] ) { 
+	if ( $action[0] == "user" ) {
+		switch ($action[1]) {
+			case "login":
+				islogin_dologin();
+				break;
+			case "forgot":
+				if ( $_SERVER['REQUEST_METHOD'] == "POST" ) { makePage(email_pwsend(), 'Forgotten Password'); 
+				} else { makePage(islogin_pwform(), 'Forgotten Password'); }
+				break;
+			case "logout":
+				islogin_logout();
+				break;
+			default:
+				makePage($login[1], 'Login');
+				break;
+		}
+	} else {
+		makePage($login[1], 'Login');
+	}
 
-//NO AUTH OPTIONS
-switch ($page_title) {
-    case "login":
-	islogin_dologin();
-	break;
-    case "pwremind":
-	if ($_SERVER['REQUEST_METHOD'] == "POST") { echo email_pwsend(); 
-	} else { echo islogin_pwform(); }
-	break;
-    case "logout":
-	islogin_logout();
-	break;
-}
-if ( $login[0] ) {
-	switch($page_title) {
+} else {
+	$user_name = $login[1];
+
+	switch($action[0]) {
+		case "user":
+			switch($action[1]) {
+				case "login":
+					islogin_dologin();
+					break;
+				case "logout":
+					islogin_logout();
+					break;
+				default:
+					makePage($login[1], 'Login');
+					break;
+			}
+
+		case "index":
+			echo makePage(display_home($user_name));
+			break;
+
 		case "search":
 			if ( perms_checkperm($user_name, 'viewbudget') ) {
 				if ( $_SERVER['REQUEST_METHOD'] == "POST" ) {
-					if ( isset($_REQUEST['keywords']) && $_REQUEST['keywords'] <> "" ) { echo budget_search($_REQUEST['keywords']); }
-					else { echo display_home($user_name); }
-				} else { echo display_home($user_name); }
-			} else { echo perms_no(); }
+					if ( isset($_REQUEST['keywords']) && $_REQUEST['keywords'] <> "" ) { makePage(budget_search($_REQUEST['keywords']), 'Search Results'); }
+					else { echo makePage(display_home($user_name)); }
+				} else { echo makePage(display_home($user_name)); }
+			} else { echo makePage(perms_no(), 'Access Denied'); }
 			break;
+
 		case "rcpt":
-			if ( perms_checkperm($user_name, 'addbudget') ) {
-				if ($_SERVER['REQUEST_METHOD'] == "POST") { rcpt_do(); }
-				else { echo rcpt_view(); }
-			} else { echo perms_no(); }
-			break;
-		case "rcpt-delete":
-			if ( perms_checkperm($user_name, 'addbudget') ) { rcpt_nuke(); 
-			} else { echo perms_no(); }
-			break;
+			switch ($action[1]) {
+				case "delete":
+					if ( perms_checkperm($user_name, 'addbudget') ) { rcpt_nuke(); 
+					} else { makePage(perms_no(), 'Access Denied'); }
+					break;
+				default:
+					if ( perms_checkperm($user_name, 'addbudget') ) {
+						if ($_SERVER['REQUEST_METHOD'] == "POST") { rcpt_do(); }
+						else { makePage(rcpt_view(), 'Reciepts'); }
+					} else { makePage(perms_no(), 'Access Denied'); }
+				break;
+			} break;
+		case "budget":
+			switch ($action[1]) {
+				case "add":
+					if ( perms_checkperm($user_name, 'addbudget') ) {
+						if ($_SERVER['REQUEST_METHOD'] == "POST") { budget_add(); }
+						else { makePage(budget_addform(), 'Add Budget Item'); }
+					} else { makePage(perms_no(), 'Access Denied'); }
+					break;
+				case "view":
+					if ( perms_checkperm($user_name, 'viewbudget') ) {
+						if ( is_numeric($action[2]) && $action[2] > 0 && $action[2] < 5 ) {
+							makePage(budget_view_special($action[2]), 'View Budget');
+						} else {
+							if ( $_SERVER['REQUEST_METHOD'] == "POST" ) { makePage(budget_view(intval($_REQUEST['showid'])), 'View Budget'); }
+							else { makePage(budget_viewselect(), 'Select Budget'); }
+						}
+					} else { makePage(perms_no(), 'Access Denied'); }
+					break;
+				case "edit":
+					if ( perms_checkperm($user_name, 'editbudget') && is_numeric($action[2]) ) {
+						if ($_SERVER['REQUEST_METHOD'] == "POST") { budget_edit_do(intval($action[2])); }
+						else { 
+							if ( is_numeric($action[2]) ) { makePage(budget_editform(intval($action[2])), 'Edit Budget Item'); }
+							else { makePage(perms_error(), 'FATAL:: Error'); } 
+						}
+					} else { makePage(perms_no(), 'Access Denied'); }
+					break;
+				case "item":
+					if ( perms_checkperm($user_name, 'viewbudget') && is_numeric($action[2]) ) {
+						makePage(budget_viewitem(intval($action[2])), "Budget Item #{$action[2]}"); 
+					} else { makePage(perms_no(), 'Access Denied'); }
+					break;
+				case "email":
+					if ( perms_checkperm($user_name, 'viewbudget') && is_numeric($action[2]) ) {
+						makePage(email_budget(intval($action[2])), 'E-Mail Budget');
+					} else { makePage(perms_no(), 'Access Denied'); }
+					break;
+				case "delete":
+					if ( perms_checkperm($user_name, 'editbudget') && is_numeric($action[2]) ) {
+						if ($_SERVER['REQUEST_METHOD'] == "POST") { budget_del_do(intval($action[2])); }
+						else { makePage(budget_delform(intval($action[2])), 'Delete Item'); }
+					} else { makePage(perms_no(), 'Access Denied'); }
+					break;
+				default:
+					makePage(display_home($user_name, 2), 'Budgets');
+					break;
+			} break;
+
 
 		case "add-show":
 			if ( perms_checkperm($user_name, 'addshow') ) {
@@ -83,47 +159,6 @@ if ( $login[0] ) {
 				else { echo show_edit_form($_REQUEST['id']); }
 			} else { echo perms_no(); }
 			break;
-
-		case "add-budget":
-			if ( perms_checkperm($user_name, 'addbudget') ) {
-				if ($_SERVER['REQUEST_METHOD'] == "POST") { budget_add(); }
-				else { echo budget_addform(); }
-			} else { echo perms_no(); }
-			break;
-		case "view-budget":
-			if ( perms_checkperm($user_name, 'viewbudget') ) {
-				if ( isset($_REQUEST['view-bud-do']) && $_REQUEST['view-bud-do'] ) { echo budget_view($_REQUEST['showid'],0); }
-				else { echo budget_viewselect(); }
-			} else { echo perms_no(); }
-			break;
-		case "view-budget-special":
-			if ( perms_checkperm($user_name, 'viewbudget') ) {
-                echo budget_view_special($_REQUEST['stype']); 
-			} else { echo perms_no(); }
-			break;
-		case "edit-budget":
-			if ( perms_checkperm($user_name, 'editbudget') ) {
-				if ($_SERVER['REQUEST_METHOD'] == "POST") { budget_edit_do($_REQUEST['id']); }
-				else { echo budget_editform($_REQUEST['id']); }
-			} else { echo perms_no(); }
-			break;
-		case "view-budget-item":
-			if ( perms_checkperm($user_name, 'viewbudget') ) {
-				echo budget_viewitem($_REQUEST['id']); 
-			} else { echo perms_no(); }
-			break;
-		case "email-budget":
-			if ( perms_checkperm($user_name, 'viewbudget') ) {
-				echo email_budget($_REQUEST['id']); 
-			} else { echo perms_no(); }
-			break;
-		case "del-budget":
-			if ( perms_checkperm($user_name, 'editbudget') ) {
-				if ($_SERVER['REQUEST_METHOD'] == "POST") { budget_del_do($_REQUEST['id']); }
-				else { echo budget_delform($_REQUEST['id']); }
-			} else { echo perms_no(); }
-		break;
-
 		case "add-todo":
 			if ( perms_checkperm($user_name, 'addbudget')) {
 				if ( $_SERVER['REQUEST_METHOD'] == "POST" ) { echo todo_add_do(); }
@@ -279,15 +314,9 @@ if ( $login[0] ) {
 			} else { echo perms_no(); }
 			break;
 
-		case "home":
-			echo display_home($user_name);
-			break;
 		case "main-show":
 			echo display_home($user_name, 3);
 			break;
-		case "main-budget":
-			echo display_home($user_name, 2);
-			break;	
 		case "main-hours":
 			echo display_home($user_name, 1);
 			break;
@@ -297,9 +326,10 @@ if ( $login[0] ) {
 		case "main-todo":
 			echo display_home($user_name, 5);
 			break;
-	}
-}
+		default:
+			echo display_home($user_name);
+			break;
+	} }
 
-require_once("lib/footer.php");
 
 ?>

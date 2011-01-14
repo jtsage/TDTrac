@@ -4,7 +4,7 @@
  * 
  * Contains all budget related functions. 
  * @package tdtrac
- * @version 1.3.1
+ * @version 1.4.0
  * @author J.T.Sage <jtsage@gmail.com>
  */
 
@@ -16,16 +16,16 @@
  * @global string MySQL Table Prefix
  * @global string TDTrac site address, for form actions
  * @return string HTML Output
+ * @version 1.4.0
  */
 function budget_addform($rcpt = 0) {
 	GLOBAL $db, $MYSQL_PREFIX, $TDTRAC_SITE;
-	$html  = "<h3>Add Budget Expense</h3>\n";
-	$form = new tdform("{$TDTRAC_SITE}add-budget", 'form1');
+	$form = new tdform("{$TDTRAC_SITE}add-budget", 'form1', 1, null, 'Add Budget Expense');
 	
 	$fesult = $form->addDrop('showid', 'Show', 'Show to Charge', db_list(get_sql_const('showid'), array(showid, showname)), False);
 	$fesult = $form->addDate('date', 'Date', 'Date of Charge');
-	$fesult = $form->addDrop('vendor', 'Vendor', 'Vendor for Charge', db_list(get_sql_const('vendor'), 'vendor'));
-	$fesult = $form->addDrop('category', 'Category', 'Category for Charge', db_list(get_sql_const('category'), 'category'));
+	$fesult = $form->addACText('vendor', 'Vendor', 'Vendor for Charge', db_list(get_sql_const('vendor'), 'vendor'));
+	$fesult = $form->addACText('category', 'Category', 'Category for Charge', db_list(get_sql_const('category'), 'category'));
 	$fesult = $form->addText('dscr', 'Description', 'Description of Charge');
 	$fesult = $form->addMoney('price', 'Price', 'Amount of charge, no tax');
 	$fesult = $form->addMoney('tax', 'Tax', 'Amount of tax paid, if any');
@@ -33,7 +33,7 @@ function budget_addform($rcpt = 0) {
 	$fesult = $form->addCheck('needrepay', 'Reimbursable Charge');
 	$fesult = $form->addCheck('gotrepay', 'Reimbursment Recieved');
 	$fesult = $form->addHidden('rcptid', $rcpt);
-	$html .= $form->output('Add Expense');
+	$html = $form->output('Add Expense');
 	return $html;
 }
 
@@ -210,17 +210,16 @@ function budget_del_do($id) {
  * @global string MySQL Table Prefix
  * @global string TDTrac site address, for form actions
  * @return string HTML Output
+ * @version 1.4.0
  */
 function budget_viewselect() {
 	GLOBAL $db, $MYSQL_PREFIX, $TDTRAC_SITE;
 	$sql = "SELECT showid, showname FROM {$MYSQL_PREFIX}shows ORDER BY created DESC";
 	$result = mysql_query($sql, $db);
-	$html  = "<h3>View Budget</h3>";
-	$form = new tdform("{$TDTRAC_SITE}view-budget");
+	$form = new tdform("{$TDTRAC_SITE}budget/view/");
 	
 	$result = $form->addDrop('showid', 'Show Name', null, db_list(get_sql_const('showidall'), array(showid, showname)), False);
-	$result = $form->addHidden('view-bud-do', true);
-	$html .= $form->output("View Selected");
+	$html = $form->output("View Selected");
 	
 	return $html;
 }
