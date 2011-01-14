@@ -146,6 +146,15 @@ function perms_error() {
 }
 
 /**
+ * Return a message that the user has attempted to do something very bad.
+ * 
+ * @return string HTML output
+ */
+function perms_fail() {
+	return "<h2>You Have Attempted to haxor the system, or something unexplained has happened.</h2><p>Please <a href=\"/\">return home.</a></p>";
+}
+
+/**
  * Show permission edit pick form
  * 
  * @global resource Database Link

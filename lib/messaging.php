@@ -1,11 +1,13 @@
 <?php
 /**
  * TDTrac Messaging Functions
+ * Data hardened since 1.3.1
  * 
  * Contains all messaging framework
  * @package tdtrac
  * @version 1.3.1
  * @author J.T.Sage <jtsage@gmail.com>
+ * @since 1.0.0beta1
  */
 
 /** 
@@ -97,6 +99,7 @@ function msg_inbox_view() {
  * @param integer Message ID to remove
  */
 function msg_delete($msgid) {
+	if ( !is_numeric($msgid) ) { thrower(perms_fail()); }
 	GLOBAL $db, $user_name, $MYSQL_PREFIX;
 	$userid = perms_getidbyname($user_name);
 	$nocheck = perms_isadmin($user_name);
