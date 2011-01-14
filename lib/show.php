@@ -36,7 +36,16 @@ function show_add_form() {
  */
 function show_add_do() {
 	GLOBAL $db, $MYSQL_PREFIX;
-	$sql = "INSERT INTO {$MYSQL_PREFIX}shows ( showname, company, venue, dates ) VALUES ( '{$_REQUEST['showname']}', '{$_REQUEST['company']}', '{$_REQUEST['venue']}', '{$_REQUEST['dates']}' )";
+	$sqlstring  = "INSERT INTO `{$MYSQL_PREFIX}shows` ( showname, company, venue, dates )";
+	$sqlstring .= " VALUES ( '%s', '%s', '%s', '%s' )";
+	
+	$sql = sprintf($sqlstring,
+		mysql_real_escape_string($_REQUEST['showname']),
+		mysql_real_escape_string($_REQUEST['company']),
+		mysql_real_escape_string($_REQUEST['venue']),
+		mysql_real_escape_string($_REQUEST['dates'])
+	);
+
 	$result = mysql_query($sql, $db);
 	thrower("Show {$_REQUEST['showname']} Added");
 }
@@ -110,3 +119,4 @@ function show_edit_do($showid) {
 	thrower("Show {$_REQUEST['showname']} Updated");
 }
 ?>
+;
