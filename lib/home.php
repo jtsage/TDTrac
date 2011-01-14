@@ -16,54 +16,54 @@
  */
 function display_home($username, $type=0) {
 	GLOBAL $TDTRAC_SITE;
-	$html  = "";
-	$html .= msg_check();
-	$html .= rcpt_check();
-	$html .= todo_check();
-	if ( $type == 0 ) { $html .= "<br /><br /><div style=\"float: left; width: 49%\">\n"; }
+	$html[] = "";
+	$html[] = msg_check();
+	$html[] = rcpt_check();
+	$html[] = todo_check();
+	if ( $type == 0 ) { $html[] = "<br /><br /><div style=\"float: left; width: 49%\">"; }
 	if ( $type == 0 || $type == 1 ) {
-		$html .= "<h3>Payroll Tracking</h3><ul class=\"linklist\">\n";
-		$html .= ( perms_checkperm($username, 'addhours') ) ? "<li><a href=\"{$TDTRAC_SITE}add-hours\">Add Hours Worked</a></li>\n" : "";
-		$html .= ( perms_checkperm($username, 'viewhours') ) ? "<li><a href=\"{$TDTRAC_SITE}view-hours\">View Hours Worked</a></li>\n" : "";
-		$html .= ( perms_isadmin($username) ) ? "<li><a href=\"{$TDTRAC_SITE}view-hours-unpaid\">View Hours Worked (unpaid)</a></li>\n" : "";
-		$html .= ( perms_isadmin($username) ) ? "<li><a href=\"{$TDTRAC_SITE}remind-hours\">Send 'please submit hours' Reminder to Employees</a></li>\n" : "";
-		$html .= "</ul>\n";
+		$html[] = "<h3>Payroll Tracking</h3><ul class=\"linklist\">";
+		$html[] = ( perms_checkperm($username, 'addhours') ) 	? "  <li><a href=\"{$TDTRAC_SITE}hours/add/\">Add Hours Worked</a></li>" : "";
+		$html[] = ( perms_checkperm($username, 'viewhours') ) 	? "  <li><a href=\"{$TDTRAC_SITE}hours/view/\">View Hours Worked</a></li>" : "";
+		$html[] = ( perms_isadmin($username) ) 			? "  <li><a href=\"{$TDTRAC_SITE}hours/view/unpaid/\">View Hours Worked (unpaid)</a></li>" : "";
+		$html[] = ( perms_isadmin($username) ) 			? "  <li><a href=\"{$TDTRAC_SITE}hours/remind/\">Send 'please submit hours' Reminder to Employees</a></li>" : "";
+		$html[] = "</ul>";
 	}
 	if ( $type == 0 || $type == 2 ) {
-		$html .= "<h3>Budget Tracking</h3><ul class=\"linklist\">\n";
-		$html .= ( perms_checkperm($username, 'addbudget') ) ? "<li><a href=\"{$TDTRAC_SITE}add-budget\">Add Budget Expense</a></li>\n" : "";
-		$html .= ( perms_checkperm($username, 'viewbudget') ) ? "<li><a href=\"{$TDTRAC_SITE}view-budget\">View Budgets</a></li>\n" : "";
-		$html .= ( perms_checkperm($username, 'viewbudget') ) ? "<li><a href=\"{$TDTRAC_SITE}view-budget-special&amp;stype=1\">View Budgets (payment pending items only, all shows)</a></li>\n" : "";
-		$html .= ( perms_checkperm($username, 'viewbudget') ) ? "<li><a href=\"{$TDTRAC_SITE}view-budget-special&amp;stype=2\">View Budgets (reimbursment items only, all shows)</a></li>\n" : "";
-		$html .= ( perms_checkperm($username, 'viewbudget') ) ? "<li><a href=\"{$TDTRAC_SITE}view-budget-special&amp;stype=3\">View Budgets (reimbursment recieved items only, all shows)</a></li>\n" : "";
-		$html .= ( perms_checkperm($username, 'viewbudget') ) ? "<li><a href=\"{$TDTRAC_SITE}view-budget-special&amp;stype=4\">View Budgets (reimbursment not recieved items only, all shows)</a></li>\n" : "";
-		$html .= "</ul>\n";
+		$html[] = "<h3>Budget Tracking</h3><ul class=\"linklist\">";
+		$html[] = ( perms_checkperm($username, 'addbudget') ) ? "<li><a href=\"{$TDTRAC_SITE}budget/add/\">Add Budget Expense</a></li>" : "";
+		$html[] = ( perms_checkperm($username, 'viewbudget') ) ? "<li><a href=\"{$TDTRAC_SITE}budget/view/\">View Budgets</a></li>" : "";
+		$html[] = ( perms_checkperm($username, 'viewbudget') ) ? "<li><a href=\"{$TDTRAC_SITE}budget/view/-1/\">View Budgets (payment pending items only, all shows)</a></li>" : "";
+		$html[] = ( perms_checkperm($username, 'viewbudget') ) ? "<li><a href=\"{$TDTRAC_SITE}budget/view/-2/\">View Budgets (reimbursment items only, all shows)</a></li>" : "";
+		$html[] = ( perms_checkperm($username, 'viewbudget') ) ? "<li><a href=\"{$TDTRAC_SITE}budget/view/-3\">View Budgets (reimbursment recieved items only, all shows)</a></li>" : "";
+		$html[] = ( perms_checkperm($username, 'viewbudget') ) ? "<li><a href=\"{$TDTRAC_SITE}budget/view/-4/\">View Budgets (reimbursment not recieved items only, all shows)</a></li>" : "";
+		$html[] = "</ul>\n";
 	}
-	if ( $type == 0 ) { $html .= "<br /><br /><br /><br /><br /><br /></div>\n"; }
+	if ( $type == 0 ) { $html[] = "<br /><br /><br /><br /><br /><br /></div>"; }
 	if ( $type == 0 || $type == 3 ) {
-		$html .= "<h3>Show Information</h3><ul class=\"linklist\">\n";
-		$html .= ( perms_checkperm($username, 'addshow') ) ? "<li><a href=\"{$TDTRAC_SITE}add-show\">Add Show</a></li>\n" : "";
-		$html .= ( perms_checkperm($username, 'viewshow') ) ? "<li><a href=\"{$TDTRAC_SITE}view-show\">View Shows</a></li>\n" : "";
-		$html .= "</ul>\n";
+		$html[] = "<h3>Show Information</h3><ul class=\"linklist\">";
+		$html[] = ( perms_checkperm($username, 'addshow') ) ? "<li><a href=\"{$TDTRAC_SITE}shows/add/\">Add Show</a></li>" : "";
+		$html[] = ( perms_checkperm($username, 'viewshow') ) ? "<li><a href=\"{$TDTRAC_SITE}shows/view/\">View Shows</a></li>" : "";
+		$html[] = "</ul>";
 	}
 	if ( $type == 0 || $type == 5 ) {
-		$html .= "<h3>ToDo Lists</h3><ul class=\"linklist\">\n";
-		$html .= ( perms_checkperm($username, 'addbudget') ) ? "<li><a href=\"{$TDTRAC_SITE}add-todo\">Add ToDo Item</a></li>\n" : "";
-		$html .= ( perms_checkperm($username, 'viewbudget') ) ? "<li><a href=\"{$TDTRAC_SITE}view-todo\">View ToDo Items</a></li>\n" : "";
-		$html .= "<li><a href=\"{$TDTRAC_SITE}view-todo&onlyuser=1\">View Personal ToDo Items</a></li>\n";
-		$html .= "</ul>\n";
+		$html[] = "<h3>ToDo Lists</h3><ul class=\"linklist\">";
+		$html[] = ( perms_checkperm($username, 'addbudget') ) ? "<li><a href=\"{$TDTRAC_SITE}todo/add/\">Add ToDo Item</a></li>" : "";
+		$html[] = ( perms_checkperm($username, 'viewbudget') ) ? "<li><a href=\"{$TDTRAC_SITE}todo/view/\">View ToDo Items</a></li>" : "";
+		$html[] = "<li><a href=\"{$TDTRAC_SITE}/todo/view/own/\">View Personal ToDo Items</a></li>";
+		$html[] = "</ul>";
 	}
 	if ( $type == 0 || $type == 4 ) {
-		$html .= "<h3>User Managment</h3><ul class=\"linklist\">\n";
-		$html .= ( perms_checkperm($username, 'adduser') ) ? "<li><a href=\"{$TDTRAC_SITE}add-user\">Add User</a></li>\n" : "";
+		$html[] = "<h3>User Managment</h3><ul class=\"linklist\">";
+		$html[] = ( perms_checkperm($username, 'adduser') ) ? "<li><a href=\"{$TDTRAC_SITE}user/add/\">Add User</a></li>" : "";
 		if ( perms_isadmin($username) ) {
-			$html .= "<li><a href=\"{$TDTRAC_SITE}view-user\">View Users</a></li>\n";
-			$html .= "<li><a href=\"{$TDTRAC_SITE}edit-perms\">Edit Permissions</a></li>\n";
-			$html .= "<li><a href=\"{$TDTRAC_SITE}view-perms\">View Permissions</a></li>\n";
-			$html .= "<li><a href=\"{$TDTRAC_SITE}mail-perms\">Set TDTracMail Subject Code</a></li>\n";
-			$html .= "<li><a href=\"{$TDTRAC_SITE}groups\">Add / Edit Groups</a></li>\n";
+			$html[] = "<li><a href=\"{$TDTRAC_SITE}user/view/\">View Users</a></li>";
+			$html[] = "<li><a href=\"{$TDTRAC_SITE}user/perms/edit/\">Edit Permissions</a></li>";
+			$html[] = "<li><a href=\"{$TDTRAC_SITE}user/perms/\">View Permissions</a></li>\n";
+			$html[] = "<li><a href=\"{$TDTRAC_SITE}user/mail/\">Set TDTracMail Subject Code</a></li>";
+			$html[] = "<li><a href=\"{$TDTRAC_SITE}user/groups/\">Add / Edit Groups</a></li>";
 		}
-		$html .= "</ul>\n";
+		$html[] = "</ul>\n";
 	}
 	return $html;
 }

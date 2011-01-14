@@ -130,10 +130,19 @@ function perms_getgroupid($group) {
 /**
  * Return a notice that user has no permissions for action
  * 
- * @return string HTML output
+ * @return array HTML output
  */
 function perms_no() {
-	return("<h2>You Do Not Have Permission to Use This Function</h2><p>Please <a href=\"/\">return home</a>.</p>");
+	return(array("<h2>You Do Not Have Permission to Use This Function</h2>","<p>Please <a href=\"/\">return home</a>.</p>"));
+}
+
+/**
+ * Return a notice that the user performed an illegal function (error)
+ * 
+ * @return array HTML output
+ */
+function perms_error() {
+	return(array("<h2>Error</h2>","<p>An unspecified error occured.  Please try again</p>"));
 }
 
 /**
