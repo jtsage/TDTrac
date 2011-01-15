@@ -18,7 +18,7 @@ function makePage($body = '', $title = '') {
 		$html[] = "\t\t\t\t{$fixme}";
 	}
 	$html = array_merge($html, makeFooter());
-	ob_clean(); //Hackish method to clear any extra lines / echos before html starts
+	//ob_clean(); //Hackish method to clear any extra lines / echos before html starts
 	foreach ($html as $line) {
 		echo $line . "\n";
 	}

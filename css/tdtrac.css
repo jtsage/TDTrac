@@ -444,4 +444,13 @@ span .ui-dialog-title {
 .ui-dialog-content ul {
 	margin-left: 2em;
 }
+
+dt {
+	font-weight: bold;
+	margin-left: 1em;
+}
+dd {
+	margin-left: 3em;
+	margin-bottom: .5em;
+}
 	

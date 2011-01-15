@@ -140,112 +140,133 @@ if ( !$login[0] ) {
 					makePage(display_home($user_name, 2), 'Budgets');
 					break;
 			} break;
-
-
-		case "add-show":
-			if ( perms_checkperm($user_name, 'addshow') ) {
-				if ($_SERVER['REQUEST_METHOD'] == "POST") { show_add_do(); }
-				else { echo show_add_form(); }
-			} else { echo perms_no(); }
-			break;
-		case "view-show":
-			if ( perms_checkperm($user_name, 'viewshow') ) {
-				echo show_view();
-			} else { echo perms_no(); }
-			break;
-		case "edit-show":
-			if ( perms_checkperm($user_name, 'editshow') ) {
-				if ($_SERVER['REQUEST_METHOD'] == "POST") { show_edit_do($_REQUEST['showid']); }
-				else { echo show_edit_form($_REQUEST['id']); }
-			} else { echo perms_no(); }
-			break;
-		case "add-todo":
-			if ( perms_checkperm($user_name, 'addbudget')) {
-				if ( $_SERVER['REQUEST_METHOD'] == "POST" ) { echo todo_add_do(); }
-				else { echo todo_add(); }
-			} else { echo perms_no(); }
-			break;
-		case "view-todo":
-			if ( perms_checkperm($user_name, 'viewbudget')) {
-				if ( isset($_REQUEST['onlyuser']) && $_REQUEST['onlyuser'] ) { echo todo_view($user_name); }
-				elseif ( isset($_REQUEST['todouser']) ) { echo todo_view($_REQUEST['todouser'], 'user'); }
-				elseif ( isset($_REQUEST['todoshow']) ) { echo todo_view($_REQUEST['todoshow'], 'show'); }
-				elseif ( isset($_REQUEST['tododue']) ) { echo todo_view(1, 'overdue'); }
-				else { echo todo_view(); }
-			} else {
-				echo view_todo($user_name);
-			}
-			break;
-		case "edit-todo":
-			if ( perms_checkperm($user_name, 'editbudget') ) {
-				if ($_SERVER['REQUEST_METHOD'] == "POST") { todo_edit_do($_REQUEST['id']); }
-				else { echo todo_edit_form($_REQUEST['id']); }
-			} else { echo perms_no(); }
-			break;
-		case "del-todo":
-			if ( perms_checkperm($user_name, 'editbudget') ) {
-				if ($_SERVER['REQUEST_METHOD'] == "POST") { todo_del_do($_REQUEST['id']); }
-				else { echo todo_del_form($_REQUEST['id']); }
-			} else { echo perms_no(); }
-			break;
-		case "done-todo":
-			if ( isset($_REQUEST['id']) ) {
-				todo_mark_do($_REQUEST['id']); 
-			} else { echo perms_no(); }
-			break;
-
-		case "add-hours":
-			if ( perms_checkperm($user_name, 'addhours') ) {
-				if ( isset($_REQUEST['new-hours']) && $_REQUEST['new-hours'] ) { hours_add_do(); }
-				else { echo hours_add(); }
-			} else { echo perms_no(); }
-			break;
-		case "remind-hours":
-			if ( perms_isadmin($user_name) ) {
-				if ( $_SERVER['REQUEST_METHOD'] == "POST" ) { echo hours_remind_do(); }
-				else { echo hours_remind_pick(); }
-			} else { echo perms_no(); }
-			break;
-		case "view-hours":
-			if ( perms_checkperm($user_name, 'addhours') ) {
-				if ( $_SERVER['REQUEST_METHOD'] == "POST" ) { 
-					if ( isset($_REQUEST['userid']) ) { echo hours_view($_REQUEST['userid']); }
-				else { echo hours_view(0); }
-				} else { echo hours_view_pick(); }
-			} else { echo perms_no(); }
-			break;
-		case "view-hours-unpaid":
-			if ( perms_checkperm($user_name, 'addhours') ) {
-				echo hours_view_unpaid(); 
-			} else { echo perms_no(); }
-			break;
-		case "hours-set-paid":
-			if ( perms_isadmin($user_name) ) {
-				hours_set_paid($_REQUEST['id']);
-			} else { echo perms_no(); }
-			break;
-		case "edit-hours":
-			if ( perms_checkperm($user_name, 'edithours') ) {
-				if ($_SERVER['REQUEST_METHOD'] == "POST") { hours_edit_do($_REQUEST['id']); }
-				else { echo hours_edit($_REQUEST['id']); }
-			} else { echo perms_no(); }
-			break;
-		case "email-hours":
-			if ( perms_checkperm($user_name, 'viewhours') ) {
-				echo email_hours($_REQUEST['id'], $_REQUEST['sdate'], $_REQUEST['edate']);
-			} else { echo perms_no(); }
-			break;
-		case "email-hours-unpaid":
-			if ( perms_isadmin($user_name) ) {
-				echo email_hours_unpaid();
-			} else { echo perms_no(); }
-			break;
-		case "del-hours":
-			if ( perms_checkperm($user_name, 'edithours') ) {
-				if ($_SERVER['REQUEST_METHOD'] == "POST") { hours_del_do($_REQUEST['id']); }
-				else { echo hours_del($_REQUEST['id']); }
-			} else { echo perms_no(); }
-			break;
+		case "shows":
+			switch ($action[1]) {
+				case "add":
+					if ( perms_checkperm($user_name, 'addshow') ) {
+						if ($_SERVER['REQUEST_METHOD'] == "POST") { show_add_do(); }
+						else { makePage(show_add_form(), 'Add A Show'); }
+					} else { makePage(perms_no(), 'Access Denied'); }
+					break;
+				case "view":
+					if ( perms_checkperm($user_name, 'viewshow') ) {
+						makePage(show_view(), 'View Show');
+					} else { makePage(perms_no(), 'Access Denied'); }
+					break;
+				case "edit":
+					if ( perms_checkperm($user_name, 'editshow') && is_numeric($action[2])) {
+						if ($_SERVER['REQUEST_METHOD'] == "POST") { show_edit_do($_REQUEST['showid']); }
+						else { makePage(show_edit_form(intval($action[2])), 'Edit Show'); }
+					} else { makePage(perms_no(), 'Access Denied'); }
+					break;
+				default:
+					makePage(display_home($user_name, 3), 'Shows');
+					break;
+			} break;
+		case "todo":
+			switch ($action[1]) {
+				case "add":
+					if ( perms_checkperm($user_name, 'addbudget')) {
+						if ( $_SERVER['REQUEST_METHOD'] == "POST" ) { todo_add_do(); }
+						else { makePage(todo_add(), 'Add To-Do Item'); }
+					} else { makePage(perms_no(), 'Access Denied'); }
+					break;
+				case "view":
+					if ( perms_checkperm($user_name, 'viewbudget')) {
+						switch( $action[2] ) {
+							case "user":
+								makePage(todo_view(intval($_REQUEST['id']), 'user'), 'User To-Do List');
+								break;
+							case "show":
+								makePage(todo_view(intval($_REQUEST['id']), 'show'), 'Show To-Do List');
+								break;
+							case "due":
+								makePage(todo_view(1, 'overdue'), 'Overdue To-Do Items');
+								break;
+							default:
+								makePage(todo_view(), 'To-Do Lists');
+								break;
+						}
+					} else {
+						makePage(todo_view($user_name), 'Personal To-Do List');
+					}
+					break;
+				case "edit":
+					if ( perms_checkperm($user_name, 'editbudget') && is_numeric($action[2])) {
+						if ($_SERVER['REQUEST_METHOD'] == "POST") { todo_edit_do($_REQUEST['id']); }
+						else { makePage(todo_edit_form(intval($action[2])), 'Edit To-Do Item'); }
+					} else { makePage(perms_no(), 'Access Denied'); }
+					break;
+				case "del":
+					if ( perms_checkperm($user_name, 'editbudget')  && is_numeric($action[2]) ) {
+						if ($_SERVER['REQUEST_METHOD'] == "POST") { todo_del_do($_REQUEST['id']); }
+						else { makePage(todo_del_form(intval($action[2])), 'Delete To-Do Item'); }
+					} else { makePage(perms_no(), 'Access Denied'); }
+					break;
+				case "done":
+					if ( is_numeric($action[2]) ) {
+						todo_mark_do(intval($action[2])); 
+					} else { makePage(perms_no(), 'Access Denied'); }
+					break;
+				default:
+					makePage(display_home($user_name, 5), 'To-Do Lists');
+					break;
+			} break;
+		case "hours":
+			switch ( $action[1] ) {
+				case "add":
+					if ( perms_checkperm($user_name, 'addhours') ) {
+						if ( isset($_REQUEST['new-hours']) && $_REQUEST['new-hours'] ) { hours_add_do(); }
+						else { makePage(hours_add(), 'Add Payroll Hours'); }
+					} else { makePage(perms_no(), 'Access Denied'); }
+					break;
+				case "remind":
+					if ( perms_isadmin($user_name) ) {
+						if ( $_SERVER['REQUEST_METHOD'] == "POST" ) { hours_remind_do(); }
+						else { makePage(hours_remind_pick(), 'Send Payroll Reminders'); }
+					} else { makePage(perms_no(), 'Access Denied'); }
+					break;
+				case "view":
+					if ( perms_checkperm($user_name, 'addhours') ) {
+						if ( $_SERVER['REQUEST_METHOD'] == "POST" ) { 
+							if ( isset($_REQUEST['userid']) ) { makePage(hours_view($_REQUEST['userid']), 'View Hours'); }
+							else { makePage(hours_view(0), 'View Your Hours'); }
+						} else { 
+							if ( $action[2] == 'unpaid' ) { makePage(hours_view_unpaid(), 'Veiw Pending Hours'); }
+							else { makePage(hours_view_pick(), 'View Hours'); }
+						}
+					} else { makePage(perms_no(), 'Access Denied'); }
+					break;
+				case "clear":
+					if ( perms_isadmin($user_name) && is_numeric($action[2]) ) {
+						hours_set_paid(intval($action[2]));
+					} else { makePage(perms_no(), 'Access Denied'); }
+					break;
+				case "edit":
+					if ( perms_checkperm($user_name, 'edithours') && is_numeric($action[2]) ) {
+						if ($_SERVER['REQUEST_METHOD'] == "POST") { hours_edit_do($_REQUEST['id']); }
+						else { makePage(hours_edit(intval($action[2])), 'Edit Payroll Hours'); }
+					} else { makePage(perms_no(), 'Access Denied'); }
+					break;
+				case "email":
+					if ( $action[2] == 'unpaid' && perms_isadmin($user_name) ) {
+							makePage(email_hours_unpaid(), 'Send Pending Payroll');
+					} else {
+						if ( perms_checkperm($user_name, 'viewhours') ) {
+							makePage(email_hours($_REQUEST['id'], $_REQUEST['sdate'], $_REQUEST['edate']), 'Send Payroll');
+						} else { makePage(perms_no(), 'Access Denied'); }
+					}
+					break;
+				case "del":
+					if ( perms_checkperm($user_name, 'edithours') && is_numeric($action[2]) ) {
+						if ($_SERVER['REQUEST_METHOD'] == "POST") { hours_del_do($_REQUEST['id']); }
+						else { makePage(hours_del(intval($action[2])), 'Delete Payroll Hours'); }
+					} else { makePage(perms_no(), 'Access Denied'); }
+					break;
+				default:
+					makePage(display_home($user_name, 1), 'Payroll Recording');
+					break;
+			} break;
 
 		case "msg-view":
 			echo msg_sent_view();
@@ -315,16 +336,13 @@ if ( !$login[0] ) {
 			break;
 
 		case "main-show":
-			echo display_home($user_name, 3);
 			break;
 		case "main-hours":
-			echo display_home($user_name, 1);
 			break;
 		case "main-perms":
 			echo display_home($user_name, 4);
 			break;
 		case "main-todo":
-			echo display_home($user_name, 5);
 			break;
 		default:
 			echo display_home($user_name);
