@@ -5,7 +5,7 @@
  * Contains the todo list functions
  * Data hardened since 1.3.1
  * @package tdtrac
- * @version 1.3.1
+ * @version 1.4.0
  * @author J.T.Sage <jtsage@gmail.com>
  * @since 1.3.1
  */
@@ -21,15 +21,14 @@
  */
 function todo_add() {
 	GLOBAL $db, $user_name, $MYSQL_PREFIX, $TDTRAC_SITE;
-	$html  = "<h3>Add Todo Item</h3>\n";
-	$form = new tdform("{$TDTRAC_SITE}add-todo", "form1");
+	$form = new tdform("{$TDTRAC_SITE}add-todo", "form1", 1, 'genform', 'Add To-Do Item');
 	$result = $form->addDrop('showid', 'Show', null, db_list(get_sql_const('showid'), array('showid', 'showname')), False);
 	$result = $form->addDrop('prio', 'Priority', null, todo_pri(), False, 1);
 	$result = $form->addDate('date', 'Due Date');
 	$result = $form->addDrop('assign', 'Assigned To', null, array_merge(array(array('0', '-unassigned-')), db_list(get_sql_const('todo'), array('userid', 'name'))), False);
 	$result = $form->addText('desc', 'Description');
 	$result = $form->addHidden('new-todo', true);
-	$html .= $form->output('Add Todo');
+	$html = $form->output('Add Todo');
 	return $html;
 }
 
@@ -53,7 +52,11 @@ function todo_add_do() {
 	);
 	
 	$result = mysql_query($sql, $db);
-	thrower("ToDo Item Added");
+	if ( $result ) {
+		thrower("To-Do Item Added");
+	} else {
+		thrower("To-Do Item Add :: Operation Failed");
+	}
 }
 
 /**
@@ -68,11 +71,10 @@ function todo_add_do() {
  */
 function todo_edit_form($todoid) {
 	GLOBAL $db, $user_name, $MYSQL_PREFIX, $TDTRAC_SITE;
-	$html  = "<h3>Edit Todo Item</h3>\n";
 	$sql = "SELECT *, DATE_FORMAT(`due`, '%Y-%m-%d') as duedate FROM {$MYSQL_PREFIX}todo WHERE id = {$todoid}";
 	$result = mysql_query($sql, $db);
 	$row = mysql_fetch_array($result);
-	$form = new tdform("{$TDTRAC_SITE}edit-todo", "form1");
+	$form = new tdform("{$TDTRAC_SITE}todo/edit/{$todoid}/", "form1", 1, 'genform', 'Edit To-Do Item');
 	$result = $form->addDrop('showid', 'Show', null, db_list(get_sql_const('showid'), array('showid', 'showname')), False, $row['showid']);
 	$result = $form->addDrop('prio', 'Priority', null, todo_pri(), False, $row['priority']);
 	$result = $form->addDate('date', 'Due Date', null, $row['duedate']);
@@ -82,7 +84,7 @@ function todo_edit_form($todoid) {
 	$result = $form->addHidden('edit-todo', true);
 	$result = $form->addHidden('id', $todoid);
 	if ( isset($_REQUEST['redir-to']) ) { $form->addHidden('redir-to', $_REQUEST['redir-to']); }
-	$html .= $form->output('Edit Todo');
+	$html = $form->output('Edit Todo');
 	return $html;
 }
 
@@ -98,11 +100,10 @@ function todo_edit_form($todoid) {
  */
 function todo_del_form($todoid) {
 	GLOBAL $db, $user_name, $MYSQL_PREFIX, $TDTRAC_SITE;
-	$html  = "<h3>Delete Todo Item</h3>\n";
 	$sql = "SELECT *, DATE_FORMAT(`due`, '%Y-%m-%d') as duedate FROM {$MYSQL_PREFIX}todo WHERE id = {$todoid}";
 	$result = mysql_query($sql, $db);
 	$row = mysql_fetch_array($result);
-	$form = new tdform("{$TDTRAC_SITE}del-todo", "form1");
+	$form = new tdform("{$TDTRAC_SITE}todo/del/{$todoid}/", "form1", 1, 'genform', 'Delete To-Do Item');
 	$result = $form->addDrop('showid', 'Show', null, db_list(get_sql_const('showid'), array('showid', 'showname')), False, $row['showid'], False);
 	$result = $form->addDrop('prio', 'Priority', null, todo_pri(), False, $row['priority'], False);
 	$result = $form->addDate('date', 'Due Date', null, $row['duedate'], False);
@@ -112,7 +113,7 @@ function todo_del_form($todoid) {
 	$result = $form->addHidden('del-todo', true);
 	$result = $form->addHidden('id', $todoid);
 	if ( isset($_REQUEST['redir-to']) ) { $form->addHidden('redir-to', $_REQUEST['redir-to']); }
-	$html .= $form->output('Delete Todo');
+	$html = $form->output('Delete Todo');
 	return $html;
 }
 
@@ -140,10 +141,14 @@ function todo_edit_do($id) {
 	);
 	
 	$result = mysql_query($sql, $db);
-	if ( isset($_REQUEST['redir-to']) ){
-		$cleanredit = preg_replace("/\*/", "&", $_REQUEST['redir-to']);
-		thrower("Todo #{$id} Updated", $cleanredit);
-	} else { thrower("Todo #{$id} Updated"); }
+	if ( $result ) {
+		if ( isset($_REQUEST['redir-to']) ){
+			$cleanredit = preg_replace("/\*/", "&", $_REQUEST['redir-to']);
+			thrower("To-Do #{$id} Updated", $cleanredit);
+		} else { thrower("To-Do #{$id} Updated"); }
+	} else {
+		thrower("To-Do Update :: Operation Failed");
+	}
 }
 
 /**
@@ -159,10 +164,14 @@ function todo_mark_do($id) {
 	$sql  = "UPDATE {$MYSQL_PREFIX}todo SET complete = 1 ";
 	$sql .= " WHERE id = '".intval($id)."'";
 	$result = mysql_query($sql, $db);
-	if ( isset($_REQUEST['redir-to']) ){
-		$cleanredit = preg_replace("/\*/", "&", $_REQUEST['redir-to']);
-		thrower("Todo #{$id} Marked Done", $cleanredit);
-	} else { thrower("Todo #{$id} Marked Done"); }
+	if ( $result ) {
+		if ( isset($_REQUEST['redir-to']) ){
+			$cleanredit = preg_replace("/\*/", "&", $_REQUEST['redir-to']);
+			thrower("To-Do #{$id} Marked Done", $cleanredit);
+		} else { thrower("To-Do #{$id} Marked Done"); }
+	} else {
+		thrower("To-Do Mark :: Operation Failed");
+	}
 }
 
 /**
@@ -174,13 +183,17 @@ function todo_mark_do($id) {
  */
 function todo_del_do($id) {
 	GLOBAL $db, $MYSQL_PREFIX;
-if ( !is_numeric($id) || $id < 1 ) { thrower(perms_fail()); }
+	if ( !is_numeric($id) || $id < 1 ) { thrower(perms_fail()); }
 	$sql  = "DELETE FROM {$MYSQL_PREFIX}todo WHERE id = '".intval($id)."'";
 	$result = mysql_query($sql, $db);
-	if ( isset($_REQUEST['redir-to']) ){
-		$cleanredit = preg_replace("/\*/", "&", $_REQUEST['redir-to']);
-		thrower("Todo #{$id} Removed", $cleanredit);
-	} else { thrower("Todo #{$id} Removed"); }
+	if ( $result ) {
+		if ( isset($_REQUEST['redir-to']) ){
+			$cleanredit = preg_replace("/\*/", "&", $_REQUEST['redir-to']);
+			thrower("To-Do #{$id} Removed", $cleanredit);
+		} else { thrower("To-Do #{$id} Removed"); }
+	} else {
+		thrower("To-Do Delete :: Operation Failed");
+	}
 }
 
 /**
@@ -194,20 +207,19 @@ if ( !is_numeric($id) || $id < 1 ) { thrower(perms_fail()); }
  * @return string HTML output
  */
 function todo_view($condition = null, $type = 'user') {
-	GLOBAL $db, $MYSQL_PREFIX, $user_name;
+	GLOBAL $db, $MYSQL_PREFIX, $user_name, $TDTRAC_SITE;
 	if ( is_null($condition) ) {
-		$html = "<h3>View Todo By User</h3>\n";
-		$form = new tdform("{$TDTRAC_SITE}view-todo", "form1");
+		$form = new tdform("{$TDTRAC_SITE}todo/view/user/", "form1", 10, 'genform1', 'View To-Do By User');
 		$result = $form->addDrop('todouser', 'Assigned To', null, db_list(get_sql_const('todo'), array('userid', 'name')), False);
-		$html .= $form->output('View User');
-		$html .= "<br /><br /><h3>View Todo By Show</h3>\n";
-		$form = new tdform("{$TDTRAC_SITE}view-todo", "form2");
+		$html = $form->output('View User');
+		$html[] = "<br /><br />\n";
+		$form = new tdform("{$TDTRAC_SITE}todo/view/show/", "form2", 20, 'genform2', 'View To-Do By Show');
 		$result = $form->addDrop('todoshow', 'Show', null, db_list(get_sql_const('showid'), array('showid', 'showname')), False);
-		$html .= $form->output('View Show');
-		$html .= "<br /><br /><h3>View Overdue Todo Items</h3>\n";
-		$form = new tdform("{$TDTRAC_SITE}view-todo", "form2");
+		$html = array_merge($html, $form->output('View Show'));
+		$html[] = "<br /><br />\n";
+		$form = new tdform("{$TDTRAC_SITE}todo/view/due/", "form3", 30, 'genform3', 'View Overdue Items');
 		$result = $form->addHidden('tododue', '1');
-		$html .= $form->output('View Overdue');
+		$html = array_merge($html, $form->output('View Overdue'));
 		return $html;
 	}
 	else {
@@ -216,30 +228,30 @@ function todo_view($condition = null, $type = 'user') {
 		
 		if ( $type == 'user' ) {
 			$sql = "SELECT todo.*, showname, DATE_FORMAT(`due`, '%Y-%m-%d') as duedate, TIME_TO_SEC( TIMEDIFF(`due` , NOW())) AS remain FROM {$MYSQL_PREFIX}todo as todo, {$MYSQL_PREFIX}shows as shows WHERE shows.showid = todo.showid AND todo.assigned = '{$thiscond}' ORDER BY due DESC, added DESC";
-			$html = "<h3>Todo Tasks by User (".perms_getfnamebyid($thiscond).")</h3>\n";
-			$backlink = "*todouser={$thiscond}";
+			$html[] = "<h3>Todo Tasks by User (".perms_getfnamebyid($thiscond).")</h3>\n";
+			$backlink = "user/*todouser={$thiscond}";
 		} elseif ( $type =='show' ) {
 			$showname = db_list("SELECT showname FROM {$MYSQL_PREFIX}shows WHERE showid = {$thiscond}", 'showname');
 			$sql = "SELECT todo.*, showname, DATE_FORMAT(`due`, '%Y-%m-%d') as duedate, TIME_TO_SEC( TIMEDIFF(`due` , NOW())) AS remain FROM {$MYSQL_PREFIX}todo as todo, {$MYSQL_PREFIX}shows as shows WHERE shows.showid = todo.showid AND todo.showid = '{$thiscond}' ORDER BY due DESC, added DESC";
-			$html = "<h3>Todo Tasks by Show ({$showname[0]})</h3>\n";
-			$backlink = "*todoshow={$thiscond}";
+			$html[] = "<h3>Todo Tasks by Show ({$showname[0]})</h3>\n";
+			$backlink = "show/*todoshow={$thiscond}";
 		} elseif ( $type == 'overdue' ) {
-			$sql = "SELECT todo.*, showname, DATE_FORMAT(`due`, '%Y-%m-%d') as duedate, TIME_TO_SEC( TIMEDIFF(`due` , NOW())) AS remain FROM {$MYSQL_PREFIX}todo as todo, {$MYSQL_PREFIX}shows as shows WHERE shows.showid = todo.showid AND todo.due < CURRENT_TIMESTAMP ORDER BY due DESC, added DESC";
-			$html = "<h3>Overdue Todo Tasks</h3>\n";
-			$backlink = "*tododue=1";
+			$sql = "SELECT todo.*, showname, DATE_FORMAT(`due`, '%Y-%m-%d') as duedate, TIME_TO_SEC( TIMEDIFF(`due` , NOW())) AS remain FROM {$MYSQL_PREFIX}todo as todo, {$MYSQL_PREFIX}shows as shows WHERE shows.showid = todo.showid AND todo.due < CURRENT_TIMESTAMP AND todo.complete = 0 ORDER BY due DESC, added DESC";
+			$html[] = "<h3>Overdue Todo Tasks</h3>\n";
+			$backlink = "due/";
 		}
 		$result = mysql_query($sql, $db);
 		$priorities = todo_pri();
-		$tabl = new tdtable("todo", 'datatable', true, "view-todo{$backlink}");
+		$html[] = "<br /><br />";
+		$tabl = new tdtable("todo", 'datatable', true, "todo/view/{$backlink}");
 		$tabl->addHeader(array('Due', 'Priority', 'Assigned To', 'Description'));
 		$tabl->addAction(array('tdone',));
 		if ( perms_checkperm($user_name, 'editbudget') ) { $tabl->addAction(array('tedit', 'tdel')); }
 		while ( $row = mysql_fetch_array($result) ) {
 			$tabl->addRow(array($row['duedate'], $priorities[$row['priority']][1], (($row['assigned'] > 0) ? perms_getfnamebyid($row['assigned']) : "-unassigned-"), $row['dscr']), $row, (($row['complete']=='1') ? "tododone" : (($row['remain'] < 0 ) ? "tododue": null))  );
 		}
-		$html .= $tabl->output();
+		$html = array_merge($html, $tabl->output(false));
 		return $html;
-		//return $thisuserid;
 	}
 }
 
@@ -254,8 +266,7 @@ function todo_view($condition = null, $type = 'user') {
  */
 function todo_check() {
 	GLOBAL $db, $MYSQL_PREFIX, $user_name, $TDTRAC_SITE;
-	$html  = "";
-	$html .= "<div class=\"infobox\"><span style=\"font-size: .7em\">";
+	$html = "<div class=\"infobox\"><span style=\"font-size: .7em\">";
 	$userid = perms_getidbyname($user_name);
 	$tosql = "SELECT COUNT(id) as num FROM {$MYSQL_PREFIX}todo WHERE assigned = '{$userid}' AND complete = 0";
 	$result1 = mysql_query($tosql, $db);
@@ -263,7 +274,7 @@ function todo_check() {
 		$row1 = mysql_fetch_array($result1);
 		mysql_free_result($result1);
 		$ret = 0;
-		if ( !is_null($row1['num']) && $row1['num'] > 0 ) { $html .= "You Have {$row1['num']} Uncompleted Tasks Waiting (<a href=\"{$TDTRAC_SITE}view-todo&onlyuser=1\">[-View-]</a>)<br />"; $ret = 1; }
+		if ( !is_null($row1['num']) && $row1['num'] > 0 ) { $html .= "You Have <strong>{$row1['num']}</strong> Uncompleted Tasks Waiting (<a href=\"{$TDTRAC_SITE}view-todo&onlyuser=1\">[-View-]</a>)<br />"; $ret = 1; }
 		$html .= "</span></div>\n";
 	} else { $ret = 0; }
 	if ( $ret ) { return $html; } else { return ""; }

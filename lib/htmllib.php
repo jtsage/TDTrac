@@ -4,7 +4,8 @@
  * 
  * Contains site header.
  * @package tdtrac
- * @version 1.3.1
+ * @version 1.4.0
+ * @since 1.4.0
  * @author J.T.Sage <jtsage@gmail.com>
  */
 require_once("helpnodes.php");
@@ -35,7 +36,7 @@ function makeNotice() {
 }
 
 function makeHeader($title = '') {
-	GLOBAL $TDTRAC_VERSION, $TDTRAC_CPNY, $TDTRAC_SITE, $TDTRAC_HELP, $login, $SITE_SCRIPT, $action, $helpnode;
+	GLOBAL $TDTRAC_VERSION, $TDTRAC_CPNY, $TDTRAC_SITE, $login, $SITE_SCRIPT, $action, $helpnode;
 
 	$SITE_SCRIPT[] = "$(function() {";
 	$SITE_SCRIPT[] = "\t$( \"#help\" ).dialog({ autoOpen: false, width: 500, modal: true });";
@@ -96,7 +97,7 @@ function makeHeader($title = '') {
 
 	if ( $login[0] ) {
 		if ( perms_checkperm($login[1], 'viewbudget') ) {
-			$html[] = "\t\t\t<form method=\"post\" action=\"{$TDTRAC_SITE}search\">\n\t\t\t<div id=\"search\">";
+			$html[] = "\t\t\t<form method=\"post\" action=\"{$TDTRAC_SITE}search/\">\n\t\t\t<div id=\"search\">";
 			$html[] = "\t\t\t\t<input tabindex=\"81\" type=\"text\" class=\"text\" maxlength=\"64\" name=\"keywords\" />";
 			$html[] = "\t\t\t\t<input tabindex=\"82\" type=\"submit\" class=\"submit\" value=\"Search\" />\n\t\t\t</div>\t\t\t</form>";
 		}
@@ -105,13 +106,13 @@ function makeHeader($title = '') {
 	$html[] = "";
 	$html[] = "\t\t<div id=\"headerpic\"></div>\n\t\t<div id=\"menu\">\n\t\t\t<ul>";
 	$html[] = "\t\t\t\t<li><a tabindex=\"90\" href=\"{$TDTRAC_SITE}\"".(($title == "")?" class=\"active\"":"").">Home</a></li>";
-	$html[] = "\t\t\t\t<li><a tabindex=\"91\" href=\"{$TDTRAC_SITE}user/password/\""	.((preg_match("/password/", $title))	?" class=\"active\"":"").">Change Password</a></li>";
+	$html[] = ($login[0])?"\t\t\t\t<li><a tabindex=\"91\" href=\"{$TDTRAC_SITE}user/password/\""	.((preg_match("/password/", $title))	?" class=\"active\"":"").">Change Password</a></li>":"";
 	$html[] = "\t\t\t\t<li><a tabindex=\"92\" href=\"{$TDTRAC_SITE}budget/\""		.((preg_match("/budget/", $title))	?" class=\"active\"":"").">Budget</a></li>";
 	$html[] = "\t\t\t\t<li><a tabindex=\"93\" href=\"{$TDTRAC_SITE}hours/\""		.((preg_match("/hours/", $title))	?" class=\"active\"":"").">Payroll</a></li>";
 	$html[] = "\t\t\t\t<li><a tabindex=\"94\" href=\"{$TDTRAC_SITE}shows/\""		.((preg_match("/shows/", $title))	?" class=\"active\"":"").">Shows</a></li>";
-	$html[] = "\t\t\t\t<li><a tabindex=\"95\" href=\"{$TDTRAC_SITE}todo/\""		.((preg_match("/todo/", $title))	?" class=\"active\"":"").">ToDo</a></li>";
-	$html[] = "\t\t\t\t<li><a tabindex=\"96\" href=\"{$TDTRAC_SITE}user/perms/\""	.((preg_match("/perms/", $title))	?" class=\"active\"":"").">Admin</a></li>";
-	$html[] = "\t\t\t\t<li><a tabindex=\"97\" href=\"{$TDTRAC_SITE}user/logout\">Logout</a></li>";
+	$html[] = "\t\t\t\t<li><a tabindex=\"95\" href=\"{$TDTRAC_SITE}todo/\""			.((preg_match("/todo/", $title))	?" class=\"active\"":"").">ToDo</a></li>";
+	$html[] = ($login[0] && perms_isadmin($login[1])) ? "\t\t\t\t<li><a tabindex=\"96\" href=\"{$TDTRAC_SITE}user/\""			.((preg_match("/perms/", $title))	?" class=\"active\"":"").">Admin</a></li>" : "";
+	$html[] = ($login[0])?"\t\t\t\t<li><a tabindex=\"97\" href=\"{$TDTRAC_SITE}user/logout/\">Logout</a></li>":"";
 	$html[] = "\t\t\t\t<li><a tabindex=\"98\" href=\"\" id=\"helplink\" >Help</a></li>";
 	$html[] = "\t\t\t</ul>\n\t\t</div>\n\t\t<div id=\"menubottom\"></div>\n\n\t\t<div id=\"content\">\n\t\t\t<div id=\"normalcontent\">";
 
