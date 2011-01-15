@@ -147,7 +147,7 @@ ul.datalist li {
 	width: 100%;
 	height: 9.0em;
 	background: #2B2B2B url('/images/topbg.gif') repeat-x;
-	margin-bottom: 2px;
+	margin-bottom: 0px;
 }
 
 #headercontent {
@@ -205,7 +205,7 @@ ul.datalist li {
 	position: relative;
 	height: 87px;
 	background: #fff url('/images/tdtrachdr.png') no-repeat top left;
-	margin-bottom: 2px;
+	margin-bottom: 0px;
 }
 
 #menu {
@@ -213,7 +213,7 @@ ul.datalist li {
 	background: #7F8400 url('/images/menubg.gif') repeat-x top left;
 	height: 3.5em;
 	padding: 0em 1.0em 0em 1.0em;
-	margin-bottom: 2px;
+	margin-bottom: 0px;
 }
 
 #menu ul {
@@ -412,7 +412,7 @@ div.genform input {
 }
 div.genform select, div.genform option {
 	background-color: #fffacd;
-	width: 300px;
+	width: 288px;
 	border: none;
 	border-radius: 1em;
         -webkit-border-radius: 1em;
@@ -443,6 +443,16 @@ span .ui-dialog-title {
 }
 .ui-dialog-content ul {
 	margin-left: 2em;
+}
+.ui-state-disabled {
+	opacity: .65 !important;
+	filter:Alpha(Opacity=65) important;
+}
+
+div.genform input[disabled='disabled'] {
+	color: #555;
+	opacity: .65 !important;
+	filter:Alpha(Opacity=65) important;
 }
 
 dt {

@@ -17,7 +17,6 @@ $SITE_SCRIPT = array('');
 
 require_once("config.php");
 require_once("lib/functions-load.php");
-$TDTRAC_HELP = $TDTRAC_SITE . "help.php?node=";
 if ( !file_exists(".htaccess") ) { $TDTRAC_SITE .= "index.php?action="; }
 
 $login = islogin();
@@ -52,25 +51,7 @@ if ( !$login[0] ) {
 
 } else {
 	$user_name = $login[1];
-
 	switch($action[0]) {
-		case "user":
-			switch($action[1]) {
-				case "login":
-					islogin_dologin();
-					break;
-				case "logout":
-					islogin_logout();
-					break;
-				default:
-					makePage($login[1], 'Login');
-					break;
-			}
-
-		case "index":
-			makePage(display_home($user_name));
-			break;
-
 		case "search":
 			if ( perms_checkperm($user_name, 'viewbudget') ) {
 				if ( $_SERVER['REQUEST_METHOD'] == "POST" ) {
@@ -79,7 +60,6 @@ if ( !$login[0] ) {
 				} else { makePage(display_home($user_name)); }
 			} else { makePage(perms_no(), 'Access Denied'); }
 			break;
-
 		case "rcpt":
 			switch ($action[1]) {
 				case "delete":
@@ -175,13 +155,16 @@ if ( !$login[0] ) {
 					if ( perms_checkperm($user_name, 'viewbudget')) {
 						switch( $action[2] ) {
 							case "user":
-								makePage(todo_view(intval($_REQUEST['id']), 'user'), 'User To-Do List');
+								makePage(todo_view(intval($_REQUEST['todouser']), 'user'), 'User To-Do List');
 								break;
 							case "show":
-								makePage(todo_view(intval($_REQUEST['id']), 'show'), 'Show To-Do List');
+								makePage(todo_view(intval($_REQUEST['todoshow']), 'show'), 'Show To-Do List');
 								break;
 							case "due":
 								makePage(todo_view(1, 'overdue'), 'Overdue To-Do Items');
+								break;
+							case "own":
+								makePage(todo_view($user_name), 'Personal To-Do List');
 								break;
 							default:
 								makePage(todo_view(), 'To-Do Lists');
@@ -267,87 +250,93 @@ if ( !$login[0] ) {
 					makePage(display_home($user_name, 1), 'Payroll Recording');
 					break;
 			} break;
-
-		case "msg-view":
-			echo msg_sent_view();
-		break;
-		case "msg-read":
-			echo msg_inbox_view();
-		break;
-		case "msg-delete":
-			msg_delete($_REQUEST['id']);
-		break;
-		case "msg-clean":
-			msg_clear_inbox();
-		break;
-
-		case "change-pass":
-			if ( $user_name <> "guest" ) {
-				if ($_SERVER['REQUEST_METHOD'] == "POST") { perms_changepass_do(); }
-				else { echo perms_changepass_form(); }
-			} else { echo perms_no(); }
-			break;
-		case "view-user":
-		if ( perms_isadmin($user_name) ) {
-			echo perms_viewuser();
-		} else { echo perms_no(); }
-		break;
-		case "edit-user" :
-			if ( perms_isadmin($user_name) ) {
-				if ($_SERVER['REQUEST_METHOD'] == "POST") { perms_edituser_do($_REQUEST['id']); }
-				else { echo perms_edituser_form($_REQUEST['id']); }
-			} else { echo perms_no(); }
-			break;
-		case "groups" :
-			if ( perms_isadmin($user_name) ) {
-				if ($_SERVER['REQUEST_METHOD'] == "POST") {
-					if ( isset($_REQUEST['newgroup']) ) { perms_group_add(); }
-					if ( isset($_REQUEST['newname']) ) { perms_group_ren(); }
-				} else { echo perms_groupform(); }
-			} else { echo perms_no(); }
-			break;
-		case "mail-perms":
-			if ( perms_isadmin($user_name) ) { 
-				if ( $_SERVER['REQUEST_METHOD'] == "POST" ) { perms_mailcode_do(); }
-				else {
-					echo perms_mailcode();
-				}
-			} else { echo perms_no(); }
-			break;
-		case "edit-perms":
-			if ( perms_isadmin($user_name) ) { 
-				if ( $_SERVER['REQUEST_METHOD'] == "GET" ) { echo perms_editpickform(); }
-				else {
-					if ( isset($_REQUEST['editgroupperm']) ) { echo perms_editform(); }
-					if ( isset($_REQUEST['grpid']) ) { perms_save($_REQUEST['grpid']); }
-				}
-			} else { echo perms_no(); }
-			break;
-		case "add-user":
-			if ( perms_checkperm($user_name, 'adduser') ) {
-				if ( $_SERVER['REQUEST_METHOD'] == "POST" ) { perms_adduser_do(); }
-				else { echo perms_adduser_form(); }
-			} else { echo perms_no(); }
-			break;
-		case "view-perms":
-			if ( perms_isadmin($user_name) ) {
-				echo perms_view();
-			} else { echo perms_no(); }
-			break;
-
-		case "main-show":
-			break;
-		case "main-hours":
-			break;
-		case "main-perms":
-			echo display_home($user_name, 4);
-			break;
-		case "main-todo":
-			break;
+		case "mail":
+			switch ( $action[1] ) {
+				case "view":
+					makePage(msg_sent_view(), 'Message Outbox');
+					break;
+				case "delete":
+					if ( is_numeric($action[2]) ) {
+						msg_delete(intval($action[2]));
+					} else { makePage(perms_error(), 'Oops!'); }
+					break;
+				case "clean":
+					msg_clear_inbox();
+					break;
+				default:
+					makePage(msg_inbox_view(), 'Message Inbox');
+					break;
+			} break;
+		case "user":
+			switch ( $action[1] ) {
+				case "password":
+					if ( $user_name <> "guest" ) {
+						if ($_SERVER['REQUEST_METHOD'] == "POST") { perms_changepass_do(); }
+						else { makePage(perms_changepass_form(), 'Change Password'); }
+					} else { makePage(perms_no(), 'Access Denied'); }
+					break;
+				case "view":
+					if ( perms_isadmin($user_name) ) {
+						makePage(perms_viewuser(), 'List Users');
+					} else { makePage(perms_no(), 'Access Denied'); }
+					break;
+				case "edit" :
+					if ( perms_isadmin($user_name) && is_numeric($action[2]) ) {
+						if ($_SERVER['REQUEST_METHOD'] == "POST") { perms_edituser_do($_REQUEST['id']); }
+						else { makePage(perms_edituser_form(inval($action[2])), 'Edit User'); }
+					} else { makePage(perms_no(), 'Access Denied'); }
+					break;
+				case "groups" :
+					if ( perms_isadmin($user_name) ) {
+						if ($_SERVER['REQUEST_METHOD'] == "POST") {
+							if ( isset($_REQUEST['newgroup']) ) { perms_group_add(); }
+							if ( isset($_REQUEST['newname']) ) { perms_group_ren(); }
+						} else { makePage(perms_groupform(), 'Group Management'); }
+					} else { makePage(perms_no(), 'Access Denied'); }
+					break;
+				case "mail":
+					if ( perms_isadmin($user_name) ) { 
+						if ( $_SERVER['REQUEST_METHOD'] == "POST" ) { perms_mailcode_do(); }
+						else { makePage(perms_mailcode(), 'Configure TDTracMail'); }
+					} else { makePage(perms_no(), 'Access Denied'); }
+					break;
+				case "perms":
+					if ( perms_isadmin($user_name) ) { 
+						switch ( $action[2] ) {
+							case "edit":
+								if ( $_SERVER['REQUEST_METHOD'] == "GET" ) { makePage(perms_editpickform(), 'Edit Permissions'); }
+								else {
+									if ( isset($_REQUEST['editgroupperm']) ) { makePage(perms_editform(), 'Edit Permissions'); }
+									if ( isset($_REQUEST['grpid']) ) { perms_save($_REQUEST['grpid']); }
+								}
+								break;
+							default:
+								makePage(perms_view(), 'View Permissions');
+								break;
+							}
+					} else { makePage(perms_no(), 'Access Denied'); }
+					break;
+				case "add":
+					if ( perms_checkperm($user_name, 'adduser') ) {
+						if ( $_SERVER['REQUEST_METHOD'] == "POST" ) { perms_adduser_do(); }
+						else { makePage(perms_adduser_form(), 'Add User'); }
+					} else { makePage(perms_no(), 'Access Denied'); }
+					break;
+				case "login":
+					islogin_dologin();
+					break;
+				case "logout":
+					islogin_logout();
+					break;
+				default:
+					makePage(display_home($user_name, 4), 'User Management');
+					break;
+			} break;
 		default:
-			echo display_home($user_name);
+			makePage(display_home($user_name), 'TD Management Made Easy');
 			break;
-	} }
+	} 
+}
 
 
 ?>

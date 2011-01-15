@@ -4,7 +4,7 @@
  * 
  * Contains the table library
  * @package tdtrac
- * @version 1.3.1
+ * @version 1.4.0
  * @author J.T.Sage <jtsage@gmail.com>
  */
 
@@ -94,7 +94,7 @@ class tdtable {
 	 * 
 	 * @return string Formatted HTML
 	 */
-	public function output() {
+	public function output($string = true) {
 		$rhtml = "";
 		if ( $this->finalsub ) {
 			$this->doSubtotal();
@@ -102,11 +102,13 @@ class tdtable {
 		if ( ! is_null($this->currencyidx) ) {
 			$this->doTotal();
 		}
+		$this->html[] = "</table></div>";
+
+		if ( !$string ) { return $this->html; }
+
 		foreach ( $this->html as $line ) {
 			$rhtml .= $line;
 		}
-		
-		$rhtml .= " </table>\n</div>";
 		return $rhtml;
 	}
 	
@@ -271,7 +273,7 @@ class tdtable {
 		foreach ( array_keys($drow) as $item ) {
 			$thtml .= "<td style=\"text-align: {$this->align[$item]}\">{$drow[$item]}</td>";
 		}
-		if ( $this->actions ) { $thtml .= "<td style=\"text-align: center\">" . $this->do_actions($raw) . "</td>"; }
+		if ( $this->actions ) { $thtml .= "<td style=\"text-align: right\">" . $this->do_actions($raw) . "</td>"; }
 		if ( is_null($rowclass) ) {
 			if ( $this->currentrow % 2 == 0 ) {
 				$this->html[] = "   <tr class=\"tdtabevn\">{$thtml}</tr>\n";
@@ -407,7 +409,7 @@ class tdtable {
 	private function act_bview($raw) {
 		global $TDTRAC_SITE;
 		
-		return "<a href=\"{$TDTRAC_SITE}view-budget-item&amp;id={$raw['id']}\"><img class=\"ticon\" src=\"/images/view.png\" title=\"View Budget Item Detail\" alt=\"View Item\" /></a>";
+		return "<a href=\"{$TDTRAC_SITE}budget/item/{$raw['id']}/\"><img class=\"ticon\" src=\"/images/view.png\" title=\"View Budget Item Detail\" alt=\"View Item\" /></a>";
 	}
 	
 	/**
@@ -419,7 +421,7 @@ class tdtable {
 	private function act_bedit($raw) {
 		global $TDTRAC_SITE;
 		if ( $this->fromlink ) { $extra = "&redir-to={$this->fromlink}"; }
-		return "<a href=\"{$TDTRAC_SITE}edit-budget&amp;id={$raw['id']}{$extra}\"><img class=\"ticon\" src=\"/images/edit.png\" title=\"Edit Budget Item\" alt=\"Edit Item\" /></a>";
+		return "<a href=\"{$TDTRAC_SITE}budget/edit/{$raw['id']}/{$extra}\"><img class=\"ticon\" src=\"/images/edit.png\" title=\"Edit Budget Item\" alt=\"Edit Item\" /></a>";
 	}
 	
 	/**
@@ -476,7 +478,7 @@ class tdtable {
 	private function act_tdel($raw) {
 		global $TDTRAC_SITE;
 		if ( $this->fromlink ) { $extra = "&redir-to={$this->fromlink}"; }
-		return "<a href=\"{$TDTRAC_SITE}del-todo&amp;id={$raw['id']}{$extra}\"><img class=\"ticon\" src=\"/images/delete.png\" title=\"Delete Todo Item\" alt=\"Delete Item\" /></a>";
+		return "<a href=\"{$TDTRAC_SITE}todo/del/{$raw['id']}/{$extra}\"><img class=\"ticon\" src=\"/images/delete.png\" title=\"Delete Todo Item\" alt=\"Delete Item\" /></a>";
 	}
 	
 	/**
@@ -488,7 +490,7 @@ class tdtable {
 	private function act_tedit($raw) {
 		global $TDTRAC_SITE;
 		if ( $this->fromlink ) { $extra = "&redir-to={$this->fromlink}"; }
-		return "<a href=\"{$TDTRAC_SITE}edit-todo&amp;id={$raw['id']}{$extra}\"><img class=\"ticon\" src=\"/images/edit.png\" title=\"Edit Budget Item\" alt=\"Edit Item\" /></a>";
+		return "<a href=\"{$TDTRAC_SITE}todo/edit/{$raw['id']}/{$extra}\"><img class=\"ticon\" src=\"/images/edit.png\" title=\"Edit Budget Item\" alt=\"Edit Item\" /></a>";
 	}
 	
 	/**
@@ -500,7 +502,7 @@ class tdtable {
 	private function act_tdone($raw) {
 		global $TDTRAC_SITE;
 		if ( $this->fromlink ) { $extra = "&redir-to={$this->fromlink}"; }
-		if ( ! $raw['complete'] ) { return "<a href=\"{$TDTRAC_SITE}done-todo&amp;id={$raw['id']}{$extra}\"><img class=\"ticon\" src=\"/images/check-no.png\" title=\"Mark Todo Item Done\" alt=\"Mark Item\" /></a>"; }
+		if ( ! $raw['complete'] ) { return "<a href=\"{$TDTRAC_SITE}todo/done/{$raw['id']}/{$extra}\"><img class=\"ticon\" src=\"/images/check-no.png\" title=\"Mark Todo Item Done\" alt=\"Mark Item\" /></a>"; }
 		else { return "<img class=\"ticon\" src=\"/images/check-yes.png\" title=\"Todo Item Done\" alt=\"Item Done\" />"; }
 	}
 }

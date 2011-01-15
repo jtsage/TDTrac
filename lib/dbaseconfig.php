@@ -4,7 +4,7 @@
  * 
  * Contains database connection details.
  * @package tdtrac
- * @version 1.3.1
+ * @version 1.4.0
  * @author J.T.Sage <jtsage@gmail.com>
  */
 GLOBAL $MYSQL_SERVER, $MYSQL_USER, $MYSQL_PASS, $MYSQL_DATABASE;
@@ -16,6 +16,6 @@ GLOBAL $MYSQL_SERVER, $MYSQL_USER, $MYSQL_PASS, $MYSQL_DATABASE;
 
 	$dbr = mysql_select_db($MYSQL_DATABASE, $db);
 	if (!$dbr) {
-		die ('Can\'t use tdtrac : ' . mysql_error());
+		die ("Can\'t use tdtrac::{$MYSQL_DATABASE}:" . mysql_error());
 	}
 ?>
