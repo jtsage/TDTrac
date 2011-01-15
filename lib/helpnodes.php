@@ -26,43 +26,39 @@ $helpnode['index']['data'][] = "<ul><li>Track as many show budgets as you wish</
 	"<li>Optionally allow your employees to add budget expenses, or even view the current budget</li></ul>";
 
 $helpnode['hours']['index']['title'] = "Payroll Tracking";
-$helpnode['hours']['index']['data'][] = "Add Hours Worked - Add Hours or Days worked by an employee.";
-$helpnode['hours']['index']['data'][] = "View Hours Worked - View Hours or Days worked by an employee or employees in a date range.";
-$helpnode['hours']['index']['data'][] = "View Hours Worked (unpaid) - View all Hours or Days worked by employees that have not yet been paid.";
-$helpnode['hours']['index']['data'][] = "Send 'please submit hours' Reminder to Employees - Send a reminder e-mail to selected employees for them to log in and submit hours.";
+$helpnode['hours']['index']['data'][] = "<dl><dt>Add Hours Worked</dt><dd>Add Hours or Days worked by an employee.</dd>" .
+	"<dt>View Hours Worked</dt><dd>View Hours or Days worked by an employee or employees in a date range.</dd>" .
+	"<dt>View Hours Worked (unpaid)</dt><dd>View all Hours or Days worked by employees that have not yet been paid.</dd>" .
+	"<dt>Send 'please submit hours' Reminder to Employees<dt><dd>Send a reminder e-mail to selected employees for them to log in and submit hours.</dd></dl>";
 
 $helpnode['budget']['index']['title'] = "Budget Tracking";
-$helpnode['budget']['index']['data'][] = "Add Budget Expense - Add a budget expense.";
-$helpnode['budget']['index']['data'][] = "View Budgets - View budgets on a per show basis, including labor budget";
-$helpnode['budget']['index']['data'][] = "View Budgets (payment pending items only, all shows) - View payment pending budget items";
-$helpnode['budget']['index']['data'][] = "View Budgets (reimbursment items only, all shows) - View all reimbursment budget items, paid or unpaid";
-$helpnode['budget']['index']['data'][] = "View Budgets (reimbursment recieved items only, all shows) - View reimbursed, paid budget items";
-$helpnode['budget']['index']['data'][] = "View Budgets (reimbursment not recieved items only, all shows) - View unreimbursed, still waiting budget items";
+$helpnode['budget']['index']['data'][] = "<dl><dt>Add Budget Expense</dt><dd>Add a budget expense.</dd>" .
+	"<dt>View Budgets</dt><dd>View budgets on a per show basis, including labor budget</dd>" .
+	"<dt>View Budgets (payment pending items only, all shows)</dt><dd>View payment pending budget items</dd>" .
+	"<dt>View Budgets (reimbursment items only, all shows)</dt><dd>View all reimbursment budget items, paid or unpaid</dd>" .
+	"<dt>View Budgets (reimbursment recieved items only, all shows)</dt><dd>View reimbursed, paid budget items</dd>" .
+	"<dt>View Budgets (reimbursment not recieved items only, all shows)</dt><dd>View unreimbursed, still waiting budget items</dd></dl>";
 
 $helpnode['shows']['index']['title'] = "Show Information";
-$helpnode['shows']['index']['data'][] = "Add Show - Add a show";
-$helpnode['shows']['index']['data'][] = "View Shows - View shows available for use";
+$helpnode['shows']['index']['data'][] = "<dl><dt>Add Show</dt><dd>Add a show</dd>" .
+	"<dt>View Shows</dt><dd>View shows available for use</dd></dl>";
 
 $helpnode['todo']['index']['title'] = "ToDo Lists";
-$helpnode['todo']['index']['data'][] = "Add ToDo Item - Add a new todo item.";
-$helpnode['todo']['index']['data'][] = "View ToDo Items - View full todo list by show.";
-$helpnode['todo']['index']['data'][] = "View Personal ToDo Items - View all todo items assigned to your user.";
+$helpnode['todo']['index']['data'][] =	"<dt>Add ToDo Item</dt><dd>Add a new todo item.</dd>" .
+	"<dt>View ToDo Items</dt><dd>View full todo list by show.</dd>" .
+	"<dt>View Personal ToDo Items</dt><dd>View all todo items assigned to your user.</dd>";
 
 
-$helpnode['user']['index']['data'][] = "<li>User Managment<ul>";
-//$helpnode['index']['data'][] = "<li>Add User - Add a user to the system</li>";
-//$helpnode['index']['data'][] = "<li>View Users - View and edit system users</li>";
-//$helpnode['index']['data'][] = "<li>Edit Permissions - Edit group based permissions</li>";
-//$helpnode['index']['data'][] = "<li>View Permissions - View current group based permissions</li>";
-//$helpnode['index']['data'][] = "<li>Add / Edit Groups - Add, Edit, or rename groups (warning: this is slightly unsupported right now)</li></ul></li>";
-
-$helpnode['main-budget'] = $helpnode['index']['data'];
-$helpnode['main-hours'] = $helpnode['index']['data'];
-$helpnode['main-show'] = $helpnode['index']['data'];
-$helpnode['main-perms'] = $helpnode['index']['data'];
-
-$helpnode['mail-perms'][] = "<h3>TDTracMail Subject Code</h3>";
-$helpnode['mail-perms'][] = "<p>This contains the easy interface to update the subject line code, and the to: address for the tdtracmail addon, a simple way to add reciepts to your tracking.  Simply send email to [the address you choose]@[your hostname] (please ask your administrator which host to use), and include the code in the subject line.  All reciepts are automaticly resized, and will await addition to the database by any user with the 'addbudget' permission.</p>";
+$helpnode['user']['index']['title'] = "User Managment";
+$helpnode['user']['index']['data'][] = "<dl><dt>Add User</dt><dd>Add a user to the system</dd>" .
+	"<dt>View Users</dt><dd>View and edit system users</dd>" .
+	"<dt>Edit Permissions</dt><dd>Edit group based permissions</dd>" .
+	"<dt>View Permissions</dt><dd>View current group based permissions</dd>" .
+	"<dt>Set TDTracMail Subject Code</dt><dd>Set TDTracMail pickup subject code (passphrase)</dd>" .
+	"<dt>Add / Edit Groups</dt><dd>Add, Edit, or rename groups (warning: this is slightly unsupported right now)</dd></dl>";
+	
+$helpnode['user']['mail']['title'] = "TDTracMail Subject Code";
+$helpnode['user']['mail']['data'][] = "This contains the easy interface to update the subject line code, and the to: address for the tdtracmail addon, a simple way to add reciepts to your tracking.  Simply send email to [the address you choose]@[your hostname] (please ask your administrator which host to use), and include the code in the subject line.  All reciepts are automaticly resized, and will await addition to the database by any user with the 'addbudget' permission.";
 
 $helpnode['msg-read'][] = "<h3>Inbox View</h3>";
 $helpnode['msg-read'][] = "<p>The Inbox view shows any system messages that have been sent to you.<ul>";

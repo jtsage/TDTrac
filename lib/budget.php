@@ -48,22 +48,23 @@ function budget_addform($rcpt = 0) {
  * @global string MySQL Table Prefix
  * @global string TDTrac site address, for form actions
  * @return string HTML Output
+ * @version 1.4.0
  */
 function budget_editform($id) {
 	GLOBAL $db, $MYSQL_PREFIX, $TDTRAC_SITE;
 	if ( !is_numeric($id) || $id < 1 ) { return perms_fail(); }
-	$html  = "<h3>Edit Budget Expense</h3>\n";
+	$html = array();
 	$sql = "SELECT showname, {$MYSQL_PREFIX}budget.* FROM `{$MYSQL_PREFIX}shows`, `{$MYSQL_PREFIX}budget` WHERE {$MYSQL_PREFIX}budget.id = {$id} AND {$MYSQL_PREFIX}budget.showid = {$MYSQL_PREFIX}shows.showid LIMIT 1;";
 	$result = mysql_query($sql, $db);
 	$row = mysql_fetch_array($result);
 	if ( $row['imgid'] > 0 ) {
-		$html .= "<div id=\"rcptbox\"><a href=\"rcpt.php?imgid={$row['imgid']}&amp;hires\" title=\"Zoom In (new window)\" target=\"_blank\"><img src=\"rcpt.php?imgid={$row['imgid']}\" alt=\"Reciept Image\" /></a></div>\n"; }
-	$form = new tdform("{$TDTRAC_SITE}edit-budget", 'form1');
+		$html[] = "<div id=\"rcptbox\"><a href=\"rcpt.php?imgid={$row['imgid']}&amp;hires\" title=\"Zoom In (new window)\" target=\"_blank\"><img src=\"rcpt.php?imgid={$row['imgid']}\" alt=\"Reciept Image\" /></a></div>\n"; }
+	$form = new tdform("{$TDTRAC_SITE}budget/edit/{$id}", 'form1', 1, 'genform', 'Edit Budget Item');
 	
 	$fesult = $form->addDrop('showid', 'Show', 'Show to Charge', db_list(get_sql_const('showid'), array(showid, showname)), False, $row['showid']);
 	$fesult = $form->addDate('date', 'Date', 'Date of Charge', $row['date']);
-	$fesult = $form->addDrop('vendor', 'Vendor', 'Vendor for Charge', db_list(get_sql_const('vendor'), 'vendor'), True, $row['vendor']);
-	$fesult = $form->addDrop('category', 'Category', 'Category for Charge', db_list(get_sql_const('category'), 'category'), True, $row['category']);
+	$fesult = $form->addACText('vendor', 'Vendor', 'Vendor for Charge', db_list(get_sql_const('vendor'), 'vendor'), $row['vendor']);
+	$fesult = $form->addACText('category', 'Category', 'Category for Charge', db_list(get_sql_const('category'), 'category'), $row['category']);
 	$fesult = $form->addText('dscr', 'Description', 'Description of Charge', $row['dscr']);
 	$fesult = $form->addMoney('price', 'Price', 'Amount of charge, no tax', $row['price']);
 	$fesult = $form->addMoney('tax', 'Tax', 'Amount of tax paid, if any', $row['tax']);
@@ -72,7 +73,7 @@ function budget_editform($id) {
 	$fesult = $form->addCheck('gotrepay', 'Reimbursment Recieved', null, $row['gotrepay']);
 	$fesult = $form->addHidden('id', $id);
 	if ( isset($_REQUEST['redir-to']) ) { $form->addHidden('redir-to', $_REQUEST['redir-to']); }
-	$html .= $form->output('Update Expense');
+	$html = array_merge($html, $form->output('Update Expense'));
 	return $html;
 }
 
