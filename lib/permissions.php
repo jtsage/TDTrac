@@ -223,8 +223,8 @@ function perms_save($grpid) {
 	foreach ( $TDTRAC_PERMS as $perm ) {
 		$sql = sprintf("INSERT INTO `{$MYSQL_PREFIX}permissions` (groupid, permid, permcan) VALUES (%d, '%s', %d)",
 			intval($grpid),
-			mysql_real_escape_string($perm),
-			intval($perm)
+			$perm,
+			(($_REQUEST[$perm]) ? "1" : "0")
 		);
 		mysql_query($sql, $db);
 	}

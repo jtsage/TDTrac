@@ -81,7 +81,7 @@ switch ($page_title) {
 		$fes = $form->addText('dayrate', "Day Rate Payroll ( 1 = yes, 0 = no )", null, $TDTRAC_DAYRATE);
 		$fes = $form->addText('payrate', "Default Day / Hourly Pay Rate", null, $TDTRAC_PAYRATE);
 		
-		echo $form->output('Save Values');
+		echo join("\n", $form->output('Save Values'));
 	}
 	break;
     case "mysql" :
@@ -91,7 +91,7 @@ switch ($page_title) {
 		fwrite($fh, "<?php\n");
 		fwrite($fh, "\$MYSQL_SERVER = \"{$_REQUEST['server']}\";\n");
 		fwrite($fh, "\$MYSQL_USER = \"{$_REQUEST['user']}\";\n");
-		fwrite($fh, "\$MYSQL_PASS = \"{$_REQUEST['pass']}\";\n");
+		fwrite($fh, "\$MYSQL_PASS = \"{$_REQUEST['password']}\";\n");
 		fwrite($fh, "\$MYSQL_DATABASE = \"{$_REQUEST['dbase']}\";\n");
 		fwrite($fh, "\$MYSQL_PREFIX = \"{$_REQUEST['prefix']}\";\n?>\n");
 		header("Location: install.php");
@@ -104,7 +104,7 @@ switch ($page_title) {
 		$fes = $form->addText('dbase', "Database", null, $MYSQL_DATABASE);
 		$fes = $form->addText('prefix', "Table Prefix (prefix_)", null, $MYSQL_PREFIX);
 		
-		echo $form->output('Save Values');
+		echo join("\n", $form->output('Save Values'));
 	}
 	break;
     case "home" :
