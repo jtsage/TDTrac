@@ -35,7 +35,7 @@ if ( !$login[0] ) {
 				islogin_dologin();
 				break;
 			case "forgot":
-				if ( $_SERVER['REQUEST_METHOD'] == "POST" ) { makePage(email_pwsend(), 'Forgotten Password'); 
+				if ( $_SERVER['REQUEST_METHOD'] == "POST" ) { email_pwsend(); 
 				} else { makePage(islogin_pwform(), 'Forgotten Password'); }
 				break;
 			case "logout":
@@ -107,10 +107,10 @@ if ( !$login[0] ) {
 					break;
 				case "email":
 					if ( perms_checkperm($user_name, 'viewbudget') && is_numeric($action[2]) ) {
-						makePage(email_budget(intval($action[2])), 'E-Mail Budget');
+						email_budget(intval($action[2]));
 					} else { makePage(perms_no(), 'Access Denied'); }
 					break;
-				case "delete":
+				case "del":
 					if ( perms_checkperm($user_name, 'editbudget') && is_numeric($action[2]) ) {
 						if ($_SERVER['REQUEST_METHOD'] == "POST") { budget_del_do(intval($action[2])); }
 						else { makePage(budget_delform(intval($action[2])), 'Delete Item'); }
@@ -236,7 +236,7 @@ if ( !$login[0] ) {
 							makePage(email_hours_unpaid(), 'Send Pending Payroll');
 					} else {
 						if ( perms_checkperm($user_name, 'viewhours') ) {
-							makePage(email_hours($_REQUEST['id'], $_REQUEST['sdate'], $_REQUEST['edate']), 'Send Payroll');
+							email_hours($_REQUEST['id'], $_REQUEST['sdate'], $_REQUEST['edate']);
 						} else { makePage(perms_no(), 'Access Denied'); }
 					}
 					break;

@@ -4,11 +4,11 @@
  * 
  * Contains main program logic.
  * @package tdtrac
- * @version 1.3.1
+ * @version 1.4.0 (db: 1.3.1)
  * @author J.T.Sage <jtsage@gmail.com>
  */
 GLOBAL $MYSQL_PREFIX, $db;
-//This is version 1.2.6
+//This is version 1.3.1
 
 $sql_budget  = "CREATE TABLE IF NOT EXISTS `{$MYSQL_PREFIX}budget` (";
 $sql_budget .= "  `id` int(10) unsigned NOT NULL auto_increment,";

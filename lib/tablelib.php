@@ -261,7 +261,7 @@ class tdtable {
 				$this->runsub[$cidx] += $row[$cidx];
 				$this->runtot[$cidx] += $row[$cidx];
 				if ( ! $this->numberonly[$cidx] ) {
-					$drow[$cidx] = number_format($drow[$cidx], 2); 
+					$drow[$cidx] = '$' . number_format($drow[$cidx], 2); 
 				}
 			}
 		}
