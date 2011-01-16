@@ -333,7 +333,7 @@ function perms_changepass_form() {
 	GLOBAL $TDTRAC_SITE;
 	$form = new tdform("{$TDTRAC_SITE}/user/password/", 'genform', 1, 'genform', 'Change Password');
 	$result = $form->addPass('newpass1', "New Password");
-	$result = $form->addPass('newpass2', "Verify New Password");
+	$result = $form->addPass('newpass2', "Verify Password");
 	return $form->output('Change Password');
 }
 

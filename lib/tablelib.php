@@ -82,8 +82,8 @@ class tdtable {
 	 * @param bool Use action type items
 	 */
 	public function __construct($id = 'tdtable', $class = 'datatable', $actions = true, $from = false) {
-		$this->html[] = "<div id=\"{$id}\">\n";
-		$this->html[] = "  <table id=\"{$id}-table\" class=\"{$class}\">\n";
+		$this->html[] = "<div id=\"{$id}\">";
+		$this->html[] = "  <table id=\"{$id}-table\" class=\"{$class}\">";
 		$this->tablename = $id;
 		$this->actions = $actions;
 		$this->fromlink = $from;
@@ -95,7 +95,6 @@ class tdtable {
 	 * @return string Formatted HTML
 	 */
 	public function output($string = true) {
-		$rhtml = "";
 		if ( $this->finalsub ) {
 			$this->doSubtotal();
 		}
@@ -105,11 +104,7 @@ class tdtable {
 		$this->html[] = "</table></div>";
 
 		if ( !$string ) { return $this->html; }
-
-		foreach ( $this->html as $line ) {
-			$rhtml .= $line;
-		}
-		return $rhtml;
+		else { return join("\n", $this->html); }
 	}
 	
 	/**
@@ -132,7 +127,7 @@ class tdtable {
 		foreach ( $thisrow as $item ) {
 			$rhtml .= "<td>{$item}</td>";
 		}
-		$this->html[] = "<tr class=\"datasubtotal\">{$rhtml}</tr>\n";
+		$this->html[] = "<tr class=\"datasubtotal\">{$rhtml}</tr>";
 		return true;
 	}
 	
@@ -154,7 +149,7 @@ class tdtable {
 		foreach ( $thisrow as $item ) {
 			$rhtml .= "<td>{$item}</td>";
 		}
-		$this->html[] = "<tr class=\"datatotal\">{$rhtml}</tr>\n";
+		$this->html[] = "<tr class=\"datatotal\">{$rhtml}</tr>";
 		return true;
 	}
 	
@@ -171,7 +166,7 @@ class tdtable {
 			$thtml .= "<th>{$item}</th>";
 		}
 		if ( $this->actions ) { $thtml .= "<th>Action</th>"; }
-		$this->html[] = "  <tr>{$thtml}</tr>\n";
+		$this->html[] = "  <tr>{$thtml}</tr>";
 		return true;
 	}
 	
@@ -276,12 +271,12 @@ class tdtable {
 		if ( $this->actions ) { $thtml .= "<td style=\"text-align: right\">" . $this->do_actions($raw) . "</td>"; }
 		if ( is_null($rowclass) ) {
 			if ( $this->currentrow % 2 == 0 ) {
-				$this->html[] = "   <tr class=\"tdtabevn\">{$thtml}</tr>\n";
+				$this->html[] = "   <tr class=\"tdtabevn\">{$thtml}</tr>";
 			} else {
-				$this->html[] = "   <tr class=\"tdtabodd\">{$thtml}</tr>\n";
+				$this->html[] = "   <tr class=\"tdtabodd\">{$thtml}</tr>";
 			}
 		} else {
-			$this->html[] = "   <tr class=\"{$rowclass}\">{$thtml}</tr>\n";
+			$this->html[] = "   <tr class=\"{$rowclass}\">{$thtml}</tr>";
 		}
 		$this->currentrow++;
 		return true;

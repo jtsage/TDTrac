@@ -145,4 +145,3 @@ function show_edit_do($showid) {
 	}
 }
 ?>
-;

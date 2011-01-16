@@ -4,27 +4,25 @@
  * 
  * Contains main program logic.
  * @package tdtrac
- * @version 1.3.1
+ * @version 1.4.0
  * @author J.T.Sage <jtsage@gmail.com>
  */
 ob_start(); session_start(); 
 
 ## PROGRAM DETAILS. DO NOT EDIT UNLESS YOU KNOW WHAT YOU ARE DOING
-$TDTRAC_VERSION = "1.3.1";
+$TDTRAC_VERSION = "1.4.0";
 $TDTRAC_PERMS = array("addshow", "editshow", "viewshow", "addbudget", "editbudget", "viewbudget", "addhours", "edithours", "viewhours", "adduser");
 $INSTALL_FILES = array(
 	"index.php",
-	"help.php",
 	"rcpt.php",
 	"./lib/helpnodes.php",
 	"./lib/install.inc.php",
 	"./lib/budget.php",
 	"./lib/dbaseconfig.php",
 	"./lib/email.php",
-	"./lib/footer.php",
 	"./lib/formlib.php",
 	"./lib/functions-load.php",
-	"./lib/header.php",
+	"./lib/htmllib.php",
 	"./lib/home.php",
 	"./lib/hours.php",
 	"./lib/login.php",
@@ -49,9 +47,9 @@ $INSTALL_TABLES = array(
 	
 
 require_once("config.php");
-$page_title = "updater";
-require_once("lib/header.php");
 $page_title = "home";
+require_once("lib/htmllib.php");
+foreach ( makeHeader("Updater") as $line ) { echo "{$line}\n"; }
 
 echo "<h3>TDTrac{$TDTRAC_VERSION} Updater</h3>\n";
 $sqllink = 1; $noinstall = 0;
@@ -274,6 +272,6 @@ switch ($page_title) {
 	break;
 }
 
-require_once("lib/footer.php");
+foreach ( makeFooter() as $line ) { echo "{$line}\n"; }
 
 ?>
