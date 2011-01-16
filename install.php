@@ -33,7 +33,7 @@ $INSTALL_FILES = array(
 	"./lib/tablelib.php",
 	"./lib/show.php" );
 $INSTALL_TABLES = array(
-        "tdtrac",
+	"tdtrac",
 	"users",
 	"budget",
 	"groupnames",
@@ -61,7 +61,7 @@ switch ($page_title) {
     case "doinstall" :
 	require_once("lib/dbaseconfig.php");
 	require_once("lib/install.inc.php");
-	echo "Installation DONE!";
+	echo "<h3>Installation DONE!</h3>";
 	break;
     case "site" :
 	if ( $_SERVER['REQUEST_METHOD'] == "POST" ) { 
@@ -74,12 +74,13 @@ switch ($page_title) {
 		fwrite($fh, "\$TDTRAC_PAYRATE = \"{$_REQUEST['payrate']}\";\n?>\n");
 		header("Location: install.php");
 	} else {
-		$form = new tdform("install.php?site", "form1");
+		$form = new tdform("install.php?site", "form1", 1, 'genform', 'Site Config');
 		
 		$fes = $form->addText('cpny', "Site Name", null, $TDTRAC_CPNY);
 		$fes = $form->addText('site', "Site URL", null, $TDTRAC_SITE);
-		$fes = $form->addText('dayrate', "Day Rate Payroll ( 1 = yes, 0 = no )", null, $TDTRAC_DAYRATE);
-		$fes = $form->addText('payrate', "Default Day / Hourly Pay Rate", null, $TDTRAC_PAYRATE);
+		$fes = $form->addText('dayrate', "Day Rate", null, $TDTRAC_DAYRATE);
+		$fes = $form->addInfo("Enter 1 for Daily rate, 0 for Hourly");
+		$fes = $form->addText('payrate', "Default Pay Rate", null, $TDTRAC_PAYRATE);
 		
 		echo join("\n", $form->output('Save Values'));
 	}
@@ -96,13 +97,14 @@ switch ($page_title) {
 		fwrite($fh, "\$MYSQL_PREFIX = \"{$_REQUEST['prefix']}\";\n?>\n");
 		header("Location: install.php");
 	} else {
-		$form = new tdform("install.php?mysql", "form1");
+		$form = new tdform("install.php?mysql", "form1", 1, 'genform', "MySQL Config");
 		
-		$fes = $form->addText('server', "MySQL Host (host:port)", null, $MYSQL_SERVER);
+		$fes = $form->addInfo("hostname[:port]");
+		$fes = $form->addText('server', "MySQL Host", null, $MYSQL_SERVER);
 		$fes = $form->addText('user', "Username", null, $MYSQL_USER);
 		$fes = $form->addText('password', "Password", null, $MYSQL_PASS);
 		$fes = $form->addText('dbase', "Database", null, $MYSQL_DATABASE);
-		$fes = $form->addText('prefix', "Table Prefix (prefix_)", null, $MYSQL_PREFIX);
+		$fes = $form->addText('prefix', "Table Prefix", null, $MYSQL_PREFIX);
 		
 		echo join("\n", $form->output('Save Values'));
 	}
