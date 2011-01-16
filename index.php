@@ -283,7 +283,7 @@ if ( !$login[0] ) {
 				case "edit" :
 					if ( perms_isadmin($user_name) && is_numeric($action[2]) ) {
 						if ($_SERVER['REQUEST_METHOD'] == "POST") { perms_edituser_do($_REQUEST['id']); }
-						else { makePage(perms_edituser_form(inval($action[2])), 'Edit User'); }
+						else { makePage(perms_edituser_form(intval($action[2])), 'Edit User'); }
 					} else { makePage(perms_no(), 'Access Denied'); }
 					break;
 				case "groups" :

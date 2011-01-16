@@ -3,8 +3,9 @@
  * TDTrac Login Functions
  * 
  * Contains all login related functions. 
+ * Data hardened
  * @package tdtrac
- * @version 1.3.1
+ * @version 1.4.0
  * @author J.T.Sage <jtsage@gmail.com>
  */
 
@@ -53,7 +54,9 @@ function islogin_cookietest() {
 	$checkname = $_SESSION['tdtracuser'];
 	$checkpass = $_SESSION['tdtracpass'];
 
-	$sql = "SELECT password FROM {$MYSQL_PREFIX}users WHERE username = '{$checkname}' LIMIT 1";
+	$sql = sprintf("SELECT password FROM `{$MYSQL_PREFIX}users` WHERE username = '%s' LIMIT 1",
+		mysql_real_escape_string($checkname)
+	);
 	$result = mysql_query($sql, $db);
 
 	$row = mysql_fetch_array($result);
@@ -70,12 +73,12 @@ function islogin_cookietest() {
  */
 function islogin_form() {
 	GLOBAL $TDTRAC_SITE;
-	$form = new tdform("{$TDTRAC_SITE}user/login", "loginform", 1, "loginform", 'Login');
+	$form = new tdform("{$TDTRAC_SITE}user/login/", "loginform", 1, "loginform", 'Login');
 	
 	$result = $form->addText('tracuser', 'User Name');
 	$result = $form->addPass('tracpass', 'Password');
 	
-	$html = $form->output('Login', "[-<a href=\"{$TDTRAC_SITE}user/forgot\">Forgot Password?</a>-] ");
+	$html = $form->output('Login', "[-<a href=\"{$TDTRAC_SITE}user/forgot/\">Forgot Password?</a>-] ");
 	return $html;
 }
 
@@ -87,12 +90,11 @@ function islogin_form() {
  */
 function islogin_pwform() {
 	GLOBAL $TDTRAC_SITE;
-	$html[] = '<h4>Send Password Via E-Mail</h4>';
-	$form = new tdform("{$TDTRAC_SITE}user/forgot", "loginform", 1, "loginform");
+	$form = new tdform("{$TDTRAC_SITE}user/forgot/", "loginform", 1, "loginform", 'Send Password Reminder');
 	
 	$result = $form->addText('tracemail', 'E-Mail Address');
 	
-	$html = array_merge($html, $form->output('Send Reminder'));
+	$html = $form->output('Send Reminder');
 	return $html;
 }
 
@@ -118,7 +120,9 @@ function islogin_dologin() {
 	$checkname = $_REQUEST['tracuser'];
 	$checkpass = $_REQUEST['tracpass'];
 
-	$sql = "SELECT userid, password, active, chpass, DATE_FORMAT(lastlogin, '%b %D %h:%i %p') AS lastlog FROM {$MYSQL_PREFIX}users WHERE username = '{$checkname}' LIMIT 1";
+	$sql = sprintf("SELECT userid, password, active, chpass, DATE_FORMAT(lastlogin, '%%b %%D %%h:%%i %%p') AS lastlog FROM `{$MYSQL_PREFIX}users` WHERE username = '%s' LIMIT 1",
+		mysql_real_escape_string($checkname)
+	);
 	$result = mysql_query($sql, $db);
 
 	$row = mysql_fetch_array($result);
@@ -136,7 +140,7 @@ function islogin_dologin() {
 			if ( mysql_num_rows($res2) < 1 ) { $infodata .= "<br><strong>WARNING:</strong> Database not up-to-date, please run upgrade script!"; }
 		}
     		if ( $row['chpass'] <> 0 ) { 
-			$infodata = "Login Successful, Please Change Your Password!"; header("Location: {$TDTRAC_SITE}change-pass"); ob_flush();
+			$infodata = "Login Successful, Please Change Your Password!"; header("Location: {$TDTRAC_SITE}user/password/"); ob_flush();
 		} 
 	}
 	else {

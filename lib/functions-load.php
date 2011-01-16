@@ -4,7 +4,7 @@
  * 
  * Loads all other function files.
  * @package tdtrac
- * @version 1.3.1
+ * @version 1.4.0
  * @author J.T.Sage <jtsage@gmail.com>
  */
 require_once("dbaseconfig.php");
