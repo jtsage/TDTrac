@@ -3,8 +3,9 @@
  * TDTrac E-Mail Functions
  * 
  * Contains all e-mail related functions. 
+ * Note: email function should never return, use thrower()
  * @package tdtrac
- * @version 1.3.1
+ * @version 1.4.0
  * @author J.T.Sage <jtsage@gmail.com>
  */
 
@@ -26,19 +27,12 @@ function email_budget($showid) {
 	$sql = "SELECT * FROM {$MYSQL_PREFIX}shows WHERE showid = {$showid}";
 	$result = mysql_query($sql, $db); 
 	$body = "";
-	$html = "";
 	$row = mysql_fetch_array($result);
 	$body .= "<h2>{$row['showname']}</h2><p><ul>\n";
 	$body .= "<li><strong>Company</strong>: {$row['company']}</li>\n";
 	$body .= "<li><strong>Venue</strong>: {$row['venue']}</li>\n";
 	$body .= "<li><strong>Dates</strong>: {$row['dates']}</li>\n";
 	$body .= "</ul></p>\n";
-
-	$html .= "<h3>{$row['showname']}</h3><ul class=\"datalist\">\n";
-	$html .= "<li><strong>Company</strong>: {$row['company']}</li>\n";
-	$html .= "<li><strong>Venue</strong>: {$row['venue']}</li>\n";
-	$html .= "<li><strong>Dates</strong>: {$row['dates']}</li>\n";
-	$html .= "</ul><br />Budget E-Mailed to: {$sendto}\n";
 
 	$subject = "TDTrac Budget: {$row['showname']}";
 	$headers  = 'MIME-Version: 1.0' . "\r\n";
@@ -63,8 +57,12 @@ function email_budget($showid) {
 	$body .= "-=- TOTAL -=-\t" . number_format($tot, 2) . "\n";
 	$body .= "</pre>\n";
 
-	mail($sendto, $subject, $body, $headers);
-	return $html;
+	$result = mail($sendto, $subject, $body, $headers);
+	if ( $result ) {
+		thrower("E-Mail Sent");
+	} else {
+		thrower("E-Mail Send Failed");
+	}
 }
 
 /**
@@ -93,10 +91,12 @@ function email_remind($userid, $duedate, $sdate, $edate) {
 	$body  = "<p>This e-mail is being sent to you to remind you that hours for the payperiod of {$sdate} true {$edate} are due on {$duedate}.  Please take a moment to log into the system and update or double check your hours.<br />";
 	$body .= "<br />As a reminder, your <strong>username:</strong> {$row1['username']} and <strong>password:</strong> {$row1['password']} for <a href=\"{$TDTRAC_SITE}home\">{$TDTRAC_SITE}home</a></p>";
 
-	$html = "Sent Reminder to: {$row1['name']}<br />\n";
-
-	mail($sendto, $subject, $body, $headers);
-	return $html;
+	$result = mail($sendto, $subject, $body, $headers);
+	if ( $result ) {
+		return "Sent: {$row1['username']}";
+	} else {
+		return "Fail: {$row1['username']}";
+	}
 }
 
 /**
@@ -120,9 +120,9 @@ function email_hours($userid, $sdate, $edate) {
 	if ( $userid == 0 && perms_isemp($user_name) ) { return perms_no(); }
 	$sql  = "SELECT CONCAT(first, ' ', last) as name, worked, date, showname, h.submitted, h.id as hid FROM {$MYSQL_PREFIX}users u, {$MYSQL_PREFIX}shows s, {$MYSQL_PREFIX}hours h WHERE ";
 	$sql .= "u.userid = h.userid AND s.showid = h.showid";
-	$sql .= ($userid <> 0) ? " AND u.userid = '{$userid}'" : "";
-	$sql .= ($sdate <> 0) ? " AND h.date >= '{$sdate}'" : "";
-	$sql .= ($edate <> 0) ? " AND h.date <= '{$edate}'" : "";
+	$sql .= ($userid <> 0) ? " AND u.userid = '".intval($userid)."'" : "";
+	$sql .= ($sdate <> 0) ? " AND h.date >= '".mysql_real_escape_string($sdate)."'" : "";
+	$sql .= ($edate <> 0) ? " AND h.date <= '".mysql_real_escape_string($edate)."'" : "";
 	$sql .= " ORDER BY last ASC, date DESC";
 
 	$result = mysql_query($sql, $db);
@@ -130,11 +130,6 @@ function email_hours($userid, $sdate, $edate) {
 		$dbarray[$row['name']][] = $row;
 	}
 	$body = "";
-	$html = "";
-	$html .= "<h3>Hours Worked Report</h3><p>\n";
-	$html .= ($sdate <> 0 ) ? "Start Date: {$sdate}\n" : "";
-	$html .= ($sdate <> 0 && $edate <> 0 ) ? "<br />" : "";
-	$html .= ($edate <> 0 ) ? "Ending Date: {$edate}" : "";
 
 	$subject = "TDTrac Hours Worked: ";
 	$subject .= $userid == 0 ? "All Employees, " : "Employee Number {$userid}, ";
@@ -146,7 +141,6 @@ function email_hours($userid, $sdate, $edate) {
 	$headers .= 'Content-type: text/html; charset=iso-8859-1' . "\r\n";
 
 	foreach ( $dbarray as $key => $data ) {
-		$html .= "<br />Included Hours For: {$key}\n";
 		$body .= "<h2>Hours Worked For {$key}</h2><p>\n";
 		$body .= ($sdate <> 0 ) ? "Start Date: {$sdate}\n" : "";
 		$body .= ($sdate <> 0 && $edate <> 0 ) ? "<br />" : "";
@@ -161,8 +155,12 @@ function email_hours($userid, $sdate, $edate) {
 		$body .= "-=- TOTAL -=-\t{$tot}\n";
 		$body .= "</pre>";
 	}
-	mail($sendto, $subject, $body, $headers);
-	return $html;
+	$result = mail($sendto, $subject, $body, $headers);
+	if ( $result ) {
+		thrower("E-Mail Sent");
+	} else {
+		thrower("E-Mail Send Failed");
+	}
 }
 
 /**
@@ -184,9 +182,9 @@ function email_hours_unpaid() {
 	if ( $userid == 0 && perms_isemp($user_name) ) { return perms_no(); }
 	$sql  = "SELECT CONCAT(first, ' ', last) as name, worked, date, showname, h.id as hid FROM {$MYSQL_PREFIX}users u, {$MYSQL_PREFIX}shows s, {$MYSQL_PREFIX}hours h WHERE ";
 	$sql .= "u.userid = h.userid AND s.showid = h.showid AND h.submitted = 0";
-	$sql .= ($userid <> 0) ? " AND u.userid = '{$userid}'" : "";
-	$sql .= ($sdate <> 0) ? " AND h.date >= '{$sdate}'" : "";
-	$sql .= ($edate <> 0) ? " AND h.date <= '{$edate}'" : "";
+	$sql .= ($userid <> 0) ? " AND u.userid = '".intval($userid)."'" : "";
+	$sql .= ($sdate <> 0) ? " AND h.date >= '".mysql_real_escape_string($sdate)."'" : "";
+	$sql .= ($edate <> 0) ? " AND h.date <= '".mysql_real_escape_string($edate)."'" : "";
 	$sql .= " ORDER BY last ASC, date DESC";
 
 	$result = mysql_query($sql, $db);
@@ -194,11 +192,6 @@ function email_hours_unpaid() {
 		$dbarray[$row['name']][] = $row;
 	}
 	$body = "";
-	$html = "";
-	$html .= "<h3>Payment Owed Hours Worked Report</h3><p>\n";
-	$html .= ($sdate <> 0 ) ? "Start Date: {$sdate}\n" : "";
-	$html .= ($sdate <> 0 && $edate <> 0 ) ? "<br />" : "";
-	$html .= ($edate <> 0 ) ? "Ending Date: {$edate}" : "";
 
 	$subject = "TDTrac Payment Owed Hours Worked: ";
 	$subject .= $userid == 0 ? "All Employees, " : "Employee Number {$userid}, ";
@@ -210,7 +203,6 @@ function email_hours_unpaid() {
 	$headers .= 'Content-type: text/html; charset=iso-8859-1' . "\r\n";
 
 	foreach ( $dbarray as $key => $data ) {
-		$html .= "<br />Included Hours For: {$key}\n";
 		$body .= "<h3>Hours Worked For {$key}</h3><p>\n";
 		$body .= ($sdate <> 0 ) ? "Start Date: {$sdate}\n" : "";
 		$body .= ($sdate <> 0 && $edate <> 0 ) ? "<br />" : "";
@@ -225,8 +217,12 @@ function email_hours_unpaid() {
 		$body .= "-=- TOTAL -=-\t{$tot}\n";
 		$body .= "</pre>";
 	}
-	mail($sendto, $subject, $body, $headers);
-	return $html;
+	$result = mail($sendto, $subject, $body, $headers);
+	if ( $result ) {
+		thrower("E-Mail Sent");
+	} else {
+		thrower("E-Mail Send Failed");
+	}
 }
 
 /**
@@ -237,13 +233,12 @@ function email_hours_unpaid() {
  */
 function email_pwsend() {
 	GLOBAL $db, $MYSQL_PREFIX;
-	$html = "<h2>Password Reminder</h2>";
 	if ( !($_REQUEST["tracemail"]) || $_REQUEST["tracemail"] == "" ) { 
-		$html .= "<p>No E-Mail Address Supplied!</p>";
+		thrower("E-Mail Address Invalid");
 	} else {
-		$sql = "SELECT username, password FROM {$MYSQL_PREFIX}users WHERE email = '{$_REQUEST["tracemail"]}'";
+		$sql = "SELECT username, password FROM {$MYSQL_PREFIX}users WHERE email = '".mysql_real_escape_string($_REQUEST["tracemail"])."'";
 		$result = mysql_query($sql, $db);
-		if ( mysql_num_rows($result) == 0 ) { $html .= "<p>E-Mail Address Not Found In Database!</p>\n"; }
+		if ( mysql_num_rows($result) == 0 ) { thrower("E-Mail Address Invalid"); }
 		else {
 			$body = "TDTrac Password Reminder:<br /><br />\n";
 			while ( $row = mysql_fetch_array($result) ) {
@@ -256,10 +251,9 @@ function email_pwsend() {
 			$headers .= 'Content-type: text/html; charset=iso-8859-1' . "\r\n";
 			$sendto = $_REQUEST['tracemail'];
 			mail($sendto, $subject, $body, $headers);
-			$html .= "<p>Password Reminder Sent!</p>\n";
 		}
 	}
-	return $html;
+	thrower("Password Reminder Sent!");
 }
 
 

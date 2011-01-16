@@ -283,6 +283,8 @@ span.overright {
 	margin-right: 40%;
 }
 table.datatable {
+	margin-top: 1em;
+	font-size: 12px;
 	border: 2px solid #ddd;
 	border-radius: 5px;
 	-webkit-border-radius: 5px;
@@ -290,8 +292,8 @@ table.datatable {
 	box-shadow: 3px 3px 3px #818181;
 	-webkit-box-shadow: 3px 3px 3px #818181;
 	-moz-box-shadow: 3px 3px 3px #818181;
-	width: 90%;
-	margin-left: 5%;
+	width: 96%;
+	margin-left: 2%;
 	border-collapse: collapse;
 }
 

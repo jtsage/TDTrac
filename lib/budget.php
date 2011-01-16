@@ -23,7 +23,7 @@
  */
 function budget_addform($rcpt = 0) {
 	GLOBAL $db, $MYSQL_PREFIX, $TDTRAC_SITE;
-	$form = new tdform("{$TDTRAC_SITE}add-budget", 'form1', 1, null, 'Add Budget Expense');
+	$form = new tdform("{$TDTRAC_SITE}budget/add/", 'form1', 1, null, 'Add Budget Expense');
 	
 	$fesult = $form->addDrop('showid', 'Show', 'Show to Charge', db_list(get_sql_const('showid'), array(showid, showname)), False);
 	$fesult = $form->addDate('date', 'Date', 'Date of Charge');
@@ -35,7 +35,7 @@ function budget_addform($rcpt = 0) {
 	$fesult = $form->addCheck('pending', 'Pending Payment');
 	$fesult = $form->addCheck('needrepay', 'Reimbursable Charge');
 	$fesult = $form->addCheck('gotrepay', 'Reimbursment Recieved');
-	$fesult = $form->addHidden('rcptid', $rcpt);
+	$fesult = $form->addHidden('rcptid', intval($rcpt));
 	$html = $form->output('Add Expense');
 	return $html;
 }
@@ -89,14 +89,14 @@ function budget_editform($id) {
 function budget_viewitem($id) {
 	GLOBAL $db, $MYSQL_PREFIX, $TDTRAC_SITE;
 	if ( !is_numeric($id) || $id < 1 ) { return perms_fail(); }
-	$html  = "<h3>Budget Expense</h3>\n";
+	$html = array();
 	$sql = "SELECT showname, {$MYSQL_PREFIX}budget.* FROM `{$MYSQL_PREFIX}shows`, `{$MYSQL_PREFIX}budget` WHERE {$MYSQL_PREFIX}budget.id = {$id} AND {$MYSQL_PREFIX}budget.showid = {$MYSQL_PREFIX}shows.showid LIMIT 1;";
 	$result = mysql_query($sql, $db);
 	$row = mysql_fetch_array($result);
 	if ( $row['imgid'] > 0 ) {
-		$html .= "<div id=\"rcptbox\"><a href=\"rcpt.php?imgid={$row['imgid']}&amp;hires\" title=\"Zoom In (new window)\" target=\"_blank\"><img src=\"rcpt.php?imgid={$row['imgid']}\" alt=\"Reciept Image\" /></a></div>\n"; }
+		$html[] = "<div id=\"rcptbox\"><a href=\"rcpt.php?imgid={$row['imgid']}&amp;hires\" title=\"Zoom In (new window)\" target=\"_blank\"><img src=\"rcpt.php?imgid={$row['imgid']}\" alt=\"Reciept Image\" /></a></div>\n"; }
 		
-	$form = new tdform("{$TDTRAC_SITE}del-budget", 'form1');
+	$form = new tdform("{$TDTRAC_SITE}del-budget", 'form1', 1, 'genform', 'Budget Item');
 	
 	$fesult = $form->addDrop('showid', 'Show', 'Show to Charge', db_list(get_sql_const('showid'), array(showid, showname)), False, $row['showid'], False);
 	$fesult = $form->addDate('date', 'Date', 'Date of Charge', $row['date'], False);
@@ -108,7 +108,7 @@ function budget_viewitem($id) {
 	$fesult = $form->addCheck('pending', 'Pending Payment', null, $row['pending'], False);
 	$fesult = $form->addCheck('needrepay', 'Reimbursable Charge', null, $row['needrepay'], False);
 	$fesult = $form->addCheck('gotrepay', 'Reimbursment Recieved', null, $row['gotrepay'], False);
-	$html .= $form->output(null,null,True);
+	$html = array_merge($html, $form->output(null,null,True));
 	
 	return $html;
 }
@@ -125,14 +125,14 @@ function budget_viewitem($id) {
 function budget_delform($id) {
 	GLOBAL $db, $MYSQL_PREFIX, $TDTRAC_SITE;
 	if ( !is_numeric($id) || $id < 1 ) { return perms_fail(); }
-	$html  = "<h3>Remove Budget Expense</h3>\n";
+	$html = array();
 	$sql = "SELECT showname, {$MYSQL_PREFIX}budget.* FROM `{$MYSQL_PREFIX}shows`, `{$MYSQL_PREFIX}budget` WHERE {$MYSQL_PREFIX}budget.id = {$id} AND {$MYSQL_PREFIX}budget.showid = {$MYSQL_PREFIX}shows.showid LIMIT 1;";
 	$result = mysql_query($sql, $db);
 	$row = mysql_fetch_array($result);
 	if ( $row['imgid'] > 0 ) {
-		$html .= "<div id=\"rcptbox\"><a href=\"rcpt.php?imgid={$row['imgid']}&amp;hires\" title=\"Zoom In (new window)\" target=\"_blank\"><img src=\"rcpt.php?imgid={$row['imgid']}\" alt=\"Reciept Image\" /></a></div>\n"; }
+		$html[] = "<div id=\"rcptbox\"><a href=\"rcpt.php?imgid={$row['imgid']}&amp;hires\" title=\"Zoom In (new window)\" target=\"_blank\"><img src=\"rcpt.php?imgid={$row['imgid']}\" alt=\"Reciept Image\" /></a></div>\n"; }
 		
-	$form = new tdform("{$TDTRAC_SITE}del-budget", 'form1');
+	$form = new tdform("{$TDTRAC_SITE}budget/del/{$id}/", 'form1', 1, 'genform', 'Delete Budget Item');
 	
 	$fesult = $form->addDrop('showid', 'Show', 'Show to Charge', db_list(get_sql_const('showid'), array(showid, showname)), False, $row['showid'], False);
 	$fesult = $form->addDate('date', 'Date', 'Date of Charge', $row['date'], False);
@@ -146,9 +146,7 @@ function budget_delform($id) {
 	$fesult = $form->addCheck('gotrepay', 'Reimbursment Recieved', null, $row['gotrepay'], False);
 	$fesult = $form->addHidden('id', $id);
 	if ( isset($_REQUEST['redir-to']) ) { $form->addHidden('redir-to', $_REQUEST['redir-to']); }
-	$html .= $form->output('Confirm Delete');
-	
-	return $html;
+	return array_merge($html, $form->output('Confirm Delete'));
 }
 
 /**
@@ -184,9 +182,13 @@ function budget_add() {
 	
 	if ( $rcptid > 0 ) {
 		$sql = "UPDATE {$MYSQL_PREFIX}rcpts SET handled = '1' WHERE imgid = '{$rcptid}'";
-		$result = mysql_query($sql, $db);
+		$result2 = mysql_query($sql, $db);
 	}
-	thrower("Expense #{$added} Added");
+	if ( $result ) {
+		thrower("Expense #{$added} Added");
+	} else {
+		thrower("Expense Add :: Operation Failed");
+	}
 }
 
 /**
@@ -218,10 +220,14 @@ function budget_edit_do($id) {
 	);
 
 	$result = mysql_query($sql, $db);
-	if ( isset($_REQUEST['redir-to']) ){
-		$cleanredit = preg_replace("/\*/", "&", $_REQUEST['redir-to']);
-		thrower("Expense #{$id} Updated", $cleanredit);
-	} else { thrower("Expense #{$id} Updated"); }
+	if ( $result ) {
+		if ( isset($_REQUEST['redir-to']) ){
+			$cleanredit = preg_replace("/\*/", "&", $_REQUEST['redir-to']);
+			thrower("Expense #{$id} Updated", $cleanredit);
+		} else { thrower("Expense #{$id} Updated"); }
+	} else {
+		thrower("Expense Update :: Operation Failed");
+	}
 }
 
 /**
@@ -236,10 +242,14 @@ function budget_del_do($id) {
 	if ( !is_numeric($id) || $id < 1 ) { thrower(perms_fail()); }
 	$sql = "DELETE FROM `{$MYSQL_PREFIX}budget` WHERE id = '".intval($id)."'";
 	$result = mysql_query($sql, $db);
-	if ( isset($_REQUEST['redir-to']) ){
-		$cleanredit = preg_replace("/\*/", "&", $_REQUEST['redir-to']);
-		thrower("Expense #{$id} Deleted", $cleanredit);
-	} else { thrower("Expense #{$id} Deleted"); }
+	if ( $result ) {
+		if ( isset($_REQUEST['redir-to']) ){
+			$cleanredit = preg_replace("/\*/", "&", $_REQUEST['redir-to']);
+			thrower("Expense #{$id} Deleted", $cleanredit);
+		} else { thrower("Expense #{$id} Deleted"); }
+	} else {
+		thrower("Expense Delete :: Operation Failed");
+	}
 }
 
 /**
@@ -255,7 +265,7 @@ function budget_viewselect() {
 	GLOBAL $db, $MYSQL_PREFIX, $TDTRAC_SITE;
 	$sql = "SELECT showid, showname FROM `{$MYSQL_PREFIX}shows` ORDER BY created DESC";
 	$result = mysql_query($sql, $db);
-	$form = new tdform("{$TDTRAC_SITE}budget/view/");
+	$form = new tdform("{$TDTRAC_SITE}budget/view/", 'genform', 1, 'genform', 'View Budget');
 	
 	$result = $form->addDrop('showid', 'Show Name', null, db_list(get_sql_const('showidall'), array(showid, showname)), False);
 	$html = $form->output("View Selected");
@@ -275,13 +285,13 @@ function budget_view_special($onlytype) {
 	GLOBAL $db, $MYSQL_PREFIX;
 	$sql = "SELECT showid FROM `{$MYSQL_PREFIX}shows` WHERE closed = 0 ORDER BY showid DESC";
 	$rest = mysql_query($sql, $db);
-	$newhtml = "";
+	$newhtml = array();
 	if ( $onlytype == 1 ) { $newhtml .= "<h3>Pending Payment Budget Items</h3><br /><br />\n"; }
 	if ( $onlytype == 2 ) { $newhtml .= "<h3>All Reimbursment Budget Items</h3><br /><br />\n"; }
 	if ( $onlytype == 3 ) { $newhtml .= "<h3>Reimbursment Paid Budget Items</h3><br /><br />\n"; }
 	if ( $onlytype == 4 ) { $newhtml .= "<h3>Reimbursment UNPaid Budget Items</h3><br /><br />\n"; }
 	while ( $row = mysql_fetch_array($rest) ) {
-		$newhtml .= budget_view($row['showid'], $onlytype);
+		$newhtml = array_merge($newhtml, budget_view($row['showid'], $onlytype));
 	}
 	return $newhtml;
 }
@@ -309,8 +319,8 @@ function budget_search($keywords) {
 	$sql = "SELECT * FROM {$MYSQL_PREFIX}budget b, {$MYSQL_PREFIX}shows s WHERE b.showid = s.showid AND {$sqlwhere} ORDER BY b.showid DESC, category ASC, date ASC, vendor ASC";
 	$result = mysql_query($sql, $db);
 	
-	$html = "<h3>Search Results</h3>\n";
-	if ( mysql_num_rows($result) == 0 ) { return $html . "<br /><br /><h4>No Records Found!</h4>\n"; }
+	$html[] = "<h3>Search Results</h3>\n";
+	if ( mysql_num_rows($result) == 0 ) { return array_merge($html, array("<br /><br /><h4>No Records Found!</h4>")); }
 	
 	$tabl = new tdtable("searchresult");
 	$tabl->addHeader(array('Show', 'Date', 'Category', 'Vendor', 'Description', 'Price', 'Tax'));
@@ -323,8 +333,7 @@ function budget_search($keywords) {
 	while( $line = mysql_fetch_array($result) ) {
 		$tabl->addRow(array($line['showname'], $line['date'], $line['category'], $line['vendor'], $line['dscr'], $line['price'], $line['tax']), $line);
 	}
-	$html .= $tabl->output();
-	return $html;
+	return array_merge($html, $tabl->output(false));
 }
 
 /**
@@ -340,7 +349,7 @@ function budget_search($keywords) {
  * @global string TDTrac site address, for form actions
  * @return string HTML Output
  */
-function budget_view($showid, $onlytype) {
+function budget_view($showid, $onlytype=0) {
 	GLOBAL $db, $user_name, $MYSQL_PREFIX, $TDTRAC_DAYRATE, $TDTRAC_PAYRATE, $TDTRAC_SITE;
 	if ( !is_numeric($showid) || $showid < 1 ) { return perms_fail(); }
 	if ( $onlytype == 0 ) { $sqlwhere = ""; }
@@ -352,21 +361,20 @@ function budget_view($showid, $onlytype) {
 	$editshow = perms_checkperm($user_name, "editshow");
 	$editbudget = perms_checkperm($user_name, "editbudget"); 
 	$result = mysql_query($sql, $db); 
-	$html = "";
 	$row = mysql_fetch_array($result);
-	$html .= "<h3>{$row['showname']}</h3>\n";
-	$html .= $editshow ? "<span class=\"overright\">[<a href=\"{$TDTRAC_SITE}edit-show&amp;id={$row['showid']}\">Edit</a>]</span>\n" : "";
-	$html .= "<ul class=\"datalist\"><li><strong>Company</strong>: {$row['company']}</li>\n";
-	$html .= "<li><strong>Venue</strong>: {$row['venue']}</li>\n";
-	$html .= "<li><strong>Dates</strong>: {$row['dates']}</li>\n";
-	$html .= "</ul>\n";
+	$html[] = "<h3>{$row['showname']}</h3>";
+	if ( $editshow ) { $html[] = "<span class=\"overright\">[<a href=\"{$TDTRAC_SITE}shows/edit/{$row['showid']}/\">Edit</a>]</span>"; }
+	$html[] = "<ul class=\"datalist\"><li><strong>Company</strong>: {$row['company']}</li>";
+	$html[] = "<li><strong>Venue</strong>: {$row['venue']}</li>";
+	$html[] = "<li><strong>Dates</strong>: {$row['dates']}</li>";
+	$html[] = "</ul>";
 
 	$sql = "SELECT * FROM {$MYSQL_PREFIX}budget WHERE showid = {$showid}{$sqlwhere} ORDER BY category ASC, date ASC, vendor ASC";
 	$result = mysql_query($sql, $db); $intr = 0; $tot = 0; $tottax = 0;
 	if ( mysql_num_rows($result) < 1 ) { return $html; }
 	if ( $onlytype == 0 ) {
-		$html .= "<h4>Materials Expenses</h4>";
-		$html .= "<span class=\"upright\">[<a href=\"{$TDTRAC_SITE}email-budget&amp;id={$row['showid']}\">E-Mail To Self</a>]</span>";
+		$html[] = "<h4>Materials Expenses</h4>";
+		$html[] = "<span class=\"upright\">[<a href=\"{$TDTRAC_SITE}budget/email/{$row['showid']}\">E-Mail To Self</a>]</span>";
 	}
 	$tabl = new tdtable("budget", 'datatable', true, "view-budget*showid={$showid}*view-bud-do=1");
 	$tabl->addHeader(array('Date', 'Vendor', 'Category', 'Description', 'Price', 'Tax'));
@@ -378,11 +386,11 @@ function budget_view($showid, $onlytype) {
 	while ( $row = mysql_fetch_array($result) ) {
 		$tabl->addRow(array($row['date'], $row['vendor'], $row['category'], $row['dscr'], $row['price'], $row['tax']), $row);
 	}
-	$html .= $tabl->output();
+	$html = array_merge($html, $tabl->output(false));
 	
-	if ( $onlytype > 0 ) { return $html . "<br /><br /><br />"; } // Show payroll only on full budget report
+	if ( $onlytype > 0 ) { return $html; } // Show payroll only on full budget report
 	
-	$html .= "<br /><br /><h4>Payroll Expenses</h4>\n";
+	$html[] = "<br /><br /><h4>Payroll Expenses</h4>";
 	
 	$tabl = new tdtable("hours", "datatable", False);
 	$tabl->addHeader(array('Employee',(($TDTRAC_DAYRATE)?"Days":"Hours")." Worked",'Price'));
@@ -395,8 +403,7 @@ function budget_view($showid, $onlytype) {
 	while ( $row = mysql_fetch_array($result) ) {
 		$tabl->addRow(array($row['name'], $row['days'], $row['days'] * $row['payrate']), $row);
 	}
-	$html .= $tabl->output();
-	return $html;
+	return array_merge($html, $tabl->output(false));
 }
 
 ?>

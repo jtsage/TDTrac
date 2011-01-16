@@ -250,7 +250,7 @@ function hours_view($userid, $unpaidonly = 0) {
 	foreach ( $dbarray as $key => $data ) {
 		$html[] = "<h3>Hours Worked For: {$key}</h3>";
 		$html[] = "<span class=\"upright\">[<a href=\"{$maillink}\">E-Mail to Self</a>]".
-			($unpaidonly) ? " [<a href=\"{$TDTRAC_SITE}hours/clear/{$data[0]['userid']}/\">Set All Paid</a>]" : "" .
+			(($unpaidonly) ? " [<a href=\"{$TDTRAC_SITE}hours/clear/{$data[0]['userid']}/\">Set All Paid</a>]" : "") .
 			"</span>";
 		$html[] = "<ul class=\"datalist\">";
 		$html[] = ($_REQUEST['sdate'] <> "" ) ? "<li>Start Date: {$_REQUEST['sdate']}</li>" : "";

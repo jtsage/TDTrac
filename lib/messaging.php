@@ -33,8 +33,8 @@ function msg_check() {
 	mysql_free_result($result1);
 	mysql_free_result($result2);
 	$ret = 0;
-	if ( !is_null($row1['num']) && $row1['num'] > 0 ) { $html .= "You Have {$row1['num']} Unread Messages Waiting (<a href=\"{$TDTRAC_SITE}mail/\">[-Read-]</a>)<br />"; $ret = 1; }
-	if ( !is_null($row2['num']) && $row2['num'] > 0 ) { $html .= "You Have {$row2['num']} Sent Messages Waiting (<a href=\"{$TDTRAC_SITE}mail/view\">[-View-]</a>)"; $ret = 1; }
+	if ( !is_null($row1['num']) && $row1['num'] > 0 ) { $html .= "You Have <strong>{$row1['num']}</strong> Unread Messages Waiting (<a href=\"{$TDTRAC_SITE}mail/\">[-Read-]</a>)<br />"; $ret = 1; }
+	if ( !is_null($row2['num']) && $row2['num'] > 0 ) { $html .= "You Have <strong>{$row2['num']}</strong> Sent Messages Waiting (<a href=\"{$TDTRAC_SITE}mail/view\">[-View-]</a>)"; $ret = 1; }
 	$html .= "</span></div>\n";
 	if ( $ret ) { return $html; } else { return ""; }
 }
