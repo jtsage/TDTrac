@@ -16,11 +16,11 @@
  */
 function display_home($username, $type=0) {
 	GLOBAL $TDTRAC_SITE;
-	$html[] = "";
-	$html[] = msg_check();
-	$html[] = rcpt_check();
-	$html[] = todo_check();
-	if ( $type == 0 ) { $html[] = "<br /><br /><div style=\"float: left; width: 49%\">"; }
+	if( $type == 0 ) {
+		$html[] = msg_check();
+		$html[] = rcpt_check();
+		$html[] = todo_check();
+		$html[] = "<br /><br /><div style=\"float: left; width: 49%\">"; }
 	if ( $type == 0 || $type == 1 ) {
 		$html[] = "<h3>Payroll Tracking</h3><ul class=\"linklist\">";
 		$html[] = ( perms_checkperm($username, 'addhours') ) 	? "  <li><a href=\"{$TDTRAC_SITE}hours/add/\">Add Hours Worked</a></li>" : "";
@@ -33,10 +33,10 @@ function display_home($username, $type=0) {
 		$html[] = "<h3>Budget Tracking</h3><ul class=\"linklist\">";
 		$html[] = ( perms_checkperm($username, 'addbudget') ) ? "<li><a href=\"{$TDTRAC_SITE}budget/add/\">Add Budget Expense</a></li>" : "";
 		$html[] = ( perms_checkperm($username, 'viewbudget') ) ? "<li><a href=\"{$TDTRAC_SITE}budget/view/\">View Budgets</a></li>" : "";
-		$html[] = ( perms_checkperm($username, 'viewbudget') ) ? "<li><a href=\"{$TDTRAC_SITE}budget/view/-1/\">View Budgets (payment pending items only, all shows)</a></li>" : "";
-		$html[] = ( perms_checkperm($username, 'viewbudget') ) ? "<li><a href=\"{$TDTRAC_SITE}budget/view/-2/\">View Budgets (reimbursment items only, all shows)</a></li>" : "";
-		$html[] = ( perms_checkperm($username, 'viewbudget') ) ? "<li><a href=\"{$TDTRAC_SITE}budget/view/-3\">View Budgets (reimbursment recieved items only, all shows)</a></li>" : "";
-		$html[] = ( perms_checkperm($username, 'viewbudget') ) ? "<li><a href=\"{$TDTRAC_SITE}budget/view/-4/\">View Budgets (reimbursment not recieved items only, all shows)</a></li>" : "";
+		$html[] = ( perms_checkperm($username, 'viewbudget') ) ? "<li><a href=\"{$TDTRAC_SITE}budget/view/1/\">View Budgets (payment pending items only, all shows)</a></li>" : "";
+		$html[] = ( perms_checkperm($username, 'viewbudget') ) ? "<li><a href=\"{$TDTRAC_SITE}budget/view/2/\">View Budgets (reimbursment items only, all shows)</a></li>" : "";
+		$html[] = ( perms_checkperm($username, 'viewbudget') ) ? "<li><a href=\"{$TDTRAC_SITE}budget/view/3\">View Budgets (reimbursment recieved items only, all shows)</a></li>" : "";
+		$html[] = ( perms_checkperm($username, 'viewbudget') ) ? "<li><a href=\"{$TDTRAC_SITE}budget/view/4/\">View Budgets (reimbursment not recieved items only, all shows)</a></li>" : "";
 		$html[] = "</ul>\n";
 	}
 	if ( $type == 0 ) { $html[] = "<br /><br /><br /><br /><br /><br /></div>"; }
@@ -54,7 +54,7 @@ function display_home($username, $type=0) {
 		$html[] = "</ul>";
 	}
 	if ( $type == 0 || $type == 4 ) {
-		$html[] = "<h3>User Managment</h3><ul class=\"linklist\">";
+		$html[] = "<h3>Administrative Tasks</h3><ul class=\"linklist\">";
 		$html[] = ( perms_checkperm($username, 'adduser') ) ? "<li><a href=\"{$TDTRAC_SITE}user/add/\">Add User</a></li>" : "";
 		if ( perms_isadmin($username) ) {
 			$html[] = "<li><a href=\"{$TDTRAC_SITE}user/view/\">View Users</a></li>";
