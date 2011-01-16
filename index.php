@@ -212,7 +212,7 @@ if ( !$login[0] ) {
 				case "view":
 					if ( perms_checkperm($user_name, 'addhours') ) {
 						if ( $_SERVER['REQUEST_METHOD'] == "POST" ) { 
-							if ( isset($_REQUEST['userid']) ) { makePage(hours_view($_REQUEST['userid']), 'View Hours'); }
+							if ( isset($_REQUEST['userid']) ) { makePage(hours_view(intval($_REQUEST['userid'])), 'View Hours'); }
 							else { makePage(hours_view(0), 'View Your Hours'); }
 						} else { 
 							if ( $action[2] == 'unpaid' ) { makePage(hours_view_unpaid(), 'Veiw Pending Hours'); }

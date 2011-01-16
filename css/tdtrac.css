@@ -419,9 +419,13 @@ div.genform select, div.genform option {
         -moz-border-radius: 1em;
 	
 }
+div.genform select {
+	width: 300px;
+}
 
 div.genform input[type=text], div.genform input[type=password] {
-	width: 300px;
+	width: 289px;
+	padding-left: 15px;
 }
 
 div.genform .frmele {
