@@ -3,8 +3,9 @@
  * TDTrac Payroll Functions
  * 
  * Contains all payroll related functions. 
+ * Data hardened
  * @package tdtrac
- * @version 1.3.1
+ * @version 1.4.0
  * @author J.T.Sage <jtsage@gmail.com>
  */
 
@@ -20,8 +21,7 @@
  */
 function hours_add () {
 	GLOBAL $db, $user_name, $MYSQL_PREFIX, $TDTRAC_DAYRATE, $TDTRAC_SITE;
-	$html  = "<h3>Add Payroll Record</h3>\n";
-	$form = new tdform("{$TDTRAC_SITE}add-hours", "form1");
+	$form = new tdform("{$TDTRAC_SITE}hours/add/", "form1", 1, 'genform', 'Add Payroll Record');
 	
 	$result = $form->addDrop('userid', 'Employee', null, db_list(get_sql_const('emps'), array('userid', 'name')), False);
 	$result = $form->addDrop('showid', 'Show', null, db_list(get_sql_const('showid'), array('showid', 'showname')), False);
@@ -29,8 +29,7 @@ function hours_add () {
 	$result = $form->addText('worked', (($TDTRAC_DAYRATE)?"Days":"Hours")." Worked");
 	$result = $form->addHidden('new-hours', true);
 	
-	$html .= $form->output('Add Hours');
-	return $html;
+	return $form->output('Add Hours');
 }
 
 /**
@@ -46,11 +45,10 @@ function hours_add () {
  */
 function hours_edit ($hid) {
 	GLOBAL $db, $user_name, $MYSQL_PREFIX, $TDTRAC_DAYRATE, $TDTRAC_SITE;
-	$sql .= "SELECT h.*, CONCAT(first, ' ', last) as name FROM {$MYSQL_PREFIX}hours h, {$MYSQL_PREFIX}users u WHERE h.userid = u.userid AND h.id = {$hid} LIMIT 1";
+	$sql .= "SELECT h.*, CONCAT(first, ' ', last) as name FROM {$MYSQL_PREFIX}hours h, {$MYSQL_PREFIX}users u WHERE h.userid = u.userid AND h.id = " . intval($hid) . " LIMIT 1";
 	$result = mysql_query($sql, $db);
 	$recd = mysql_fetch_array($result);
-	$html  = "<h3>Edit Payroll Record</h3>\n";
-	$form = new tdform("{$TDTRAC_SITE}edit-hours", "form1");
+	$form = new tdform("{$TDTRAC_SITE}hours/edit/{$hid}/", "form1", 1, 'genform', 'Edit Payroll Record');
 	
 	$fesult = $form->addDrop('userid', 'Employee', null, array(array($recd['userid'], $recd['name'])), False);
 	$fesult = $form->addDrop('showid', 'Show', null, db_list(get_sql_const('showid'), array('showid', 'showname')), False, $recd['showid']);
@@ -59,8 +57,7 @@ function hours_edit ($hid) {
 	$fesult = $form->addCheck('submitted', 'Hours Paid Out', null, $recd['submitted']);
 	$fesult = $form->addHidden('id', $hid);
 	
-	$html .= $form->output('Edit Hours');
-	return $html;
+	return $form->output('Edit Hours');
 }
 
 /**
@@ -76,11 +73,10 @@ function hours_edit ($hid) {
  */
 function hours_del ($hid) {
 	GLOBAL $db, $user_name, $MYSQL_PREFIX, $TDTRAC_DAYRATE, $TDTRAC_SITE;
-	$sql .= "SELECT h.*, CONCAT(first, ' ', last) as name, showname FROM {$MYSQL_PREFIX}hours h, {$MYSQL_PREFIX}users u, {$MYSQL_PREFIX}shows s WHERE h.userid = u.userid AND h.showid = s.showid AND h.id = {$hid} LIMIT 1";
+	$sql .= "SELECT h.*, CONCAT(first, ' ', last) as name, showname FROM {$MYSQL_PREFIX}hours h, {$MYSQL_PREFIX}users u, {$MYSQL_PREFIX}shows s WHERE h.userid = u.userid AND h.showid = s.showid AND h.id = ".intval($hid)." LIMIT 1";
 	$result = mysql_query($sql, $db);
 	$recd = mysql_fetch_array($result);
-	$html  = "<h3>Delete Payroll Record</h3>\n";
-	$form = new tdform("{$TDTRAC_SITE}edit-hours", "form1");
+	$form = new tdform("{$TDTRAC_SITE}hours/del/{$del}/", "form1", 1, 'genform', 'Delete Payroll Record');
 	
 	$fesult = $form->addDrop('userid', 'Employee', null, array(array($recd['userid'], $recd['name'])), False, $recd['userid'], False);
 	$fesult = $form->addDrop('showid', 'Show', null, db_list(get_sql_const('showid'), array('showid', 'showname')), False, $recd['showid'], False);
@@ -89,8 +85,7 @@ function hours_del ($hid) {
 	$fesult = $form->addCheck('submitted', 'Hours Paid Out', null, $recd['submitted'], False);
 	$fesult = $form->addHidden('id', $hid);
 	
-	$html .= $form->output('Confirm Delete');
-	return $html;
+	return $form->output('Confirm Delete');
 }
 
 /**
@@ -102,9 +97,18 @@ function hours_del ($hid) {
  */
 function hours_add_do() {
 	GLOBAL $db, $MYSQL_PREFIX, $user_name;
-	$sql = "INSERT INTO {$MYSQL_PREFIX}hours ( userid, showid, date, worked ) VALUES ( '{$_REQUEST['userid']}' , '{$_REQUEST['showid']}' , '{$_REQUEST['date']}' , '{$_REQUEST['worked']}' )";
+	$sqlstring  = "INSERT INTO `{$MYSQL_PREFIX}hours` ( `userid`, `showid`, `date`, `worked` )";
+	$sqlstring .= " VALUES ( %d, %d, '%s', '%f' )";
+
+	$sql = sprintf($sqlstring,
+		intval($_REQUEST['userid']),
+		intval($_REQUEST['showid']),
+		mysql_real_escape_string($_REQUEST['data']),
+		floatval($_REQUEST['worked'])
+	);
+
 	$fromid = perms_getidbyname($user_name);
-	$msg = "{$user_name} Added Hours: {$_REQUEST['worked']} for {$_REQUEST['date']}";
+	$msg = "{$user_name} Added Hours: ".floatval($_REQUEST['worked'])." for ".mysql_real_escape_string($_REQUEST['date']);
 
 	if ( $fromid == $_REQUEST['userid'] ) { // ADDING HOURS FOR SELF
 		$sqltoid = "SELECT userid FROM {$MYSQL_PREFIX}users WHERE notify = 1";
@@ -119,7 +123,11 @@ function hours_add_do() {
 		$result = mysql_query($msgsql, $db);
 	}
 	$result = mysql_query($sql, $db);
-	thrower("Hours Added");
+	if ( $result ) {
+		thrower("Hours Added");
+	} else {
+		thrower("Hours Add :: Operation Failed");
+	}
 }
 
 /**
@@ -131,9 +139,25 @@ function hours_add_do() {
  */
 function hours_edit_do($id) {
 	GLOBAL $db, $MYSQL_PREFIX;
-	$sql = "UPDATE {$MYSQL_PREFIX}hours SET showid = '{$_REQUEST['showid']}', date = '{$_REQUEST['date']}', worked = '{$_REQUEST['worked']}', submitted = ".(($_REQUEST['submitted'] == "y") ? "1" : "0")." WHERE id = '{$id}'";
+	$thissubmit = ($_REQUEST['submitted'] == "y") ? "1" : "0";
+	
+	$sqlstring = "UPDATE `{$MYSQL_PREFIX}hours` SET `showid` = %d, `date` = '%s', `worked` = '%f', submitted = %d WHERE id = %d";
+
+	$sql = sprintf($sqlstring,
+		intval($_REQUEST['showid']),
+		mysql_real_escape_string($_REQUEST['date']),
+		floatval($_REQUEST['worked']),
+		$thissubmit,
+		intval($id)
+	);
+
 	$result = mysql_query($sql, $db);
-	thrower("Hours Record #{$id} Updated");
+
+	if ( $result ) {
+		thrower("Hours Record #{$id} Updated");
+	} else {
+		thrower("Hours Update :: Operation Failed");
+	}
 }
 
 /**
@@ -145,9 +169,13 @@ function hours_edit_do($id) {
  */
 function hours_del_do($id) {
 	GLOBAL $db, $MYSQL_PREFIX;
-	$sql = "DELETE FROM {$MYSQL_PREFIX}hours WHERE id = '{$id}' LIMIT 1";
+	$sql = "DELETE FROM {$MYSQL_PREFIX}hours WHERE id = ".intval($id)." LIMIT 1";
 	$result = mysql_query($sql, $db);
-	thrower("Hours Record #{$id} Deleted");
+	if ( $result ) {
+		thrower("Hours Record #{$id} Deleted");
+	} else {
+		thrower("Hours Delete :: Operation Failed");
+	}
 }
 
 
@@ -162,26 +190,23 @@ function hours_del_do($id) {
  */
 function hours_view_pick() {
 	GLOBAL $db, $user_name, $MYSQL_PREFIX, $TDTRAC_SITE;
-	$html = "<h3>View By Employee</h3>";
-	$form1 = new tdform("{$TDTRAC_SITE}view-hours", "form1");
+	$form1 = new tdform("{$TDTRAC_SITE}hours/view/", "form1", 1, 'genform', 'View By Employee');
 	$fesult = $form1->addDrop('userid', 'Employee', null, db_list(get_sql_const('emps'), array('userid', 'name')), False);
 	$fesult = $form1->addDate('sdate', 'Start Date', null, null, True, 'sdate1');
 	$fesult = $form1->addDate('edate', 'End Date', null, null, True, 'edate1');
-	$html .= $form1->output('View Hours', 'Leave Dates Blank to See All');
+	$html = $form1->output('View Hours', 'Leave Dates Blank to See All');
 	
 	if ( perms_isemp($user_name) ) { return $html; }
 	
-	$html .= "<h3>View Dated Report</h3>";
-	$form2 = new tdform("{$TDTRAC_SITE}view-hours", "form2", $form1->getlasttab(), "genform2");
+	$form2 = new tdform("{$TDTRAC_SITE}hours/view/", "form2", $form1->getlasttab(), "genform2", 'View Dated Report');
 	$fesult = $form2->addDate('sdate', 'Start Date', null, null, True, 'sdate2');
 	$fesult = $form2->addDate('edate', 'End Date', null, null, True, 'edate2');
-	$html .= $form2->output('View Hours', 'Leave Dates Blank to See All');
+	$html = array_merge($html, $form2->output('View Hours', 'Leave Dates Blank to See All'));
 
 	if ( !perms_isadmin($user_name) ) { return $html; }
 	
-	$html .= "<h3>View All Un-Paid Hours</h3>";
-	$form3 = new tdform("{$TDTRAC_SITE}view-hours-unpaid", "form3", $form2->getlasttab(), "genform3");
-	$html .= $form3->output('View Hours');
+	$form3 = new tdform("{$TDTRAC_SITE}hours/view/unpaid/", "form3", $form2->getlasttab(), "genform3", "View Unpaid Hours");
+	$html = array_merge($html, $form3->output('View Hours'));
 	return $html;	
 }
 
@@ -205,31 +230,32 @@ function hours_view($userid, $unpaidonly = 0) {
 	$sql .= "u.userid = h.userid AND s.showid = h.showid";
 	$sql .= ($userid <> 0) ? " AND u.userid = '{$userid}'" : "";
 	if ( !$unpaidonly ) {
-		$sql .= ($_REQUEST['sdate'] <> "") ? " AND h.date >= '{$_REQUEST['sdate']}'" : "";
-		$sql .= ($_REQUEST['edate'] <> "") ? " AND h.date <= '{$_REQUEST['edate']}'" : "";
+		$sql .= ($_REQUEST['sdate'] <> "") ? " AND h.date >= '".mysql_real_escape_string($_REQUEST['sdate'])."'" : "";
+		$sql .= ($_REQUEST['edate'] <> "") ? " AND h.date <= '".mysql_real_escape_string($_REQUEST['edate'])."'" : "";
 	} else {
 		$sql .= " AND h.submitted = 0";
 	}
 	$sql .= " ORDER BY last ASC, date DESC";
 	if ( !$unpaidonly ) {
-		$maillink  = "{$TDTRAC_SITE}email-hours&amp;id={$userid}&amp;sdate=";
+		$maillink  = "{$TDTRAC_SITE}hours/email/&amp;id={$userid}&amp;sdate=";
 		$maillink .= ($_REQUEST['sdate'] <> "" ) ? $_REQUEST['sdate'] : "0";
 		$maillink .= "&amp;edate=";
 		$maillink .= ($_REQUEST['edate'] <> "" ) ? $_REQUEST['edate'] : "0";
-	} else { $maillink  = "{$TDTRAC_SITE}email-hours-unpaid"; }
+	} else { $maillink  = "{$TDTRAC_SITE}hours/email/unpaid/"; }
 	$result = mysql_query($sql, $db);
+	if ( mysql_num_rows($result) < 1 ) { return array("<h3>Empty Data Set</h3>", "<p>There are no payroll items matching your terms.</p>"); }
 	while ( $row = mysql_fetch_array($result) ) {
 		$dbarray[$row['name']][] = $row;
 	}
-	$html = "";
 	foreach ( $dbarray as $key => $data ) {
-		$html .= "<h3>Hours Worked For: {$key}</h3>\n";
-		$html .= "<span class=\"upright\">[<a href=\"{$maillink}\">E-Mail to Self</a>]";
-		$html .= ($unpaidonly) ? " [<a href=\"{$TDTRAC_SITE}hours-set-paid&amp;id={$data[0]['userid']}\">Set All Paid</a>]" : "";
-		$html .= "</span><ul class=\"datalist\">\n";
-		$html .= ($_REQUEST['sdate'] <> "" ) ? "<li>Start Date: {$_REQUEST['sdate']}</li>" : "";
-		$html .= ($_REQUEST['edate'] <> "" ) ? "<li>Ending Date: {$_REQUEST['edate']}</li>" : "";
-		$html .= "</ul>\n";
+		$html[] = "<h3>Hours Worked For: {$key}</h3>";
+		$html[] = "<span class=\"upright\">[<a href=\"{$maillink}\">E-Mail to Self</a>]".
+			($unpaidonly) ? " [<a href=\"{$TDTRAC_SITE}hours/clear/{$data[0]['userid']}/\">Set All Paid</a>]" : "" .
+			"</span>";
+		$html[] = "<ul class=\"datalist\">";
+		$html[] = ($_REQUEST['sdate'] <> "" ) ? "<li>Start Date: {$_REQUEST['sdate']}</li>" : "";
+		$html[] = ($_REQUEST['edate'] <> "" ) ? "<li>Ending Date: {$_REQUEST['edate']}</li>" : "";
+		$html[] = "</ul>";
 		$tabl = new tdtable("hours");
 		$tabl->addHeader(array('Date', 'Show', (($TDTRAC_DAYRATE)?"Days":"Hours")." Worked", 'Paid'));
 		$tabl->addNumber((($TDTRAC_DAYRATE)?"Days":"Hours")." Worked");
@@ -239,7 +265,7 @@ function hours_view($userid, $unpaidonly = 0) {
 		foreach ( $data as $num => $line ) {
 			$tabl->addRow(array($line['date'], $line['showname'], $line['worked'], (($line['submitted'] == 1) ? "YES" : "NO")), $line);
 		}
-		$html .= $tabl->output();
+		$html = array_merge($html, $tabl->output(false));
 	}
 	return $html;
 }
@@ -261,10 +287,14 @@ function hours_view_unpaid() {
  */
 function hours_set_paid($userid) {
 	GLOBAL $db, $MYSQL_PREFIX;
-	$sql = "UPDATE {$MYSQL_PREFIX}hours SET submitted = 1 WHERE userid = {$userid}";
+	$sql = "UPDATE {$MYSQL_PREFIX}hours SET submitted = 1 WHERE userid = ".intval($userid);
 	$result = mysql_query($sql, $db);
 	$uname = perms_getfnamebyid($userid);
-	thrower("Hours for {$name} (ID:{$userid}) Marked Paid");
+	if ( $result ) {
+		thrower("Hours for {$name} (ID:{$userid}) Marked Paid");
+	} else {
+		thrower("Hours Clear :: Operation Failed");
+	}
 }
 
 /**
@@ -279,19 +309,17 @@ function hours_remind_pick() {
 	GLOBAL $db, $MYSQL_PREFIX, $TDTRAC_SITE;
 	$sql = "SELECT CONCAT(first, ' ', last) as name, userid FROM {$MYSQL_PREFIX}users WHERE payroll = 1 ORDER BY last DESC";
 	$result = mysql_query($sql, $db);
-	$html  = "<h3>Send Hours Due Reminder to Employees</h3>\n";
-	$form = new tdform("{$TDTRAC_SITE}remind-hours", 'form2');
+	$form = new tdform("{$TDTRAC_SITE}hours/remind/", 'form2', 1, 'genform', 'Send Payroll Reminder');
 	
 	$fesult = $form->addDate('duedate', 'Hours Due Date');
-	$fesult = $form->addDate('sdate', 'Start Date of Pay Period');
-	$fesult = $form->addDate('edate', 'End Date of Pay Period');
+	$fesult = $form->addDate('sdate', 'Start Date');
+	$fesult = $form->addDate('edate', 'End Date');
 	$fesult = $form->addInfo('<strong>Employees to remind:</strong>');
 	while ( $row = mysql_fetch_array($result) ) {
 		$fesult = $form->addCheck('toremind[]', $row['name'], null, False, True, $row['userid']);
 	}
 	
-	$html .= $form->output('Send Reminders');
-	return $html;
+	return $form->output('Send Reminders');
 }
 
 /**
@@ -304,12 +332,17 @@ function hours_remind_pick() {
  */
 function hours_remind_do() {
 	GLOBAL $db, $MYSQL_PREFIX, $TDTRAC_SITE;
-	$html  = "<h2>Sending Reminders</h2><p>";
 	foreach ( $_REQUEST['toremind'] as $remid ) {
-		$html .= email_remind($remid, $_REQUEST['duedate'], $_REQUEST['sdate'], $_REQUEST['edate']);
+		$results[] = email_remind(
+			intval($remid), 
+			mysql_real_escape_string($_REQUEST['duedate']),
+			mysql_real_escape_string($_REQUEST['sdate']),
+			mysql_real_escape_string($_REQUEST['edate'])
+		);
 	}
-	$html .= "</p>\n";
-	return $html;
+	$msg  = "Sent Reminders<br />";
+	$msg .= join($results);
+	thrower($msg);
 }
 
 ?>

@@ -428,7 +428,7 @@ class tdtable {
 	private function act_bdel($raw) {
 		global $TDTRAC_SITE;
 		if ( $this->fromlink ) { $extra = "&redir-to={$this->fromlink}"; }
-		return "<a href=\"{$TDTRAC_SITE}/budget/del/{$raw['id']}/{$extra}\"><img class=\"ticon\" src=\"/images/delete.png\" title=\"Delete Budget Item\" alt=\"Delete Item\" /></a>";
+		return "<a href=\"{$TDTRAC_SITE}budget/del/{$raw['id']}/{$extra}\"><img class=\"ticon\" src=\"/images/delete.png\" title=\"Delete Budget Item\" alt=\"Delete Item\" /></a>";
 	}
 	
 	/**
@@ -439,7 +439,7 @@ class tdtable {
 	 */
 	private function act_pedit($raw) {
 		global $TDTRAC_SITE;
-		return "<a title=\"Edit Payroll Item\" href=\"{$TDTRAC_SITE}/hours/edit/{$raw['hid']}/\"><img class=\"ticon\" src=\"images/edit.png\" alt=\"Edit\" /></a> ";
+		return "<a title=\"Edit Payroll Item\" href=\"{$TDTRAC_SITE}hours/edit/{$raw['hid']}/\"><img class=\"ticon\" src=\"/images/edit.png\" alt=\"Edit\" /></a> ";
 	}
 	
 	/**
@@ -450,7 +450,7 @@ class tdtable {
 	 */
 	private function act_pdel($raw) {
 		global $TDTRAC_SITE;
-		return "<a title=\"Delete Payroll Item\" href=\"{$TDTRAC_SITE}/hours/del/{$raw['hid']}/\"><img class=\"ticon\" src=\"images/delete.png\" alt=\"Delete\" /></a>";
+		return "<a title=\"Delete Payroll Item\" href=\"{$TDTRAC_SITE}hours/del/{$raw['hid']}/\"><img class=\"ticon\" src=\"/images/delete.png\" alt=\"Delete\" /></a>";
 	}
 	
 	/**
@@ -461,7 +461,7 @@ class tdtable {
 	 */
 	private function act_mdel($raw) {
 		global $TDTRAC_SITE;
-		return "<a title=\"Delete Message\" href=\"{$TDTRAC_SITE}/mail/delete/{$raw['id']}/\"><img class=\"ticon\"  alt=\"Delete\" src=\"/images/delete.png\" /></a>";
+		return "<a title=\"Delete Message\" href=\"{$TDTRAC_SITE}mail/delete/{$raw['id']}/\"><img class=\"ticon\"  alt=\"Delete\" src=\"/images/delete.png\" /></a>";
 	}
 	
 	/**

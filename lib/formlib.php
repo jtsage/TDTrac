@@ -65,7 +65,7 @@ class tdform {
 					$temp .= "<input type=\"hidden\" name=\"{$hide[0]}\" value=\"{$hide[1]}\" />";
 				}
 			}
-			$temp .= ((!is_null($extra)) ? $extra : "");
+			$temp .= ((!is_null($extra)) ? "{$extra}&nbsp;&nbsp;&nbsp;" : "");
 			$temp .= "<input type=\"submit\" class=\"subbie\" tabindex=\"{$this->tabindex}\" value=\"{$actioname}\" title=\"{$actioname}\" /></div>";
 			$output[] = $temp;
 		}
@@ -107,14 +107,15 @@ class tdform {
 	 * @param bool Element is enabled
 	 * @return bool True on success
 	 */
-	public function addDate($name = 'date', $text = null, $title = null, $preset = null, $enabled = True ) {
+	public function addDate($name = 'date', $text = null, $title = null, $preset = null, $enabled = True, $id = null ) {
 		global $SITE_SCRIPT;
+		if ( $id == null ) { $id = $name; }
 		$this->members[] = array('date', $name, $text, $title, $preset);
 		if ( $title == null ) { $title = $text; }
 		$SITE_SCRIPT[] = "\t$(function() {";
-		$SITE_SCRIPT[] = "\t\t$( \"#{$name}\" ).datepicker({ dateFormat: 'yy-mm-dd' });";
+		$SITE_SCRIPT[] = "\t\t$( \"#{$id}\" ).datepicker({ dateFormat: 'yy-mm-dd' });";
 		$SITE_SCRIPT[] = "\t});";
-		$temp  = "  <div class=\"frmele\" title=\"{$title}\">{$text}: <input tabindex=\"{$this->tabindex}\" type=\"text\" size=\"21\" name=\"{$name}\" id=\"{$name}\" ";
+		$temp  = "  <div class=\"frmele\" title=\"{$title}\">{$text}: <input tabindex=\"{$this->tabindex}\" type=\"text\" size=\"21\" name=\"{$name}\" id=\"{$id}\" ";
 		if ( $preset != null ) { $temp .= "value=\"{$preset}\" "; }
 		if ( !$enabled ) { $temp .= "disabled=\"disabled\" "; }
 		$temp .= "/></div>";
