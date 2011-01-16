@@ -5,7 +5,7 @@
  * 
  * Contains all messaging framework
  * @package tdtrac
- * @version 1.3.1
+ * @version 1.4.0
  * @author J.T.Sage <jtsage@gmail.com>
  * @since 1.0.0beta1
  */
@@ -33,8 +33,8 @@ function msg_check() {
 	mysql_free_result($result1);
 	mysql_free_result($result2);
 	$ret = 0;
-	if ( !is_null($row1['num']) && $row1['num'] > 0 ) { $html .= "You Have {$row1['num']} Unread Messages Waiting (<a href=\"{$TDTRAC_SITE}msg-read\">[-Read-]</a>)<br />"; $ret = 1; }
-	if ( !is_null($row2['num']) && $row2['num'] > 0 ) { $html .= "You Have {$row2['num']} Sent Messages Waiting (<a href=\"{$TDTRAC_SITE}msg-view\">[-View-]</a>)"; $ret = 1; }
+	if ( !is_null($row1['num']) && $row1['num'] > 0 ) { $html .= "You Have {$row1['num']} Unread Messages Waiting (<a href=\"{$TDTRAC_SITE}mail/\">[-Read-]</a>)<br />"; $ret = 1; }
+	if ( !is_null($row2['num']) && $row2['num'] > 0 ) { $html .= "You Have {$row2['num']} Sent Messages Waiting (<a href=\"{$TDTRAC_SITE}mail/view\">[-View-]</a>)"; $ret = 1; }
 	$html .= "</span></div>\n";
 	if ( $ret ) { return $html; } else { return ""; }
 }
@@ -53,14 +53,14 @@ function msg_sent_view() {
 	$userid = perms_getidbyname($user_name);
 	$sql = "SELECT id, toid, body, DATE_FORMAT(stamp, '%m-%d-%y %h:%i %p') as wtime FROM {$MYSQL_PREFIX}msg WHERE fromid = {$userid} ORDER BY stamp DESC";
 	$result = mysql_query($sql, $db);
-	$html  = "<h3>Message Outbox</h3>";
+	$html[]  = "<h3>Message Outbox</h3>";
 	$tabl = new tdtable("msgoutbox", 'datatable', perms_isadmin($user_name));
 	$tabl->addHeader(array('Date', 'Recipient', 'Message'));
 	if ( perms_isadmin($user_name) ) { $tabl->addAction('mdel'); }
 	while ( $row = mysql_fetch_array($result) ) {
 		$tabl->addRow(array($row['wtime'], perms_getfnamebyid($row['toid']), $row['body']), $row);
 	}
-	$html .= $tabl->output();
+	$html = array_merge($html, $tabl->output(false));
 	return $html;
 }
 
@@ -78,15 +78,15 @@ function msg_inbox_view() {
 	$userid = perms_getidbyname($user_name);
 	$sql = "SELECT id, fromid, body, DATE_FORMAT(stamp, '%m-%d-%y %h:%i %p') as wtime FROM {$MYSQL_PREFIX}msg WHERE toid = {$userid} ORDER BY stamp DESC";
 	$result = mysql_query($sql, $db);
-	$html  = "<h3>Message Inbox</h3>";
-	$html .= "<span class=\"upright\">[-<a href=\"{$TDTRAC_SITE}msg-clean\">Clear Inbox</a>-]</span>\n";
+	$html[] = "<h3>Message Inbox</h3>";
+	$html[] = "<span class=\"upright\">[-<a href=\"{$TDTRAC_SITE}mail/clean/\">Clear Inbox</a>-]</span>";
 	$tabl = new tdtable("msginbox");
-	$tabl->addHeader(array('Date', 'Recipient', 'Message'));
+	$tabl->addHeader(array('Date', 'Sender', 'Message'));
 	$tabl->addAction('mdel');
 	while ( $row = mysql_fetch_array($result) ) {
 		$tabl->addRow(array($row['wtime'], perms_getfnamebyid($row['fromid']), $row['body']), $row);
 	}
-	$html .= $tabl->output();
+	$html = array_merge($html, $tabl->output(false));
 	return $html;
 }
 

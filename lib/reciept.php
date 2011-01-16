@@ -3,8 +3,9 @@
  * TDTrac Reciept Functions
  * 
  * Contains all reciept related functions. 
+ * Data Hardened
  * @package tdtrac
- * @version 1.3.1
+ * @version 1.4.0
  * @author J.T.Sage <jtsage@gmail.com>
  */
 
@@ -16,11 +17,24 @@
  */
 function rcpt_do() {
 	GLOBAL $db, $MYSQL_PREFIX;
-	$sqla = "UPDATE {$MYSQL_PREFIX}budget SET imgid = {$_REQUEST['imgid']} WHERE id = {$_REQUEST['budid']}";
-	$sqlb = "UPDATE {$MYSQL_PREFIX}rcpts SET handled = '1' WHERE imgid = {$_REQUEST['imgid']}";
+	$sqla = sprintf("UPDATE `{$MYSQL_PREFIX}budget` SET imgid = %d WHERE id = %d",
+		intval($_REQUEST['imgid']),
+		intval($_REQUEST['budid'])
+	);
+	$sqlb = sprintf("UPDATE `{$MYSQL_PREFIX}rcpts` SET `handled` = 1 WHERE imgid = %d",
+		intval($_REQUEST['imgid'])
+	);
 	$result = mysql_query($sqla);
-	$result = mysql_query($sqlb);
-	thrower("Reciept Associated with Budget Record");
+	if ( $result ) {
+		$result = mysql_query($sqlb);
+		if ( $result ) {
+			thrower("Reciept Associated with Budget Record");
+		} else {
+			thrower("Error :: Operation Failed");
+		}
+	} else { 
+		thrower("Error :: Operation Failed");
+	}
 }
 
 /**
@@ -34,11 +48,10 @@ function rcpt_do() {
  */
 function rcpt_check() {
 	GLOBAL $db, $MYSQL_PREFIX, $user_name, $TDTRAC_SITE;
-	$html  = "";
-	$html .= "<div class=\"infobox\"><span style=\"font-size: .7em\">";
+	$html = "<div class=\"infobox\"><span style=\"font-size: .7em\">";
 	$userid = perms_getidbyname($user_name);
 	if ( $userid == 1 ) {
-		$sql = "SELECT COUNT(imgid) as num FROM {$MYSQL_PREFIX}rcpts WHERE handled = 0";
+		$sql = "SELECT COUNT(imgid) as num FROM `{$MYSQL_PREFIX}rcpts` WHERE handled = 0";
 		$result = mysql_query($sql, $db);
 		if ( mysql_num_rows($result) > 0 ) {
 			$num = mysql_fetch_array($result);
@@ -61,9 +74,10 @@ function rcpt_check() {
 function rcpt_nuke() {
 	GLOBAL $db, $MYSQL_PREFIX;
 	if ( isset($_REQUEST['imgid']) && is_numeric($_REQUEST['imgid']) ) {
-		$sql = "DELETE FROM {$MYSQL_PREFIX}rcpts WHERE imgid = {$_REQUEST['imgid']}";
+		$sql = "DELETE FROM {$MYSQL_PREFIX}rcpts WHERE imgid = ".intval($_REQUEST['imgid']);
 		$result = mysql_query($sql, $db);
-		thrower("Reciept Image Deleted");
+		if ( $result ) { thrower("Reciept Image Deleted"); 
+		} else { thrower("Error :: Operation Failed"); }
 	} else {
 		thrower("Invalid Reciept Image");
 	}
@@ -79,7 +93,7 @@ function rcpt_nuke() {
  */
 function rcpt_list_budget($rcpt = 0) {
 	GLOBAL $db, $MYSQL_PREFIX;
-	$sql = "SELECT budget.*, showname FROM {$MYSQL_PREFIX}budget as budget, {$MYSQL_PREFIX}shows as shows WHERE budget.showid = shows.showid AND budget.imgid = 0 AND shows.closed = 0 ORDER BY budget.date DESC, budget.id DESC";
+	$sql = "SELECT budget.*, showname FROM `{$MYSQL_PREFIX}budget` as budget, `{$MYSQL_PREFIX}shows` as shows WHERE budget.showid = shows.showid AND budget.imgid = 0 AND shows.closed = 0 ORDER BY budget.date DESC, budget.id DESC";
 	$result = mysql_query($sql, $db);
 	while ( $row = mysql_fetch_array($result) ) {
 		$picklist[] = array($row['id'], "{$row['showname']} - {$row['date']} - {$row['vendor']} - \${$row['price']}");
@@ -87,9 +101,8 @@ function rcpt_list_budget($rcpt = 0) {
 	
 	$form = new tdform("{$TDTRAC_SITE}rcpt", "forma", 80, "genform2", 'Add To Budget Item');
 	$result = $form->addDrop('budid', 'Item', 'Item to associate with', $picklist, False);
-	$result = $form->addHidden('imgid', $rcpt);
+	$result = $form->addHidden('imgid', intval($rcpt));
 	$html = $form->output('Associate');
-	
 	return $html;
 }
 
@@ -104,8 +117,11 @@ function rcpt_list_budget($rcpt = 0) {
  */
 function rcpt_view() {
 	GLOBAL $db, $MYSQL_PREFIX, $user_name, $TDTRAC_SITE;
+	if ( isset($_REQUEST['num']) && !is_numeric($_REQUEST['num']) ) {
+		thrower("Error :: Undefined Error");
+	}
 	$html[] = "<div id=\"rcptbox\">";
-	$sql = "SELECT count(imgid) as num FROM {$MYSQL_PREFIX}rcpts WHERE handled = 0";
+	$sql = "SELECT count(imgid) as num FROM `{$MYSQL_PREFIX}rcpts` WHERE handled = 0";
 	$result = mysql_query($sql, $db);
 	$line = mysql_fetch_array($result);
 	$total = $line['num'];
@@ -125,14 +141,10 @@ function rcpt_view() {
 	$html[] = "<a title=\"Zoom In (new window)\" href=\"rcpt.php?imgid={$line['imgid']}&amp;hires\" target=\"_blank\"><img src=\"images/rcpt-zoom.jpg\" alt=\"Zoom\" /></a>";
 	$html[] = "<a title=\"Flip Original 180deg\" href=\"javascript:document['rcptimg'].src='rcpt.php?imgid={$line['imgid']}&amp;rotate=180';document.links['rcptsave'].href='rcpt.php?imgid={$line['imgid']}&amp;rotate=180&amp;save';return true;\"><img src=\"images/rcpt-flip.jpg\" alt=\"Rotate 180\" /></a>";
 	$html[] = "<a title=\"Rotate Original 90deg Clockwise\" href=\"javascript:document['rcptimg'].src='rcpt.php?imgid={$line['imgid']}&amp;rotate=90';document.links['rcptsave'].href='rcpt.php?imgid={$line['imgid']}&amp;rotate=90&amp;save';return true;\"><img src=\"images/rcpt-cw.jpg\" alt=\"Rotate CW\" /></a>";
-	$html[] = "<br />[-<a title=\"Delete This Reciept\" href=\"/rcpt-delete&amp;imgid={$line['imgid']}\">Nuke</a>-] [-<a title=\"Skip this Reciept for Now\" href=\"/rcpt&amp;num={$thisnum}\">Skip</a>-]";
+	$html[] = "<br />[-<a title=\"Delete This Reciept\" href=\"/rcpt/delete&amp;imgid={$line['imgid']}\">Nuke</a>-] [-<a title=\"Skip this Reciept for Now\" href=\"/rcpt/&amp;num={$thisnum}\">Skip</a>-]";
 	$html[] = "</div></div>";
 	$html = array_merge($html, rcpt_list_budget($line['imgid']));
 	$html = array_merge($html, budget_addform($line['imgid']));
 	return $html;
 }
-
-
-
 ?>
-
