@@ -17,7 +17,7 @@
  */
 function show_add_form() {
 	GLOBAL $TDTRAC_SITE;
-	$form = new tdform("{$TDTRAC_SITE}add-show", 'genform', 1, 'genform', 'Add A Show');
+	$form = new tdform("{$TDTRAC_SITE}shows/add/", 'genform', 1, 'genform', 'Add A Show');
 	
 	$result = $form->addText('showname', 'Show Name');
 	$result = $form->addText('company', 'Show Company');
@@ -47,7 +47,7 @@ function show_add_do() {
 	);
 
 	$result = mysql_query($sql, $db);
-	if ( $request ) {
+	if ( $result ) {
 		thrower("Show {$_REQUEST['showname']} Added");
 	} else {
 		thrower("Show Add :: Operation Failed");
