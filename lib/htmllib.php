@@ -103,17 +103,16 @@ function makeHeader($title = '') {
 		}
 	}
 
-	$html[] = "";
 	$html[] = "\t\t<div id=\"headerpic\"></div>\n\t\t<div id=\"menu\">\n\t\t\t<ul>";
-	$html[] = "\t\t\t\t<li><a tabindex=\"90\" href=\"{$TDTRAC_SITE}\"".(($title == "")?" class=\"active\"":"").">Home</a></li>";
-	$html[] = ($login[0])?"\t\t\t\t<li><a tabindex=\"91\" href=\"{$TDTRAC_SITE}user/password/\""	.((preg_match("/password/", $title))	?" class=\"active\"":"").">Change Password</a></li>":"";
-	$html[] = "\t\t\t\t<li><a tabindex=\"92\" href=\"{$TDTRAC_SITE}budget/\""		.((preg_match("/budget/", $title))	?" class=\"active\"":"").">Budget</a></li>";
-	$html[] = "\t\t\t\t<li><a tabindex=\"93\" href=\"{$TDTRAC_SITE}hours/\""		.((preg_match("/hours/", $title))	?" class=\"active\"":"").">Payroll</a></li>";
-	$html[] = "\t\t\t\t<li><a tabindex=\"94\" href=\"{$TDTRAC_SITE}shows/\""		.((preg_match("/shows/", $title))	?" class=\"active\"":"").">Shows</a></li>";
-	$html[] = "\t\t\t\t<li><a tabindex=\"95\" href=\"{$TDTRAC_SITE}todo/\""			.((preg_match("/todo/", $title))	?" class=\"active\"":"").">ToDo</a></li>";
-	$html[] = ($login[0] && perms_isadmin($login[1])) ? "\t\t\t\t<li><a tabindex=\"96\" href=\"{$TDTRAC_SITE}user/\""			.((preg_match("/perms/", $title))	?" class=\"active\"":"").">Admin</a></li>" : "";
-	$html[] = ($login[0])?"\t\t\t\t<li><a tabindex=\"97\" href=\"{$TDTRAC_SITE}user/logout/\">Logout</a></li>":"";
-	$html[] = "\t\t\t\t<li><a tabindex=\"98\" href=\"\" id=\"helplink\" >Help</a></li>";
+	$html[] = "\t\t\t\t<li><a tabindex=\"90\" href=\"{$TDTRAC_SITE}\"".(($action[0] == "index")?" class=\"active\"":"")." title=\"Main Index\">Home</a></li>";
+	$html[] = ($login[0])?"\t\t\t\t<li><a tabindex=\"91\" href=\"{$TDTRAC_SITE}user/password/\""	.(($action[1] == "password")	?" class=\"active\"":"")." title=\"Change Your Password\">Change Password</a></li>":"";
+	$html[] = "\t\t\t\t<li><a tabindex=\"92\" href=\"{$TDTRAC_SITE}budget/\""		.(($action[0] == "budget")	?" class=\"active\"":"")." title=\"Budget Tracking\">Budget</a></li>";
+	$html[] = "\t\t\t\t<li><a tabindex=\"93\" href=\"{$TDTRAC_SITE}hours/\""		.(($action[0] == "hours")	?" class=\"active\"":"")." title=\"Payroll Tracking\">Payroll</a></li>";
+	$html[] = "\t\t\t\t<li><a tabindex=\"94\" href=\"{$TDTRAC_SITE}shows/\""		.(($action[0] == "shows")	?" class=\"active\"":"")." title=\"Show Managment\">Shows</a></li>";
+	$html[] = "\t\t\t\t<li><a tabindex=\"95\" href=\"{$TDTRAC_SITE}todo/\""			.(($action[0] == "todo")	?" class=\"active\"":"")." title=\"To-Do Lists\">ToDo</a></li>";
+	$html[] = ($login[0] && perms_isadmin($login[1])) ? "\t\t\t\t<li><a tabindex=\"96\" href=\"{$TDTRAC_SITE}user/\""			.(($action[0] == "user" && $action[1] <> "password")	?" class=\"active\"":"")." title=\"User, Group &amp; Permissions Management\">Admin</a></li>" : "";
+	$html[] = ($login[0])?"\t\t\t\t<li><a tabindex=\"97\" href=\"{$TDTRAC_SITE}user/logout/\" title=\"Logout of system\">Logout</a></li>":"";
+	$html[] = "\t\t\t\t<li><a tabindex=\"98\" href=\"\" id=\"helplink\" title=\"Help Popup\" >Help</a></li>";
 	$html[] = "\t\t\t</ul>\n\t\t</div>\n\t\t<div id=\"menubottom\"></div>\n\n\t\t<div id=\"content\">\n\t\t\t<div id=\"normalcontent\">";
 
 	return $html;

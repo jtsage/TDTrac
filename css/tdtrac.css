@@ -182,12 +182,15 @@ ul.datalist li {
 #search input.text {
 	margin-right: 0.5em;
 	vertical-align: middle;
-	border-top: solid 1px #000000;
-	border-right: 0px;
-	border-bottom: solid 1px #777777;
-	border-left: 0px;
+	border: none;
 	padding: 0.15em;
-	width: 10.0em;
+	padding-left: .6em;
+	width: 9.0em;
+	border-radius: 1em;
+	-webkit-border-radius: 1em;
+	-moz-border-radius: 1em;
+	background-color: #000000;
+	background: -webkit-gradient(linear, left top, left bottom, from(#fff), to(#aaa));
 
 }
 
@@ -199,6 +202,9 @@ ul.datalist li {
 	font-size: 0.8em;
 	color: #F2F3DE;
 	vertical-align: middle;
+	border-radius: .5em;
+	-webkit-border-radius: .5em;
+	-moz-border-radius: .5em;
 }
 
 #headerpic {
