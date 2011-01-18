@@ -474,7 +474,7 @@ class tdtable {
 		global $TDTRAC_SITE, $SITE_SCRIPT;
 		$SITE_SCRIPT[] = "var tdelrow{$this->currentrow} = true;";
 		$SITE_SCRIPT[] = "$(function() { $('.tdel-row-{$this->currentrow}').click( function() {";
-		$SITE_SCRIPT[] = "	if ( tdelrow{$this->currentrow} && confirm('Delete Item #{$raw['id']} Done?')) {";
+		$SITE_SCRIPT[] = "	if ( tdelrow{$this->currentrow} && confirm('Delete Item #{$raw['id']}?')) {";
 		$SITE_SCRIPT[] = "		$.getJSON(\"{$TDTRAC_SITE}todo/delete/json:1/id:{$raw['id']}/\", function(data) {";
 		$SITE_SCRIPT[] = "			if ( data.success === true ) { ";
 		$SITE_SCRIPT[] = "				$('.row-{$this->currentrow}').html('<td colspan=\"5\" style=\"background-color: #888; text-align: center\">-=- Removed -=-</td>');";
@@ -496,7 +496,7 @@ class tdtable {
 	 */
 	private function act_tedit($raw) {
 		global $TDTRAC_SITE;
-		return "<a href=\"{$TDTRAC_SITE}todo/edit/id:{$raw['id']}/\"><img class=\"ticon\" src=\"/images/edit.png\" title=\"Edit Budget Item\" alt=\"Edit Item\" /></a>";
+		return "<a href=\"{$TDTRAC_SITE}todo/edit/id:{$raw['id']}/\"><img class=\"ticon\" src=\"/images/edit.png\" title=\"Edit Todo Item\" alt=\"Edit Item\" /></a>";
 	}
 	
 	/**

@@ -36,6 +36,7 @@ function thrower($msg, $loc='') {
 	if ( $msg !== false ) {
 		$_SESSION['infodata'] = $msg;
 	}
+	session_write_close();
 	header("Location: {$TDTRAC_SITE}{$loc}");
 }
 

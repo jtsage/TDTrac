@@ -36,6 +36,9 @@ class tdtrac_todo {
 	/** @var array JSON Data */
 	private $json = array();
 	
+	/** @var array List of priorities */
+	private $priorities = array(array(0, 'Low'), array(1, 'Normal'), array(2, 'High'), array(3, 'Critical'));
+	
 	/** 
 	 * Create a new instance of the TO-DO module
 	 * 
@@ -83,7 +86,7 @@ class tdtrac_todo {
 							if ( !$this->user->can("viewtodo") ) {
 								$this->html = $this->view($this->user->id, 'user');
 							} else {
-								$type = ( isset($this->action['type']) && ( $this->action['type'] == 'overdue' || $this->action['type'] == 'user' ) ) ? $this->action['type'] : "user";
+								$type = ( isset($this->action['type']) && ( $this->action['type'] == 'overdue' || $this->action['type'] == 'show' ) ) ? $this->action['type'] : "user";
 								$id   = ( isset($this->action['id']) && is_numeric($this->action['id']) ) ? intval($this->action['id']) : 1;
 								$this->html = $this->view($id, $type);
 							}
@@ -98,10 +101,10 @@ class tdtrac_todo {
 								thrower('Error :: Data Mismatch Detected', 'todo/');
 							}
 						} else {
-							if ( isset($action['id']) && is_numeric($action['id']) ) {
-								$this->html = $this->edit_form(intval($action['id']));
+							if ( isset($this->action['id']) && is_numeric($this->action['id']) ) {
+								$this->html = $this->edit_form(intval($this->action['id']));
 							} else {
-								thrower('Error :: Data Mismatch Detected', 'todo/');
+								thrower("Error :: Data Mismatch Detected", 'todo/');
 							}
 						}
 					} else {
@@ -198,7 +201,7 @@ class tdtrac_todo {
 		global $TDTRAC_SITE;
 		$form = new tdform("{$TDTRAC_SITE}todo/add/", 'todo-add-form', 1, 'genform', 'Add To-Do Item');
 		$result = $form->addDrop('showid', 'Show', null, db_list(get_sql_const('showid'), array('showid', 'showname')), False);
-		$result = $form->addDrop('prio', 'Priority', null, todo_pri(), False, 1);
+		$result = $form->addDrop('prio', 'Priority', null, $this->priorities, False, 1);
 		$result = $form->addDate('date', 'Due Date');
 		$result = $form->addDrop('assign', 'Assigned To', null, array_merge(array(array('0', '-unassigned-')), db_list(get_sql_const('todo'), array('userid', 'name'))), False);
 		$result = $form->addText('desc', 'Description');
@@ -223,7 +226,7 @@ class tdtrac_todo {
 		
 		$form = new tdform("{$TDTRAC_SITE}todo/edit/{$id}/", 'todo-edit-form', 1, 'genform', 'Edit To-Do Item');
 		$result = $form->addDrop('showid', 'Show', null, db_list(get_sql_const('showid'), array('showid', 'showname')), False, $row['showid']);
-		$result = $form->addDrop('prio', 'Priority', null, todo_pri(), False, $row['priority']);
+		$result = $form->addDrop('prio', 'Priority', null, $this->priorities, False, $row['priority']);
 		$result = $form->addDate('date', 'Due Date', null, $row['duedate']);
 		$result = $form->addDrop('assign', 'Assigned To', null, array_merge(array(array('0', '-unassigned-')), db_list(get_sql_const('todo'), array('userid', 'name'))), False, $row['assigned']);
 		$result = $form->addText('desc', 'Description', null, $row['dscr']);
@@ -298,7 +301,7 @@ class tdtrac_todo {
 			$html = array_merge($html, $form->output('View Show'));
 			$html[] = "<br /><br />\n";
 			$form = new tdform("{$TDTRAC_SITE}todo/view/id:1/type:overdue/", "form3", 30, 'genform3', 'View Overdue Items');
-			$result = $form->addHidden('tododue', '1');
+			$result = $form->addHidden('type', 'overdue');
 			$html = array_merge($html, $form->output('View Overdue'));
 			return $html;
 		}
@@ -321,7 +324,7 @@ class tdtrac_todo {
 				$backlink = "due/";
 			}
 			$result = mysql_query($sql, $db);
-			$priorities = todo_pri();
+			$priorities = $this->priorities;
 			$html[] = "<br /><br />";
 			$tabl = new tdtable("todo", 'datatable', true);
 			$tabl->addHeader(array('Due', 'Priority', 'Assigned To', 'Description'));
@@ -361,17 +364,5 @@ function todo_check() {
 	if ( $ret ) { return $html; } else { return ""; }
 }
 
-/**
- * Populate a list of priorities
- * 
- * @return array List of Priorities
- */
-function todo_pri() {
-	$names = array('Low', 'Normal', 'High', 'Critical');
-	for ($i = 0; $i < count($names); $i++) {
-		$retarr[] = array($i, $names[$i]);
-	}
-	return $retarr;
-}
 
 ?>
