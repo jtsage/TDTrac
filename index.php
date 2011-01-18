@@ -92,27 +92,6 @@ if ( !$user->loggedin ) {
 
 			
 /*
-if ( !$login[0] ) { 
-	if ( $action[0] == "user" ) {
-		switch ($action[1]) {
-			case "login":
-				islogin_dologin();
-				break;
-			case "forgot":
-				if ( $_SERVER['REQUEST_METHOD'] == "POST" ) { email_pwsend(); 
-				} else { makePage(islogin_pwform(), 'Forgotten Password'); }
-				break;
-			case "logout":
-				islogin_logout();
-				break;
-			default:
-				makePage($login[1], 'Login');
-				break;
-		}
-	} else {
-		makePage($login[1], 'Login');
-	}
-
 } else {
 	$user_name = $login[1];
 	switch($action[0]) {
@@ -184,81 +163,7 @@ if ( !$login[0] ) {
 					makePage(display_home($user_name, 2), 'Budgets');
 					break;
 			} break;
-		case "shows":
-			switch ($action[1]) {
-				case "add":
-					if ( perms_checkperm($user_name, 'addshow') ) {
-						if ($_SERVER['REQUEST_METHOD'] == "POST") { show_add_do(); }
-						else { makePage(show_add_form(), 'Add A Show'); }
-					} else { makePage(perms_no(), 'Access Denied'); }
-					break;
-				case "view":
-					if ( perms_checkperm($user_name, 'viewshow') ) {
-						makePage(show_view(), 'View Show');
-					} else { makePage(perms_no(), 'Access Denied'); }
-					break;
-				case "edit":
-					if ( perms_checkperm($user_name, 'editshow') && is_numeric($action[2])) {
-						if ($_SERVER['REQUEST_METHOD'] == "POST") { show_edit_do($_REQUEST['showid']); }
-						else { makePage(show_edit_form(intval($action[2])), 'Edit Show'); }
-					} else { makePage(perms_no(), 'Access Denied'); }
-					break;
-				default:
-					makePage(display_home($user_name, 3), 'Shows');
-					break;
-			} break;
-		case "todo":
-			switch ($action[1]) {
-				case "add":
-					if ( perms_checkperm($user_name, 'addbudget')) {
-						if ( $_SERVER['REQUEST_METHOD'] == "POST" ) { todo_add_do(); }
-						else { makePage(todo_add(), 'Add To-Do Item'); }
-					} else { makePage(perms_no(), 'Access Denied'); }
-					break;
-				case "view":
-					if ( perms_checkperm($user_name, 'viewbudget')) {
-						switch( $action[2] ) {
-							case "user":
-								makePage(todo_view(intval($_REQUEST['todouser']), 'user'), 'User To-Do List');
-								break;
-							case "show":
-								makePage(todo_view(intval($_REQUEST['todoshow']), 'show'), 'Show To-Do List');
-								break;
-							case "due":
-								makePage(todo_view(1, 'overdue'), 'Overdue To-Do Items');
-								break;
-							case "own":
-								makePage(todo_view($user_name), 'Personal To-Do List');
-								break;
-							default:
-								makePage(todo_view(), 'To-Do Lists');
-								break;
-						}
-					} else {
-						makePage(todo_view($user_name), 'Personal To-Do List');
-					}
-					break;
-				case "edit":
-					if ( perms_checkperm($user_name, 'editbudget') && is_numeric($action[2])) {
-						if ($_SERVER['REQUEST_METHOD'] == "POST") { todo_edit_do($_REQUEST['id']); }
-						else { makePage(todo_edit_form(intval($action[2])), 'Edit To-Do Item'); }
-					} else { makePage(perms_no(), 'Access Denied'); }
-					break;
-				case "del":
-					if ( perms_checkperm($user_name, 'editbudget')  && is_numeric($action[2]) ) {
-						if ($_SERVER['REQUEST_METHOD'] == "POST") { todo_del_do($_REQUEST['id']); }
-						else { makePage(todo_del_form(intval($action[2])), 'Delete To-Do Item'); }
-					} else { makePage(perms_no(), 'Access Denied'); }
-					break;
-				case "done":
-					if ( is_numeric($action[2]) ) {
-						todo_mark_do(intval($action[2])); 
-					} else { makePage(perms_no(), 'Access Denied'); }
-					break;
-				default:
-					makePage(display_home($user_name, 5), 'To-Do Lists');
-					break;
-			} break;
+		
 		case "hours":
 			switch ( $action[1] ) {
 				case "add":
