@@ -85,11 +85,11 @@ function makeHeader($title = '') {
 	$html[] = "\t<div id=\"outer\">";
 	$html[] = "\t\t<div id=\"header\">";
 	$html[] = "\t\t\t<div id=\"headercontent\">";
-	$html[] = "\t\t\t\t<h1>TDTrac{$TDTRAC_CPNY}<sup>{$TDTRAC_VERSION}</sup></h1>";
+	$html[] = "\t\t\t\t<h1><span style=\"letter-spacing: -5px\">TDT</span>rac{$TDTRAC_CPNY}<sup>{$TDTRAC_VERSION}</sup></h1>";
 	if ( $user->loggedin ) { 
-		$temp = "\t\t\t\t<h2><strong>Logged In User:</strong> {$user->name} (ID: {$user->id}) <strong>Group: {$user->group}</strong> "; 
+		$temp = "\t\t\t\t<h2 style=\"margin-left: 1.5em\"><strong>Logged In User:</strong> {$user->name} (ID: {$user->id}) <strong>Group: {$user->group}</strong> "; 
 	} else {
-		$temp = "\t\t\t\t<h2>Budget and Payroll Tracking";
+		$temp = "\t\t\t\t<h2 style=\"margin-left: 1.5em\">Budget and Payroll Tracking";
 	}
 	$html[] = "{$temp}</h2>\n\t\t\t</div>\n\t\t</div>";
 

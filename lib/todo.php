@@ -5,7 +5,7 @@
  * Contains the todo list functions
  * Data hardened since 1.3.1
  * @package tdtrac
- * @version 1.4.0
+ * @version 2.0.0
  * @author J.T.Sage <jtsage@gmail.com>
  * @since 1.3.1
  */
@@ -93,10 +93,11 @@ class tdtrac_todo {
 						}
 					} break;
 				case "edit":
+					$this->title .= " :: Edit";
 					if ( $this->user->can("edittodo") ) {
 						if ( $this->post ) {
 							if ( isset($_REQUEST['id']) && is_numeric($_REQUEST['id']) ) {
-								thrower($this->save(true), "todo/edit/".intval($_REQUST['id']));
+								thrower($this->save(true), "todo/edit/id:".intval($_REQUEST['id'])."/");
 							} else {
 								thrower('Error :: Data Mismatch Detected', 'todo/');
 							}
@@ -183,11 +184,12 @@ class tdtrac_todo {
 	 */
 	public function index() {
 		global $TDTRAC_SITE;
-		$html[] = "<h3>ToDo Lists</h3><ul class=\"linklist\">";
+		$html[] = "<ul class=\"linklist\"><li><h3>ToDo Lists</h3><ul class=\"linklist\">";
+		$html[] = "<li>Manage per-user and per-show task lists.</li>";
 		$html[] = ( $this->user->can('addtodo') ) ? "<li><a href=\"{$TDTRAC_SITE}todo/add/\">Add ToDo Item</a></li>" : "";
 		$html[] = ( $this->user->can('viewtodo') ) ? "<li><a href=\"{$TDTRAC_SITE}todo/view/\">View ToDo Items</a></li>" : "";
 		$html[] = "<li><a href=\"{$TDTRAC_SITE}todo/view/id:{$this->user->id}/type:user/\">View Personal ToDo Items</a></li>";
-		$html[] = "</ul>";
+		$html[] = "</ul></li></ul>";
 		return $html;
 	}
 	
@@ -224,7 +226,7 @@ class tdtrac_todo {
 		$result = mysql_query($sql, $db);
 		$row = mysql_fetch_array($result);
 		
-		$form = new tdform("{$TDTRAC_SITE}todo/edit/{$id}/", 'todo-edit-form', 1, 'genform', 'Edit To-Do Item');
+		$form = new tdform("{$TDTRAC_SITE}todo/edit/id:{$id}/", 'todo-edit-form', 1, 'genform', 'Edit To-Do Item');
 		$result = $form->addDrop('showid', 'Show', null, db_list(get_sql_const('showid'), array('showid', 'showname')), False, $row['showid']);
 		$result = $form->addDrop('prio', 'Priority', null, $this->priorities, False, $row['priority']);
 		$result = $form->addDate('date', 'Due Date', null, $row['duedate']);
@@ -344,21 +346,20 @@ class tdtrac_todo {
  * 
  * @global resource Database Link
  * @global string MySQL Table Prefix
- * @global string User Name
+ * @global object User Object
  * @global string Site address for links
  * @return string HTML output
  */
 function todo_check() {
-	GLOBAL $db, $MYSQL_PREFIX, $user_name, $TDTRAC_SITE;
+	GLOBAL $db, $MYSQL_PREFIX, $user, $TDTRAC_SITE;
 	$html = "<div class=\"infobox\"><span style=\"font-size: .7em\">";
-	$userid = perms_getidbyname($user_name);
-	$tosql = "SELECT COUNT(id) as num FROM {$MYSQL_PREFIX}todo WHERE assigned = '{$userid}' AND complete = 0";
+	$tosql = "SELECT COUNT(id) as num FROM {$MYSQL_PREFIX}todo WHERE assigned = '{$user->id}' AND complete = 0";
 	$result1 = mysql_query($tosql, $db);
 	if ( !mysql_error() && mysql_num_rows($result1) > 0 ) {
 		$row1 = mysql_fetch_array($result1);
 		mysql_free_result($result1);
 		$ret = 0;
-		if ( !is_null($row1['num']) && $row1['num'] > 0 ) { $html .= "You Have <strong>{$row1['num']}</strong> Uncompleted Tasks Waiting (<a href=\"{$TDTRAC_SITE}view-todo&onlyuser=1\">[-View-]</a>)<br />"; $ret = 1; }
+		if ( !is_null($row1['num']) && $row1['num'] > 0 ) { $html .= "You Have <strong>{$row1['num']}</strong> Incomplete Tasks Waiting (<a href=\"{$TDTRAC_SITE}todo/view/id:{$user->id}/type:user/\">[-View-]</a>)<br />"; $ret = 1; }
 		$html .= "</span></div>\n";
 	} else { $ret = 0; }
 	if ( $ret ) { return $html; } else { return ""; }

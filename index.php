@@ -64,6 +64,26 @@ if ( !$user->loggedin ) {
 			$todo = new tdtrac_todo($user, $action);
 			$todo->output();
 			break;
+		case "shows":
+			$shows = new tdtrac_shows($user, $action);
+			$shows->output();
+			break;
+		default: 
+			//$html[] = msg_check();
+			//$html[] = rcpt_check();
+			$html[] = todo_check();
+			$html[] = "<br /><br /><div style=\"float: left; min-height: 400px; width: 48%\">";
+			// Budget & Payroll
+			$html[] = "<br /><br /><br /><br /><br /><br /></div><div style=\"width: 48%; float: right;\">";
+			// Shows, Todo & Admin
+			$show = new tdtrac_shows($user, $action);
+			$todo = new tdtrac_todo($user, $action);
+			
+			$html = array_merge($html, $show->index(), $todo->index());
+			
+			$html[] = "</div>";
+			makePage($html, 'TD Tracking Made Easy');
+			break;
 	}
 	
 	//echo "Logged In!";

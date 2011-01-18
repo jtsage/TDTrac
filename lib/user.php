@@ -1,5 +1,15 @@
 <?php
 /**
+ * TDTrac User Functions
+ * 
+ * Functions that pertain to the logged in user
+ * @package tdtrac
+ * @version 2.0.0
+ * @since 2.0.0
+ * @author J.T.Sage <jtsage@gmail.com>
+ */
+ 
+/**
  * TDTrac User Object
  * 
  * Contains all login and user related functions. 
@@ -28,9 +38,13 @@ class tdtrac_user {
 	/** @var bool True if on list of payable employees */
 	public $isemp = false;
 	
+	/**
+	 * Open a new user element
+	 * 
+	 * Checks for login via session info
+	 * @return null
+	 */
 	public function __construct() {
-		GLOBAL $LOGIN_DEBUG, $MYSQL_PREFIX;
-
 		if ( !$this->cookieexist() ) { 
 			$this->loggedin = false;
 		} else {
@@ -43,6 +57,14 @@ class tdtrac_user {
 		}
 	}
 	
+	/**
+	 * Load user detail from database
+	 * 
+	 * @param string User login name
+	 * @global object DB Resource
+	 * @global string MySQL Prefix
+	 * @return null
+	 */
 	private function load($username) {
 		GLOBAL $db, $MYSQL_PREFIX;
 		$sql = sprintf("SELECT limithours, u.userid, CONCAT(first, ' ', last) as name, u.email, groupname, ug.groupid as gid FROM `{$MYSQL_PREFIX}groupnames` gn, `{$MYSQL_PREFIX}usergroups` ug, `{$MYSQL_PREFIX}users` u WHERE username = '%s' AND u.userid = ug.userid AND ug.groupid = gn.groupid",
@@ -152,6 +174,8 @@ class tdtrac_user {
 	
 	/**
 	 * Log a User Out
+	 * 
+	 * @return null
 	 */
 	public function logout() {
 		unset($_SESSION['tdtracuser']);
@@ -166,6 +190,7 @@ class tdtrac_user {
 	 * @global string MySQL Table Prefix
 	 * @global string Site address for links
 	 * @global string Database version string
+	 * @return null
 	 */
 	public function login() {
 		GLOBAL $db, $MYSQL_PREFIX, $TDTRAC_SITE, $TDTRAC_DBVER;
@@ -225,6 +250,7 @@ class tdtrac_user {
 	 * @global resource Database Link
 	 * @global string User Name
 	 * @global string MySQL Table Prefix
+	 * @return null
 	 */
 	public function changepass() {
 		GLOBAL $db, $user_name, $MYSQL_PREFIX;
