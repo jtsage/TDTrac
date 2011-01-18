@@ -10,24 +10,68 @@
 ob_start(); session_start(); 
 
 ## PROGRAM DETAILS. DO NOT EDIT UNLESS YOU KNOW WHAT YOU ARE DOING
-$TDTRAC_VERSION = "1.4.0";
+$TDTRAC_VERSION = "2.0.0";
 $TDTRAC_DBVER = "1.3.1";
-$TDTRAC_PERMS = array("addshow", "editshow", "viewshow", "addbudget", "editbudget", "viewbudget", "addhours", "edithours", "viewhours", "adduser");
+$TDTRAC_PERMS = array("addshow", "editshow", "viewshow", "addbudget", "editbudget", "viewbudget", "addhours", "edithours", "viewhours", "adduser", "edittodo", "viewtodo", "addtodo");
 $SITE_SCRIPT = array('');
 
 require_once("config.php");
 require_once("lib/functions-load.php");
 if ( !file_exists(".htaccess") ) { $TDTRAC_SITE .= "index.php?action="; }
 
-$login = islogin();
+$user = new tdtrac_user();
 
-$action = preg_split("/\//", $_REQUEST['action']);
+$rawaction = preg_split("/\//", $_REQUEST['action']);
 
+if ( !isset($rawaction[0]) || $rawaction[0] == "" ) {
+	$action['module'] = 'index';
+} else { 
+	$action['module'] = $rawaction[0];
+}
+if ( !isset($rawaction[1]) || preg_match("/:/", $rawaction[1]) || $rawaction[1] == "" ) {
+	$action['action'] = 'index';
+} else {
+	$action['action'] = $rawaction[1];
+}
+foreach ( $rawaction as $maybevar ) {
+	if ( preg_match("/:/", $maybevar) ) {
+		$goodvar = preg_split("/:/", $maybevar);
+		$action[$goodvar[0]] = $goodvar[1];
+	}
+}
 
-if ( !isset($action[0]) || $action[0] == "" ) { $action[0] = 'index'; }
-if ( !isset($action[1]) || $action[1] == "" ) { $action[1] = 'index'; }
-if ( !isset($action[2]) || $action[2] == "" ) { $action[2] = 'index'; }
+if ( !$user->loggedin ) {
+	switch( $action['action'] ) {
+		case "login":
+			$user->login();
+			break;
+		case "forgot":
+			if ( $_SERVER['REQUEST_METHOD'] == "POST" ) {
+				email_pwsend();
+			} else {
+				makePage($user->password_form(), 'Forgotten Password');
+			} break;
+		default:
+			makePage($user->login_form(), 'Please Login');
+			break;
+	}
+} else {
+	switch ($action['module']) {
+		case "user":
+			if ( $action['action'] == "logout" ) { $user->logout(); }
+			thrower(false, ''); 
+		case "todo":
+			$todo = new tdtrac_todo($user, $action);
+			$todo->output();
+			break;
+	}
+	
+	//echo "Logged In!";
+	//print_r($action);
+}
 
+			
+/*
 if ( !$login[0] ) { 
 	if ( $action[0] == "user" ) {
 		switch ($action[1]) {
@@ -337,6 +381,6 @@ if ( !$login[0] ) {
 			break;
 	} 
 }
-
+*/
 
 ?>

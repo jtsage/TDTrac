@@ -4,22 +4,25 @@
  * 
  * Loads all other function files.
  * @package tdtrac
- * @version 1.4.0
+ * @version 2.0.0
  * @author J.T.Sage <jtsage@gmail.com>
  */
 require_once("dbaseconfig.php");
 require_once("login.php");
+
 require_once("formlib.php");
 require_once("tablelib.php");
 require_once("htmllib.php");
-require_once("permissions.php");
-require_once("show.php");
-require_once("home.php");
-require_once("budget.php");
-require_once("hours.php");
-require_once("email.php");
-require_once("messaging.php");
-require_once("reciept.php");
+require_once("user.php");
+
+//require_once("permissions.php");
+//require_once("show.php");
+//require_once("home.php");
+//require_once("budget.php");
+//require_once("hours.php");
+//require_once("email.php");
+//require_once("messaging.php");
+//require_once("reciept.php");
 require_once("todo.php");
 
 /**
@@ -30,7 +33,9 @@ require_once("todo.php");
  */
 function thrower($msg, $loc='') {
 	GLOBAL $TDTRAC_SITE;
-	$_SESSION['infodata'] = $msg;
+	if ( $msg !== false ) {
+		$_SESSION['infodata'] = $msg;
+	}
 	header("Location: {$TDTRAC_SITE}{$loc}");
 }
 

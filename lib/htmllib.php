@@ -4,7 +4,7 @@
  * 
  * Contains site header.
  * @package tdtrac
- * @version 1.4.0
+ * @version 2.0.0
  * @since 1.4.0
  * @author J.T.Sage <jtsage@gmail.com>
  */
@@ -27,16 +27,16 @@ function makePage($body = '', $title = '') {
 
 function makeNotice() {
 	if ( isset($_SESSION['infodata']) ) { 
-		$html[] = "\t\t\t\t<div class=\"infobox\"><span style=\"font-size: .7em\">{$_SESSION['infodata']}</span></div>";
+		$html[] = "\t\t\t\t<div id=\"popperdiv\" class=\"infobox\"><span id=\"popper\" style=\"font-size: .7em\">{$_SESSION['infodata']}</span></div>";
 		unset($_SESSION['infodata']);
 		return $html;
 	} else {
-		return array("\t\t\t\t<!--No InfoNotices-->");
+		return array("\t\t\t\t<div id=\"popperdiv\" style=\"display: none\" class=\"infobox\"><span id=\"popper\" style=\"font-size: .7em\"></span></div>");
 	}
 }
 
 function makeHeader($title = '') {
-	GLOBAL $TDTRAC_VERSION, $TDTRAC_CPNY, $TDTRAC_SITE, $login, $SITE_SCRIPT, $action, $helpnode;
+	GLOBAL $TDTRAC_VERSION, $TDTRAC_CPNY, $TDTRAC_SITE, $user, $SITE_SCRIPT, $action, $helpnode;
 
 	$SITE_SCRIPT[] = "$(function() {";
 	$SITE_SCRIPT[] = "\t$( \"#help\" ).dialog({ autoOpen: false, width: 500, modal: true });";
@@ -63,16 +63,16 @@ function makeHeader($title = '') {
 		$html[] = "\t\t{$line}";
 	}
 	$html[] = "\t</script>\n</head>\n\n<body>";
-	if ( $action[0] == 'index' ) {
+	if ( $action['module'] == 'index' ) {
 		$hdivTitle = $helpnode['index']['title'];
 		$hdivData = $helpnode['index']['data'];
 	} else {
-		if ( !isset($helpnode[$action[0]][$action[1]])) {
+		if ( !isset($helpnode[$action['module']][$action['action']])) {
 			$hdivTitle = $helpnode['error']['title'];
 			$hdivData = $helpnode['error']['data'];
 		} else {
-			$hdivTitle = $helpnode[$action[0]][$action[1]]['title'];
-			$hdivData = $helpnode[$action[0]][$action[1]]['data'];
+			$hdivTitle = $helpnode[$action['module']][$action['action']]['title'];
+			$hdivData = $helpnode[$action['module']][$action['action']]['data'];
 		}
 	}
 	$html[] = "\t<div id=\"help\" title=\"{$hdivTitle}\">";
@@ -86,17 +86,15 @@ function makeHeader($title = '') {
 	$html[] = "\t\t<div id=\"header\">";
 	$html[] = "\t\t\t<div id=\"headercontent\">";
 	$html[] = "\t\t\t\t<h1>TDTrac{$TDTRAC_CPNY}<sup>{$TDTRAC_VERSION}</sup></h1>";
-	if ( $login[0] ) { 
-		$temp = "\t\t\t\t<h2><strong>Logged In User:</strong> {$login[1]} (ID: ".perms_getidbyname($login[1]).") <strong>Group:</strong> "; 
-		$groups = perms_getgroups($login[1]);
-		foreach ( $groups as $group ) { $temp .= "{$group} "; }
+	if ( $user->loggedin ) { 
+		$temp = "\t\t\t\t<h2><strong>Logged In User:</strong> {$user->name} (ID: {$user->id}) <strong>Group: {$user->group}</strong> "; 
 	} else {
 		$temp = "\t\t\t\t<h2>Budget and Payroll Tracking";
 	}
 	$html[] = "{$temp}</h2>\n\t\t\t</div>\n\t\t</div>";
 
-	if ( $login[0] ) {
-		if ( perms_checkperm($login[1], 'viewbudget') ) {
+	if ( $user->loggedin ) {
+		if ( $user->can('viewbudget') ) {
 			$html[] = "\t\t\t<form method=\"post\" action=\"{$TDTRAC_SITE}search/\">\n\t\t\t<div id=\"search\">";
 			$html[] = "\t\t\t\t<input tabindex=\"81\" type=\"text\" class=\"text\" maxlength=\"64\" name=\"keywords\" />";
 			$html[] = "\t\t\t\t<input tabindex=\"82\" type=\"submit\" class=\"submit\" value=\"Search\" />\n\t\t\t</div>\t\t\t</form>";
@@ -104,14 +102,14 @@ function makeHeader($title = '') {
 	}
 
 	$html[] = "\t\t<div id=\"headerpic\"></div>\n\t\t<div id=\"menu\">\n\t\t\t<ul>";
-	$html[] = "\t\t\t\t<li><a tabindex=\"90\" href=\"{$TDTRAC_SITE}\"".(($action[0] == "index")?" class=\"active\"":"")." title=\"Main Index\">Home</a></li>";
-	$html[] = ($login[0])?"\t\t\t\t<li><a tabindex=\"91\" href=\"{$TDTRAC_SITE}user/password/\""	.(($action[1] == "password")	?" class=\"active\"":"")." title=\"Change Your Password\">Change Password</a></li>":"";
-	$html[] = "\t\t\t\t<li><a tabindex=\"92\" href=\"{$TDTRAC_SITE}budget/\""		.(($action[0] == "budget")	?" class=\"active\"":"")." title=\"Budget Tracking\">Budget</a></li>";
-	$html[] = "\t\t\t\t<li><a tabindex=\"93\" href=\"{$TDTRAC_SITE}hours/\""		.(($action[0] == "hours")	?" class=\"active\"":"")." title=\"Payroll Tracking\">Payroll</a></li>";
-	$html[] = "\t\t\t\t<li><a tabindex=\"94\" href=\"{$TDTRAC_SITE}shows/\""		.(($action[0] == "shows")	?" class=\"active\"":"")." title=\"Show Managment\">Shows</a></li>";
-	$html[] = "\t\t\t\t<li><a tabindex=\"95\" href=\"{$TDTRAC_SITE}todo/\""			.(($action[0] == "todo")	?" class=\"active\"":"")." title=\"To-Do Lists\">ToDo</a></li>";
-	$html[] = ($login[0] && perms_isadmin($login[1])) ? "\t\t\t\t<li><a tabindex=\"96\" href=\"{$TDTRAC_SITE}user/\""			.(($action[0] == "user" && $action[1] <> "password")	?" class=\"active\"":"")." title=\"User, Group &amp; Permissions Management\">Admin</a></li>" : "";
-	$html[] = ($login[0])?"\t\t\t\t<li><a tabindex=\"97\" href=\"{$TDTRAC_SITE}user/logout/\" title=\"Logout of system\">Logout</a></li>":"";
+	$html[] = "\t\t\t\t<li><a tabindex=\"90\" href=\"{$TDTRAC_SITE}\"".(($action['module'] == "index")?" class=\"active\"":"")." title=\"Main Index\">Home</a></li>";
+	$html[] = ($user->loggedin)?"\t\t\t\t<li><a tabindex=\"91\" href=\"{$TDTRAC_SITE}user/password/\""	.(($action['action'] == "password")	?" class=\"active\"":"")." title=\"Change Your Password\">Change Password</a></li>":"";
+	$html[] = "\t\t\t\t<li><a tabindex=\"92\" href=\"{$TDTRAC_SITE}budget/\""		.(($action['module'] == "budget")	?" class=\"active\"":"")." title=\"Budget Tracking\">Budget</a></li>";
+	$html[] = "\t\t\t\t<li><a tabindex=\"93\" href=\"{$TDTRAC_SITE}hours/\""		.(($action['module'] == "hours")	?" class=\"active\"":"")." title=\"Payroll Tracking\">Payroll</a></li>";
+	$html[] = "\t\t\t\t<li><a tabindex=\"94\" href=\"{$TDTRAC_SITE}shows/\""		.(($action['module'] == "shows")	?" class=\"active\"":"")." title=\"Show Managment\">Shows</a></li>";
+	$html[] = "\t\t\t\t<li><a tabindex=\"95\" href=\"{$TDTRAC_SITE}todo/\""			.(($action['module'] == "todo")	?" class=\"active\"":"")." title=\"To-Do Lists\">ToDo</a></li>";
+	$html[] = ($user->admin) ? "\t\t\t\t<li><a tabindex=\"96\" href=\"{$TDTRAC_SITE}user/\""			.(($action['module'] == "admin")	?" class=\"active\"":"")." title=\"User, Group &amp; Permissions Management\">Admin</a></li>" : "";
+	$html[] = ($user->loggedin)?"\t\t\t\t<li><a tabindex=\"97\" href=\"{$TDTRAC_SITE}user/logout/\" title=\"Logout of system\">Logout</a></li>":"";
 	$html[] = "\t\t\t\t<li><a tabindex=\"98\" href=\"\" id=\"helplink\" title=\"Help Popup\" >Help</a></li>";
 	$html[] = "\t\t\t</ul>\n\t\t</div>\n\t\t<div id=\"menubottom\"></div>\n\n\t\t<div id=\"content\">\n\t\t\t<div id=\"normalcontent\">";
 

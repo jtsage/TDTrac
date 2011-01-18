@@ -177,9 +177,9 @@ class tdform {
 		if ( $title == null ) { $title = $text; }
 
 		$SITE_SCRIPT[] = "\t$(function() {";
-		$SITE_SCRIPT[] = "\t\t$( \"#{$name}\" ).selectmenu();";
+		$SITE_SCRIPT[] = "\t\t$( \"#{$name}-{$this->tabindex}\" ).selectmenu();";
 		$SITE_SCRIPT[] = "\t});";
-		$temp  = "  <div class=\"frmele\" title=\"{$title}\">{$text}: <select name=\"{$name}\" id=\"{$name}\" tabindex=\"{$this->tabindex}\"".(!$enabled ? " disabled=\"disabled\"":"").">";
+		$temp  = "  <div class=\"frmele\" title=\"{$title}\">{$text}: <select name=\"{$name}\" id=\"{$name}-{$this->tabindex}\" tabindex=\"{$this->tabindex}\"".(!$enabled ? " disabled=\"disabled\"":"").">";
 		if ( $preset != null ) {
 			foreach ( $preset as $option ) {
 				if ( is_array($option) ) {

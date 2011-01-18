@@ -271,12 +271,12 @@ class tdtable {
 		if ( $this->actions ) { $thtml .= "<td style=\"text-align: right\">" . $this->do_actions($raw) . "</td>"; }
 		if ( is_null($rowclass) ) {
 			if ( $this->currentrow % 2 == 0 ) {
-				$this->html[] = "   <tr class=\"tdtabevn\">{$thtml}</tr>";
+				$this->html[] = "   <tr class=\"tdtabevn row-{$this->currentrow}\">{$thtml}</tr>";
 			} else {
-				$this->html[] = "   <tr class=\"tdtabodd\">{$thtml}</tr>";
+				$this->html[] = "   <tr class=\"tdtabodd row-{$this->currentrow}\">{$thtml}</tr>";
 			}
 		} else {
-			$this->html[] = "   <tr class=\"{$rowclass}\">{$thtml}</tr>";
+			$this->html[] = "   <tr class=\"{$rowclass} row-{$this->currentrow}\">{$thtml}</tr>";
 		}
 		$this->currentrow++;
 		return true;
@@ -471,9 +471,21 @@ class tdtable {
 	 * @return string Formatted HTML
 	 */
 	private function act_tdel($raw) {
-		global $TDTRAC_SITE;
-		if ( $this->fromlink ) { $extra = "&redir-to={$this->fromlink}"; }
-		return "<a href=\"{$TDTRAC_SITE}todo/del/{$raw['id']}/{$extra}\"><img class=\"ticon\" src=\"/images/delete.png\" title=\"Delete Todo Item\" alt=\"Delete Item\" /></a>";
+		global $TDTRAC_SITE, $SITE_SCRIPT;
+		$SITE_SCRIPT[] = "var tdelrow{$this->currentrow} = true;";
+		$SITE_SCRIPT[] = "$(function() { $('.tdel-row-{$this->currentrow}').click( function() {";
+		$SITE_SCRIPT[] = "	if ( tdelrow{$this->currentrow} && confirm('Delete Item #{$raw['id']} Done?')) {";
+		$SITE_SCRIPT[] = "		$.getJSON(\"{$TDTRAC_SITE}todo/delete/json:1/id:{$raw['id']}/\", function(data) {";
+		$SITE_SCRIPT[] = "			if ( data.success === true ) { ";
+		$SITE_SCRIPT[] = "				$('.row-{$this->currentrow}').html('<td colspan=\"5\" style=\"background-color: #888; text-align: center\">-=- Removed -=-</td>');";
+		$SITE_SCRIPT[] = "				$('#popper').html(\"To-Do Item #{$raw['id']} Deleted\");";
+		$SITE_SCRIPT[] = "			} else { $('#popper').html(\"To-Do Item #{$raw['id']} Delete :: Failed\"); }";
+		$SITE_SCRIPT[] = "			tdelrow{$this->currentrow} = false;";
+		$SITE_SCRIPT[] = "			$('#popperdiv').show('blind');";			
+		$SITE_SCRIPT[] = "	});} return false;";
+		$SITE_SCRIPT[] = "});});";
+
+		return "<a class=\"tdel-row-{$this->currentrow}\" href=\"#\"><img class=\"ticon\" src=\"/images/delete.png\" title=\"Delete Todo Item\" alt=\"Delete Item\" /></a>";
 	}
 	
 	/**
@@ -484,8 +496,7 @@ class tdtable {
 	 */
 	private function act_tedit($raw) {
 		global $TDTRAC_SITE;
-		if ( $this->fromlink ) { $extra = "&redir-to={$this->fromlink}"; }
-		return "<a href=\"{$TDTRAC_SITE}todo/edit/{$raw['id']}/{$extra}\"><img class=\"ticon\" src=\"/images/edit.png\" title=\"Edit Budget Item\" alt=\"Edit Item\" /></a>";
+		return "<a href=\"{$TDTRAC_SITE}todo/edit/id:{$raw['id']}/\"><img class=\"ticon\" src=\"/images/edit.png\" title=\"Edit Budget Item\" alt=\"Edit Item\" /></a>";
 	}
 	
 	/**
@@ -495,9 +506,24 @@ class tdtable {
 	 * @return string Formatted HTML
 	 */
 	private function act_tdone($raw) {
-		global $TDTRAC_SITE;
-		if ( $this->fromlink ) { $extra = "&redir-to={$this->fromlink}"; }
-		if ( ! $raw['complete'] ) { return "<a href=\"{$TDTRAC_SITE}todo/done/{$raw['id']}/{$extra}\"><img class=\"ticon\" src=\"/images/check-no.png\" title=\"Mark Todo Item Done\" alt=\"Mark Item\" /></a>"; }
+		global $TDTRAC_SITE, $SITE_SCRIPT;
+		if ( ! $raw['complete'] ) {
+			$SITE_SCRIPT[] = "var tdonerow{$this->currentrow} = true;";
+			$SITE_SCRIPT[] = "$(function() { $('.tdone-row-{$this->currentrow}').click( function() {";
+			$SITE_SCRIPT[] = "	if ( tdonerow{$this->currentrow} && confirm('Mark Item #{$raw['id']} Done?')) {";
+			$SITE_SCRIPT[] = "		$.getJSON(\"{$TDTRAC_SITE}todo/mark/json:1/id:{$raw['id']}/\", function(data) {";
+			$SITE_SCRIPT[] = "			if ( data.success === true ) { ";
+			$SITE_SCRIPT[] = "				$('.row-{$this->currentrow}').removeClass('tododue').addClass('tododone');";
+			$SITE_SCRIPT[] = "				$('#popper').html(\"To-Do Item #{$raw['id']} Marked Done\");";
+			$SITE_SCRIPT[] = "				$('.tdone-row-{$this->currentrow} > img').attr('title', 'Todo Item Done');";
+			$SITE_SCRIPT[] = "			} else { $('#popper').html(\"To-Do Item #{$raw['id']} Mark :: Failed\"); }";
+			$SITE_SCRIPT[] = "			tdonerow{$this->currentrow} = false;";
+			$SITE_SCRIPT[] = "			$('#popperdiv').show('blind');";			
+			$SITE_SCRIPT[] = "	});} return false;";
+			$SITE_SCRIPT[] = "});});";
+		
+			return "<a class=\"tdone-row-{$this->currentrow}\"href=\"#\"><img class=\"ticon\" src=\"/images/check-no.png\" title=\"Mark Todo Item Done\" alt=\"Mark Item\" /></a>";
+		}
 		else { return "<img class=\"ticon\" src=\"/images/check-yes.png\" title=\"Todo Item Done\" alt=\"Item Done\" />"; }
 	}
 }
