@@ -14,12 +14,12 @@ require_once("formlib.php");
 require_once("tablelib.php");
 require_once("htmllib.php");
 require_once("user.php");
-
 //require_once("permissions.php");
 //require_once("home.php");
-//require_once("budget.php");
 //require_once("email.php");
-//require_once("messaging.php");
+require_once("messaging.php");
+//require_once("admin.php");
+//require_once("budget.php");
 //require_once("reciept.php");
 require_once("show.php");
 require_once("todo.php");

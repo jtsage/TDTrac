@@ -72,8 +72,12 @@ if ( !$user->loggedin ) {
 			$hours = new tdtrac_hours($user, $action);
 			$hours->output();
 			break;
+		case "mail":
+			$mail = new tdtrac_mail($user, $action);
+			$mail->output();
+			break;
 		default: 
-			//$html[] = msg_check();
+			$html[] = mail_check();
 			//$html[] = rcpt_check();
 			$html[] = todo_check();
 			$html[] = "<br /><br /><div style=\"float: left; min-height: 400px; width: 48%\">";

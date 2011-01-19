@@ -472,8 +472,20 @@ class tdtable {
 	 * @return string Formatted HTML
 	 */
 	private function act_mdel($raw) {
-		global $TDTRAC_SITE;
-		return "<a title=\"Delete Message\" href=\"{$TDTRAC_SITE}mail/delete/{$raw['id']}/\"><img class=\"ticon\"  alt=\"Delete\" src=\"/images/delete.png\" /></a>";
+		global $TDTRAC_SITE, $SITE_SCRIPT;
+		$SITE_SCRIPT[] = "var mdelrow{$this->currentrow} = true;";
+		$SITE_SCRIPT[] = "$(function() { $('.mdel-{$this->tablename}-row-{$this->currentrow}').click( function() {";
+		$SITE_SCRIPT[] = "	if ( mdelrow{$this->currentrow} && confirm('Delete Message #{$raw['id']}?')) {";
+		$SITE_SCRIPT[] = "		$.getJSON(\"{$TDTRAC_SITE}mail/delete/json:1/id:{$raw['id']}/\", function(data) {";
+		$SITE_SCRIPT[] = "			if ( data.success === true ) { ";
+		$SITE_SCRIPT[] = "				$('.{$this->tablename}-row-{$this->currentrow}').html('<td colspan=\"4\" style=\"background-color: #888; text-align: center\">-=- Removed -=-</td>');";
+		$SITE_SCRIPT[] = "				$('#popper').html(\"Message #{$raw['id']} Deleted\");";
+		$SITE_SCRIPT[] = "			} else { $('#popper').html(\"Message #{$raw['id']} Delete :: Failed\"); }";
+		$SITE_SCRIPT[] = "			mdelrow{$this->currentrow} = false;";
+		$SITE_SCRIPT[] = "			$('#popperdiv').show('blind');";			
+		$SITE_SCRIPT[] = "	});} return false;";
+		$SITE_SCRIPT[] = "});});";
+		return "<a class=\"mdel-{$this->tablename}-row-{$this->currentrow}\" title=\"Delete Message\" href=\"#\"><img class=\"ticon\"  alt=\"Delete\" src=\"/images/delete.png\" /></a>";
 	}
 	
 	/**
