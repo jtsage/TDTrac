@@ -271,12 +271,12 @@ class tdtable {
 		if ( $this->actions ) { $thtml .= "<td style=\"text-align: right\">" . $this->do_actions($raw) . "</td>"; }
 		if ( is_null($rowclass) ) {
 			if ( $this->currentrow % 2 == 0 ) {
-				$this->html[] = "   <tr class=\"tdtabevn row-{$this->currentrow}\">{$thtml}</tr>";
+				$this->html[] = "   <tr class=\"tdtabevn {$this->tablename}-row-{$this->currentrow}\">{$thtml}</tr>";
 			} else {
-				$this->html[] = "   <tr class=\"tdtabodd row-{$this->currentrow}\">{$thtml}</tr>";
+				$this->html[] = "   <tr class=\"tdtabodd {$this->tablename}-row-{$this->currentrow}\">{$thtml}</tr>";
 			}
 		} else {
-			$this->html[] = "   <tr class=\"{$rowclass} row-{$this->currentrow}\">{$thtml}</tr>";
+			$this->html[] = "   <tr class=\"{$rowclass} {$this->tablename}-row-{$this->currentrow}\">{$thtml}</tr>";
 		}
 		$this->currentrow++;
 		return true;
@@ -439,7 +439,7 @@ class tdtable {
 	 */
 	private function act_pedit($raw) {
 		global $TDTRAC_SITE;
-		return "<a title=\"Edit Payroll Item\" href=\"{$TDTRAC_SITE}hours/edit/{$raw['hid']}/\"><img class=\"ticon\" src=\"/images/edit.png\" alt=\"Edit\" /></a> ";
+		return "<a title=\"Edit Payroll Item\" href=\"{$TDTRAC_SITE}hours/edit/id:{$raw['hid']}/\"><img class=\"ticon\" src=\"/images/edit.png\" alt=\"Edit\" /></a> ";
 	}
 	
 	/**
@@ -449,8 +449,20 @@ class tdtable {
 	 * @return string Formatted HTML
 	 */
 	private function act_pdel($raw) {
-		global $TDTRAC_SITE;
-		return "<a title=\"Delete Payroll Item\" href=\"{$TDTRAC_SITE}hours/del/{$raw['hid']}/\"><img class=\"ticon\" src=\"/images/delete.png\" alt=\"Delete\" /></a>";
+		global $TDTRAC_SITE, $SITE_SCRIPT;
+		$SITE_SCRIPT[] = "var pdelrow{$this->currentrow} = true;";
+		$SITE_SCRIPT[] = "$(function() { $('.pdel-{$this->tablename}-row-{$this->currentrow}').click( function() {";
+		$SITE_SCRIPT[] = "	if ( pdelrow{$this->currentrow} && confirm('Delete Item #{$raw['hid']}?')) {";
+		$SITE_SCRIPT[] = "		$.getJSON(\"{$TDTRAC_SITE}hours/delete/json:1/id:{$raw['hid']}/\", function(data) {";
+		$SITE_SCRIPT[] = "			if ( data.success === true ) { ";
+		$SITE_SCRIPT[] = "				$('.{$this->tablename}-row-{$this->currentrow}').html('<td colspan=\"5\" style=\"background-color: #888; text-align: center\">-=- Removed -=-</td>');";
+		$SITE_SCRIPT[] = "				$('#popper').html(\"Payroll Item #{$raw['hid']} Deleted\");";
+		$SITE_SCRIPT[] = "			} else { $('#popper').html(\"Payroll Item #{$raw['hid']} Delete :: Failed\"); }";
+		$SITE_SCRIPT[] = "			pdelrow{$this->currentrow} = false;";
+		$SITE_SCRIPT[] = "			$('#popperdiv').show('blind');";			
+		$SITE_SCRIPT[] = "	});} return false;";
+		$SITE_SCRIPT[] = "});});";
+		return "<a class=\"pdel-{$this->tablename}-row-{$this->currentrow}\" title=\"Delete Payroll Item\" href=\"#\"><img class=\"ticon\" src=\"/images/delete.png\" alt=\"Delete\" /></a>";
 	}
 	
 	/**
@@ -473,11 +485,11 @@ class tdtable {
 	private function act_tdel($raw) {
 		global $TDTRAC_SITE, $SITE_SCRIPT;
 		$SITE_SCRIPT[] = "var tdelrow{$this->currentrow} = true;";
-		$SITE_SCRIPT[] = "$(function() { $('.tdel-row-{$this->currentrow}').click( function() {";
+		$SITE_SCRIPT[] = "$(function() { $('.tdel-{$this->tablename}-row-{$this->currentrow}').click( function() {";
 		$SITE_SCRIPT[] = "	if ( tdelrow{$this->currentrow} && confirm('Delete Item #{$raw['id']}?')) {";
 		$SITE_SCRIPT[] = "		$.getJSON(\"{$TDTRAC_SITE}todo/delete/json:1/id:{$raw['id']}/\", function(data) {";
 		$SITE_SCRIPT[] = "			if ( data.success === true ) { ";
-		$SITE_SCRIPT[] = "				$('.row-{$this->currentrow}').html('<td colspan=\"5\" style=\"background-color: #888; text-align: center\">-=- Removed -=-</td>');";
+		$SITE_SCRIPT[] = "				$('.{$this->tablename}-row-{$this->currentrow}').html('<td colspan=\"5\" style=\"background-color: #888; text-align: center\">-=- Removed -=-</td>');";
 		$SITE_SCRIPT[] = "				$('#popper').html(\"To-Do Item #{$raw['id']} Deleted\");";
 		$SITE_SCRIPT[] = "			} else { $('#popper').html(\"To-Do Item #{$raw['id']} Delete :: Failed\"); }";
 		$SITE_SCRIPT[] = "			tdelrow{$this->currentrow} = false;";
@@ -485,7 +497,7 @@ class tdtable {
 		$SITE_SCRIPT[] = "	});} return false;";
 		$SITE_SCRIPT[] = "});});";
 
-		return "<a class=\"tdel-row-{$this->currentrow}\" href=\"#\"><img class=\"ticon\" src=\"/images/delete.png\" title=\"Delete Todo Item\" alt=\"Delete Item\" /></a>";
+		return "<a class=\"tdel-{$this->tablename}-row-{$this->currentrow}\" href=\"#\"><img class=\"ticon\" src=\"/images/delete.png\" title=\"Delete Todo Item\" alt=\"Delete Item\" /></a>";
 	}
 	
 	/**
@@ -509,20 +521,20 @@ class tdtable {
 		global $TDTRAC_SITE, $SITE_SCRIPT;
 		if ( ! $raw['complete'] ) {
 			$SITE_SCRIPT[] = "var tdonerow{$this->currentrow} = true;";
-			$SITE_SCRIPT[] = "$(function() { $('.tdone-row-{$this->currentrow}').click( function() {";
+			$SITE_SCRIPT[] = "$(function() { $('.tdone-{$this->tablename}-row-{$this->currentrow}').click( function() {";
 			$SITE_SCRIPT[] = "	if ( tdonerow{$this->currentrow} && confirm('Mark Item #{$raw['id']} Done?')) {";
 			$SITE_SCRIPT[] = "		$.getJSON(\"{$TDTRAC_SITE}todo/mark/json:1/id:{$raw['id']}/\", function(data) {";
 			$SITE_SCRIPT[] = "			if ( data.success === true ) { ";
-			$SITE_SCRIPT[] = "				$('.row-{$this->currentrow}').removeClass('tododue').addClass('tododone');";
+			$SITE_SCRIPT[] = "				$('.{$this->tablename}-row-{$this->currentrow}').removeClass('tododue').addClass('tododone');";
 			$SITE_SCRIPT[] = "				$('#popper').html(\"To-Do Item #{$raw['id']} Marked Done\");";
-			$SITE_SCRIPT[] = "				$('.tdone-row-{$this->currentrow} > img').attr('title', 'Todo Item Done');";
+			$SITE_SCRIPT[] = "				$('.tdone-{$this->tablename}-row-{$this->currentrow} > img').attr('title', 'Todo Item Done');";
 			$SITE_SCRIPT[] = "			} else { $('#popper').html(\"To-Do Item #{$raw['id']} Mark :: Failed\"); }";
 			$SITE_SCRIPT[] = "			tdonerow{$this->currentrow} = false;";
 			$SITE_SCRIPT[] = "			$('#popperdiv').show('blind');";			
 			$SITE_SCRIPT[] = "	});} return false;";
 			$SITE_SCRIPT[] = "});});";
 		
-			return "<a class=\"tdone-row-{$this->currentrow}\"href=\"#\"><img class=\"ticon\" src=\"/images/check-no.png\" title=\"Mark Todo Item Done\" alt=\"Mark Item\" /></a>";
+			return "<a class=\"tdone-{$this->tablename}-row-{$this->currentrow}\"href=\"#\"><img class=\"ticon\" src=\"/images/check-no.png\" title=\"Mark Todo Item Done\" alt=\"Mark Item\" /></a>";
 		}
 		else { return "<img class=\"ticon\" src=\"/images/check-yes.png\" title=\"Todo Item Done\" alt=\"Item Done\" />"; }
 	}

@@ -68,12 +68,19 @@ if ( !$user->loggedin ) {
 			$shows = new tdtrac_shows($user, $action);
 			$shows->output();
 			break;
+		case "hours":
+			$hours = new tdtrac_hours($user, $action);
+			$hours->output();
+			break;
 		default: 
 			//$html[] = msg_check();
 			//$html[] = rcpt_check();
 			$html[] = todo_check();
 			$html[] = "<br /><br /><div style=\"float: left; min-height: 400px; width: 48%\">";
 			// Budget & Payroll
+			$hour = new tdtrac_hours($user, $action);
+			$html = array_merge($html, $hour->index());
+			
 			$html[] = "<br /><br /><br /><br /><br /><br /></div><div style=\"width: 48%; float: right;\">";
 			// Shows, Todo & Admin
 			$show = new tdtrac_shows($user, $action);

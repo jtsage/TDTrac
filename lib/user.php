@@ -275,10 +275,10 @@ class tdtrac_user {
 	 */
 	public function get_name($userid) {
 	        GLOBAL $db, $MYSQL_PREFIX;
-	        $sql = "SELECT first FROM `{$MYSQL_PREFIX}users` WHERE userid = ".intval($userid);
+	        $sql = "SELECT CONCAT(first, ' ', last) as name FROM `{$MYSQL_PREFIX}users` WHERE userid = ".intval($userid);
 	        $result = mysql_query($sql, $db);
 	        $row = mysql_fetch_array($result);
-	        return $row['first'];
+	        return $row['name'];
 	}
 }
 

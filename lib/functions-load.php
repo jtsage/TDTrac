@@ -18,12 +18,12 @@ require_once("user.php");
 //require_once("permissions.php");
 //require_once("home.php");
 //require_once("budget.php");
-//require_once("hours.php");
 //require_once("email.php");
 //require_once("messaging.php");
 //require_once("reciept.php");
 require_once("show.php");
 require_once("todo.php");
+require_once("hours.php");
 
 /**
  * Throw a message to the user
@@ -73,14 +73,14 @@ function db_list($sql, $columns) {
  * @return string Query string or FALSE
  */
 function get_sql_const($name, $extra = null) {
-	GLOBAL $MYSQL_PREFIX, $user_name;
+	GLOBAL $MYSQL_PREFIX, $user;
 	if ( $name == "showid" ) { return "SELECT showname, showid FROM {$MYSQL_PREFIX}shows WHERE closed = 0 ORDER BY created DESC;"; }
 	if ( $name == "showidall" ) { return "SELECT showname, showid FROM {$MYSQL_PREFIX}shows WHERE 1 ORDER BY created DESC;"; }
 	if ( $name == "vendor" ) { return "SELECT vendor FROM `{$MYSQL_PREFIX}budget` GROUP BY vendor ORDER BY COUNT(vendor) DESC, vendor ASC"; }
 	if ( $name == "category" ) { return "SELECT category FROM `{$MYSQL_PREFIX}budget` GROUP BY category ORDER BY COUNT(category) DESC, category ASC"; }
 	if ( $name == "emps" ) {
 		$sql  = "SELECT u.userid, CONCAT(first, ' ', last) as name FROM {$MYSQL_PREFIX}users u, {$MYSQL_PREFIX}usergroups ug WHERE";
-		$sql .= perms_isemp($user_name) ? " username = '{$user_name}' AND" : "";
+		$sql .= $user->isemp ? " username = '{$user->username}' AND" : "";
 		$sql .= " active = 1 AND payroll = 1 AND ug.userid = u.userid ORDER BY last ASC";
 		return $sql; }
 	if ( $name == "todo" ) { return "SELECT u.userid, CONCAT(first, ' ', last) as name FROM {$MYSQL_PREFIX}users u WHERE active = 1 ORDER BY last ASC"; }
