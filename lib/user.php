@@ -180,7 +180,6 @@ class tdtrac_user {
 	public function logout() {
 		unset($_SESSION['tdtracuser']);
 		unset($_SESSION['tdtracpass']);
-		thrower("User Logged Out");
 	}
 	
 	/**
@@ -238,7 +237,7 @@ class tdtrac_user {
 	 */
 	public function changepass_form() {
 		GLOBAL $TDTRAC_SITE;
-		$form = new tdform("{$TDTRAC_SITE}/user/password/", 'genform', 1, 'genform', 'Change Password');
+		$form = new tdform("{$TDTRAC_SITE}user/password/", 'genform', 1, 'genform', 'Change Password');
 		$result = $form->addPass('newpass1', "New Password");
 		$result = $form->addPass('newpass2', "Verify Password");
 		return $form->output('Change Password');
@@ -253,20 +252,22 @@ class tdtrac_user {
 	 * @return null
 	 */
 	public function changepass() {
-		GLOBAL $db, $user_name, $MYSQL_PREFIX;
+		GLOBAL $db, $MYSQL_PREFIX;
 		if ( $_REQUEST['newpass1'] == $_REQUEST['newpass2'] ) {
 			if ( strlen($_REQUEST['newpass1']) < 4 ) { thrower("Password must be at least 5 characters"); }
 			if ( strlen($_REQUEST['newpass1']) > 15 ) { thrower("Password may not exceed 15 characters"); }
-			$sql = sprintf("UPDATE `{$MYSQL_PREFIX}users` SET `chpass` = 0 , `password` = '%d' WHERE `username` = '{$user_name}' LIMIT 1",
-				mysql_real_escape_string($_REQUEST['newpass1'])
+			$sql = sprintf("UPDATE `{$MYSQL_PREFIX}users` SET `chpass` = 0 , `password` = '%s' WHERE `userid` = %d LIMIT 1",
+				mysql_real_escape_string($_REQUEST['newpass1']),
+				$this->id
 			);
 			$result = mysql_query($sql, $db);
-			thrower("Password Changed - Please Re-Login");
+			if ( $result ) { thrower("Password Changed - Please Re-Login"); }
+			else { thrower("Password Change Failed"); }
 		} else { thrower("Password Mismatch - Not Changed"); }
 	}
 	
 	/**
-	 * Return a first name from a userid
+	 * Return a full name from a userid
 	 * 
 	 * @global resource Database Link
 	 * @global string MySQL Table Prefix
@@ -280,6 +281,54 @@ class tdtrac_user {
 	        $row = mysql_fetch_array($result);
 	        return $row['name'];
 	}
+	
+	/**
+	 * Return a group name from a groupid
+	 * 
+	 * @global resource Database Link
+	 * @global string MySQL Table Prefix
+	 * @param integer User ID
+	 * @return string User First Name
+	 */
+	public function get_group($gid) {
+	        GLOBAL $db, $MYSQL_PREFIX;
+	        $sql = "SELECT groupname as name FROM `{$MYSQL_PREFIX}groupnames` WHERE groupid = ".intval($gid);
+	        $result = mysql_query($sql, $db);
+	        $row = mysql_fetch_array($result);
+	        return $row['name'];
+	}
 }
 
+
+
+/**
+ * Send password reminder via email
+ * 
+ * @global resource Database connection
+ * @global string MySQL Table Prefix
+ */
+function email_pwsend() {
+	GLOBAL $db, $MYSQL_PREFIX;
+	if ( !($_REQUEST["tracemail"]) || $_REQUEST["tracemail"] == "" ) { 
+		thrower("E-Mail Address Invalid");
+	} else {
+		$sql = "SELECT username, password FROM {$MYSQL_PREFIX}users WHERE email = '".mysql_real_escape_string($_REQUEST["tracemail"])."'";
+		$result = mysql_query($sql, $db);
+		if ( mysql_num_rows($result) == 0 ) { thrower("E-Mail Address Invalid"); }
+		else {
+			$body = "TDTrac Password Reminder:<br /><br />\n";
+			while ( $row = mysql_fetch_array($result) ) {
+				$body .= "Username: {$row['username']}<br />\n";
+				$body .= "Password: {$row['password']}<br /><br />\n";
+			}
+			$body .= "Note: For security pusposes, you should change this password when you first log in!<br />\n";
+			$subject = "TDTrac Password Reminder";
+			$headers  = 'MIME-Version: 1.0' . "\r\n";
+			$headers .= 'Content-type: text/html; charset=iso-8859-1' . "\r\n";
+			$sendto = $_REQUEST['tracemail'];
+			mail($sendto, $subject, $body, $headers);
+		}
+	}
+	thrower("Password Reminder Sent!");
+}
 ?>

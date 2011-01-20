@@ -344,6 +344,9 @@ class tdtable {
 				case "tdel":
 					$rethtml .= $this->act_tdel($raw);
 					break;
+				case "pmedit":
+					$rethtml .= $this->act_pmedit($raw);
+					break;
 			}
 		}
 		return $rethtml;
@@ -511,6 +514,18 @@ class tdtable {
 
 		return "<a class=\"tdel-{$this->tablename}-row-{$this->currentrow}\" href=\"#\"><img class=\"ticon\" src=\"/images/delete.png\" title=\"Delete Todo Item\" alt=\"Delete Item\" /></a>";
 	}
+	
+	/**
+	 * Action: Perms edit item button
+	 * 
+	 * @param array Raw SQL Array
+	 * @return string Formatted HTML
+	 */
+	private function act_pmedit($raw) {
+		global $TDTRAC_SITE;
+		return "<a href=\"{$TDTRAC_SITE}admin/permsedit/id:{$raw['id']}/\"><img class=\"ticon\" src=\"/images/edit.png\" title=\"Edit {$raw['name']}'s Permissions\" alt=\"Edit Item\" /></a>";
+	}
+	
 	
 	/**
 	 * Action: Todo edit item button

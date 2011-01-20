@@ -108,7 +108,7 @@ function makeHeader($title = '') {
 	$html[] = "\t\t\t\t<li><a tabindex=\"93\" href=\"{$TDTRAC_SITE}hours/\""		.(($action['module'] == "hours")	?" class=\"active\"":"")." title=\"Payroll Tracking\">Payroll</a></li>";
 	$html[] = "\t\t\t\t<li><a tabindex=\"94\" href=\"{$TDTRAC_SITE}shows/\""		.(($action['module'] == "shows")	?" class=\"active\"":"")." title=\"Show Managment\">Shows</a></li>";
 	$html[] = "\t\t\t\t<li><a tabindex=\"95\" href=\"{$TDTRAC_SITE}todo/\""			.(($action['module'] == "todo")	?" class=\"active\"":"")." title=\"To-Do Lists\">ToDo</a></li>";
-	$html[] = ($user->admin) ? "\t\t\t\t<li><a tabindex=\"96\" href=\"{$TDTRAC_SITE}user/\""			.(($action['module'] == "admin")	?" class=\"active\"":"")." title=\"User, Group &amp; Permissions Management\">Admin</a></li>" : "";
+	$html[] = ($user->admin) ? "\t\t\t\t<li><a tabindex=\"96\" href=\"{$TDTRAC_SITE}admin/\""			.(($action['module'] == "admin")	?" class=\"active\"":"")." title=\"User, Group &amp; Permissions Management\">Admin</a></li>" : "";
 	$html[] = ($user->loggedin)?"\t\t\t\t<li><a tabindex=\"97\" href=\"{$TDTRAC_SITE}user/logout/\" title=\"Logout of system\">Logout</a></li>":"";
 	$html[] = "\t\t\t\t<li><a tabindex=\"98\" href=\"\" id=\"helplink\" title=\"Help Popup\" >Help</a></li>";
 	$html[] = "\t\t\t</ul>\n\t\t</div>\n\t\t<div id=\"menubottom\"></div>\n\n\t\t<div id=\"content\">\n\t\t\t<div id=\"normalcontent\">";

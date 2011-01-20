@@ -406,4 +406,73 @@ function budget_view($showid, $onlytype=0) {
 	return array_merge($html, $tabl->output(false));
 }
 
+
+/**
+ * Send budget via email
+ * 
+ * @param integer Show ID for budget
+ * @global resource Database connection
+ * @global string User Name
+ * @global string MySQL Table Prefix
+ */
+function email_budget($showid) {
+	GLOBAL $db, $user_name, $MYSQL_PREFIX;
+	$sql1 = "SELECT email FROM {$MYSQL_PREFIX}users WHERE username = '{$user_name}'";
+	$resul1 = mysql_query($sql1, $db);
+	$row1 = mysql_fetch_array($resul1);
+	$sendto = $row1['email'];
+	mysql_free_result($resul1);
+	$sql = "SELECT * FROM {$MYSQL_PREFIX}shows WHERE showid = {$showid}";
+	$result = mysql_query($sql, $db); 
+	$body = "";
+	$row = mysql_fetch_array($result);
+	$body .= "<h2>{$row['showname']}</h2><p><ul>\n";
+	$body .= "<li><strong>Company</strong>: {$row['company']}</li>\n";
+	$body .= "<li><strong>Venue</strong>: {$row['venue']}</li>\n";
+	$body .= "<li><strong>Dates</strong>: {$row['dates']}</li>\n";
+	$body .= "</ul></p>\n";
+
+	$subject = "TDTrac Budget: {$row['showname']}";
+	$headers  = 'MIME-Version: 1.0' . "\r\n";
+	$headers .= 'Content-type: text/html; charset=iso-8859-1' . "\r\n";
+
+	$body .= "<h2>Materials Expenses</h2><pre>\n";
+	$body .= "Date\t\tPrice\tPending\tReimburse\tVendor\tDescription\n";
+	$sql = "SELECT * FROM {$MYSQL_PREFIX}budget WHERE showid = {$showid} ORDER BY category ASC, date ASC, vendor ASC";
+	$result = mysql_query($sql, $db); $intr = 0; $tot = 0; $last = "";
+	while ( $row = mysql_fetch_array($result) ) {
+		if ( $last != "" && $last != $row['category'] ) { 
+			$body .= "-=- {$last} SUB-TOTAL -=-\t" . number_format($subtot, 2) . "\n"; $subtot = 0; }
+		$intr++;
+		$body .= "{$row['date']}\t".number_format($row['price'], 2)."\t";
+		$body .= (($row['pending'] == 1) ? "YES" : "NO") . "\t";
+		$body .= (($row['needrepay'] == 1) ? (($row['didrepay'] == 1) ? "PAID" : "UNPAID") : "N/A") . "\t";
+		$body .= "{$row['vendor']}\t{$row['category']}\t{$row['dscr']}\n";
+		$tot += $row['price']; $subtot += $row['price'];
+		$last = $row['category'];
+	}
+	$body .= "-=- {$last} SUB-TOTAL -=-\t" . number_format($subtot, 2) . "\n";
+	$body .= "-=- TOTAL -=-\t" . number_format($tot, 2) . "\n";
+	$body .= "</pre>\n";
+
+	$result = mail($sendto, $subject, $body, $headers);
+	if ( $result ) {
+		thrower("E-Mail Sent");
+	} else {
+		thrower("E-Mail Send Failed");
+	}
+}
+
+/*
+ * if ( $type == 0 || $type == 2 ) {
+		$html[] = "<h3>Budget Tracking</h3><ul class=\"linklist\">";
+		$html[] = ( perms_checkperm($username, 'addbudget') ) ? "<li><a href=\"{$TDTRAC_SITE}budget/add/\">Add Budget Expense</a></li>" : "";
+		$html[] = ( perms_checkperm($username, 'viewbudget') ) ? "<li><a href=\"{$TDTRAC_SITE}budget/view/\">View Budgets</a></li>" : "";
+		$html[] = ( perms_checkperm($username, 'viewbudget') ) ? "<li><a href=\"{$TDTRAC_SITE}budget/view/1/\">View Budgets (payment pending items only, all shows)</a></li>" : "";
+		$html[] = ( perms_checkperm($username, 'viewbudget') ) ? "<li><a href=\"{$TDTRAC_SITE}budget/view/2/\">View Budgets (reimbursment items only, all shows)</a></li>" : "";
+		$html[] = ( perms_checkperm($username, 'viewbudget') ) ? "<li><a href=\"{$TDTRAC_SITE}budget/view/3\">View Budgets (reimbursment recieved items only, all shows)</a></li>" : "";
+		$html[] = ( perms_checkperm($username, 'viewbudget') ) ? "<li><a href=\"{$TDTRAC_SITE}budget/view/4/\">View Budgets (reimbursment not recieved items only, all shows)</a></li>" : "";
+		$html[] = "</ul>\n";
+	} */
+
 ?>

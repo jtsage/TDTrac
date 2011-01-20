@@ -224,7 +224,7 @@ class tdtrac_shows {
 	}
 	
 	/** 
-	 * Show available ToDo Functions
+	 * Show available Show Functions
 	 * 
 	 * @global string TDTrac Root Link HREF
 	 * @return array Formatted HTML

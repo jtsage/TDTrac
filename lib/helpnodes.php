@@ -4,7 +4,7 @@
  * 
  * Contains help node raw data.
  * @package tdtrac
- * @version 1.4.0
+ * @version 2.0.0
  * @author J.T.Sage <jtsage@gmail.com>
  */
 $helpnode['error']['title'] = "Error";
@@ -49,16 +49,16 @@ $helpnode['todo']['index']['data'][] =	"<dt>Add ToDo Item</dt><dd>Add a new todo
 	"<dt>View Personal ToDo Items</dt><dd>View all todo items assigned to your user.</dd>";
 
 
-$helpnode['user']['index']['title'] = "User Managment";
-$helpnode['user']['index']['data'][] = "<dl><dt>Add User</dt><dd>Add a user to the system</dd>" .
+$helpnode['admin']['index']['title'] = "Administrative Tasks";
+$helpnode['admin']['index']['data'][] = "<dl><dt>Add User</dt><dd>Add a user to the system</dd>" .
 	"<dt>View Users</dt><dd>View and edit system users</dd>" .
 	"<dt>Edit Permissions</dt><dd>Edit group based permissions</dd>" .
 	"<dt>View Permissions</dt><dd>View current group based permissions</dd>" .
 	"<dt>Set TDTracMail Subject Code</dt><dd>Set TDTracMail pickup subject code (passphrase)</dd>" .
 	"<dt>Add / Edit Groups</dt><dd>Add, Edit, or rename groups (warning: this is slightly unsupported right now)</dd></dl>";
 	
-$helpnode['user']['mail']['title'] = "TDTracMail Subject Code";
-$helpnode['user']['mail']['data'][] = "This contains the easy interface to update the subject line code, and the to: address for the tdtracmail addon, a simple way to add reciepts to your tracking.  Simply send email to [the address you choose]@[your hostname] (please ask your administrator which host to use), and include the code in the subject line.  All reciepts are automaticly resized, and will await addition to the database by any user with the 'addbudget' permission.";
+$helpnode['admin']['mail']['title'] = "TDTracMail Subject Code";
+$helpnode['admin']['mail']['data'][] = "This contains the easy interface to update the subject line code, and the to: address for the tdtracmail addon, a simple way to add reciepts to your tracking.  Simply send email to [the address you choose]@[your hostname] (please ask your administrator which host to use), and include the code in the subject line.  All reciepts are automaticly resized, and will await addition to the database by any user with the 'addbudget' permission.";
 
 $helpnode['mail']['index']['title'] = "Inbox View";
 $helpnode['mail']['index']['data'][] = "The Inbox view shows any system messages that have been sent to you.";
@@ -107,9 +107,9 @@ $helpnode['shows']['view']['title'] = "View Shows";
 $helpnode['shows']['view']['data'][] = "Displays all shows or job names, past or present, in the reverse order of which they were added.  This is always the sort order for shows.";
 $helpnode['shows']['view']['data'][] = "<dl><dt>Edit Link</dt><dd>Allows editing the show name, venue, company, and dates.</dd></dl>";
 
-$helpnode['user']['edit']['title'] = "Edit User Form";
-$helpnode['user']['edit']['data'][] = "Allows editing of a user to the system.";
-$helpnode['user']['edit']['data'][] = "<dl><dt>User Name</dt><dd>The username, or login name for the user.</dd>" .
+$helpnode['admin']['useredit']['title'] = "Edit User Form";
+$helpnode['admin']['useredit']['data'][] = "Allows editing of a user to the system.";
+$helpnode['admin']['useredit']['data'][] = "<dl><dt>User Name</dt><dd>The username, or login name for the user.</dd>" .
 	"<dt>Password</dt><dd>An initial password for the user.  Users are encouraged to change their password on first successful login.</dd>" .
 	"<dt>Payrate</dt><dd>The user's pay rate, by day or by hour dependant on install configuration.</dd>" .
 	"<dt>First Name</dt><dd>The user's first name.</dd>" .
@@ -122,19 +122,19 @@ $helpnode['user']['edit']['data'][] = "<dl><dt>User Name</dt><dd>The username, o
 	"<dt>User on Payroll</dt><dd>The user's payroll status. Active payroll users appear in the add payroll hours picklist.</dd>" .
 	"<dt>Admin Notify on Employee Add of Payroll</dt><dd>When toggeled on, a user in the employee group adding hours will trigger a message sent to this user to let them know of the action.  Particularly useful for admins, shop or shift managers, etc.</dd></dl>";
 
-$helpnode['user']['add']['title'] = "Add User Form";
-$helpnode['user']['add']['data'][] = "Allows adding a user to the system";
-$helpnode['user']['add']['data'][] = $helpnode['user']['edit']['data'][1];
+$helpnode['admin']['useradd']['title'] = "Add User Form";
+$helpnode['admin']['useradd']['data'][] = "Allows adding a user to the system";
+$helpnode['admin']['useradd']['data'][] = $helpnode['admin']['useredit']['data'][1];
 
-$helpnode['user']['view']['title'] = "View Users";
-$helpnode['user']['view']['data'][] = "Displays all system users, sorted by last name";
-$helpnode['user']['view']['data'][] = $helpnode['user']['edit']['data'][1];
-$helpnode['user']['view']['data'][] = "The edit link allows administrators to edit each user";
+$helpnode['admin']['users']['title'] = "View Users";
+$helpnode['admin']['users']['data'][] = "Displays all system users, sorted by last name";
+$helpnode['admin']['users']['data'][] = $helpnode['admin']['useredit']['data'][1];
+$helpnode['admin']['users']['data'][] = "The edit link allows administrators to edit each user";
 
-$helpnode['user']['perms']['title'] = "Permissions System";
-$helpnode['user']['perms']['data'][] = "Allows editing and view of the permissions system. Permissions are group based throughout the site.  Only members of the 'admin' group may edit permissions.";
-$helpnode['user']['perms']['data'][] = "<strong>Description of permissions</strong>";
-$helpnode['user']['perms']['data'][] = "<dl><dt>addshow</dt><dd>Can Add New Shows / Jobs</dd>" .
+$helpnode['admin']['perms']['title'] = "Permissions System";
+$helpnode['admin']['perms']['data'][] = "Allows editing and view of the permissions system. Permissions are group based throughout the site.  Only members of the 'admin' group may edit permissions.";
+$helpnode['admin']['perms']['data'][] = "<strong>Description of permissions</strong>";
+$helpnode['admin']['perms']['data'][] = "<dl><dt>addshow</dt><dd>Can Add New Shows / Jobs</dd>" .
 	"<dt>viewshow</dt><dd>Can View Current and Past Shows / Jobs</dd>" .
 	"<dt>editshow</dt><dd>Can Edit Shows / Jobs information</dd>" .
 	"<dt>addbudget</dt><dd>Can Add Expenses</dd>" .
@@ -143,13 +143,17 @@ $helpnode['user']['perms']['data'][] = "<dl><dt>addshow</dt><dd>Can Add New Show
 	"<dt>addhours</dt><dd>Can Add Hours for employees on payroll<ul><li><strong>NOTE:</strong> they can only add hours for themselves if set in user record</li></ul></dd>" .
 	"<dt>edithours</dt><dd>Can Edit or Delete Hours for employees on payroll<ul><li><strong>NOTE:</strong> they can only edit thier own hours if set in user record</li></ul></dd>" .
 	"<dt>viewhours</dt><dd>Can View Labor reports<ul><li><strong>NOTE:</strong> they can only view thier own hours if set in user record</li></dd>" .
-	"<dt>adduser</dt><dd>Can Add New Users / Employees to the program</dd></dl>";
+	"<dt>addtodo</dt><dd>Can Add ToDo List Items</dd>".
+	"<dt>edittodo</dt><dd>Can Edit ToDo List Items</dd>".
+	"<dt>viewtodo</dt><dd>Can View Todo Lists other than their personal list</dd></dl>";
+	
+$helpnode['admin']['permsedit'] = $helpnode['admin']['perms'];
 
-$helpnode['user']['groups']['title'] = "Groups on TDTrac";
-$helpnode['user']['groups']['data'][] = "This page allows the renaming of groups and addition of new groups.  Groups are nothing more than permission sets.  You may have as many groups as you like, and as of version 1.2.1, groups names are largely meaningless, they have no intrinsic permissions.  You cannot rename the admin group, as it is a system group.";
+$helpnode['admin']['groups']['title'] = "Groups on TDTrac";
+$helpnode['admin']['groups']['data'][] = "This page allows the renaming of groups and addition of new groups.  Groups are nothing more than permission sets.  You may have as many groups as you like, and as of version 1.2.1, groups names are largely meaningless, they have no intrinsic permissions.  You cannot rename the admin group, as it is a system group.";
 
-$helpnode['user']['password']['title'] = "Password Reminder";
-$helpnode['user']['password']['data'][] = "This will send the login details associated with the entered e-mail address to that e-mail.  If you do not recieve an e-mail, or can't remember your e-mail, please contact your administrator.  If you are the administrator, and this installation is hosted on tdtrac.com, please contact the management via the homepage.";
+$helpnode['user']['forgot']['title'] = "Password Reminder";
+$helpnode['user']['forgot']['data'][] = "This will send the login details associated with the entered e-mail address to that e-mail.  If you do not recieve an e-mail, or can't remember your e-mail, please contact your administrator.  If you are the administrator, and this installation is hosted on tdtrac.com, please contact the management via the homepage.";
 
 $helpnode['rcpt']['index']['title'] = "Reciept Managment";
 $helpnode['rcpt']['index']['data'][] = "This page allows management of e-mailed reciepts.  You may add a new record of the reciept, or associate it with an old menu item.  See the help under the Add Budget Item for a description of all the fields here";
@@ -185,6 +189,10 @@ $helpnode['todo']['add']['data'][] = "<dl><dt>Show</dt><dd>Show to associate ite
 	"<dt>Due Date</dt><dd>The date the task should be completed before it's considered overdue</dd>" .
 	"<dt>Assigned To</dt><dd>The user that should complete the task</dd>" .
 	"<dt>Description</dt><dd>A Description of the required task</dd>";
+
+$helpnode['todo']['edit']['title'] = "Edit To-Do Item";
+$helpnode['todo']['edit']['data'][] = "Allows you to edit a to-do item";
+$helpnode['todo']['edit']['data'][] = $helpnode['todo']['add']['data'][1];
 
 $helpnode['todo']['view']['title'] = "To-Do List View";
 $helpnode['todo']['view']['data'][] = "Allows you to view todo lists; either by show, assigned user, or those items that are overdue.";

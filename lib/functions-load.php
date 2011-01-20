@@ -8,7 +8,6 @@
  * @author J.T.Sage <jtsage@gmail.com>
  */
 require_once("dbaseconfig.php");
-require_once("login.php");
 
 require_once("formlib.php");
 require_once("tablelib.php");
@@ -18,7 +17,7 @@ require_once("user.php");
 //require_once("home.php");
 //require_once("email.php");
 require_once("messaging.php");
-//require_once("admin.php");
+require_once("admin.php");
 //require_once("budget.php");
 //require_once("reciept.php");
 require_once("show.php");
