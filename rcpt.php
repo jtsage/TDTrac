@@ -4,7 +4,7 @@
  * 
  * Contains main program logic.
  * @package tdtrac
- * @version 1.3.1
+ * @version 2.0.0
  * @author J.T.Sage <jtsage@gmail.com>
  */
 ob_start(); session_start();
@@ -12,9 +12,9 @@ ob_start(); session_start();
 require_once("config.php");
 require_once("lib/functions-load.php");
 
-$login = islogin();
+$user = new tdtrac_user();
 
-if ( !$login[0] ) { // Not Logged In
+if ( !$user->loggedin ) { // Not Logged In
 	$quickdrop = fopen("./images/rcpt-403.jpg", 'rb');
 	ob_end_clean();
 	header("Content-Type: image/jpeg");

@@ -41,7 +41,7 @@ function makeHeader($title = '') {
 	$SITE_SCRIPT[] = "$(function() {";
 	$SITE_SCRIPT[] = "\t$( \"#help\" ).dialog({ autoOpen: false, width: 500, modal: true });";
 	$SITE_SCRIPT[] = "});";
-	$SITE_SCRIPT[] = "$(document).ready(function() {";
+	$SITE_SCRIPT[] = "$(function() {";
 	$SITE_SCRIPT[] = "\t$( \"#helplink\" ).click(function() {";
 	$SITE_SCRIPT[] = "\t\t$( \"#help\" ).dialog('open'); return false;";
 	$SITE_SCRIPT[] = "\t});";
@@ -95,13 +95,14 @@ function makeHeader($title = '') {
 
 	if ( $user->loggedin ) {
 		if ( $user->can('viewbudget') ) {
-			$html[] = "\t\t\t<form method=\"post\" action=\"{$TDTRAC_SITE}search/\">\n\t\t\t<div id=\"search\">";
+			$html[] = "\t\t\t<form method=\"post\" action=\"{$TDTRAC_SITE}budget/search/\">\n\t\t\t<div id=\"search\">";
 			$html[] = "\t\t\t\t<input tabindex=\"81\" type=\"text\" class=\"text\" maxlength=\"64\" name=\"keywords\" />";
 			$html[] = "\t\t\t\t<input tabindex=\"82\" type=\"submit\" class=\"submit\" value=\"Search\" />\n\t\t\t</div>\t\t\t</form>";
 		}
+		
 	}
 
-	$html[] = "\t\t<div id=\"headerpic\"></div>\n\t\t<div id=\"menu\">\n\t\t\t<ul>";
+	$html[] = "\t\t<div id=\"headerpic\"></div>\n\t\t<div id=\"menu\">\n\t\t\t<ul class=\"topnav\">";
 	$html[] = "\t\t\t\t<li><a tabindex=\"90\" href=\"{$TDTRAC_SITE}\"".(($action['module'] == "index")?" class=\"active\"":"")." title=\"Main Index\">Home</a></li>";
 	$html[] = ($user->loggedin)?"\t\t\t\t<li><a tabindex=\"91\" href=\"{$TDTRAC_SITE}user/password/\""	.(($action['action'] == "password")	?" class=\"active\"":"")." title=\"Change Your Password\">Change Password</a></li>":"";
 	$html[] = "\t\t\t\t<li><a tabindex=\"92\" href=\"{$TDTRAC_SITE}budget/\""		.(($action['module'] == "budget")	?" class=\"active\"":"")." title=\"Budget Tracking\">Budget</a></li>";

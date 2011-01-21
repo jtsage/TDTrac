@@ -359,8 +359,22 @@ class tdtable {
 	 * @return string Formatted HTML
 	 */
 	private function act_bpend($raw) {
+		global $TDTRAC_SITE, $SITE_SCRIPT;
 		if ( $raw['pending'] ) {
-			return "<img class=\"ticon\" src=\"/images/pending.png\" alt=\"Payment Pending\" title=\"Payment Pending\" />";
+			$SITE_SCRIPT[] = "var bpndrow{$this->currentrow} = true;";
+			$SITE_SCRIPT[] = "$(function() { $('.bpnd-{$this->tablename}-row-{$this->currentrow}').click( function() {";
+			$SITE_SCRIPT[] = "	if ( bpndrow{$this->currentrow} && confirm('Mark Item #{$raw['id']} Paid?')) {";
+			$SITE_SCRIPT[] = "		$.getJSON(\"{$TDTRAC_SITE}budget/paid/json:1/id:{$raw['id']}/\", function(data) {";
+			$SITE_SCRIPT[] = "			if ( data.success === true ) { ";
+			$SITE_SCRIPT[] = "				$('#popper').html(\"Budget Item #{$raw['id']} Marked Paid\");";
+			$SITE_SCRIPT[] = "				$('.bpnd-{$this->tablename}-row-{$this->currentrow}').find('img').attr('src', '/images/blank.png').attr('title', 'Paid');";
+			$SITE_SCRIPT[] = "			} else { $('#popper').html(\"Budget Item #{$raw['id']} Mark :: Failed\"); }";
+			$SITE_SCRIPT[] = "			bpndrow{$this->currentrow} = false;";
+			$SITE_SCRIPT[] = "			$('#popperdiv').show('blind');";			
+			$SITE_SCRIPT[] = "	});} return false;";
+			$SITE_SCRIPT[] = "});});";
+		
+			return "<a class=\"bpnd-{$this->tablename}-row-{$this->currentrow}\" href=\"#\"><img class=\"ticon\" src=\"/images/pending.png\" alt=\"Payment Pending\" title=\"Payment Pending\" /></a>";
 		} else {
 			return "<img class=\"ticon\" src=\"/images/blank.png\" alt=\"Spacer\" />";
 		}
@@ -373,11 +387,25 @@ class tdtable {
 	 * @return string Formatted HTML
 	 */
 	private function act_breim($raw) {
+		global $TDTRAC_SITE, $SITE_SCRIPT;
 		if ( $raw['needrepay'] ) {
 			if ( $raw['gotrepay'] ) {
 				return "<img class=\"ticon\" src=\"/images/reim-yes.png\" title=\"Reimbursment Recieved\" alt=\"Reimbursment Recieved\" />";
 			} else {
-				return "<img class=\"ticon\" src=\"/images/reim-no.png\" title=\"Reimbursment Needed\" alt=\"Reimbursment Needed\" />";
+				$SITE_SCRIPT[] = "var bremrow{$this->currentrow} = true;";
+				$SITE_SCRIPT[] = "$(function() { $('.brem-{$this->tablename}-row-{$this->currentrow}').click( function() {";
+				$SITE_SCRIPT[] = "	if ( bremrow{$this->currentrow} && confirm('Mark Item #{$raw['id']} Recieved?')) {";
+				$SITE_SCRIPT[] = "		$.getJSON(\"{$TDTRAC_SITE}budget/reimb/json:1/id:{$raw['id']}/\", function(data) {";
+				$SITE_SCRIPT[] = "			if ( data.success === true ) { ";
+				$SITE_SCRIPT[] = "				$('#popper').html(\"Budget Item #{$raw['id']} Reimbursment Recieved\");";
+				$SITE_SCRIPT[] = "				$('.brem-{$this->tablename}-row-{$this->currentrow}').find('img').attr('src', '/images/reim-yes.png').attr('title', 'Reimbursment Recieved');";
+				$SITE_SCRIPT[] = "			} else { $('#popper').html(\"Budget Item #{$raw['id']} Mark :: Failed\"); }";
+				$SITE_SCRIPT[] = "			bremrow{$this->currentrow} = false;";
+				$SITE_SCRIPT[] = "			$('#popperdiv').show('blind');";			
+				$SITE_SCRIPT[] = "	});} return false;";
+				$SITE_SCRIPT[] = "});});";
+			
+				return "<a class=\"brem-{$this->tablename}-row-{$this->currentrow}\" href=\"#\"><img class=\"ticon\" src=\"/images/reim-no.png\" title=\"Reimbursment Needed\" alt=\"Reimbursment Needed\" /></a>";
 			}
 		} else { 
 			return "<img class=\"ticon\" src=\"/images/blank.png\" alt=\"Spacer\" />";
@@ -392,7 +420,7 @@ class tdtable {
 	 */
 	private function act_rview($raw) {
 		if ( $raw['imgid'] > 0 ) {
-			return "<a href=\"/rcpt.php?imgid={$raw['imgid']}&amp;hires\" target=\"_blank\"><img class=\"ticon\" src=\"/images/rcptview.png\" title=\"View Reciept (new window)\" alt=\"Show Reciept\" /></a>";
+			return "<a href=\"/rcpt.php?imgid={$raw['imgid']}&amp;hires\" target=\"_blank\"><img class=\"ticon\" src=\"/images/view.png\" title=\"View Reciept (new window)\" alt=\"Show Reciept\" /></a>";
 		} else { 
 			return "<img class=\"ticon\" src=\"/images/blank.png\" alt=\"Spacer\" />";
 		}
@@ -406,7 +434,6 @@ class tdtable {
 	 */
 	private function act_bview($raw) {
 		global $TDTRAC_SITE;
-		
 		return "<a href=\"{$TDTRAC_SITE}budget/item/{$raw['id']}/\"><img class=\"ticon\" src=\"/images/view.png\" title=\"View Budget Item Detail\" alt=\"View Item\" /></a>";
 	}
 	
@@ -418,8 +445,7 @@ class tdtable {
 	 */
 	private function act_bedit($raw) {
 		global $TDTRAC_SITE;
-		if ( $this->fromlink ) { $extra = "&redir-to={$this->fromlink}"; }
-		return "<a href=\"{$TDTRAC_SITE}budget/edit/{$raw['id']}/{$extra}\"><img class=\"ticon\" src=\"/images/edit.png\" title=\"Edit Budget Item\" alt=\"Edit Item\" /></a>";
+		return "<a href=\"{$TDTRAC_SITE}budget/edit/id:{$raw['id']}/\"><img class=\"ticon\" src=\"/images/edit.png\" title=\"Edit Budget Item\" alt=\"Edit Item\" /></a>";
 	}
 	
 	/**
@@ -429,9 +455,21 @@ class tdtable {
 	 * @return string Formatted HTML
 	 */
 	private function act_bdel($raw) {
-		global $TDTRAC_SITE;
-		if ( $this->fromlink ) { $extra = "&redir-to={$this->fromlink}"; }
-		return "<a href=\"{$TDTRAC_SITE}budget/del/{$raw['id']}/{$extra}\"><img class=\"ticon\" src=\"/images/delete.png\" title=\"Delete Budget Item\" alt=\"Delete Item\" /></a>";
+		global $TDTRAC_SITE, $SITE_SCRIPT;
+		$SITE_SCRIPT[] = "var bdelrow{$this->currentrow} = true;";
+		$SITE_SCRIPT[] = "$(function() { $('.bdel-{$this->tablename}-row-{$this->currentrow}').click( function() {";
+		$SITE_SCRIPT[] = "	if ( bdelrow{$this->currentrow} && confirm('Delete Item #{$raw['id']}?')) {";
+		$SITE_SCRIPT[] = "		$.getJSON(\"{$TDTRAC_SITE}budget/delete/json:1/id:{$raw['id']}/\", function(data) {";
+		$SITE_SCRIPT[] = "			if ( data.success === true ) { ";
+		$SITE_SCRIPT[] = "				$('.{$this->tablename}-row-{$this->currentrow}').html('<td colspan=\"7\" style=\"background-color: #888; text-align: center\">-=- Removed -=-</td>');";
+		$SITE_SCRIPT[] = "				$('#popper').html(\"Budget Item #{$raw['id']} Deleted\");";
+		$SITE_SCRIPT[] = "			} else { $('#popper').html(\"Budget Item #{$raw['id']} Delete :: Failed\"); }";
+		$SITE_SCRIPT[] = "			bdelrow{$this->currentrow} = false;";
+		$SITE_SCRIPT[] = "			$('#popperdiv').show('blind');";			
+		$SITE_SCRIPT[] = "	});} return false;";
+		$SITE_SCRIPT[] = "});});";
+		
+		return "<a class=\"bdel-{$this->tablename}-row-{$this->currentrow}\" href=\"#\"><img class=\"ticon\" src=\"/images/delete.png\" title=\"Delete Budget Item\" alt=\"Delete Item\" /></a>";
 	}
 	
 	/**

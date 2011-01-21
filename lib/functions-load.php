@@ -7,27 +7,37 @@
  * @version 2.0.0
  * @author J.T.Sage <jtsage@gmail.com>
  */
+ 
+/** Database Configuration */
 require_once("dbaseconfig.php");
 
+/** Library: Forms */
 require_once("formlib.php");
+/** Library: Tables */
 require_once("tablelib.php");
+/** Library: HTML */
 require_once("htmllib.php");
+/** Library: tdtrac_user */
 require_once("user.php");
-//require_once("permissions.php");
-//require_once("home.php");
-//require_once("email.php");
+
+/** Module: tdtrac_mail */
 require_once("messaging.php");
+/** Module: tdtrac_admin */
 require_once("admin.php");
-//require_once("budget.php");
-//require_once("reciept.php");
+/** Module: tdtrac_budget */
+require_once("budget.php");
+/** Module: tdtrac_show */
 require_once("show.php");
+/** Module: tdtrac_todo */
 require_once("todo.php");
+/** Module: tdtrac_hours */
 require_once("hours.php");
 
 /**
  * Throw a message to the user
  * 
- * @param string Message to send
+ * @param string Message to send (or false)
+ * @param string Location to navigate to
  * @global string Address to redirct to
  */
 function thrower($msg, $loc='') {

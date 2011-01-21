@@ -149,8 +149,8 @@ class tdtrac_todo {
 		GLOBAL $db, $MYSQL_PREFIX;
 		
 		$sql  = "UPDATE {$MYSQL_PREFIX}todo SET complete = 1 WHERE id = '".intval($id)."'";
-		//$result = mysql_query($sql, $db);
-		if ( 1 == 1 ) { //$result ) {
+		$result = mysql_query($sql, $db);
+		if ( $result ) {
 			$this->json['success'] = true;
 		} else {
 			$this->json['success'] = false;
@@ -168,8 +168,8 @@ class tdtrac_todo {
 	 private function delete($id) {
 		GLOBAL $db, $MYSQL_PREFIX;
 		$sql  = "DELETE FROM {$MYSQL_PREFIX}todo WHERE id = '".intval($id)."'";
-		//$result = mysql_query($sql, $db);
-		if ( 1==1 ) { //$result ) {
+		$result = mysql_query($sql, $db);
+		if ( $result ) {
 			$this->json['success'] = true;
 		} else {
 			$this->json['success'] = false;

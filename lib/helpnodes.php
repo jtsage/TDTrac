@@ -155,8 +155,8 @@ $helpnode['admin']['groups']['data'][] = "This page allows the renaming of group
 $helpnode['user']['forgot']['title'] = "Password Reminder";
 $helpnode['user']['forgot']['data'][] = "This will send the login details associated with the entered e-mail address to that e-mail.  If you do not recieve an e-mail, or can't remember your e-mail, please contact your administrator.  If you are the administrator, and this installation is hosted on tdtrac.com, please contact the management via the homepage.";
 
-$helpnode['rcpt']['index']['title'] = "Reciept Managment";
-$helpnode['rcpt']['index']['data'][] = "This page allows management of e-mailed reciepts.  You may add a new record of the reciept, or associate it with an old menu item.  See the help under the Add Budget Item for a description of all the fields here";
+$helpnode['budget']['reciept']['title'] = "Reciept Managment";
+$helpnode['budget']['reciept']['data'][] = "This page allows management of e-mailed reciepts.  You may add a new record of the reciept, or associate it with an old menu item.  See the help under the Add Budget Item for a description of all the fields here";
 
 $helpnode['budget']['edit']['title'] = "Edit Budget Expense Form";
 $helpnode['budget']['edit']['data'][] = "Allows the editing of a budget item";

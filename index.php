@@ -4,7 +4,7 @@
  * 
  * Contains main program logic.
  * @package tdtrac
- * @version 1.3.1
+ * @version 2.0.0
  * @author J.T.Sage <jtsage@gmail.com>
  */
 ob_start(); session_start(); 
@@ -14,8 +14,11 @@ $TDTRAC_VERSION = "2.0.0";
 $TDTRAC_DBVER = "1.3.1";
 $SITE_SCRIPT = array('');
 
+/** Site Confiuration File */
 require_once("config.php");
+/** Function, Library and Module loader */
 require_once("lib/functions-load.php");
+
 if ( !file_exists(".htaccess") ) { $TDTRAC_SITE .= "index.php?action="; }
 
 $user = new tdtrac_user();
@@ -91,14 +94,19 @@ if ( !$user->loggedin ) {
 			$admin = new tdtrac_admin($user, $action);
 			$admin->output();
 			break;
+		case "budget":
+			$budget = new tdtrac_budget($user, $action);
+			$budget->output();
+			break;
 		default: 
 			$html[] = mail_check();
-			//$html[] = rcpt_check();
+			$html[] = reciept_check();
 			$html[] = todo_check();
 			$html[] = "<br /><br /><div style=\"float: left; min-height: 400px; width: 48%\">";
 			// Budget & Payroll
+			$budg = new tdtrac_budget($user, $action);
 			$hour = new tdtrac_hours($user, $action);
-			$html = array_merge($html, $hour->index());
+			$html = array_merge($html, $budg->index(), $hour->index());
 			
 			$html[] = "<br /><br /><br /><br /><br /><br /></div><div style=\"width: 48%; float: right;\">";
 			// Shows, Todo & Admin
