@@ -643,6 +643,7 @@ class tdtrac_budget {
 			mysql_free_result($res_exp);
 			
 			if ( $type == "show" ) {
+				$html = array();
 				$html[] = "<br /><br /><h4>Payroll Expenses</h4>";
 				
 				$tabl = new tdtable("hours", "datatable", False);
@@ -656,7 +657,7 @@ class tdtrac_budget {
 				while ( $pay = mysql_fetch_array($res_pay) ) {
 					$tabl->addRow(array($pay['name'], $pay['days'], $pay['days'] * $pay['payrate']), $pay);
 				}
-				$html = array_merge($html, $tabl->output(false));
+				$rhtml = array_merge($rhtml, $html, $tabl->output(false));
 				mysql_free_result($res_pay);
 			}
 		}
