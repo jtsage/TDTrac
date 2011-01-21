@@ -414,6 +414,7 @@ class tdtrac_hours {
 			$ident = preg_replace("/ /", "", $key);
 			if ( $this->action['type'] == 'unpaid' ) { $maillink = "{$TDTRAC_SITE}hours/email/json:1/type:unpaid/id:{$data[0]['userid']}"; }
 			$SITE_SCRIPT[] = "$(function() { $('.{$ident}-email').click( function() {";
+			$SITE_SCRIPT[] = "  $('#popper').html(\"Please wait...\"); $('#popperdiv').show('blind');";
 			$SITE_SCRIPT[] = "	$.getJSON(\"{$maillink}\", function(data) {";
 			$SITE_SCRIPT[] = "		if ( data.success === true ) { ";
 			$SITE_SCRIPT[] = "			$('#popper').html(\"Hours For {$key} :: Sent\");";
@@ -509,15 +510,17 @@ class tdtrac_hours {
 			$body .= ($sdate <> 0 ) ? "Start Date: {$sdate}\n" : "";
 			$body .= ($sdate <> 0 && $edate <> 0 ) ? "<br />" : "";
 			$body .= ($edate <> 0 ) ? "Ending Date: {$edate}" : "";
-			$body .= "</p><pre>\n";
-			$body .= "Date\t\t".(($TDTRAC_DAYRATE)?"Days":"Hours")." Worked\tPaid\tShow\n";
-			$tot = 0;
+			$body .= "</p>\n";
+
+			$tabl = new tdtable("hours-{$ident}", 'datatable', false);
+			$tabl->addHeader(array('Date', 'Show', (($TDTRAC_DAYRATE)?"Days":"Hours")." Worked", 'Paid'));
+			$tabl->addNumber((($TDTRAC_DAYRATE)?"Days":"Hours")." Worked");
+			$tabl->setAlign('Paid', "center");
+			
 			foreach ( $data as $num => $line ) {
-				$tot += $line['worked'];
-				$body .= "{$line['date']}\t{$line['worked']}\t\t".(($line['submitted'] == 1) ? "YES" : "NO")."\t{$line['showname']}\n";
+				$tabl->addRow(array($line['date'], $line['showname'], $line['worked'], (($line['submitted'] == 1) ? "YES" : "NO")), $line);
 			}
-			$body .= "-=- TOTAL -=-\t{$tot}\n";
-			$body .= "</pre>";
+			$body .= $tabl->output(true);
 		}
 		
 		$result = mail($this->user->email, $subject, $body, $headers);

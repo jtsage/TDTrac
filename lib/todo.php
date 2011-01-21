@@ -124,6 +124,12 @@ class tdtrac_todo {
 					} else {
 						$this->json['success'] = false;
 					} break;
+				case "email":
+					if ( isset($this->action['id']) && is_numeric($this->action['id']) && isset($this->action['type']) ) {
+						$this->email();
+					} else {
+						$this->json['success'] = false;
+					} break;
 				case "delete":
 					if ( isset($this->action['id']) && is_numeric($this->action['id']) && $this->user->can('edittodo') ) {
 						$this->delete(intval($this->action['id']));
@@ -290,7 +296,7 @@ class tdtrac_todo {
 	 * @return string HTML output
 	 */
 	private function view($condition = null, $type = 'user') {
-		GLOBAL $db, $MYSQL_PREFIX, $user_name, $TDTRAC_SITE;
+		GLOBAL $db, $MYSQL_PREFIX, $user_name, $TDTRAC_SITE, $SITE_SCRIPT;
 		if ( is_null($condition) ) {
 			$form = new tdform("{$TDTRAC_SITE}todo/view/user/", "form1", 10, 'genform1', 'View To-Do By User');
 			$result = $form->addDrop('id', 'Assigned To', null, db_list(get_sql_const('todo'), array('userid', 'name')), False);
@@ -314,19 +320,29 @@ class tdtrac_todo {
 			if ( $type == 'user' ) {
 				$sql = "SELECT todo.*, showname, DATE_FORMAT(`due`, '%Y-%m-%d') as duedate, TIME_TO_SEC( TIMEDIFF(`due` , NOW())) AS remain FROM {$MYSQL_PREFIX}todo as todo, {$MYSQL_PREFIX}shows as shows WHERE shows.showid = todo.showid AND todo.assigned = '{$thiscond}' ORDER BY due DESC, added DESC";
 				$html[] = "<h3>Todo Tasks by User (".$this->user->get_name($thiscond).")</h3>\n";
-				$backlink = "user/*todouser={$thiscond}";
 			} elseif ( $type =='show' ) {
 				$showname = db_list("SELECT showname FROM {$MYSQL_PREFIX}shows WHERE showid = {$thiscond}", 'showname');
 				$sql = "SELECT todo.*, showname, DATE_FORMAT(`due`, '%Y-%m-%d') as duedate, TIME_TO_SEC( TIMEDIFF(`due` , NOW())) AS remain FROM {$MYSQL_PREFIX}todo as todo, {$MYSQL_PREFIX}shows as shows WHERE shows.showid = todo.showid AND todo.showid = '{$thiscond}' ORDER BY due DESC, added DESC";
 				$html[] = "<h3>Todo Tasks by Show ({$showname[0]})</h3>\n";
-				$backlink = "show/*todoshow={$thiscond}";
 			} elseif ( $type == 'overdue' ) {
 				$sql = "SELECT todo.*, showname, DATE_FORMAT(`due`, '%Y-%m-%d') as duedate, TIME_TO_SEC( TIMEDIFF(`due` , NOW())) AS remain FROM {$MYSQL_PREFIX}todo as todo, {$MYSQL_PREFIX}shows as shows WHERE shows.showid = todo.showid AND todo.due < CURRENT_TIMESTAMP AND todo.complete = 0 ORDER BY due DESC, added DESC";
 				$html[] = "<h3>Overdue Todo Tasks</h3>\n";
-				$backlink = "due/";
 			}
 			$result = mysql_query($sql, $db);
 			$priorities = $this->priorities;
+
+			$SITE_SCRIPT[] = "$(function() { $('.todo-email').click( function() {";
+			$SITE_SCRIPT[] = "  $('#popper').html(\"Please wait...\"); $('#popperdiv').show('blind');";
+			$SITE_SCRIPT[] = "	$.getJSON(\"{$TDTRAC_SITE}todo/email/json:1/id:{$thiscond}/type:{$type}/\", function(data) {";
+			$SITE_SCRIPT[] = "		if ( data.success === true ) { ";
+			$SITE_SCRIPT[] = "			$('#popper').html(\"Todo List :: Sent\");";
+			$SITE_SCRIPT[] = "		} else { $('#popper').html(\"E-Mail Send :: Failed\"); }";
+			$SITE_SCRIPT[] = "		$('#popperdiv').show('blind');";			
+			$SITE_SCRIPT[] = "	}); return false;";
+			$SITE_SCRIPT[] = "});});";
+			$html[] = "<span class=\"upright\">[<a class=\"todo-email\" href=\"#\">E-Mail to Self</a>]</span>";
+
+
 			$html[] = "<br /><br />";
 			$tabl = new tdtable("todo", 'datatable', true);
 			$tabl->addHeader(array('Due', 'Priority', 'Assigned To', 'Description'));
@@ -337,6 +353,44 @@ class tdtrac_todo {
 			}
 			$html = array_merge($html, $tabl->output(false));
 			return $html;
+		}
+	}
+
+	private function email() {
+		GLOBAL $db, $MYSQL_PREFIX;
+		$thiscond = $this->action['id'];
+		$type = $this->action['type'];
+			
+		$subject = "TDTrac Todo {$this->action['type']}: {$this->action['id']}";
+		$headers  = 'MIME-Version: 1.0' . "\r\n";
+		$headers .= 'Content-type: text/html; charset=iso-8859-1' . "\r\n";
+	
+		if ( $type == 'user' ) {
+			$sql = "SELECT todo.*, showname, DATE_FORMAT(`due`, '%Y-%m-%d') as duedate, TIME_TO_SEC( TIMEDIFF(`due` , NOW())) AS remain FROM {$MYSQL_PREFIX}todo as todo, {$MYSQL_PREFIX}shows as shows WHERE shows.showid = todo.showid AND todo.assigned = '{$thiscond}' ORDER BY due DESC, added DESC";
+			$html[] = "<h3>Todo Tasks by User (".$this->user->get_name($thiscond).")</h3>\n";
+		} elseif ( $type =='show' ) {
+			$showname = db_list("SELECT showname FROM {$MYSQL_PREFIX}shows WHERE showid = {$thiscond}", 'showname');
+			$sql = "SELECT todo.*, showname, DATE_FORMAT(`due`, '%Y-%m-%d') as duedate, TIME_TO_SEC( TIMEDIFF(`due` , NOW())) AS remain FROM {$MYSQL_PREFIX}todo as todo, {$MYSQL_PREFIX}shows as shows WHERE shows.showid = todo.showid AND todo.showid = '{$thiscond}' ORDER BY due DESC, added DESC";
+			$html[] = "<h3>Todo Tasks by Show ({$showname[0]})</h3>\n";
+		} elseif ( $type == 'overdue' ) {
+			$sql = "SELECT todo.*, showname, DATE_FORMAT(`due`, '%Y-%m-%d') as duedate, TIME_TO_SEC( TIMEDIFF(`due` , NOW())) AS remain FROM {$MYSQL_PREFIX}todo as todo, {$MYSQL_PREFIX}shows as shows WHERE shows.showid = todo.showid AND todo.due < CURRENT_TIMESTAMP AND todo.complete = 0 ORDER BY due DESC, added DESC";
+			$html[] = "<h3>Overdue Todo Tasks</h3>\n";
+		}
+		$result = mysql_query($sql, $db);
+		$priorities = $this->priorities;
+		$html[] = "<br /><br />";
+		$tabl = new tdtable("todo", 'datatable', false);
+		$tabl->addHeader(array('Status', 'Due', 'Priority', 'Assigned To', 'Description'));
+		while ( $row = mysql_fetch_array($result) ) {
+			$tabl->addRow(array((($row['complete'])?"DONE":""), $row['duedate'], $priorities[$row['priority']][1], (($row['assigned'] > 0) ? $this->user->get_name($row['assigned']) : "-unassigned-"), $row['dscr']), $row, (($row['complete']=='1') ? "tododone" : (($row['remain'] < 0 ) ? "tododue": null))  );
+		}
+		$html = array_merge($html, $tabl->output(false));
+
+		$result = mail($this->user->email, $subject, join($html), $headers);
+		if ( $result ) {
+			$this->json['success'] = true;
+		} else {
+			$this->json['success'] = false;
 		}
 	}
 }

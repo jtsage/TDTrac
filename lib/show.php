@@ -100,7 +100,17 @@ class tdtrac_shows {
 			}
 			makePage($this->html, $this->title);
 		} else { 
-			$this->json['success'] = false;
+			switch($this->action['action']) {
+				case "delete":
+					if ( isset($this->action['id']) && is_numeric($this->action['id']) && $this->user->admin ) {
+						$this->delete(intval($this->action['id']));
+					} else {
+						$this->json['success'] = false;
+					} break;
+				default:
+					$this->json['success'] = false;
+					break;
+			}
 			echo json_encode($this->json);
 		}
 	} // END OUTPUT FUNCTION
@@ -158,6 +168,30 @@ class tdtrac_shows {
 	}
 
 	/**
+	 * Logic to remove a show from the database
+	 *
+	 * @global object Database Link
+	 * @global string MySQL Table Prefix
+	 * @param integer ShowID to nuke
+	 */
+	private function delete($id) {
+		GLOBAL $db, $MYSQL_PREFIX;
+		if ( !$this->user->admin || !is_numeric($id) || $id < 1 ) {
+			$json['success'] = false;
+		} else {
+			$sqla = "DELETE FROM `{$MYSQL_PREFIX}todo` WHERE showid = ".intval($id);
+			$sqlb = "DELETE FROM `{$MYSQL_PREFIX}hours` WHERE showid = ".intval($id);
+			$sqlc = "DELETE FROM `{$MYSQL_PREFIX}budget` WHERE showid = ".intval($id);
+			$sqld = "DELETE FROM `{$MYSQL_PREFIX}shows` WHERE showid = ".intval($id);
+			$result = mysql_query($sqla, $db);
+			$result = mysql_query($sqlb, $db);
+			$result = mysql_query($sqlc, $db);
+			$result = mysql_query($sqld, $db);
+			$json['success'] = true;
+		}
+	}
+
+	/**
 	 * Logic to save show to database
 	 * 
 	 * @global resource Database Link
@@ -206,13 +240,31 @@ class tdtrac_shows {
 	 * @return string HTML Output
 	 */
 	private function view() {
-		GLOBAL $db, $MYSQL_PREFIX, $TDTRAC_SITE;
+		GLOBAL $db, $MYSQL_PREFIX, $TDTRAC_SITE, $SITE_SCRIPT;
 		$sql = "SELECT * FROM `{$MYSQL_PREFIX}shows` ORDER BY `created` DESC";
 		$result = mysql_query($sql, $db);
 		$html = array();
 		while ( $row = mysql_fetch_array($result) ) {
 			$html[] = "<h3>{$row['showname']}</h3>";
-			$html[] = $this->user->admin ? "<span class=\"overright\">[<a href=\"{$TDTRAC_SITE}shows/edit/id:{$row['showid']}/\">Edit</a>]</span>" : "";
+			if ( $this->user->admin ) {
+				$safename = preg_replace("/ /", "", $row['showname']);
+				$temp = array();
+				$SITE_SCRIPT[] = "var showdel{$safename} = true;";
+				$SITE_SCRIPT[] = "$(function() { $('.sdel-{$safename}').click( function() {";
+				$SITE_SCRIPT[] = "	if ( showdel{$safename} && confirm('Delete Show #{$row['showid']}?')) {";
+				$SITE_SCRIPT[] = "		$.getJSON(\"{$TDTRAC_SITE}shows/delete/json:1/id:{$row['showid']}/\", function(data) {";
+				$SITE_SCRIPT[] = "			if ( data.success === true ) { ";
+				$SITE_SCRIPT[] = "				$('#popper').html(\"Show #{$row['showid']} Deleted\");";
+				$SITE_SCRIPT[] = "			} else { $('#popper').html(\"Show #{$row['showid']} Delete :: Failed\"); }";
+				$SITE_SCRIPT[] = "			showdel{$safename} = false;";
+				$SITE_SCRIPT[] = "			$('#popperdiv').show('blind');";			
+				$SITE_SCRIPT[] = "	});} return false;";
+				$SITE_SCRIPT[] = "});});";
+				$temp[] = "<span class=\"overright\">[<a href=\"{$TDTRAC_SITE}shows/edit/id:{$row['showid']}/\">Edit</a>]";
+				$temp[] = " [<a href=\"#\" class=\"sdel-{$safename}\" />Delete</a>]";
+				$temp[] = "</span>";
+				$html[] = join($temp);
+			}
 			$html[] = "  <ul class=\"datalist\">";
 			$html[] = "    <li><strong>Company</strong>: {$row['company']}</li>";
 			$html[] = "    <li><strong>Venue</strong>: {$row['venue']}</li>";

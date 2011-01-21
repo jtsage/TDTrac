@@ -186,7 +186,7 @@ class tdtrac_budget {
 	 * @global resource Datebase Link
 	 * @global string MySQL Table Prefix
 	 */
-	function reciept_delete($id) {
+	private function reciept_delete($id) {
 		GLOBAL $db, $MYSQL_PREFIX;
 		$sql = "DELETE FROM {$MYSQL_PREFIX}rcpts WHERE imgid = {$id} LIMIT 1";
 		$result = mysql_query($sql, $db);
@@ -203,7 +203,7 @@ class tdtrac_budget {
 	 * @global resource Datebase Link
 	 * @global string MySQL Table Prefix
 	 */
-	function reciept_save() {
+	private function reciept_save() {
 		GLOBAL $db, $MYSQL_PREFIX;
 		$sqla = sprintf("UPDATE `{$MYSQL_PREFIX}budget` SET imgid = %d WHERE id = %d",
 			intval($_REQUEST['imgid']),
@@ -234,7 +234,7 @@ class tdtrac_budget {
 	 * @global string Site Address for links
 	 * @return string HTML Formatted information
 	 */
-	function reciept_view() {
+	private function reciept_view() {
 		GLOBAL $db, $MYSQL_PREFIX, $user_name, $TDTRAC_SITE, $SITE_SCRIPT;
 		if ( isset($this->action['num']) && !is_numeric($this->action['num']) ) {
 			thrower("Error :: Data Mismatch Detected");
@@ -455,7 +455,7 @@ class tdtrac_budget {
 		} else {
 			$sqlstring  = "UPDATE `{$MYSQL_PREFIX}budget` SET showid = '%d', price = '%f', tax = '%f' , vendor = '%s', ";
 			$sqlstring .= "category = '%s', dscr = '%s' , date = '%s', pending = '%d', needrepay = '%d', gotrepay = '%d'";
-			$sqlstring .= " WHERE id = {$id}";
+			$sqlstring .= " WHERE id = %d";
 			
 			$sql = sprintf($sqlstring,
 				intval($_REQUEST['showid']),
@@ -467,7 +467,8 @@ class tdtrac_budget {
 				mysql_real_escape_string($_REQUEST['date']),
 				(($_REQUEST['pending'] == "y") ? "1" : "0"),
 				(($_REQUEST['needrepay'] == "y") ? "1" : "0"),
-				(($_REQUEST['gotrepay'] == "y") ? "1" : "0")
+				(($_REQUEST['gotrepay'] == "y") ? "1" : "0"),
+				intval($_REQUEST['id'])
 			);
 		}
 			
@@ -476,7 +477,7 @@ class tdtrac_budget {
 		if ( $result ) {
 			return "Expense Saved";
 		} else {
-			return "Expense Save :: Operation Failed";
+			return "Expense Save :: Operation Failed ";
 		}
 	}
 
@@ -608,7 +609,6 @@ class tdtrac_budget {
 			$html = array();
 			$html[] = "<h3>{$row['showname']}</h3>";
 			
-			if ( $this->user->can('editshow') ) { $html[] = "<span class=\"overright\">[<a href=\"{$TDTRAC_SITE}shows/edit/{$row['showid']}/\">Edit</a>]</span>"; }
 			$html[] = "<ul class=\"datalist\"><li><strong>Company</strong>: {$row['company']}</li>";
 			$html[] = "<li><strong>Venue</strong>: {$row['venue']}</li>";
 			$html[] = "<li><strong>Dates</strong>: {$row['dates']}</li>";
@@ -620,6 +620,7 @@ class tdtrac_budget {
 			if ( $type == "show" ) {
 				$html[] = "<h4>Materials Expenses</h4>";
 				$SITE_SCRIPT[] = "$(function() { $('.bud-email').click( function() {";
+				$SITE_SCRIPT[] = "  $('#popper').html(\"Please wait...\"); $('#popperdiv').show('blind');";
 				$SITE_SCRIPT[] = "	$.getJSON(\"{$TDTRAC_SITE}budget/email/json:1/id:{$showid}\", function(data) {";
 				$SITE_SCRIPT[] = "		if ( data.success === true ) { ";
 				$SITE_SCRIPT[] = "			$('#popper').html(\"Budget For {$row['showname']} :: Sent\");";
@@ -688,24 +689,20 @@ class tdtrac_budget {
 		$headers  = 'MIME-Version: 1.0' . "\r\n";
 		$headers .= 'Content-type: text/html; charset=iso-8859-1' . "\r\n";
 	
-		$body .= "<h2>Materials Expenses</h2><pre>\n";
-		$body .= "Date\t\tPrice\tPending\tReimburse\tVendor\tDescription\n";
+		$body .= "<h2>Materials Expenses</h2>\n";
 		$sql = "SELECT * FROM {$MYSQL_PREFIX}budget WHERE showid = {$showid} ORDER BY category ASC, date ASC, vendor ASC";
-		$result = mysql_query($sql, $db); $intr = 0; $tot = 0; $last = "";
-		while ( $row = mysql_fetch_array($result) ) {
-			if ( $last != "" && $last != $row['category'] ) { 
-				$body .= "-=- {$last} SUB-TOTAL -=-\t" . number_format($subtot, 2) . "\n"; $subtot = 0; }
-			$intr++;
-			$body .= "{$row['date']}\t".number_format($row['price'], 2)."\t";
-			$body .= (($row['pending'] == 1) ? "YES" : "NO") . "\t";
-			$body .= (($row['needrepay'] == 1) ? (($row['didrepay'] == 1) ? "PAID" : "UNPAID") : "N/A") . "\t";
-			$body .= "{$row['vendor']}\t{$row['category']}\t{$row['dscr']}\n";
-			$tot += $row['price']; $subtot += $row['price'];
-			$last = $row['category'];
+
+		$result = mysql_query($sql, $db); 
+
+		$tabl = new tdtable("budget", 'datatable', false, "");
+		$tabl->addHeader(array('Date', 'Vendor', 'Category', 'Description', 'Price', 'Tax'));
+		$tabl->addSubtotal('Category');
+		$tabl->addCurrency('Price');
+		$tabl->addCurrency('Tax');
+		while ( $exp = mysql_fetch_array($result) ) {
+			$tabl->addRow(array($exp['date'], $exp['vendor'], $exp['category'], $exp['dscr'], $exp['price'], $exp['tax']), $exp);
 		}
-		$body .= "-=- {$last} SUB-TOTAL -=-\t" . number_format($subtot, 2) . "\n";
-		$body .= "-=- TOTAL -=-\t" . number_format($tot, 2) . "\n";
-		$body .= "</pre>\n";
+		$body .= $tabl->output(true);
 	
 		$result = mail($this->user->email, $subject, $body, $headers);
 		if ( $result ) {
