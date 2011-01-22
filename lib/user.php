@@ -42,7 +42,7 @@ class tdtrac_user {
 	 * Open a new user element
 	 * 
 	 * Checks for login via session info
-	 * @return null
+	 * @return void
 	 */
 	public function __construct() {
 		if ( !$this->cookieexist() ) { 
@@ -63,7 +63,7 @@ class tdtrac_user {
 	 * @param string User login name
 	 * @global object DB Resource
 	 * @global string MySQL Prefix
-	 * @return null
+	 * @return void
 	 */
 	private function load($username) {
 		GLOBAL $db, $MYSQL_PREFIX;
@@ -141,7 +141,7 @@ class tdtrac_user {
 	 * Show Password Reminder Form
 	 * 
 	 * @global string Address for links.
-	 * @return string HTML output
+	 * @return array HTML output
 	 */
 	public function password_form() {
 		GLOBAL $TDTRAC_SITE;
@@ -175,7 +175,7 @@ class tdtrac_user {
 	/**
 	 * Log a User Out
 	 * 
-	 * @return null
+	 * @return void
 	 */
 	public function logout() {
 		unset($_SESSION['tdtracuser']);
@@ -185,7 +185,7 @@ class tdtrac_user {
 	/**
 	 * Log a user in
 	 * 
-	 * @global resource Database Link
+	 * @global object Database Link
 	 * @global string MySQL Table Prefix
 	 * @global string Site address for links
 	 * @global string Database version string
@@ -233,7 +233,7 @@ class tdtrac_user {
 	 * Show change password form
 	 * 
 	 * @global string Site Address for links
-	 * @return string HTML output
+	 * @return array HTML output
 	 */
 	public function changepass_form() {
 		GLOBAL $TDTRAC_SITE;
@@ -246,10 +246,10 @@ class tdtrac_user {
 	/**
 	 * Logic to change password in database
 	 * 
-	 * @global resource Database Link
+	 * @global object Database Link
 	 * @global string User Name
 	 * @global string MySQL Table Prefix
-	 * @return null
+	 * @return void
 	 */
 	public function changepass() {
 		GLOBAL $db, $MYSQL_PREFIX;
@@ -269,7 +269,7 @@ class tdtrac_user {
 	/**
 	 * Return a full name from a userid
 	 * 
-	 * @global resource Database Link
+	 * @global object Database Link
 	 * @global string MySQL Table Prefix
 	 * @param integer User ID
 	 * @return string User First Name
@@ -285,7 +285,7 @@ class tdtrac_user {
 	/**
 	 * Return a group name from a groupid
 	 * 
-	 * @global resource Database Link
+	 * @global object Database Link
 	 * @global string MySQL Table Prefix
 	 * @param integer User ID
 	 * @return string User First Name
@@ -304,8 +304,9 @@ class tdtrac_user {
 /**
  * Send password reminder via email
  * 
- * @global resource Database connection
+ * @global object Database connection
  * @global string MySQL Table Prefix
+ * @return void
  */
 function email_pwsend() {
 	GLOBAL $db, $MYSQL_PREFIX;

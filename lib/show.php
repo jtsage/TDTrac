@@ -5,7 +5,7 @@
  * Contains all show related functions. 
  * Data hardened
  * @package tdtrac
- * @version 1.4.0
+ * @version 2.0.0
  * @author J.T.Sage <jtsage@gmail.com>
  */
  
@@ -52,7 +52,7 @@ class tdtrac_shows {
 	/**
 	 * Output todo list operation
 	 * 
-	 * @return null
+	 * @return void
 	 */
 	public function output() {
 		if ( !$this->output_json ) { // HTML METHODS
@@ -119,7 +119,7 @@ class tdtrac_shows {
 	 * Show the show add form
 	 * 
 	 * @global string Site address for links
-	 * @return string HTML output
+	 * @return array HTML output
 	 */
 	private function add_form() {
 		GLOBAL $TDTRAC_SITE;
@@ -136,11 +136,11 @@ class tdtrac_shows {
 	/**
 	 * Show the show edit form
 	 * 
-	 * @global resource Database Link
+	 * @global object Database Link
 	 * @global string MySQL Table Prefix
 	 * @global string Site address for links
 	 * @param integer Show ID
-	 * @return string HTML Output
+	 * @return array HTML Output
 	 */
 	private function edit_form($id) {
 		GLOBAL $db, $MYSQL_PREFIX, $TDTRAC_SITE;
@@ -173,6 +173,7 @@ class tdtrac_shows {
 	 * @global object Database Link
 	 * @global string MySQL Table Prefix
 	 * @param integer ShowID to nuke
+	 * @return void
 	 */
 	private function delete($id) {
 		GLOBAL $db, $MYSQL_PREFIX;
@@ -194,9 +195,11 @@ class tdtrac_shows {
 	/**
 	 * Logic to save show to database
 	 * 
-	 * @global resource Database Link
+	 * @global object Database Link
 	 * @global string MySQL Table Prefix
 	 * @global bool MySQL DEBUG Status
+	 * @param bool True for new record, false for overwrite
+	 * @return void
 	 */
 	private function save($exists = false) {
 		GLOBAL $db, $MYSQL_PREFIX, $MYSQL_DEBUG;
@@ -235,9 +238,11 @@ class tdtrac_shows {
 	/**
 	 * View all shows in database
 	 * 
-	 * @global resource Database Link
+	 * @global object Database Link
 	 * @global string MySQL Table Prefix
-	 * @return string HTML Output
+	 * @global string Base HREF
+	 * @global array JavaScript
+	 * @return array HTML Output
 	 */
 	private function view() {
 		GLOBAL $db, $MYSQL_PREFIX, $TDTRAC_SITE, $SITE_SCRIPT;

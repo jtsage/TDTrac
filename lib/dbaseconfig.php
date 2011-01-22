@@ -4,7 +4,7 @@
  * 
  * Contains database connection details.
  * @package tdtrac
- * @version 1.4.0
+ * @version 2.0.0
  * @author J.T.Sage <jtsage@gmail.com>
  */
 GLOBAL $MYSQL_SERVER, $MYSQL_USER, $MYSQL_PASS, $MYSQL_DATABASE;

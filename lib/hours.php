@@ -10,7 +10,7 @@
  */
 
 /**
- * SHOWS Module
+ * PAYROLL Module
  *  Allows configuration of shows
  * 
  * @package tdtrac
@@ -40,7 +40,7 @@ class tdtrac_hours {
 	 * 
 	 * @param object User object
 	 * @param array Parsed query string
-	 * @return object Todo Object
+	 * @return object Payroll Object
 	 */
 	public function __construct($user, $action = null) {
 		$this->post = ($_SERVER['REQUEST_METHOD'] == "POST") ? true : false;
@@ -52,7 +52,7 @@ class tdtrac_hours {
 	/**
 	 * Output todo list operation
 	 * 
-	 * @return null
+	 * @return void
 	 */
 	public function output() {
 		if ( !$this->output_json ) { // HTML METHODS
@@ -190,8 +190,7 @@ class tdtrac_hours {
 	/**
 	 * Show hours edit form
 	 * 
-	 * @global resource Database Link
-	 * @global string User Name
+	 * @global object Database Link
 	 * @global string MySQL Table Prefix
 	 * @global bool Use daily or hourly pay rates
 	 * @global string Site address for links
@@ -220,9 +219,10 @@ class tdtrac_hours {
 	/**
 	 * Logic to save payroll record to database
 	 * 
-	 * @global resource Database Link
+	 * @global object Database Link
 	 * @global string MySQL Table Prefix
 	 * @global bool MySQL Debug
+	 * @param bool False for new record, true for overwrite
 	 * @return void
 	 */
 	private function save($exists = false) {
@@ -288,9 +288,10 @@ class tdtrac_hours {
 	/**
 	 * Logic to remove hours from database
 	 * 
-	 * @global resource Database Link
+	 * @global object Database Link
 	 * @global string MySQL Table Prefix
 	 * @param integer Payroll ID to remove
+	 * @return void
 	 */
 	private function delete($id) {
 		GLOBAL $db, $MYSQL_PREFIX;
@@ -306,8 +307,10 @@ class tdtrac_hours {
 	/**
 	 * Set all hours paid
 	 * 
-	 * @global resource Database Link
+	 * @global object Database Link
 	 * @global string MySQL Table Prefix
+	 * @param integer User ID
+	 * @return void
 	 */
 	private function clear($userid) {
 		GLOBAL $db, $MYSQL_PREFIX;
@@ -341,7 +344,7 @@ class tdtrac_hours {
 	/**
 	 * Show pick form for hours view.
 	 * 
-	 * @global resource Database Link
+	 * @global object Database Link
 	 * @global string MySQL Table Prefix
 	 * @global string Site address for links
 	 * @return array HTML Output
@@ -373,10 +376,11 @@ class tdtrac_hours {
 	/**
 	 * Show payroll report
 	 * 
-	 * @global resource Database Link
+	 * @global object Database Link
 	 * @global string MySQL Table Prefix
 	 * @global bool Use daily or hourly wages
 	 * @global string Site address for links
+	 * @global array JavaScript
 	 * @return array HTML Output
 	 */
 	private function view() {
@@ -464,14 +468,13 @@ class tdtrac_hours {
 	/**
 	 * Send hours via email
 	 * 
-	 * @global resource Database connection
-	 * @global string User Name
+	 * @global object Database connection
 	 * @global string MySQL Table Prefix
 	 * @global bool Use dayrate or hourly rate
 	 * @return void
 	 */
 	private function email() {
-		GLOBAL $db, $user_name, $MYSQL_PREFIX, $TDTRAC_DAYRATE;
+		GLOBAL $db, $MYSQL_PREFIX, $TDTRAC_DAYRATE;
 		if ( $this->user->isemp && ! ( $this->action['type'] == 'user' && $this->action['id'] == $this->user->id ) ) {
 			return false;
 		}
@@ -534,10 +537,10 @@ class tdtrac_hours {
 	/**
 	 * Show hours reminder email options form
 	 * 
-	 * @global resource Database Link
+	 * @global object Database Link
 	 * @global string MySQL Table Prefix
 	 * @global string Site address for links
-	 * @return HTML output
+	 * @return array HTML output
 	 */
 	private function remind_form() {
 		GLOBAL $db, $MYSQL_PREFIX, $TDTRAC_SITE;
@@ -559,10 +562,10 @@ class tdtrac_hours {
 	/**
 	 * Logic to send reminders
 	 * 
-	 * @global resource Database Link
+	 * @global object Database Link
 	 * @global string MySQL Table Prefix
 	 * @global string Site address for links
-	 * @return HTML output
+	 * @return string HTML output
 	 */
 	private function remind_send() {
 		GLOBAL $db, $MYSQL_PREFIX, $TDTRAC_SITE;
@@ -584,9 +587,10 @@ class tdtrac_hours {
 	 * @param string Date hours are due
 	 * @param string Start Date of payperiod
 	 * @param string End Date of payperiod
-	 * @global resource Database connection
+	 * @global object Database connection
 	 * @global string MySQL Table Prefix
 	 * @global string Site Address for redirect
+	 * @return string Success / Fail Message
 	 */
 	private function remind_email($userid, $duedate, $sdate, $edate) {
 		GLOBAL $db, $MYSQL_PREFIX, $TDTRAC_SITE;

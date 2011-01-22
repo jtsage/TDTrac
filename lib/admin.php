@@ -38,12 +38,13 @@ class tdtrac_admin {
 	
 	/** @var array Available Permissions */
 	private $perms_avail = array("addshow", "editshow", "viewshow", "addbudget", "editbudget", "viewbudget", "addhours", "edithours", "viewhours", "addtodo", "edittodo", "viewtodo");
+	
 	/** 
 	 * Create a new instance of the TO-DO module
 	 * 
 	 * @param object User object
 	 * @param array Parsed query string
-	 * @return object Todo Object
+	 * @return object Admin Object
 	 */
 	public function __construct($user, $action = null) {
 		$this->post = ($_SERVER['REQUEST_METHOD'] == "POST") ? true : false;
@@ -55,7 +56,7 @@ class tdtrac_admin {
 	/**
 	 * Output todo list operation
 	 * 
-	 * @return null
+	 * @return void
 	 */
 	public function output() {
 		if ( !$this->output_json ) { // HTML METHODS
@@ -178,7 +179,7 @@ class tdtrac_admin {
 	 * @param integer User ID
 	 * @global object DB Resource
 	 * @global string MySQL Prefix
-	 * @return null
+	 * @return void
 	 */
 	 private function user_notify($id) {
 		GLOBAL $db, $MYSQL_PREFIX;
@@ -197,7 +198,7 @@ class tdtrac_admin {
 	 * @param integer User ID
 	 * @global object DB Resource
 	 * @global string MySQL Prefix
-	 * @return null
+	 * @return void
 	 */
 	 private function user_payroll($id) {
 		GLOBAL $db, $MYSQL_PREFIX;
@@ -216,7 +217,7 @@ class tdtrac_admin {
 	 * @param integer User ID
 	 * @global object DB Resource
 	 * @global string MySQL Prefix
-	 * @return null
+	 * @return void
 	 */
 	 private function user_limit($id) {
 		GLOBAL $db, $MYSQL_PREFIX;
@@ -235,7 +236,7 @@ class tdtrac_admin {
 	 * @param integer User ID
 	 * @global object DB Resource
 	 * @global string MySQL Prefix
-	 * @return null
+	 * @return void
 	 */
 	 private function user_active($id) {
 		GLOBAL $db, $MYSQL_PREFIX;
@@ -270,9 +271,9 @@ class tdtrac_admin {
 	/**
 	 * Return a list of groups
 	 * 
-	 * @global resource Database Link
+	 * @global object Database Link
 	 * @global string MySQL Table Prefix
-	 * @param string User Name
+	 * @param integer UserID
 	 * @return array List of groups
 	 */
 	private function groups_by_user($id) {
@@ -290,10 +291,10 @@ class tdtrac_admin {
 	/**
 	 * View all permissions
 	 * 
-	 * @global resource Database Link
+	 * @global object Database Link
 	 * @global array Name of all known permissions
 	 * @global string MySQL Table Prefix
-	 * @return string HTML output
+	 * @return array HTML output
 	 */
 	private function perms_view() {
 		GLOBAL $db, $TDTRAC_PERMS, $MYSQL_PREFIX;
@@ -362,9 +363,9 @@ class tdtrac_admin {
 	
 	/**
 	 * Show permission edit form
-	 * 
-	 * @global resource Database Link
-	 * @global array Name of all known permissions
+	 *
+	 * @param integer ID of group to edit 
+	 * @global object Database Link
 	 * @global string MySQL Table Prefix
 	 * @global string Site Address for links
 	 * @return array HTML output
@@ -391,9 +392,10 @@ class tdtrac_admin {
 	/**
 	 * Save permissions to database
 	 * 
-	 * @global resource Database Link
-	 * @global array Name of all known permissions
+	 * @global object Database Link
 	 * @global string MySQL Table Prefix
+	 * @param integer Group ID to save
+	 * @return string Success / Failure Message
 	 */
 	private function perms_save($grpid) {
 		GLOBAL $db, $MYSQL_PREFIX;
@@ -414,7 +416,7 @@ class tdtrac_admin {
 	/**
 	 * Show add user form
 	 * 
-	 * @global resource Database Link
+	 * @global object Database Link
 	 * @global string MySQL Table Prefix
 	 * @global string Site Address for links
 	 * @return array HTML output
@@ -437,11 +439,11 @@ class tdtrac_admin {
 	/**
 	 * Show edit user form
 	 * 
-	 * @global resource Database Link
+	 * @global object Database Link
 	 * @global string MySQL Table Prefix
 	 * @global string Site Address for links
 	 * @param integer User ID to edit
-	 * @return string HTML output
+	 * @return array HTML output
 	 */
 	private function user_edit_form($id) {
 		GLOBAL $db, $MYSQL_PREFIX, $TDTRAC_SITE;
@@ -466,9 +468,11 @@ class tdtrac_admin {
 	/**
 	 * Logic to save user to database
 	 * 
-	 * @global resource Database Link
+	 * @param bool True if editing, False for new
+	 * @global object Database Link
 	 * @global string MySQL Table Prefix
 	 * @global double Default Payrate
+	 * @return string Success or Failure
 	 */
 	private function user_save($exists = false) {
 		GLOBAL $db, $MYSQL_PREFIX, $TDTRAC_PAYRATE;
@@ -530,10 +534,11 @@ class tdtrac_admin {
 	/**
 	 * View all users
 	 * 
-	 * @global resource Database Link
+	 * @global object Database Link
 	 * @global string MySQL Table Prefix
 	 * @global string Site Address for links
-	 * @return string HTML output
+	 * @global array JavaScript
+	 * @return array HTML output
 	 */
 	private function user_view() {
 		GLOBAL $db, $MYSQL_PREFIX, $TDTRAC_SITE, $SITE_SCRIPT;
@@ -595,10 +600,10 @@ class tdtrac_admin {
 	/**
 	 * Show group related forms
 	 * 
-	 * @global resource Database Link
+	 * @global object Database Link
 	 * @global string MySQL Table Prefix
 	 * @global string Site Address for links
-	 * @return string HTML output
+	 * @return array HTML output
 	 */
 	private function group_forms() {
 		GLOBAL $db, $MYSQL_PREFIX, $TDTRAC_SITE;
@@ -618,8 +623,9 @@ class tdtrac_admin {
 	/**
 	 * Logic to add a group
 	 * 
-	 * @global resource Database Link
+	 * @global object Database Link
 	 * @global string MySQL Table Prefix
+	 * @return void
 	 */
 	private function group_add() {
 		GLOBAL $db, $MYSQL_PREFIX;
@@ -637,8 +643,9 @@ class tdtrac_admin {
 	/**
 	 * Logic to rename a group
 	 * 
-	 * @global resource Database Link
+	 * @global object Database Link
 	 * @global string MySQL Table Prefix
+	 * @return void
 	 */
 	private function group_rename() {
 		GLOBAL $db, $MYSQL_PREFIX;
@@ -657,9 +664,9 @@ class tdtrac_admin {
 	/**
 	 * Form for changing the mail code (tdtracmail enabled installs)
 	 * 
-	 * @global resource Database Link
+	 * @global object Database Link
 	 * @global string MySQL Table Prefix
-	 * @return string HTML Output
+	 * @return array HTML Output
 	 */
 	private function mailcode_form() {
 		GLOBAL $db, $MYSQL_PREFIX;
@@ -676,8 +683,9 @@ class tdtrac_admin {
 	/**
 	 * Logic to save TDTracMail code
 	 * 
-	 * @global resource Database Link
+	 * @global object Database Link
 	 * @global string MySQL Table Prefix
+	 * @return string Success or Failure
 	 */
 	function mailcode_save() {
 		GLOBAL $db, $MYSQL_PREFIX;

@@ -56,7 +56,7 @@ class tdtrac_todo {
 	/**
 	 * Output todo list operation
 	 * 
-	 * @return null
+	 * @return void
 	 */
 	public function output() {
 		if ( !$this->output_json ) { // HTML METHODS
@@ -149,7 +149,7 @@ class tdtrac_todo {
 	 * @param integer Todo Item ID
 	 * @global object DB Resource
 	 * @global string MySQL Prefix
-	 * @return null
+	 * @return void
 	 */
 	private function mark($id) {
 		GLOBAL $db, $MYSQL_PREFIX;
@@ -169,7 +169,7 @@ class tdtrac_todo {
 	 * @param integer Todo Item ID
 	 * @global object DB Resource
 	 * @global string MySQL Prefix
-	 * @return null
+	 * @return void
 	 */
 	 private function delete($id) {
 		GLOBAL $db, $MYSQL_PREFIX;
@@ -246,9 +246,10 @@ class tdtrac_todo {
 	/**
 	 * Todo Item Save Logic
 	 * 
-	 * @global resource Database Link
+	 * @global object Database Link
 	 * @global string MySQL Table Prefix
 	 * @global bool MySQL DEBUG Status
+	 * @return string Success or Failure
 	 */
 	private function save($exists = false) {
 		GLOBAL $db, $MYSQL_PREFIX, $MYSQL_DEBUG;
@@ -288,15 +289,16 @@ class tdtrac_todo {
 	/**
 	 * Show todo views - form for pick or todo list
 	 * 
-	 * @global resource Database Link
+	 * @global object Database Link
 	 * @global string MySQL Table Prefix
-	 * @global string User Name
-	 * @param string|integer UserID, User Name, or ShowID for display
+	 * @global string Base HREF
+	 * @global array Javascript Output
+	 * @param integer UserID or ShowID for display
 	 * @param string Type of display (user, show, overdue)
-	 * @return string HTML output
+	 * @return array HTML output
 	 */
 	private function view($condition = null, $type = 'user') {
-		GLOBAL $db, $MYSQL_PREFIX, $user_name, $TDTRAC_SITE, $SITE_SCRIPT;
+		GLOBAL $db, $MYSQL_PREFIX, $TDTRAC_SITE, $SITE_SCRIPT;
 		if ( is_null($condition) ) {
 			$form = new tdform("{$TDTRAC_SITE}todo/view/user/", "form1", 10, 'genform1', 'View To-Do By User');
 			$result = $form->addDrop('id', 'Assigned To', null, db_list(get_sql_const('todo'), array('userid', 'name')), False);
@@ -356,6 +358,13 @@ class tdtrac_todo {
 		}
 	}
 
+	/**
+	 * Send a todo list as email
+	 * 
+	 * @global object Database resource
+	 * @global string MySQL Prefix
+	 * @return void
+	 */
 	private function email() {
 		GLOBAL $db, $MYSQL_PREFIX;
 		$thiscond = $this->action['id'];

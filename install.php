@@ -4,13 +4,13 @@
  * 
  * Contains main program logic.
  * @package tdtrac
- * @version 1.4.0
+ * @version 2.0.0
  * @author J.T.Sage <jtsage@gmail.com>
  */
 ob_start(); session_start(); 
 
 ## PROGRAM DETAILS. DO NOT EDIT UNLESS YOU KNOW WHAT YOU ARE DOING
-$TDTRAC_VERSION = "1.4.0";
+$TDTRAC_VERSION = "2.0.0";
 $TDTRAC_PERMS = array("addshow", "editshow", "viewshow", "addbudget", "editbudget", "viewbudget", "addhours", "edithours", "viewhours", "adduser");
 $INSTALL_FILES = array(
 	"index.php",
@@ -19,16 +19,13 @@ $INSTALL_FILES = array(
 	"./lib/install.inc.php",
 	"./lib/budget.php",
 	"./lib/dbaseconfig.php",
-	"./lib/email.php",
+	"./lib/admin.php",
 	"./lib/formlib.php",
 	"./lib/functions-load.php",
 	"./lib/htmllib.php",
-	"./lib/home.php",
 	"./lib/hours.php",
-	"./lib/login.php",
+	"./lib/user.php",
 	"./lib/messaging.php",
-	"./lib/permissions.php",
-	"./lib/reciept.php", 
 	"./lib/todo.php",
 	"./lib/tablelib.php",
 	"./lib/show.php" );

@@ -69,7 +69,7 @@ class tdtrac_mail {
 	 * 
 	 * @param object User object
 	 * @param array Parsed query string
-	 * @return object Todo Object
+	 * @return object Mail Object
 	 */
 	public function __construct($user, $action = null) {
 		$this->post = ($_SERVER['REQUEST_METHOD'] == "POST") ? true : false;
@@ -81,7 +81,7 @@ class tdtrac_mail {
 	/**
 	 * Output todo list operation
 	 * 
-	 * @return null
+	 * @return void
 	 */
 	public function output() {
 		if ( !$this->output_json ) { // HTML METHODS
@@ -120,7 +120,7 @@ class tdtrac_mail {
 	/** 
 	 * View outbox
 	 * 
-	 * @global string Database Link
+	 * @global object Database Link
 	 * @global string MySQL Table Prefix
 	 * @global string Site Address for links
 	 * @return array HTML Output
@@ -167,9 +167,10 @@ class tdtrac_mail {
 	/** 
 	 * Remove a message form the datebase
 	 * 
-	 * @global resource Database Link
+	 * @global object Database Link
 	 * @global string MySQL Table Prefix
 	 * @param integer Message ID to remove
+	 * @return void
 	 */
 	private function delete($msgid) {
 		GLOBAL $db, $MYSQL_PREFIX;
@@ -193,8 +194,9 @@ class tdtrac_mail {
 	/** 
 	 * Clear inbox
 	 * 
-	 * @global resource Database Link
+	 * @global object Database Link
 	 * @global string MySQL Table Prefix
+	 * @return void
 	 */
 	private function clear() {
 		GLOBAL $db, $MYSQL_PREFIX;

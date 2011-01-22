@@ -8,8 +8,16 @@
  * @since 1.4.0
  * @author J.T.Sage <jtsage@gmail.com>
  */
+/** Library: Help Text */
 require_once("helpnodes.php");
 
+/**
+ * Master makePage Function
+ * 
+ * @param array Body Contents
+ * @param string Page Title
+ * @return void
+ */
 function makePage($body = '', $title = '') {
 	if (!is_array($body) ) {
 		$body = preg_split("/\n/", $body);
@@ -19,12 +27,17 @@ function makePage($body = '', $title = '') {
 		$html[] = "\t\t\t\t{$fixme}";
 	}
 	$html = array_merge($html, makeFooter());
-	//ob_clean(); //Hackish method to clear any extra lines / echos before html starts
+	ob_clean(); //Hackish method to clear any extra lines / echos before html starts
 	foreach ($html as $line) {
 		echo $line . "\n";
 	}
 }
 
+/**
+ * Make infonotice box
+ * 
+ * @return array Formatted HTML
+ */
 function makeNotice() {
 	if ( isset($_SESSION['infodata']) ) { 
 		$html[] = "\t\t\t\t<div id=\"popperdiv\" class=\"infobox\"><span id=\"popper\" style=\"font-size: .7em\">{$_SESSION['infodata']}</span></div>";
@@ -35,6 +48,19 @@ function makeNotice() {
 	}
 }
 
+/** 
+ * Make page header
+ * 
+ * @param string Page Title
+ * @global string Program Version
+ * @global string Company Name
+ * @global string Base HREF
+ * @global object User object
+ * @global array JavaScript
+ * @global array Parsed Query String
+ * @global array Help Node Text
+ * @return array Formatted HTML
+ */
 function makeHeader($title = '') {
 	GLOBAL $TDTRAC_VERSION, $TDTRAC_CPNY, $TDTRAC_SITE, $user, $SITE_SCRIPT, $action, $helpnode;
 
@@ -117,6 +143,11 @@ function makeHeader($title = '') {
 	return $html;
 }
 
+/**
+ * Make page footer
+ * 
+ * @return array Formatted HTML
+ */
 function makeFooter() {
 	$html[] = "\t\t\t</div>\n\t\t</div>";
 	$html[] = "\t\t<div id=\"footer\">";

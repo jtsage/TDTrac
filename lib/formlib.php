@@ -4,7 +4,7 @@
  * 
  * Contains the form library
  * @package tdtrac
- * @version 1.3.1
+ * @version 2.0.0
  * @author J.T.Sage <jtsage@gmail.com>
  */
 
@@ -41,6 +41,7 @@ class tdform {
 	 * @param string ID of form
 	 * @param integer First tab index for form
 	 * @param string ID for enclosing div
+	 * @return object Form Object
 	 */
 	public function __construct($action = null, $id = 'genform', $tab = 1, $div = 'genform', $legend = 'Form') {
 		$this->html[] = "<div id=\"{$div}\" class=\"genform\"><form method=\"post\" action=\"{$action}\" name=\"{$id}\">";
@@ -54,7 +55,8 @@ class tdform {
 	 * 
 	 * @param string Name of submit button
 	 * @param string Extra text beform submit button
-	 * @return string HTML Formatted output
+	 * @param bool Suppress submit button on true
+	 * @return array HTML Formatted output
 	 */
 	public function output($actioname = 'Submit', $extra = null, $nobutton = False) {
 		$output = $this->html;
@@ -105,6 +107,7 @@ class tdform {
 	 * @param string Hover text for element
 	 * @param string Preset value of element
 	 * @param bool Element is enabled
+	 * @param string ID for element
 	 * @return bool True on success
 	 */
 	public function addDate($name = 'date', $text = null, $title = null, $preset = null, $enabled = True, $id = null ) {
@@ -126,7 +129,7 @@ class tdform {
 
 	
 	/**
-	 * Add a SELECT method to from
+	 * Add a AUTOCOMPLETE TEXT method to from
 	 * 
 	 * @param string Name of input field
 	 * @param string Text to display before input

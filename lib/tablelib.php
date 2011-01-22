@@ -80,6 +80,7 @@ class tdtable {
 	 * @param string ID of the table
 	 * @param string Class type for the table
 	 * @param bool Use action type items
+	 * @return object
 	 */
 	public function __construct($id = 'tdtable', $class = 'datatable', $actions = true, $from = false) {
 		$this->html[] = "<div id=\"{$id}\">";
@@ -92,7 +93,8 @@ class tdtable {
 	/**
 	 * Ouput the finished table
 	 * 
-	 * @return string Formatted HTML
+	 * @param bool Return string (true) or array (false)
+	 * @return array|string Formatted HTML
 	 */
 	public function output($string = true) {
 		if ( $this->finalsub ) {
@@ -287,6 +289,7 @@ class tdtable {
 	 * Add an action to each table row
 	 * 
 	 * @param string Action name (or array of names)
+	 * @return void
 	 */
 	public function addAction($name) {
 		if ( is_array($name) ) {
@@ -355,6 +358,8 @@ class tdtable {
 	/**
 	 * Action: Budget pending items notification
 	 * 
+	 * @global string Base HREF
+	 * @global array Javascript
 	 * @param array Raw SQL Array
 	 * @return string Formatted HTML
 	 */
@@ -383,6 +388,8 @@ class tdtable {
 	/**
 	 * Action: Budget reimbursment items notification
 	 * 
+	 * @global string base HREF
+	 * @global array JavaScript
 	 * @param array Raw SQL Array
 	 * @return string Formatted HTML
 	 */
@@ -429,6 +436,7 @@ class tdtable {
 	/**
 	 * Action: Budget view item button
 	 * 
+	 * @global string Base HREF
 	 * @param array Raw SQL Array
 	 * @return string Formatted HTML
 	 */
@@ -440,6 +448,7 @@ class tdtable {
 	/**
 	 * Action: Budget edit item button
 	 * 
+	 * @global string Base HREF
 	 * @param array Raw SQL Array
 	 * @return string Formatted HTML
 	 */
@@ -451,6 +460,8 @@ class tdtable {
 	/**
 	 * Action: Budget delete item button
 	 * 
+	 * @global string Base HREF
+	 * @global array JavaScript
 	 * @param array Raw SQL Array
 	 * @return string Formatted HTML
 	 */
@@ -475,6 +486,7 @@ class tdtable {
 	/**
 	 * Action: Payroll edit item button
 	 * 
+	 * @global string Base HREF
 	 * @param array Raw SQL Array
 	 * @return string Formatted HTML
 	 */
@@ -486,6 +498,8 @@ class tdtable {
 	/**
 	 * Action: Payroll delete item button
 	 * 
+	 * @global string Base HREF
+	 * @global array JavaScript
 	 * @param array Raw SQL Array
 	 * @return string Formatted HTML
 	 */
@@ -509,6 +523,8 @@ class tdtable {
 	/**
 	 * Action: Message delete item button
 	 * 
+	 * @global string Base HREF
+	 * @global array JavaScript
 	 * @param array Raw SQL Array
 	 * @return string Formatted HTML
 	 */
@@ -532,6 +548,8 @@ class tdtable {
 	/**
 	 * Action: Todo delete item button
 	 * 
+	 * @global string Base HREF
+	 * @global array JavaScript
 	 * @param array Raw SQL Array
 	 * @return string Formatted HTML
 	 */
@@ -556,6 +574,7 @@ class tdtable {
 	/**
 	 * Action: Perms edit item button
 	 * 
+	 * @global string Base HREF
 	 * @param array Raw SQL Array
 	 * @return string Formatted HTML
 	 */
@@ -568,6 +587,7 @@ class tdtable {
 	/**
 	 * Action: Todo edit item button
 	 * 
+	 * @global string Base HREF
 	 * @param array Raw SQL Array
 	 * @return string Formatted HTML
 	 */
@@ -579,6 +599,8 @@ class tdtable {
 	/**
 	 * Action: Todo mark item done button
 	 * 
+	 * @global string Base HREF
+	 * @global array JavaScript
 	 * @param array Raw SQL Array
 	 * @return string Formatted HTML
 	 */

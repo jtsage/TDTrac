@@ -39,6 +39,7 @@ require_once("hours.php");
  * @param string Message to send (or false)
  * @param string Location to navigate to
  * @global string Address to redirct to
+ * @return void
  */
 function thrower($msg, $loc='') {
 	GLOBAL $TDTRAC_SITE;
@@ -55,7 +56,7 @@ function thrower($msg, $loc='') {
  * @param string SQL argument
  * @param string $columns Name of column to return as single list
  * @param array $columns Names of 2 columsn to return as double list
- * @global resource Database Link
+ * @global object Database Link
  * @return array Single or Double list of items
  */
 function db_list($sql, $columns) {
@@ -77,8 +78,9 @@ function db_list($sql, $columns) {
  * Return a SQL Query constant by name
  * 
  * @param string Name of SQL Query
+ * @param string Unused?
  * @global string MySQL Table Prefix
- * @global string User Name
+ * @global object User object
  * @return string Query string or FALSE
  */
 function get_sql_const($name, $extra = null) {

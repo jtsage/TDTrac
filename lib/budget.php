@@ -45,7 +45,7 @@ class tdtrac_budget {
 	 * 
 	 * @param object User object
 	 * @param array Parsed query string
-	 * @return object Todo Object
+	 * @return object Budget Object
 	 */
 	public function __construct($user, $action = null) {
 		$this->post = ($_SERVER['REQUEST_METHOD'] == "POST") ? true : false;
@@ -57,7 +57,7 @@ class tdtrac_budget {
 	/**
 	 * Output todo list operation
 	 * 
-	 * @return null
+	 * @return void
 	 */
 	public function output() {
 		if ( !$this->output_json ) { // HTML METHODS
@@ -183,8 +183,10 @@ class tdtrac_budget {
 	/**
 	 * Remove a reciept from the database
 	 * 
-	 * @global resource Datebase Link
+	 * @global object Datebase Link
 	 * @global string MySQL Table Prefix
+	 * @param integer Reciept ID
+	 * @return string Success / Failure Message
 	 */
 	private function reciept_delete($id) {
 		GLOBAL $db, $MYSQL_PREFIX;
@@ -200,8 +202,9 @@ class tdtrac_budget {
 	/**
 	 * Associate reciept with budget item
 	 * 
-	 * @global resource Datebase Link
+	 * @global object Datebase Link
 	 * @global string MySQL Table Prefix
+	 * @return string Success / Failure Message
 	 */
 	private function reciept_save() {
 		GLOBAL $db, $MYSQL_PREFIX;
@@ -228,14 +231,14 @@ class tdtrac_budget {
 	/**
 	 * View box for existing reciept
 	 * 
-	 * @global resource Database Link
+	 * @global object Database Link
 	 * @global string MySQL Table Prefix
-	 * @global string User Name
 	 * @global string Site Address for links
-	 * @return string HTML Formatted information
+	 * @global array JavaScript
+	 * @return array HTML Formatted information
 	 */
 	private function reciept_view() {
-		GLOBAL $db, $MYSQL_PREFIX, $user_name, $TDTRAC_SITE, $SITE_SCRIPT;
+		GLOBAL $db, $MYSQL_PREFIX, $TDTRAC_SITE, $SITE_SCRIPT;
 		if ( isset($this->action['num']) && !is_numeric($this->action['num']) ) {
 			thrower("Error :: Data Mismatch Detected");
 		}
@@ -281,9 +284,9 @@ class tdtrac_budget {
 	 * Show form to associate reciept with current budget record
 	 * 
 	 * @param integer Reciept ID
-	 * @global resource Datebase Link
+	 * @global object Datebase Link
 	 * @global string MySQL Table Prefix
-	 * @return string HTML Output
+	 * @return array HTML Output
 	 */
 	private function list_form($rcpt = 0) {
 		GLOBAL $db, $MYSQL_PREFIX;
@@ -303,8 +306,9 @@ class tdtrac_budget {
 	 * Logic to mark item reimbursed
 	 * 
 	 * @param integer Budget item to mark
-	 * @global resource Database Connection
+	 * @global object Database Connection
 	 * @global string MySQL Table Prefix
+	 * @return void
 	 */
 	private function got_pending($id) {
 		GLOBAL $db, $MYSQL_PREFIX;
@@ -320,8 +324,9 @@ class tdtrac_budget {
 	 * Logic to mark item reimbursed
 	 * 
 	 * @param integer Budget item to mark
-	 * @global resource Database Connection
+	 * @global object Database Connection
 	 * @global string MySQL Table Prefix
+	 * @return void
 	 */
 	private function got_reimb($id) {
 		GLOBAL $db, $MYSQL_PREFIX;
@@ -358,11 +363,10 @@ class tdtrac_budget {
 	 * Form to add a new budget item
 	 * 
 	 * @param integer Reciept Number if applicable
-	 * @global resource Database Connection
+	 * @global object Database Connection
 	 * @global string MySQL Table Prefix
 	 * @global string TDTrac site address, for form actions
-	 * @return string HTML Output
-	 * @version 1.4.0
+	 * @return array HTML Output
 	 */
 	private function add_form($rcpt = 0) {
 		GLOBAL $db, $MYSQL_PREFIX, $TDTRAC_SITE;
@@ -386,11 +390,10 @@ class tdtrac_budget {
 	 * Form to edit a budget item
 	 * 
 	 * @param integer Id of Budget Item
-	 * @global resource Database Connection
+	 * @global object Database Connection
 	 * @global string MySQL Table Prefix
 	 * @global string TDTrac site address, for form actions
-	 * @return string HTML Output
-	 * @version 1.4.0
+	 * @return array HTML Output
 	 */
 	private function edit_form($id) {
 		GLOBAL $db, $MYSQL_PREFIX, $TDTRAC_SITE;
@@ -420,8 +423,8 @@ class tdtrac_budget {
 	/**
 	 * Logic to save a budget item
 	 * 
-	 * @param bool New record? 
-	 * @global resource Database Connection
+	 * @param bool False on new record, true on overwrite
+	 * @global object Database Connection
 	 * @global string MySQL Table Prefix
 	 * @return string Success / Failure message
 	 */
@@ -485,8 +488,9 @@ class tdtrac_budget {
 	 * Logic to delete a budget item
 	 * 
 	 * @param integer Budget item to remove
-	 * @global resource Database Connection
+	 * @global object Database Connection
 	 * @global string MySQL Table Prefix
+	 * @return void
 	 */
 	private function delete($id) {
 		GLOBAL $db, $MYSQL_PREFIX;
@@ -502,11 +506,10 @@ class tdtrac_budget {
 	/**
 	 * Form to select show budget to view
 	 * 
-	 * @global resource Database Connection
+	 * @global object Database Connection
 	 * @global string MySQL Table Prefix
 	 * @global string TDTrac site address, for form actions
-	 * @return string HTML Output
-	 * @version 1.4.0
+	 * @return array HTML Output
 	 */
 	private function view_form() {
 		GLOBAL $db, $MYSQL_PREFIX, $TDTRAC_SITE;
@@ -523,16 +526,13 @@ class tdtrac_budget {
 	/** 
 	 * Logic to display a searched item
 	 * 
-	 * @param string keywords
-	 * @global resource Database Link
-	 * @global string User Name
+	 * @global object Database Link
 	 * @global string MySQL Table Prefix
 	 * @global string TDTrac site address for links
-	 * @return string HTML output
-	 * @since 1.3.1
+	 * @return array HTML output
 	 */
 	private function search() {
-		GLOBAL $db, $user_name, $MYSQL_PREFIX, $TDTRAC_SITE;
+		GLOBAL $db, $MYSQL_PREFIX, $TDTRAC_SITE;
 		$keywords = $this->action['keywords'];
 		
 		$sqlwhere  = "( category LIKE '%" . mysql_real_escape_string($keywords) . "%' OR "; 
@@ -564,14 +564,14 @@ class tdtrac_budget {
 	 * Logic to display a show's budget
 	 * 
 	 * @param integer Id of Show
-	 * @param integer Special Budget type
-	 * @global resource Database Connection
+	 * @param string Special Budget type
+	 * @global object Database Connection
 	 * @global string MySQL Table Prefix
 	 * @global bool Daily payrate vs. Hourly Payrate
 	 * @global double Default payrate
 	 * @global string TDTrac site address, for form actions
-	 * @global array Site Scripts
-	 * @return string HTML Output
+	 * @global array JavaScript
+	 * @return array Formatted HTML
 	 */
 	private function view($showid, $type) {
 		GLOBAL $db, $MYSQL_PREFIX, $TDTRAC_DAYRATE, $TDTRAC_PAYRATE, $TDTRAC_SITE, $SITE_SCRIPT;
@@ -669,9 +669,9 @@ class tdtrac_budget {
 	 * Send budget via email
 	 * 
 	 * @param integer Show ID for budget
-	 * @global resource Database connection
-	 * @global string User Name
+	 * @global object Database connection
 	 * @global string MySQL Table Prefix
+	 * @return void
 	 */
 	private function email($showid) {
 		GLOBAL $db, $MYSQL_PREFIX;
@@ -718,11 +718,11 @@ class tdtrac_budget {
 /**
  * Check for pending reciepts
  * 
- * @global resource Database Link
+ * @global object Database Link
  * @global string MySQL Table Prefix
- * @global string User Name
+ * @global string User Object
  * @global string Site Address for links
- * @return string HTML Formatted information
+ * @return array HTML Formatted information
  */
 function reciept_check() {
 	GLOBAL $db, $MYSQL_PREFIX, $user, $TDTRAC_SITE;
