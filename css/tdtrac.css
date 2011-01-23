@@ -212,38 +212,6 @@ ul.datalist li {
 	margin-bottom: 0px;
 }
 
-#menu {
-	position: relative;
-	height: 3.5em;
-	padding: 0em 1.0em 0em 1.0em;
-	margin-bottom: 0px;
-	background-image: -webkit-gradient(linear,left bottom,left top,color-stop(0.31, rgb(2,23,54)),color-stop(1, rgb(0,82,153)));
-	background-image: -moz-linear-gradient(center bottom,rgb(2,23,54) 31%,rgb(0,82,153) 100%);
-}
-
-#menu ul {
-	position: absolute;
-	top: 1.1em;
-}
-
-#menu ul li {
-	position: relative;
-	display: inline;
-}
-
-#menu ul li a {
-	padding: 0.5em 1.0em 0.9em 1.0em;
-	color: #fff;
-	text-decoration: none;
-}
-
-#menu ul li a:hover {
-	text-decoration: underline;
-}
-
-#menu ul li a.active {
-	background: url('/images/hiline.png') no-repeat bottom center;
-}
 
 #menubottom {
 	background: #fff url('/images/border1.gif') repeat-x;
@@ -538,3 +506,78 @@ dl.dashboard dd {
 div.dashmenu {
 	padding-left: 5%;
 }
+
+
+
+#menu {
+	position: relative;
+	height: 3.5em;
+	padding: 0em 1.0em 0em 1.0em;
+	margin-bottom: 0px;
+	background-image: -webkit-gradient(linear,left bottom,left top,color-stop(0.31, rgb(2,23,54)),color-stop(1, rgb(0,82,153)));
+	background-image: -moz-linear-gradient(center bottom,rgb(2,23,54) 31%,rgb(0,82,153) 100%);
+}
+
+#menu ul li a.active {
+	background: url('/images/hiline.png') no-repeat 1.1em 1.2em;
+}
+
+
+ul.topnav {  
+    list-style: none;  
+    padding: 0 20px; 
+    padding-top: .8em;
+    margin: 0;  
+    float: left;   
+}  
+ul.topnav li {  
+    float: left;  
+    margin: 0;  
+    padding: 0 15px 0 0;  
+    position: relative; /*--Declare X and Y axis base for sub navigation--*/  
+}  
+ul.topnav li a{  
+    padding: 0.5em .3em 0.9em 1.0em;
+    color: #fff;  
+    display: block;  
+    text-decoration: none;  
+    float: left;  
+}  
+ul.topnav li a:hover{  
+    text-decoration: underline;
+}  
+ul.topnav li span { /*--Drop down trigger styles--*/  
+    width: 17px;  
+    height: 35px;  
+    float: left;  
+    background: url(/images/subnav_btn.gif) no-repeat center top;  
+}  
+ul.topnav li span.subhover {background-position: center bottom; cursor: pointer;} /*--Hover effect for trigger--*/  
+ul.topnav li ul.subnav {  
+    list-style: none;  
+    position: absolute; /*--Important - Keeps subnav from affecting main navigation flow--*/  
+    left: 0; top: 35px;  
+    background: #333;  
+    font-size: .9em;
+    margin: 0; padding: 0;  
+    display: none;  
+    float: left;  
+    width: 170px;  
+    border: 1px solid #111;  
+}  
+ul.topnav li ul.subnav li{  
+    margin: 0; padding: 0;  
+    border-top: 1px solid #252525; /*--Create bevel effect--*/  
+    border-bottom: 1px solid #444; /*--Create bevel effect--*/  
+    clear: both;  
+    width: 170px;  
+}  
+html ul.topnav li ul.subnav li a {  
+    float: left;  
+    width: 145px;  
+    background: #004289;
+    padding-left: 20px;  
+}  
+html ul.topnav li ul.subnav li a:hover { /*--Hover effect for subnav links--*/  
+    background: #021736;
+}  

@@ -259,12 +259,12 @@ class tdtrac_admin {
 		global $TDTRAC_SITE;
 		if ( !$this->user->admin ) { return array('',''); }
 		$html[] = "<ul class=\"linklist\"><li><h3>Administrative Tasks</h3><ul class=\"linklist\">";
-		$html[] = "<li>Manage users, groups and permissions.</li>";
-		$html[] = "<li><a href=\"{$TDTRAC_SITE}admin/useradd/\">Add User</a></li>";
-		$html[] = "<li><a href=\"{$TDTRAC_SITE}admin/users/\">View Users</a></li>";
-		$html[] = "<li><a href=\"{$TDTRAC_SITE}admin/groups/\">Add / Edit Groups</a></li>"; 
-		$html[] = "<li><a href=\"{$TDTRAC_SITE}admin/perms/\">View Permissions</a></li>\n";
-		$html[] = "<li><a href=\"{$TDTRAC_SITE}admin/mail/\">Set TDTracMail Subject Code</a></li></ul></li></ul>";
+		$html[] = "  <li>Manage users, groups and permissions.</li>";
+		$html[] = "  <li><a href=\"{$TDTRAC_SITE}admin/useradd/\">Add User</a></li>";
+		$html[] = "  <li><a href=\"{$TDTRAC_SITE}admin/users/\">View Users</a></li>";
+		$html[] = "  <li><a href=\"{$TDTRAC_SITE}admin/groups/\">Add / Edit Groups</a></li>"; 
+		$html[] = "  <li><a href=\"{$TDTRAC_SITE}admin/perms/\">View Permissions</a></li>";
+		$html[] = "  <li><a href=\"{$TDTRAC_SITE}admin/mail/\">Set TDTracMail Subject Code</a></li></ul></li></ul>";
 		return $html;
 	}
 

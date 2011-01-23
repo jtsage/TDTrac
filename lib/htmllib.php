@@ -65,12 +65,26 @@ function makeHeader($title = '') {
 	GLOBAL $TDTRAC_VERSION, $TDTRAC_CPNY, $TDTRAC_SITE, $user, $SITE_SCRIPT, $action, $helpnode;
 
 	$SITE_SCRIPT[] = "$(function() {";
-	$SITE_SCRIPT[] = "\t$( \"#help\" ).dialog({ autoOpen: false, width: 500, modal: true });";
+	$SITE_SCRIPT[] = "	$( \"#help\" ).dialog({ autoOpen: false, width: 500, modal: true });";
 	$SITE_SCRIPT[] = "});";
 	$SITE_SCRIPT[] = "$(function() {";
-	$SITE_SCRIPT[] = "\t$( \"#helplink\" ).click(function() {";
-	$SITE_SCRIPT[] = "\t\t$( \"#help\" ).dialog('open'); return false;";
-	$SITE_SCRIPT[] = "\t});";
+	$SITE_SCRIPT[] = "	$( \"#helplink\" ).click(function() {";
+	$SITE_SCRIPT[] = "		$( \"#help\" ).dialog('open'); return false;";
+	$SITE_SCRIPT[] = "	});";
+	$SITE_SCRIPT[] = "});";
+	$SITE_SCRIPT[] = "$(document).ready(function(){";
+	$SITE_SCRIPT[] = "	$('ul.subnav').parent().append('<span></span>');";
+	$SITE_SCRIPT[] = "	$('ul.topnav li span').click(function() { ";
+	$SITE_SCRIPT[] = "		$(this).parent().find('ul.subnav').slideDown('fast').show();";
+	$SITE_SCRIPT[] = "		$(this).parent().hover(function() {";
+	$SITE_SCRIPT[] = "		}, function(){";
+	$SITE_SCRIPT[] = "			$(this).parent().find('ul.subnav').slideUp('slow'); ";
+	$SITE_SCRIPT[] = "		});";
+	$SITE_SCRIPT[] = "		}).hover(function() {";
+	$SITE_SCRIPT[] = "			$(this).addClass('subhover'); ";
+	$SITE_SCRIPT[] = "		}, function(){	";
+	$SITE_SCRIPT[] = "			$(this).removeClass('subhover');";
+	$SITE_SCRIPT[] = "	});";
 	$SITE_SCRIPT[] = "});";
 
 	$html = array();
@@ -88,7 +102,7 @@ function makeHeader($title = '') {
 	foreach ( $SITE_SCRIPT as $line ) {
 		$html[] = "\t\t{$line}";
 	}
-	$html[] = "\t</script>\n</head>\n\n<body>";
+	$html[] = "\n\t</script>\n</head>\n\n<body>";
 	if ( $action['module'] == 'index' ) {
 		$hdivTitle = $helpnode['index']['title'];
 		$hdivData = $helpnode['index']['data'];
@@ -113,7 +127,7 @@ function makeHeader($title = '') {
 	$html[] = "\t\t\t<div id=\"headercontent\">";
 	$html[] = "\t\t\t\t<h1><span style=\"letter-spacing: -5px\">TD<span style=\"color: #C3593C;\">T</span></span><span style=\"color: #C3593C;\">rac</span>{$TDTRAC_CPNY}<sup>{$TDTRAC_VERSION}</sup></h1>";
 	if ( $user->loggedin ) { 
-		$temp = "\t\t\t\t<h2 style=\"margin-left: 1.5em\"><strong>Logged In User:</strong> {$user->name} (ID: {$user->id}) <strong>Group: {$user->group}</strong> "; 
+		$temp = "\t\t\t\t<h2 style=\"margin-left: 1.5em\"><strong>Logged In User:</strong> {$user->name} (ID::{$user->id}/Group::{$user->group})"; 
 	} else {
 		$temp = "\t\t\t\t<h2 style=\"margin-left: 1.5em\">Budget and Payroll Tracking";
 	}
@@ -129,7 +143,7 @@ function makeHeader($title = '') {
 	}
 
 	$menu[] = array(true, 'Dashboard', '', 'Main Dashboard');
-	$menu[] = array($user->loggedin, 'Change Password', 'user/password/', 'Change Your Password');
+	$menu[] = array($user->loggedin, 'Password', 'user/password/', 'Change Your Password');
 	$menu[] = array(true, 'Budget', 'budget/', 'Manage Show Budgets', array(
 		array(($user->loggedin && $user->can('addbudget')), 'Add Expense', 'budget/add/', 'Add An Expense'),
 		array(($user->loggedin && $user->can('viewbudget')), 'View Expenses', 'budget/view/', 'View Show Budgets')
@@ -141,8 +155,14 @@ function makeHeader($title = '') {
 		array(($user->loggedin && $user->admin), 'View Unpaid Hours', 'hours/view/type:unpaid/', 'View Pending Payroll')
 	));
 	$menu[] = array(true, 'Shows', 'shows/', 'Manage Shows', array(
-		array(($user->loggedin && $user->can('addshows')), 'Add Show', 'shows/add/', 'Add a Show'),
-		array(($user->loggedin && $user->can('viewshows')), 'View Shows', 'shows/view/', 'View tracked Shows')
+		array(($user->loggedin && $user->can('addshow')), 'Add Show', 'shows/add/', 'Add a Show'),
+		array(($user->loggedin && $user->can('viewshow')), 'View Shows', 'shows/view/', 'View tracked Shows')
+	));
+	$menu[] = array(true, 'To-Do', 'todo/', 'Manage Todo Lists', array(
+		array(($user->loggedin), 'View Your List', "todo/view/id:{$user->id}/type:user/", 'View Your Todo List'),
+		array(($user->loggedin && $user->can('viewtodo')), 'View Overdue', 'todo/view/id:1/type:overdue', 'View Overdue Todo Items'),
+		array(($user->loggedin && $user->can('viewtodo')), 'View Todo Items', 'todo/view/', 'View Todo Lists'),
+		array(($user->loggedin && $user->can('addtodo')), 'Add Todo Item', 'todo/add', 'Add Todo List Item')
 	));
 	$menu[] = array($user->admin, 'Admin', 'admin/', 'Administration', array(
 		array(true, 'Add User', 'admin/useradd/', 'Add A User'),
@@ -150,22 +170,23 @@ function makeHeader($title = '') {
 		array(true, 'View Permissions', 'admin/perms/', 'Manage Permissions')
 	));
 	$menu[] = array($user->loggedin, 'Logout', 'user/logout/', 'Log out of system');
-	
-	$html[] = "<!--";
+
+	$html[] = "\t\t<div id=\"headerpic\"></div>\n\t\t<div id=\"menu\">\n\t\t\t<ul class=\"topnav\">";
 	foreach ( $menu as $key => $item ) {
 		if ( $item[0] ) {
 			$mitem = array();
 			$mitem[] = "<li><a tabindex=\"".($key+90)."\" href=\"{$TDTRAC_SITE}{$item[2]}\" title=\"{$item[3]}\" ";
 			if ( preg_match("/\//", $item[2]) ) {
 				$tester = preg_split("/\//", $item[2]);
-				if ( $action['action'] == $tester[1] ) {
+				if ( ( $action['action'] == $tester[1] || $action['module'] == $tester[0] ) && $key <> 7 ) {
 					$mitem[] = "class=\"active\" ";
-				}
-			} else {
-				if ( $action['module'] == $item[2] || ( $item[2] == "" && $action['module'] == 'index' && $key == 0)) {
+				} 
+			} else { 
+				if ( $key == 0 && $action['module'] == 'index' ) {
 					$mitem[] = "class=\"active\" ";
 				}
 			}
+					
 			$mitem[] = ">{$item[1]}</a>";
 			$subs = "";
 			if ( count($item) > 4 ) {
@@ -175,27 +196,14 @@ function makeHeader($title = '') {
 					}
 				}
 				if ( !empty($subs) ) {
-					$mitem[] = "<ul class=\"submenu\">{$subs}</ul>";
+					$mitem[] = "<ul class=\"subnav\">{$subs}</ul>";
 				}
 			}
 			$html[] = "\t\t\t\t".join($mitem)."</li>";
 		}
 	}
 	
-	
-	$html[] = "-->";
-	
-
-	$html[] = "\t\t<div id=\"headerpic\"></div>\n\t\t<div id=\"menu\">\n\t\t\t<ul class=\"topnav\">";
-	$html[] = "\t\t\t\t<li><a tabindex=\"90\" href=\"{$TDTRAC_SITE}\"".(($action['module'] == "index")?" class=\"active\"":"")." title=\"Main Index\">Home</a></li>";
-	$html[] = ($user->loggedin)?"\t\t\t\t<li><a tabindex=\"91\" href=\"{$TDTRAC_SITE}user/password/\""	.(($action['action'] == "password")	?" class=\"active\"":"")." title=\"Change Your Password\">Change Password</a></li>":"";
-	$html[] = "\t\t\t\t<li><a tabindex=\"92\" href=\"{$TDTRAC_SITE}budget/\""		.(($action['module'] == "budget")	?" class=\"active\"":"")." title=\"Budget Tracking\">Budget</a></li>";
-	$html[] = "\t\t\t\t<li><a tabindex=\"93\" href=\"{$TDTRAC_SITE}hours/\""		.(($action['module'] == "hours")	?" class=\"active\"":"")." title=\"Payroll Tracking\">Payroll</a></li>";
-	$html[] = "\t\t\t\t<li><a tabindex=\"94\" href=\"{$TDTRAC_SITE}shows/\""		.(($action['module'] == "shows")	?" class=\"active\"":"")." title=\"Show Managment\">Shows</a></li>";
-	$html[] = "\t\t\t\t<li><a tabindex=\"95\" href=\"{$TDTRAC_SITE}todo/\""			.(($action['module'] == "todo")	?" class=\"active\"":"")." title=\"To-Do Lists\">ToDo</a></li>";
-	$html[] = ($user->admin) ? "\t\t\t\t<li><a tabindex=\"96\" href=\"{$TDTRAC_SITE}admin/\""			.(($action['module'] == "admin")	?" class=\"active\"":"")." title=\"User, Group &amp; Permissions Management\">Admin</a></li>" : "";
-	$html[] = ($user->loggedin)?"\t\t\t\t<li><a tabindex=\"97\" href=\"{$TDTRAC_SITE}user/logout/\" title=\"Logout of system\">Logout</a></li>":"";
-	$html[] = "\t\t\t\t<li><a tabindex=\"98\" href=\"\" id=\"helplink\" title=\"Help Popup\" >Help</a></li>";
+	$html[] = "\t\t\t\t<li><a tabindex=\"100\" href=\"\" id=\"helplink\" title=\"Help Popup\" >Help</a></li>";
 	$html[] = "\t\t\t</ul>\n\t\t</div>\n\t\t<div id=\"menubottom\"></div>\n\n\t\t<div id=\"content\">\n\t\t\t<div id=\"normalcontent\">";
 
 	return $html;
