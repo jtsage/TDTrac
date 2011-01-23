@@ -111,7 +111,7 @@ function makeHeader($title = '') {
 	$html[] = "\t<div id=\"outer\">";
 	$html[] = "\t\t<div id=\"header\">";
 	$html[] = "\t\t\t<div id=\"headercontent\">";
-	$html[] = "\t\t\t\t<h1><span style=\"letter-spacing: -5px\">TDT</span>rac{$TDTRAC_CPNY}<sup>{$TDTRAC_VERSION}</sup></h1>";
+	$html[] = "\t\t\t\t<h1><span style=\"letter-spacing: -5px\">TD<span style=\"color: #C3593C;\">T</span></span><span style=\"color: #C3593C;\">rac</span>{$TDTRAC_CPNY}<sup>{$TDTRAC_VERSION}</sup></h1>";
 	if ( $user->loggedin ) { 
 		$temp = "\t\t\t\t<h2 style=\"margin-left: 1.5em\"><strong>Logged In User:</strong> {$user->name} (ID: {$user->id}) <strong>Group: {$user->group}</strong> "; 
 	} else {
@@ -127,6 +127,64 @@ function makeHeader($title = '') {
 		}
 		
 	}
+
+	$menu[] = array(true, 'Dashboard', '', 'Main Dashboard');
+	$menu[] = array($user->loggedin, 'Change Password', 'user/password/', 'Change Your Password');
+	$menu[] = array(true, 'Budget', 'budget/', 'Manage Show Budgets', array(
+		array(($user->loggedin && $user->can('addbudget')), 'Add Expense', 'budget/add/', 'Add An Expense'),
+		array(($user->loggedin && $user->can('viewbudget')), 'View Expenses', 'budget/view/', 'View Show Budgets')
+	));
+	$menu[] = array(true, 'Payroll', 'hours/', 'Manage Payroll', array(
+		array(($user->loggedin && $user->onpayroll && $user->can('addhours')), 'Add Own Hours', 'hours/add/own:1/', 'Add Hours to Yourself'),
+		array(($user->loggedin && !$user->isemp && $user->can('addhours')), 'Add Hours', 'hours/add/', 'Add Payroll Hours'),
+		array(($user->loggedin && $user->can('viewhours')), 'View Hours', 'hours/view/', 'View Payroll History'),
+		array(($user->loggedin && $user->admin), 'View Unpaid Hours', 'hours/view/type:unpaid/', 'View Pending Payroll')
+	));
+	$menu[] = array(true, 'Shows', 'shows/', 'Manage Shows', array(
+		array(($user->loggedin && $user->can('addshows')), 'Add Show', 'shows/add/', 'Add a Show'),
+		array(($user->loggedin && $user->can('viewshows')), 'View Shows', 'shows/view/', 'View tracked Shows')
+	));
+	$menu[] = array($user->admin, 'Admin', 'admin/', 'Administration', array(
+		array(true, 'Add User', 'admin/useradd/', 'Add A User'),
+		array(true, 'View Users', 'admin/users/', 'View All Users'),
+		array(true, 'View Permissions', 'admin/perms/', 'Manage Permissions')
+	));
+	$menu[] = array($user->loggedin, 'Logout', 'user/logout/', 'Log out of system');
+	
+	$html[] = "<!--";
+	foreach ( $menu as $key => $item ) {
+		if ( $item[0] ) {
+			$mitem = array();
+			$mitem[] = "<li><a tabindex=\"".($key+90)."\" href=\"{$TDTRAC_SITE}{$item[2]}\" title=\"{$item[3]}\" ";
+			if ( preg_match("/\//", $item[2]) ) {
+				$tester = preg_split("/\//", $item[2]);
+				if ( $action['action'] == $tester[1] ) {
+					$mitem[] = "class=\"active\" ";
+				}
+			} else {
+				if ( $action['module'] == $item[2] || ( $item[2] == "" && $action['module'] == 'index' && $key == 0)) {
+					$mitem[] = "class=\"active\" ";
+				}
+			}
+			$mitem[] = ">{$item[1]}</a>";
+			$subs = "";
+			if ( count($item) > 4 ) {
+				foreach( $item[4] as $subitem ) {
+					if ( $subitem[0] ) {
+						$subs .= "<li><a href=\"{$TDTRAC_SITE}{$subitem[2]}\" title=\"{$subitem[3]}\">{$subitem[1]}</a></li>";
+					}
+				}
+				if ( !empty($subs) ) {
+					$mitem[] = "<ul class=\"submenu\">{$subs}</ul>";
+				}
+			}
+			$html[] = "\t\t\t\t".join($mitem)."</li>";
+		}
+	}
+	
+	
+	$html[] = "-->";
+	
 
 	$html[] = "\t\t<div id=\"headerpic\"></div>\n\t\t<div id=\"menu\">\n\t\t\t<ul class=\"topnav\">";
 	$html[] = "\t\t\t\t<li><a tabindex=\"90\" href=\"{$TDTRAC_SITE}\"".(($action['module'] == "index")?" class=\"active\"":"")." title=\"Main Index\">Home</a></li>";

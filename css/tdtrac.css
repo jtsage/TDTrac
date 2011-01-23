@@ -53,13 +53,11 @@ h3,h4 {
 h3 {
 	font-size: 1.7em;
 	padding-right: 34px;
-	background-image: url('/images/db1.gif');
 }
 
 h4 {
 	font-size: 1.2em;
 	padding-right: 28px;
-	background-image: url('/images/db2.gif');
 }
 
 .contentarea {
@@ -216,10 +214,11 @@ ul.datalist li {
 
 #menu {
 	position: relative;
-	background: #7F8400 url('/images/menubg.gif') repeat-x top left;
 	height: 3.5em;
 	padding: 0em 1.0em 0em 1.0em;
 	margin-bottom: 0px;
+	background-image: -webkit-gradient(linear,left bottom,left top,color-stop(0.31, rgb(2,23,54)),color-stop(1, rgb(0,82,153)));
+	background-image: -moz-linear-gradient(center bottom,rgb(2,23,54) 31%,rgb(0,82,153) 100%);
 }
 
 #menu ul {
@@ -243,7 +242,7 @@ ul.datalist li {
 }
 
 #menu ul li a.active {
-	background: #7F8400 url('/images/menuactive.gif') repeat-x top left;
+	background: url('/images/hiline.png') no-repeat bottom center;
 }
 
 #menubottom {
@@ -361,7 +360,8 @@ div.infobox {
 	border: 2px solid #ddd;
 	-webkit-border-radius: 5px;
 	-moz-border-radius: 5px;
-	background: #7F8400 url('/images/menubg.gif') repeat top left;
+	background-image: -webkit-gradient(linear,left bottom,left top,color-stop(0.31, rgb(2,23,54)),color-stop(1, rgb(0,82,153)));
+	background-image: -moz-linear-gradient(center bottom,rgb(2,23,54) 31%,rgb(0,82,153) 100%);
 	box-shadow: 3px 3px 3px #818181;
 	-webkit-box-shadow: 3px 3px 3px #818181;
 	-moz-box-shadow: 3px 3px 3px #818181;
@@ -478,4 +478,63 @@ dd {
 }
 .small {
 	font-size: .75em;
+}
+
+#dashtable {
+	width: 100%;
+}
+
+#dashtable td {
+	width: 50%;
+	vertical-align: top;
+}
+
+dl.dashboard {
+	width: 90%;
+	margin-left: auto;
+	margin-right: auto;
+	border: 2px solid #ddd;
+	-webkit-border-radius: 5px;
+	-moz-border-radius: 5px;
+	box-shadow: 3px 3px 3px #818181;
+	-webkit-box-shadow: 3px 3px 3px #818181;
+	-moz-box-shadow: 3px 3px 3px #818181;
+	padding-top: .5em;
+	padding-bottom: .5em;
+	color: white;
+	font-size: .85em;
+	margin-bottom: 20px;
+	background-image: -webkit-gradient(linear,left bottom,left top,color-stop(0.31, rgb(2,23,54)),color-stop(1, rgb(0,82,153)));
+	background-image: -moz-linear-gradient(center bottom,rgb(2,23,54) 31%,rgb(0,82,153) 100%);
+}
+
+dl.dashboard dd {
+	margin-top: .2em;
+	margin-bottom: .2em;
+	font-size: .9em;
+}
+
+.dashdata {
+	font-weight: bold;
+}
+
+.dRed {
+	color: red;
+}
+
+.dGrn {
+	color: green;
+}
+
+.dashhead a {
+	color: white;
+}
+
+.dashhead a:hover {
+	color: #ddd;
+	text-decoration: none;
+}
+
+div.dashmenu {
+	padding-left: 5%;
 }

@@ -74,6 +74,40 @@ function db_list($sql, $columns) {
 	return $returner;
 }
 
+/** 
+ * Get a single value from SQL
+ * 
+ * @param string SQL Query
+ * @param string Column to retrieve
+ * @global object Database Resource
+ * @return string Contents of column
+ */
+ function get_single($sql, $col='num') {
+	 GLOBAL $db;
+	 $result = mysql_query($sql, $db);
+	 if ( mysql_num_rows($result) < 1 ) { return 0; }
+	 $row = mysql_fetch_array($result);
+	 return $row[$col];
+}
+
+/**
+ * Build a dashboard entry
+ * 
+ * @param string Header
+ * @param string Data
+ * @param string Extra data classes
+ * @global string Base HREF
+ * @return string Well Formed Entry
+ */
+function make_dash($header, $data, $extra = "", $link = false) {
+	GLOBAL $TDTRAC_SITE;
+	if ( !$link) {
+		return "<dd><span class=\"dashhead\">{$header} :-: </span><span class=\"dashdata {$extra}\">{$data}</span></dd>";
+	} else {
+		return "<dd><span class=\"dashhead\"><a href=\"{$TDTRAC_SITE}{$link}\">{$header}</a> :-: </span><span class=\"dashdata {$extra}\">{$data}</span></dd>";
+	}
+}
+
 /**
  * Return a SQL Query constant by name
  * 

@@ -35,8 +35,11 @@ class tdtrac_user {
 	public $loggedin = false;
 	/** @var bool True if an administrator */
 	public $admin = false;
-	/** @var bool True if on list of payable employees */
+	/** @var bool True if limited to adding own hours */
 	public $isemp = false;
+	/** @var bool True if on payroll */
+	public $onpayroll = false;
+	
 	
 	/**
 	 * Open a new user element
@@ -67,12 +70,13 @@ class tdtrac_user {
 	 */
 	private function load($username) {
 		GLOBAL $db, $MYSQL_PREFIX;
-		$sql = sprintf("SELECT limithours, u.userid, CONCAT(first, ' ', last) as name, u.email, groupname, ug.groupid as gid FROM `{$MYSQL_PREFIX}groupnames` gn, `{$MYSQL_PREFIX}usergroups` ug, `{$MYSQL_PREFIX}users` u WHERE username = '%s' AND u.userid = ug.userid AND ug.groupid = gn.groupid",
+		$sql = sprintf("SELECT payroll, limithours, u.userid, CONCAT(first, ' ', last) as name, u.email, groupname, ug.groupid as gid FROM `{$MYSQL_PREFIX}groupnames` gn, `{$MYSQL_PREFIX}usergroups` ug, `{$MYSQL_PREFIX}users` u WHERE username = '%s' AND u.userid = ug.userid AND ug.groupid = gn.groupid",
 			mysql_real_escape_string($username)
 		);
 		$result = mysql_query($sql, $db);
 		$row = mysql_fetch_array($result);
 		$this->username = $username;
+		$this->onpayroll = $row['payroll'];
 		$this->name = $row['name'];
 		$this->id = $row['userid'];
 		$this->email = $row['email'];

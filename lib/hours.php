@@ -178,7 +178,11 @@ class tdtrac_hours {
 		GLOBAL $TDTRAC_DAYRATE, $TDTRAC_SITE;
 		$form = new tdform("{$TDTRAC_SITE}hours/add/", "hours-add-form", 1, 'genform', 'Add Payroll Record');
 		
-		$result = $form->addDrop('userid', 'Employee', null, db_list(get_sql_const('emps'), array('userid', 'name')), False);
+		if ( isset($this->action['own']) && $this->action['own'] && $this->user->onpayroll ) {
+			$result = $form->addDrop('userid', 'Employee', null, db_list(get_sql_const('emps'), array('userid', 'name')), False, $this->user->id);
+		} else {
+			$result = $form->addDrop('userid', 'Employee', null, db_list(get_sql_const('emps'), array('userid', 'name')), False);
+		}
 		$result = $form->addDrop('showid', 'Show', null, db_list(get_sql_const('showid'), array('showid', 'showname')), False);
 		$result = $form->addDate('date', 'Date');
 		$result = $form->addText('worked', (($TDTRAC_DAYRATE)?"Days":"Hours")." Worked");
@@ -265,11 +269,13 @@ class tdtrac_hours {
 				$mail_sql_str  = "INSERT INTO `{$MYSQL_PREFIX}msg` ( toid, fromid, body ) VALUES ( %d, %d, '%s' )";
 				
 				if ( $this->user->id == intval($_REQUEST['userid']) ) { // ADDING FOR SELF, NOTIFY WHERE `notify`
-					$users_to_notify_sql = "SELECT userid FROM `{$MYSQL_PREFIX}users` WHERE notify = 1";
-					$users_to_notify_res = mysql_query($users_to_notify_sql, $db);
-					while ( $row = mysql_fetch_array($users_to_notify_res) ) {
-						$mail_sql  = sprintf($mail_sql_str,	$row['userid'], $this->user->id, $mailmessage );
-						$mail_res  = mysql_query($mail_sql, $db);
+					if ( $this->user->isemp ) { // BUT ONLY FOR LIMITED ACCOUNTS
+						$users_to_notify_sql = "SELECT userid FROM `{$MYSQL_PREFIX}users` WHERE notify = 1";
+						$users_to_notify_res = mysql_query($users_to_notify_sql, $db);
+						while ( $row = mysql_fetch_array($users_to_notify_res) ) {
+							$mail_sql  = sprintf($mail_sql_str,	$row['userid'], $this->user->id, $mailmessage );
+							$mail_res  = mysql_query($mail_sql, $db);
+						}
 					}
 				} else { // ADDING FOR OTHERS, NOTIFY RECIPIENT ONLY
 					$mail_sql = sprintf($mail_sql_str,
@@ -333,7 +339,8 @@ class tdtrac_hours {
 		global $TDTRAC_SITE;
 		$html[] = "<ul class=\"linklist\"><li><h3>Payroll Tracking</h3><ul class=\"linklist\">";
 		$html[] = "<li>Manage payroll records for each employee</li>";
-		$html[] = ( $this->user->can('addhours') ) 	? "  <li><a href=\"{$TDTRAC_SITE}hours/add/\">Add Hours Worked</a></li>" : "";
+		$html[] = ( $this->user->onpayroll ) 		? "  <li><a href=\"{$TDTRAC_SITE}hours/add/own:1/\">Add Hours For Yourself</a></li>" : "";
+		$html[] = ( $this->user->can('addhours') && !$this->user->isemp ) 	? "  <li><a href=\"{$TDTRAC_SITE}hours/add/\">Add Hours Worked</a></li>" : ""; // SUPPESS THIS ON ONLY ADD OWN.
 		$html[] = ( $this->user->can('viewhours') ) ? "  <li><a href=\"{$TDTRAC_SITE}hours/view/\">View Hours Worked</a></li>" : "";
 		$html[] = ( $this->user->admin ) 			? "  <li><a href=\"{$TDTRAC_SITE}hours/view/type:unpaid/\">View Hours Worked (unpaid)</a></li>" : "";
 		$html[] = ( $this->user->admin ) 			? "  <li><a href=\"{$TDTRAC_SITE}hours/remind/\">Send Payroll Due Reminder To Employees</a></li>" : "";
