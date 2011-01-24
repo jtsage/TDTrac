@@ -197,10 +197,17 @@ function get_dash($name) {
 		case "payroll":
 			$html[] = "<dl class=\"dashboard\"><dt>Payroll Information</dt>";
 			$hPending = get_single("SELECT SUM(worked) AS num FROM {$MYSQL_PREFIX}hours WHERE submitted = 0");
+			$ePending = number_format(get_single("SELECT SUM(worked*payrate) AS num FROM {$MYSQL_PREFIX}hours h, {$MYSQL_PREFIX}users u WHERE h.userid = u.userid AND submitted = 0"),2);
+			if ( empty($hPending) ) { $hPending = 0; }
 			if ( $hPending > 0 ) {
 				$html[] = make_dash('Payroll '.(($TDTRAC_DAYRATE)?"Days":"Hours").' Pending', $hPending, 'dRed', 'hours/view/type:unpaid/');
 			} else {
 				$html[] = make_dash('Payroll '.(($TDTRAC_DAYRATE)?"Days":"Hours").' Pending', $hPending, 'dGrn');
+			}
+			if ( $ePending > 0 ) {
+				$html[] = make_dash('Payroll Expenditure Pending', '$'.$ePending, 'dRed');
+			} else {
+				$html[] = make_dash('Payroll Expenditure Pending', '$'.$ePending, 'dGrn');
 			}
 			$html[] = make_dash('Payroll Total '.(($TDTRAC_DAYRATE)?"Days":"Hours").' Worked', get_single("SELECT SUM(worked) AS num FROM {$MYSQL_PREFIX}hours"));
 			$html[] = make_dash('Payroll Total Expenditure', '$'.number_format(get_single("SELECT SUM(worked*payrate) as num FROM {$MYSQL_PREFIX}hours h, {$MYSQL_PREFIX}users u WHERE h.userid = u.userid"),2));

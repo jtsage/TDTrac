@@ -242,8 +242,6 @@ class tdtrac_hours {
 				floatval($_REQUEST['worked'])
 			);
 		} else {
-			$thissubmit = ($_REQUEST['submitted'] == "y") ? "1" : "0";
-	
 			$sqlstring  = "UPDATE `{$MYSQL_PREFIX}hours` SET `showid` = %d, `date` = '%s', `worked` = '%f',";
 			$sqlstring .= " submitted = %d WHERE id = %d";
 		
@@ -251,8 +249,8 @@ class tdtrac_hours {
 				intval($_REQUEST['showid']),
 				mysql_real_escape_string($_REQUEST['date']),
 				floatval($_REQUEST['worked']),
-				$thissubmit,
-				intval($id)
+				(($_REQUEST['submitted'] == "y") ? "1" : "0"),
+				intval($_REQUEST['id'])
 			);
 		}
 		
@@ -415,6 +413,20 @@ class tdtrac_hours {
 		
 		$maillink = "{$TDTRAC_SITE}hours/email/json:1/{$type}{$id}{$sdate}{$edate}";
 		
+		if ( $this->action['type'] == 'unpaid' ) {
+			$html[] = "<h3>All Unpaid Hours</h3>";
+			$html[] = "<span class=\"upright\">[<a class=\"ALL-email\" href=\"#\">E-Mail All to Self</a>]</span>";
+			$html[] = "<br /><br /><br />";
+			$SITE_SCRIPT[] = "$(function() { $('.ALL-email').click( function() {";
+			$SITE_SCRIPT[] = "  $('#popper').html(\"Please wait...\"); $('#popperdiv').show('blind');";
+			$SITE_SCRIPT[] = "	$.getJSON(\"{$TDTRAC_SITE}hours/email/json:1/type:unpaid/id:0/\", function(data) {";
+			$SITE_SCRIPT[] = "		if ( data.success === true ) { ";
+			$SITE_SCRIPT[] = "			$('#popper').html(\"All Unpaid Hours :: Sent\");";
+			$SITE_SCRIPT[] = "		} else { $('#popper').html(\"E-Mail Send :: Failed\"); }";
+			$SITE_SCRIPT[] = "		$('#popperdiv').show('blind');";			
+			$SITE_SCRIPT[] = "	}); return false;";
+			$SITE_SCRIPT[] = "});});";
+		}
 		$result = mysql_query($sql, $db);
 		if ( mysql_num_rows($result) < 1 ) { return array("<h3>Empty Data Set</h3>", "<p>There are no payroll items matching your terms.</p>"); }
 		while ( $row = mysql_fetch_array($result) ) {
@@ -488,7 +500,7 @@ class tdtrac_hours {
 		
 		$sql  = "SELECT CONCAT(first, ' ', last) as name, u.userid, worked, date, showname, submitted, h.id as hid FROM {$MYSQL_PREFIX}users u, {$MYSQL_PREFIX}shows s, {$MYSQL_PREFIX}hours h WHERE ";
 		$sql .= "u.userid = h.userid AND s.showid = h.showid";
-		$sql .= ($this->action['type'] == 'user' || $this->action['type'] == 'unpaid' ) ? " AND u.userid = '".intval($this->action['id'])."'" : "";
+		$sql .= ($this->action['type'] == 'user' || ( $this->action['type'] == 'unpaid' && $this->action['id'] <> 0 ) ) ? " AND u.userid = '".intval($this->action['id'])."'" : "";
 		if ( $this->action['type'] <> 'unpaid' ) {
 			$sql .= (isset($this->action['sdate'])) ? " AND h.date >= '".mysql_real_escape_string($this->action['sdate'])."'" : "";
 			$sql .= (isset($this->action['edate'])) ? " AND h.date <= '".mysql_real_escape_string($this->action['edate'])."'" : "";
@@ -508,9 +520,10 @@ class tdtrac_hours {
 		$body = "";
 	
 		$subject = "TDTrac Hours Worked ::";
-		$subject .= ( $this->action['type'] <> 'date' ) ? " ".$this->user->get_name($uid) : "";
+		$subject .= ( $this->action['type'] == 'user' ) ? " ".$this->user->get_name($uid) : "";
 		$subject .= ($sdate <> 0 ) ? " [Start Date: {$sdate}]" : "";
 		$subject .= ($edate <> 0 ) ? " [Ending Date: {$edate}]" : "";
+		$subject .= ( $this->action['id'] == 0 && $this->action['type'] == 'unpaid' ) ? " All Unpaid Hours" : "";
 	
 		$headers  = 'MIME-Version: 1.0' . "\r\n";
 		$headers .= 'Content-type: text/html; charset=iso-8859-1' . "\r\n";

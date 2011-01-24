@@ -113,7 +113,7 @@ if ( !$user->loggedin ) {
 			$todo = new tdtrac_todo($user, $action);
 			$admn = new tdtrac_admin($user, $action);
 
-			$html[] = "<table id=\"dashtable\"><tr><td>";
+			$html[] = "<table id=\"dashtable\"><tr><td style=\"vertical-align: middle\">";
 			$html = array_merge($html, $d_mail, $d_budg, $d_show);
 			$html[] = "</td><td style=\"vertical-align: middle\">";
 			$html = array_merge($html, $d_todo, $d_payr, $d_user);
