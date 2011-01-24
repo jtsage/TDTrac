@@ -158,7 +158,7 @@ function format_phone($phone) {
  * @return array Formatted HTML
  */
 function get_dash($name) {
-	GLOBAL $MYSQL_PREFIX, $user;
+	GLOBAL $MYSQL_PREFIX, $TDTRAC_DAYRAYE, $user;
 	switch ( $name ) {
 		case "shows":
 			$html[] = "<dl class=\"dashboard\"><dt>Show Information</dt>";
