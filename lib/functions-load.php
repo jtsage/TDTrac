@@ -247,4 +247,18 @@ function get_dash($name) {
 	return $html;
 }
 
+/**
+ * Format a user-inputted date
+ * 
+ * @param string The Date
+ * @return string Formatted Date
+ */
+function make_date($date) {
+	$tempdate = strtotime($date);
+	if ( $tempdate ) {
+		return date('Y-m-d', $tempdate) . ' 00:00:00';
+	} else {
+		return '0000-00-00 00:00:00';
+	}
+}
 ?>

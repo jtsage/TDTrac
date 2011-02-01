@@ -260,7 +260,7 @@ class tdtrac_todo {
 			$sql = sprintf($sqlstring,
 				intval($_REQUEST['showid']),
 				intval($_REQUEST['prio']),
-				mysql_real_escape_string($_REQUEST['date']),
+				make_date($_REQUEST['date']),
 				intval($_REQUEST['assign']),
 				mysql_real_escape_string($_REQUEST['desc'])
 			);
@@ -273,7 +273,7 @@ class tdtrac_todo {
 				intval($_REQUEST['prio']),
 				intval($_REQUEST['assign']),
 				mysql_real_escape_string($_REQUEST['desc']),
-				mysql_real_escape_string($_REQUEST['date']),
+				make_date($_REQUEST['date']),
 				(($_REQUEST['complete'] == "y") ? 1 : 0),
 				intval($_REQUEST['id'])
 		); }

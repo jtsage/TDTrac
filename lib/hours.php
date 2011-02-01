@@ -261,7 +261,7 @@ class tdtrac_hours {
 				$mailmessage = sprintf("%s Added Payroll: %f for %s (%s)",
 					$this->user->name,
 					floatval($_REQUEST['worked']),
-					mysql_real_escape_string($_REQUEST['data']),
+					mysql_real_escape_string($_REQUEST['date']),
 					$this->user->get_name(intval($_REQUEST['userid']))
 				);
 				$mail_sql_str  = "INSERT INTO `{$MYSQL_PREFIX}msg` ( toid, fromid, body ) VALUES ( %d, %d, '%s' )";
