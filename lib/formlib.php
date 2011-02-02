@@ -116,7 +116,7 @@ class tdform {
 		$this->members[] = array('date', $name, $text, $title, $preset);
 		if ( $title == null ) { $title = $text; }
 		$SITE_SCRIPT[] = "\t$(function() {";
-		$SITE_SCRIPT[] = "\t\t$( \"#{$id}\" ).datepicker({ dateFormat: 'yy-mm-dd' });";
+		$SITE_SCRIPT[] = "\t\t$( \"#{$id}\" ).datepicker({ dateFormat: 'yy-mm-dd', constrainInput: false });";
 		$SITE_SCRIPT[] = "\t});";
 		$temp  = "  <div class=\"frmele\" title=\"{$title}\"><label for=\"{$name}\">{$text}</label><input tabindex=\"{$this->tabindex}\" type=\"text\" name=\"{$name}\" id=\"{$id}\" ";
 		if ( $preset != null ) { $temp .= "value=\"{$preset}\" "; }

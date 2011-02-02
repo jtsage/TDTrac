@@ -126,8 +126,10 @@ class tdtable {
 		}
 		$thisrow[$this->subidx] = $this->members[$this->currentrow-1][$this->subidx];
 		if ( $this->actions ) { $thisrow[$elements-1] = ''; }
+		$i = 0;
 		foreach ( $thisrow as $item ) {
-			$rhtml .= "<td>{$item}</td>";
+			$rhtml .= "<td class=\"{$this->tablename}-table-{$i}\">{$item}</td>";
+			$i++;
 		}
 		$this->html[] = "<tr class=\"datasubtotal\">{$rhtml}</tr>";
 		return true;
@@ -148,8 +150,10 @@ class tdtable {
 			$thisrow[$cidx] = "<span style=\"display: block; text-align: {$this->align[$cidx]}\">{$thisrow[$cidx]}</span>";
 		}
 		if ( $this->actions ) { $thisrow[$elements-1] = ''; }
+		$i = 0;
 		foreach ( $thisrow as $item ) {
-			$rhtml .= "<td>{$item}</td>";
+			$rhtml .= "<td class=\"{$this->tablename}-table-{$i}\">{$item}</td>";
+			$i++;
 		}
 		$this->html[] = "<tr class=\"datatotal\">{$rhtml}</tr>";
 		return true;
@@ -179,10 +183,12 @@ class tdtable {
 	public function addHeader($items = null) {
 		$this->headers = $items;
 		$this->align = array_fill(0, count($this->headers), "left");
+		$i = 0;
 		foreach ( $items as $item ) {
-			$thtml .= "<th>{$item}</th>";
+			$thtml .= "<th class=\"{$this->tablename}-table-{$i}\">{$item}</th>";
+			$i++;
 		}
-		if ( $this->actions ) { $thtml .= "<th>Action</th>"; }
+		if ( $this->actions ) { $thtml .= "<th class=\"actions\">Action</th>"; }
 		$this->html[] = "  <tr>{$thtml}</tr>";
 		return true;
 	}
@@ -284,7 +290,7 @@ class tdtable {
 			}
 		}
 		foreach ( array_keys($drow) as $item ) {
-			$thtml .= "<td style=\"text-align: {$this->align[$item]}\">{$drow[$item]}</td>";
+			$thtml .= "<td style=\"text-align: {$this->align[$item]}\" class=\"{$this->tablename}-table-{$item}\">{$drow[$item]}</td>";
 		}
 		if ( $this->actions ) { $thtml .= "<td style=\"text-align: right\">" . $this->do_actions($raw) . "</td>"; }
 		if ( is_null($rowclass) ) {

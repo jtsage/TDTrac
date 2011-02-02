@@ -100,10 +100,10 @@ function makeHeader($title = '') {
 	$html[] = "\t<![endif]-->";
 	$html[] = "\t<meta name=\"viewport\" content=\"width=device-width; initial-scale=1\"/>";
 	$html[] = "\t<link href=\"/css/tdtrac.css\" rel=\"stylesheet\" type=\"text/css\" />";
-	$html[] = "\t<link type=\"text/css\" href=\"/css/custom-theme/jquery-ui-1.8.7.custom.css\" rel=\"stylesheet\" />";
+	$html[] = "\t<link type=\"text/css\" href=\"/css/custom-theme/jquery-ui-1.8.9.custom.css\" rel=\"stylesheet\" />";
 	$html[] = "\t<link type=\"text/css\" href=\"/css/jquery.ui.selectmenu.css\" rel=\"stylesheet\" />";
 	$html[] = "\t<script type=\"text/javascript\" src=\"/js/jquery-1.4.4.min.js\"></script>";
-	$html[] = "\t<script type=\"text/javascript\" src=\"/js/jquery-ui-1.8.7.custom.min.js\"></script>";
+	$html[] = "\t<script type=\"text/javascript\" src=\"/js/jquery-ui-1.8.9.custom.min.js\"></script>";
 	$html[] = "\t<script type=\"text/javascript\" src=\"/js/jquery.ui.selectmenu.js\"></script>";
 	$html[] = "\t<script type=\"text/javascript\" src=\"/js/jquery.masonry.min.js\"></script>";
 	$html[] = "\t<script type=\"text/javascript\">";
@@ -136,7 +136,7 @@ function makeHeader($title = '') {
 	if ( $user->loggedin ) { 
 		$temp = "\t\t\t\t<h3><strong>Logged In User:</strong> {$user->name} (ID::{$user->id}/Group::{$user->group})</h3>"; 
 	} else {
-		$temp = "\t\t\t\t<h2>Budget and Payroll Tracking</h2>";
+		$temp = "\t\t\t\t<h3>Budget and Payroll Tracking</h3>";
 	}
 	$html[] = "{$temp}\n\t\t\t</div>";
 	

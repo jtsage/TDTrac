@@ -1,20 +1,11 @@
 /**
  * TDTrac Main Program CSS
  * 
- * Contains all layout css rules.
+ * Contains all layout css rules. Fluid layout, fully mobile ready.
  * @package tdtrac
- * @version 1.4.0
+ * @version 2.0.0
  * @author J.T.Sage <jtsage@gmail.com>
  */
-
-
-
-
-
-
-/*	Less Framework 3
-	by Joni Korpi
-	http://lessframework.com	*/
 
 
 /*	Resets
@@ -64,7 +55,7 @@ figure img {width: 100%;}
 	line-height: 36px;
 }
 
-.big, h3 {
+.big, h3, h4 {
 	font-size: 20px;
 	line-height: 26px;
 	font-weight: bold;
@@ -92,6 +83,16 @@ figure img {width: 100%;}
 dt { font-weight: bold; }
 dd { margin-left: 1em; }
 
+div.installer {
+	margin-left: 15%;
+	font-size: 1.5em;
+}
+div.installer ul {
+	margin-left: 20px;
+	margin-bottom: 10px;
+	font-size: .8em;
+}
+
 
 /*	Default 8-column layout
 	60 px columns, 24 px gutters, 60 px margins, 768 px total
@@ -101,6 +102,7 @@ dd { margin-left: 1em; }
 
 body {
 	background: rgb(232,232,232);
+	background-image: url(/images/tdtracbg.gif);
 	padding: 84px 60px 0;
 	width: 648px;
 	-webkit-tap-highlight-color: rgb(255,255,0);
@@ -127,11 +129,12 @@ img::-moz-selection {background: transparent;}
 a 		{ color: #4A8EBC; font-weight: bold; font-size: .95em; text-decoration: underline; }
 a:hover { text-decoration: none; }
 
-#header				{ margin-right: 5px; }
-#headercontent		{ text-align: right; }
+#header				{ background-image: url(/images/tdtrachdr.png); background-position: bottom -70px; background-repeat: no-repeat; border-radius: .75em .75em 0 0;}
+#headercontent		{ text-align: right; margin-right: 5px; }
 #headercontent sup	{ font-weight: normal; font-size: 55%; margin-left: .3em; }
-#headercontent h3	{ margin: 0; font-weight: normal; font-size: 18px; }
+#headercontent h3	{ margin: 0; font-weight: normal; font-size: 16px; }
 #search 			{ position: absolute; top: 0px; right: 0px; }
+#search input		{ border-radius: .5em; }
 #footer 			{ text-align: center; color: grey; background-color: #F4F4F4; }
 #footer .right		{ text-align: right; }
 
@@ -267,11 +270,21 @@ dl.dashboard dd { font-size: .9em; margin-left: 10px; }
 #dashmenu ul.linklist li ul { width: auto; border: none; margin: 0; padding: 0;}
 #dashmenu a { color: #FFFCD1; }
 
+div.infobox		{ background-color: #6E6E6E; color: white; width: 290px; margin-left: auto; margin-right: auto; margin-top: 8px; margin-bottom: 8px; padding: 6px; border-radius: 1em; box-shadow: 2px 2px 6px #888; text-align: center; }
+div.infobox a	{ color: white; font-weight: bold; }
+
 span.overright {
 	float: right; 
 	text-align: right;
 	margin-top: -1.5em;
 	padding-right: .5em;
+}
+
+span.upright {
+	text-align: right;
+	margin-bottom: 0em;
+	margin-right: 1%;
+	display: block;
 }
 
 table {
@@ -282,7 +295,32 @@ table {
 
 table.permtable th { border: 1px solid grey; }
 table.permtable td { border: 1px solid #F3F3F3; }
-	
+
+table.datatable {
+	margin-top: 1em;
+	font-size: 12px;
+	border: 2px solid #ddd;
+	border-radius: 5px;
+	box-shadow: 3px 3px 3px #818181;
+	width: 99%;
+	margin-left: .5%;
+	margin-bottom: 4em;
+	border-collapse: collapse;
+}
+
+table.datatable th.actions			{ width: 96px; }
+table.datatable th					{ border-bottom: 2px solid #ddd; }
+table.datatable td 					{ padding-left: 1px; }
+table.datatable tr:nth-child(odd)	{ background-color: #ccc; }
+table.datatable tr:nth-child(1)		{ background-color: white; }
+table.datatable .datatotal			{ background-color: #FFAAAA !important; height: 2em; border-top: 2px solid #ccc; }
+table.datatable .datasubtotal		{ background-color: #FFDDDD !important; height: 1.6em; border-bottom: 1px solid #ccc; border-top: 1px solid #ccc; }
+table.datatable .tododone			{ background-color: #AAFFAA !important; }
+table.datatable .tododue			{ background-color: #FF8888 !important; }
+table.datatable img.ticon			{ border: none; }
+
+#rcptbox		{ margin-left: auto; margin-right: auto; text-align: center; margin-bottom: 1em; }
+#rcptbox img	{ border: none; }
 
 /*	13-column layout
 	60 px columns, 24 px gutters, 72 px margins, 1212 px total (extra space for scrollbars)
@@ -317,7 +355,8 @@ table.permtable td { border: 1px solid #F3F3F3; }
 	dl.dashboard { width: 320px; }
 	#dashmenu ul.linklist { width: 320px; }
 	#dashfloat { z-index: 10; top: 20px; left: 3%; position: absolute; display: block;}
-	
+	#header { background-position: bottom left; }
+	#rcptbox { float: left; margin-left: 80px; }
 	
 }
 
@@ -336,6 +375,7 @@ table.permtable td { border: 1px solid #F3F3F3; }
 		/* Prevents Mobile Safari from bumping up font sizes in landscape */
 		-webkit-text-size-adjust: 100%; 
 	}
+	#header { background-position: bottom -220px; }
 	#headercontent h3 { font-size: .7em; }
 	#menu { height: 1.3em; }
 	ul.topnav li div.menubut {
@@ -364,7 +404,8 @@ table.permtable td { border: 1px solid #F3F3F3; }
 	dl.dashboard { width: 365px; }
 	#dashmenu ul.linklist { width: 365px; }
 	table.permtable { font-size: .68em; width: 100%; margin: 0; border-spacing: 0; border-collapse: collapse; }
-	
+	table.datatable td.budget-table-2, table.datatable th.budget-table-2 { display: none; }
+	table.datatable td.budget-table-5, table.datatable th.budget-table-5 { display: none; }
 }
 
 
@@ -382,6 +423,7 @@ table.permtable td { border: 1px solid #F3F3F3; }
 		/* Prevents Mobile Safari from bumping up font sizes in landscape */
 		-webkit-text-size-adjust: 100%;
 	}
+	#header { background-image: none; }
 	#headercontent h3 { display: none; }
 	#headercontent h2 { display: none; }
 	#headercontent h1 { text-align: center; font-size: 36px; }
@@ -434,237 +476,11 @@ table.permtable td { border: 1px solid #F3F3F3; }
 	#dashmenu ul.linklist li { margin: 0; }
 	
 	span.overright { margin: 0; }
+	div.infobox { width: 200px; font-size: .9em; }
 	table.permtable { display: none; }
-}
-
-
-/*
-
-
-
-
-#search {
-	position: absolute;
-	top: 5.5em;
-	right: 2.0em;
-	padding-right: 0.0em;
-}
-
-#search input.text {
-	margin-right: 0.5em;
-	vertical-align: middle;
-	border: none;
-	padding: 0.15em;
-	padding-left: .6em;
-	width: 9.0em;
-	border-radius: 1em;
-	-webkit-border-radius: 1em;
-	-moz-border-radius: 1em;
-	background-color: #000000;
-	background: -webkit-gradient(linear, left top, left bottom, from(#fff), to(#aaa));
-
-}
-
-#search input.submit {
-	background: #939B00 url('/images/buttonbg.gif') repeat-x;
-	border: solid 1px #5F6800;
-	font-weight: bold;
-	padding: 0.25em;
-	font-size: 0.8em;
-	color: #F2F3DE;
-	vertical-align: middle;
-	border-radius: .5em;
-	-webkit-border-radius: .5em;
-	-moz-border-radius: .5em;
-}
-
-
-span.upright {
-	text-align: right;
-	margin-bottom: 1em;
-	margin-right: 5%;
-	display: block;
-}
-span.overright {
-	float: right;
-	margin-right: 40%;
-}
-table.datatable {
-	margin-top: 1em;
-	font-size: 12px;
-	border: 2px solid #ddd;
-	border-radius: 5px;
-	-webkit-border-radius: 5px;
-	-moz-border-radius: 5px;
-	box-shadow: 3px 3px 3px #818181;
-	-webkit-box-shadow: 3px 3px 3px #818181;
-	-moz-box-shadow: 3px 3px 3px #818181;
-	width: 96%;
-	margin-left: 2%;
-	margin-bottom: 4em;
-	border-collapse: collapse;
-}
-
-table.datatable th {
-	border-bottom: 2px solid #ddd;
-}
-
-table.datatable td {
-	padding-left: 1px;
-}
-
-table.datatable tr:nth-child(odd) {
-	background-color: #ccc;
-}
-table.datatable tr:nth-child(1) {
-	background-color: white;
-}
-
-table.datatable .datatotal {
-	background-color: #FFAAAA !important;
-	height: 2em;
-	border-top: 2px solid black;
-}
-
-table.datatable .datasubtotal {
-	background-color: #FFDDDD !important;
-	height: 1.6em;
-	border-bottom: 1px solid #ccc;
-	border-top: 1px solid #ccc;
-}
-
-table.datatable .tododone {
-	background-color: #AAFFAA !important;
-}
-
-table.datatable .tododue {
-	background-color: #FF8888 !important;
-}
+	table.datatable { display: none; }
 	
-img.ticon {
-	border: none;
+	#rcptbox { font-size: .9em; }
+	#rcptbox #rcptimg { width: 228px; }
+	#rcptbox #rcptcontrol img { width: 40px; }
 }
-
-div.installer {
-	margin-left: 15%;
-	font-size: 1.5em;
-}
-div.installer ul {
-	margin-left: 20px;
-	margin-bottom: 10px;
-	font-size: .8em;
-}
-
-div.infobox {
-	width: 380px;
-	margin-left: auto;
-	margin-right: auto;
-	border: 2px solid #ddd;
-	-webkit-border-radius: 5px;
-	-moz-border-radius: 5px;
-	background-image: -webkit-gradient(linear,left bottom,left top,color-stop(0.31, rgb(2,23,54)),color-stop(1, rgb(0,82,153)));
-	background-image: -moz-linear-gradient(center bottom,rgb(2,23,54) 31%,rgb(0,82,153) 100%);
-	box-shadow: 3px 3px 3px #818181;
-	-webkit-box-shadow: 3px 3px 3px #818181;
-	-moz-box-shadow: 3px 3px 3px #818181;
-	background-color: green;
-	text-align: center;
-	padding-top: .5em;
-	padding-bottom: .5em;
-	color: white;
-	font-size: 1em;
-	margin-bottom: 20px;
-}
-
-div.infobox a {
-	color: white;
-	font-weight: bold;
-}
-
-#rcptbox {
-	float: left;
-	text-align: center;
-}
-#rcptbox img {
-	border: none;
-}
-
-// jQuery Overrides 
-span .ui-dialog-title {
-	background-image: none;
-	font-size: 1.2em;
-}
-.ui-dialog-content ul {
-	margin-left: 2em;
-}
-
-
-
-dt {
-	font-weight: bold;
-	margin-left: 1em;
-}
-dd {
-	margin-left: 3em;
-	margin-bottom: .5em;
-}
-.small {
-	font-size: .75em;
-}
-
-#dashtable {
-	width: 100%;
-}
-
-#dashtable td {
-	width: 50%;
-	vertical-align: top;
-}
-
-dl.dashboard {
-	width: 90%;
-	margin-left: auto;
-	margin-right: auto;
-	border: 2px solid #ddd;
-	-webkit-border-radius: 5px;
-	-moz-border-radius: 5px;
-	box-shadow: 3px 3px 3px #818181;
-	-webkit-box-shadow: 3px 3px 3px #818181;
-	-moz-box-shadow: 3px 3px 3px #818181;
-	padding-top: .5em;
-	padding-bottom: .5em;
-	color: white;
-	font-size: .85em;
-	margin-bottom: 20px;
-	background-image: -webkit-gradient(linear,left bottom,left top,color-stop(0.31, rgb(2,23,54)),color-stop(1, rgb(0,82,153)));
-	background-image: -moz-linear-gradient(center bottom,rgb(2,23,54) 31%,rgb(0,82,153) 100%);
-}
-
-dl.dashboard dd {
-	margin-top: .2em;
-	margin-bottom: .2em;
-	font-size: .9em;
-}
-
-.dashdata {
-	font-weight: bold;
-}
-
-
-
-.dashhead a {
-	color: white;
-}
-
-.dashhead a:hover {
-	color: #ddd;
-	text-decoration: none;
-}
-
-div.dashmenu {
-	padding-left: 5%;
-}
-
-
-
-*/
