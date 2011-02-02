@@ -247,6 +247,21 @@ function get_dash($name) {
 }
 
 /**
+ * Format a user-inputted date (for sql select)
+ * 
+ * @param string The Date
+ * @return string Formatted Date
+ */
+function make_sql_date($date) {
+	$tempdate = strtotime(urldecode($date));
+	if ( $tempdate ) {
+		return date('Y-m-d', $tempdate);
+	} else {
+		return date('Y-m-d');
+	}
+}
+
+/**
  * Format a user-inputted date
  * 
  * @param string The Date
@@ -257,7 +272,7 @@ function make_date($date) {
 	if ( $tempdate ) {
 		return date('Y-m-d', $tempdate) . ' 00:00:00';
 	} else {
-		return '0000-00-00 00:00:00';
+		return date('Y-m-d') . ' 00:00:00';
 	}
 }
 ?>

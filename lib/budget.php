@@ -445,7 +445,7 @@ class tdtrac_budget {
 				mysql_real_escape_string($_REQUEST['vendor']),
 				mysql_real_escape_string($_REQUEST['category']),
 				mysql_real_escape_string($_REQUEST['dscr']),
-				mysql_real_escape_string($_REQUEST['date']),
+				make_date($_REQUEST['date']),
 				(($_REQUEST['pending'] == "y") ? "1" : "0"),
 				(($_REQUEST['needrepay'] == "y") ? "1" : "0"),
 				(($_REQUEST['gotrepay'] == "y") ? "1" : "0")
@@ -467,7 +467,7 @@ class tdtrac_budget {
 				mysql_real_escape_string($_REQUEST['vendor']),
 				mysql_real_escape_string($_REQUEST['category']),
 				mysql_real_escape_string($_REQUEST['dscr']),
-				mysql_real_escape_string($_REQUEST['date']),
+				make_date($_REQUEST['date']),
 				(($_REQUEST['pending'] == "y") ? "1" : "0"),
 				(($_REQUEST['needrepay'] == "y") ? "1" : "0"),
 				(($_REQUEST['gotrepay'] == "y") ? "1" : "0"),

@@ -238,7 +238,7 @@ class tdtrac_hours {
 			$sql = sprintf($sqlstring,
 				intval($_REQUEST['userid']),
 				intval($_REQUEST['showid']),
-				mysql_real_escape_string($_REQUEST['date']),
+				make_date($_REQUEST['date']),
 				floatval($_REQUEST['worked'])
 			);
 		} else {
@@ -247,7 +247,7 @@ class tdtrac_hours {
 		
 			$sql = sprintf($sqlstring,
 				intval($_REQUEST['showid']),
-				mysql_real_escape_string($_REQUEST['date']),
+				make_date($_REQUEST['date']),
 				floatval($_REQUEST['worked']),
 				(($_REQUEST['submitted'] == "y") ? "1" : "0"),
 				intval($_REQUEST['id'])
@@ -398,18 +398,17 @@ class tdtrac_hours {
 		$sql .= "u.userid = h.userid AND s.showid = h.showid";
 		$sql .= ($this->action['type'] == 'user') ? " AND u.userid = '".intval($this->action['id'])."'" : "";
 		if ( $this->action['type'] <> 'unpaid' ) {
-			$sql .= (isset($this->action['sdate'])) ? " AND h.date >= '".mysql_real_escape_string($this->action['sdate'])."'" : "";
-			$sql .= (isset($this->action['edate'])) ? " AND h.date <= '".mysql_real_escape_string($this->action['edate'])."'" : "";
+			$sql .= (isset($this->action['sdate'])) ? " AND h.date >= '".make_sql_date($this->action['sdate'])."'" : "";
+			$sql .= (isset($this->action['edate'])) ? " AND h.date <= '".make_sql_date($this->action['edate'])."'" : "";
 		} else {
 			$sql .= " AND h.submitted = 0";
 		}
 		$sql .= " ORDER BY last ASC, date DESC";
-		$html[] = "<!--{$sql}-->";
 		
 		$type  = ( isset($this->action['type']) && ( $this->action['type'] == 'unpaid' || $this->action['type'] == 'user' || $this->action['type'] == 'date' )) ? "type:{$this->action['type']}/" : "";
 		$id    = ( isset($this->action['id']) && is_numeric($this->action['id']) ) ? "id:".intval($this->action['id'])."/" : "";
-		$sdate = ( isset($this->action['sdate']) ) ? "sdate:{$this->action['sdate']}/" : "";
-		$edate = ( isset($this->action['edate']) ) ? "edate:{$this->action['edate']}/" : "";
+		$sdate = ( isset($this->action['sdate']) ) ? "sdate:".make_sql_date($this->action['sdate'])."/" : "";
+		$edate = ( isset($this->action['edate']) ) ? "edate:".make_sql_date($this->action['edate'])."/" : "";
 		
 		$maillink = "{$TDTRAC_SITE}hours/email/json:1/{$type}{$id}{$sdate}{$edate}";
 		
@@ -502,8 +501,8 @@ class tdtrac_hours {
 		$sql .= "u.userid = h.userid AND s.showid = h.showid";
 		$sql .= ($this->action['type'] == 'user' || ( $this->action['type'] == 'unpaid' && $this->action['id'] <> 0 ) ) ? " AND u.userid = '".intval($this->action['id'])."'" : "";
 		if ( $this->action['type'] <> 'unpaid' ) {
-			$sql .= (isset($this->action['sdate'])) ? " AND h.date >= '".mysql_real_escape_string($this->action['sdate'])."'" : "";
-			$sql .= (isset($this->action['edate'])) ? " AND h.date <= '".mysql_real_escape_string($this->action['edate'])."'" : "";
+			$sql .= (isset($this->action['sdate'])) ? " AND h.date >= '".make_sql_date($this->action['sdate'])."'" : "";
+			$sql .= (isset($this->action['edate'])) ? " AND h.date <= '".make_sql_date($this->action['edate'])."'" : "";
 		} else {
 			$sql .= " AND h.submitted = 0";
 		}

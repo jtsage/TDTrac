@@ -344,8 +344,6 @@ class tdtrac_todo {
 			$SITE_SCRIPT[] = "});});";
 			$html[] = "<span class=\"upright\">[<a class=\"todo-email\" href=\"#\">E-Mail to Self</a>]</span>";
 
-
-			$html[] = "<br /><br />";
 			$tabl = new tdtable("todo", 'datatable', true);
 			$tabl->addHeader(array('Due', 'Priority', 'Assigned To', 'Description'));
 			$tabl->addAction(array('tdone',));
