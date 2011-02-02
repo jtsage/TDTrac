@@ -172,7 +172,6 @@ function get_dash($name) {
 			$html[] = make_dash('Total Expenditure', '$'.number_format(get_single("SELECT SUM(price) AS num FROM {$MYSQL_PREFIX}budget"),2));
 			$html[] = make_dash('Pending Payment', '$'.number_format(get_single("SELECT SUM(price) AS num FROM {$MYSQL_PREFIX}budget WHERE pending = 1"),2));
 			$html[] = make_dash('Pending Reimbursment', '$'.number_format(get_single("SELECT SUM(price) AS num FROM {$MYSQL_PREFIX}budget WHERE needrepay = 1 AND gotrepay = 0"),2));
-			$html[] = make_dash('Reciepts Available', get_single("SELECT COUNT(*) AS num FROM {$MYSQL_PREFIX}rcpts"));
 			$rPending = get_single("SELECT COUNT(*) AS num FROM {$MYSQL_PREFIX}rcpts WHERE handled = 0");
 			if ( $rPending > 0 ) {
 				$html[] = make_dash('Reciepts Pending', $rPending, 'dRed', 'budget/reciept/');

@@ -326,11 +326,13 @@ class tdtrac_admin {
 		$html[] = "<div style=\"clear: both\"><br /></div>";
 		
 		
-		$tabl = new tdtable("perms", 'datatable', true);
-		$tabl->addHeader(array_merge(array('Group', 'Members'), $this->perms_avail));
+		$tabl = new tdtable("perms", 'permtable', true);
+		$perm = array('A', 'E', 'V');
+		$tabl->addRaw('<tr><th colspan="2"></th><th colspan="3">Show</th><th colspan="3">Budget</th><th colspan="3">Hours</th><th colspan="3">Todo</th><th></th></tr>');
+		$tabl->addHeader(array_merge(array('Group', 'Members'), $perm, $perm, $perm, $perm));
 		$tabl->addAction(array('pmedit',));
 		
-		foreach ( $this->perms_avail as $cph ) {
+		foreach ( $perm as $cph ) {
 			$tabl->setAlign($cph, 'center');
 		}
 		
@@ -607,7 +609,7 @@ class tdtrac_admin {
 	 */
 	private function group_forms() {
 		GLOBAL $db, $MYSQL_PREFIX, $TDTRAC_SITE;
-		$form1 = new tdform("{$TDTRAC_SITE}admin/groups/", 'form1', 1, 'genform'. 'Add Group');
+		$form1 = new tdform("{$TDTRAC_SITE}admin/groups/", 'form1', 1, 'genform', 'Add Group');
 		$result = $form1->addText('newgroup', "Group Name");
 		$html = $form1->output("Add Group");
 		

@@ -155,6 +155,21 @@ class tdtable {
 		return true;
 	}
 	
+	/** 
+	 * Add a raw something to the table - sometimes useful for overriding.
+	 * 
+	 * @param string HTML to add
+	 * @return bool True on success
+	 */
+	public function addRaw($raw = null) {
+		if ( !is_null($raw) ) {
+			$this->html[] = $raw;
+			return true;
+		} else {
+			return false;
+		}
+	}
+	
 	/**
 	 * Add a list of header names to the table
 	 * 
@@ -229,14 +244,15 @@ class tdtable {
 	 * @return int Index of column or False on failure
 	 */
 	public function setAlign($headername, $alignment) {
-		$currentindex = 0;
+		$currentindex = 0; $retty = -1;
 		foreach ( $this->headers as $testname ) {
 			if ( $testname == $headername ) {
 				$this->align[$currentindex] = $alignment;
-				return $currentindex;
+				$retty = $currentindex;
 			} $currentindex++;
 		}
-		return false;
+		if ( $retty > -1 ) { return $retty; }
+		else { return false; }
 	}
 	
 	/**

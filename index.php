@@ -77,26 +77,32 @@ if ( !$user->loggedin ) {
 			break;
 		case "todo":
 			$todo = new tdtrac_todo($user, $action);
+			$SITE_BLOCK = get_dash('todo');
 			$todo->output();
 			break;
 		case "shows":
 			$shows = new tdtrac_shows($user, $action);
+			$SITE_BLOCK = ($user->can('viewshow')) ? get_dash('shows') : array();
 			$shows->output();
 			break;
 		case "hours":
 			$hours = new tdtrac_hours($user, $action);
+			$SITE_BLOCK = ($user->can('viewhours')) ? get_dash('payroll') : array();
 			$hours->output();
 			break;
 		case "mail":
 			$mail = new tdtrac_mail($user, $action);
+			$SITE_BLOCK = get_dash('mail');
 			$mail->output();
 			break;
 		case "admin":
 			$admin = new tdtrac_admin($user, $action);
+			$SITE_BLOCK = ($user->admin) ? get_dash('user') : array();
 			$admin->output();
 			break;
 		case "budget":
 			$budget = new tdtrac_budget($user, $action);
+			$SITE_BLOCK = ($user->can('viewbudget')) ? get_dash('budget') : array();
 			$budget->output();
 			break;
 		default: 
@@ -113,15 +119,13 @@ if ( !$user->loggedin ) {
 			$todo = new tdtrac_todo($user, $action);
 			$admn = new tdtrac_admin($user, $action);
 
-			$html[] = "<table id=\"dashtable\"><tr><td style=\"vertical-align: middle\">";
-			$html = array_merge($html, $d_mail, $d_budg, $d_show);
-			$html[] = "</td><td style=\"vertical-align: middle\">";
-			$html = array_merge($html, $d_todo, $d_payr, $d_user);
-			$html[] = "</td></tr><tr><td><br /><br /></td><td></td></tr><tr><td><div class=\"dashmenu\">";
-			$html = array_merge($html, $budg->index(), $hour->index());
-			$html[] = "</div></td><td><div class=\"dashmenu\">";
-			$html = array_merge($html, $show->index(), $todo->index(), $admn->index());
-			$html[] = "</div></td></tr></table>";
+			$html[] = "<div id=\"dashbubbles\">";
+			$SITE_SCRIPT[] = "$(function() { $('#dashbubbles').masonry({ singleMode: true }); });";
+			$SITE_SCRIPT[] = "$(function() { $('#dashmenu').masonry({ singleMode: true }); });";
+			$html = array_merge($html, $d_mail, $d_todo, $d_budg, $d_payr, $d_show, $d_user);
+			$html[] = "</div><div id=\"dashmenu\">";
+			$html = array_merge($html, $budg->index(), $hour->index(), $show->index(), $todo->index(), $admn->index());
+			$html[] = "</div>";
 			makePage($html, 'TD Tracking Made Easy');
 			break;
 	}

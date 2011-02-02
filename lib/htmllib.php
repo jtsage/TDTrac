@@ -65,7 +65,10 @@ function makeHeader($title = '') {
 	GLOBAL $TDTRAC_VERSION, $TDTRAC_CPNY, $TDTRAC_SITE, $user, $SITE_SCRIPT, $action, $helpnode;
 
 	$SITE_SCRIPT[] = "$(function() {";
-	$SITE_SCRIPT[] = "	$( \"#help\" ).dialog({ autoOpen: false, width: 500, modal: true });";
+	$SITE_SCRIPT[] = "	var hWide = 500;";
+	$SITE_SCRIPT[] = "	if ( $(document).width() < 768 ) { hWide = 390; }";
+	$SITE_SCRIPT[] = "	if ( $(document).width() < 480 ) { hWide = 220; }";
+	$SITE_SCRIPT[] = "	$( \"#help\" ).dialog({ autoOpen: false, width: hWide, modal: true });";
 	$SITE_SCRIPT[] = "});";
 	$SITE_SCRIPT[] = "$(function() {";
 	$SITE_SCRIPT[] = "	$( \"#helplink\" ).click(function() {";
@@ -73,12 +76,12 @@ function makeHeader($title = '') {
 	$SITE_SCRIPT[] = "	});";
 	$SITE_SCRIPT[] = "});";
 	$SITE_SCRIPT[] = "$(document).ready(function(){";
-	$SITE_SCRIPT[] = "	$('ul.subnav').parent().append('<span></span>');";
+	$SITE_SCRIPT[] = "	$('ul.subnav').parent().find('div.menubut').append('<span></span>');";
 	$SITE_SCRIPT[] = "	$('ul.topnav li span').click(function() { ";
-	$SITE_SCRIPT[] = "		$(this).parent().find('ul.subnav').slideDown('fast').show();";
-	$SITE_SCRIPT[] = "		$(this).parent().hover(function() {";
+	$SITE_SCRIPT[] = "		$(this).parent().parent().find('ul.subnav').slideDown('fast').show();";
+	$SITE_SCRIPT[] = "		$(this).parent().parent().hover(function() {";
 	$SITE_SCRIPT[] = "		}, function(){";
-	$SITE_SCRIPT[] = "			$(this).parent().find('ul.subnav').slideUp('slow'); ";
+	$SITE_SCRIPT[] = "			$(this).parent().parent().find('ul.subnav').slideUp('slow'); ";
 	$SITE_SCRIPT[] = "		});";
 	$SITE_SCRIPT[] = "		}).hover(function() {";
 	$SITE_SCRIPT[] = "			$(this).addClass('subhover'); ";
@@ -88,16 +91,21 @@ function makeHeader($title = '') {
 	$SITE_SCRIPT[] = "});";
 
 	$html = array();
-	$html[] = '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">';
-	$html[] = '<html xmlns="http://www.w3.org/1999/xhtml">';
+	$html[] = '<!DOCTYPE html>';
+	$html[] = '<html lang="en">';
 	$html[] = "<head>\n\t<meta http-equiv=\"Content-Type\" content=\"text/html; charset=iso-8859-1\" />";
 	$html[] = "\t<title>TDTrac{$TDTRAC_CPNY}:v{$TDTRAC_VERSION} - {$title}</title>";
+	$html[] = "\t<!--[if lt IE 9]>";
+	$html[] = "\t\t<script src=\"http://html5shim.googlecode.com/svn/trunk/html5.js\"></script>";
+	$html[] = "\t<![endif]-->";
+	$html[] = "\t<meta name=\"viewport\" content=\"width=device-width; initial-scale=1\"/>";
 	$html[] = "\t<link href=\"/css/tdtrac.css\" rel=\"stylesheet\" type=\"text/css\" />";
 	$html[] = "\t<link type=\"text/css\" href=\"/css/custom-theme/jquery-ui-1.8.7.custom.css\" rel=\"stylesheet\" />";
 	$html[] = "\t<link type=\"text/css\" href=\"/css/jquery.ui.selectmenu.css\" rel=\"stylesheet\" />";
 	$html[] = "\t<script type=\"text/javascript\" src=\"/js/jquery-1.4.4.min.js\"></script>";
 	$html[] = "\t<script type=\"text/javascript\" src=\"/js/jquery-ui-1.8.7.custom.min.js\"></script>";
 	$html[] = "\t<script type=\"text/javascript\" src=\"/js/jquery.ui.selectmenu.js\"></script>";
+	$html[] = "\t<script type=\"text/javascript\" src=\"/js/jquery.masonry.min.js\"></script>";
 	$html[] = "\t<script type=\"text/javascript\">";
 	foreach ( $SITE_SCRIPT as $line ) {
 		$html[] = "\t\t{$line}";
@@ -121,17 +129,17 @@ function makeHeader($title = '') {
 	}
 	$html[] = "\t</div>";
 	
-	$html[] = "\t<div id=\"upbg\"></div>";
 	$html[] = "\t<div id=\"outer\">";
 	$html[] = "\t\t<div id=\"header\">";
 	$html[] = "\t\t\t<div id=\"headercontent\">";
-	$html[] = "\t\t\t\t<h1><span style=\"letter-spacing: -5px\">TD<span style=\"color: #C3593C;\">T</span></span><span style=\"color: #C3593C;\">rac</span>{$TDTRAC_CPNY}<sup>{$TDTRAC_VERSION}</sup></h1>";
+	$html[] = "\t\t\t\t<h1><span class=\"logoclose\">TD<span class=\"red\">T</span></span><span class=\"red\">rac</span><span class=\"logoclose\">{$TDTRAC_CPNY}</span><sup>{$TDTRAC_VERSION}</sup></h1>";
 	if ( $user->loggedin ) { 
-		$temp = "\t\t\t\t<h2 style=\"margin-left: 1.5em\"><strong>Logged In User:</strong> {$user->name} (ID::{$user->id}/Group::{$user->group})"; 
+		$temp = "\t\t\t\t<h3><strong>Logged In User:</strong> {$user->name} (ID::{$user->id}/Group::{$user->group})</h3>"; 
 	} else {
-		$temp = "\t\t\t\t<h2 style=\"margin-left: 1.5em\">Budget and Payroll Tracking";
+		$temp = "\t\t\t\t<h2>Budget and Payroll Tracking</h2>";
 	}
-	$html[] = "{$temp}</h2>\n\t\t\t</div>\n\t\t</div>";
+	$html[] = "{$temp}\n\t\t\t</div>";
+	
 
 	if ( $user->loggedin ) {
 		if ( $user->can('viewbudget') ) {
@@ -141,7 +149,7 @@ function makeHeader($title = '') {
 		}
 		
 	}
-
+	$html[] = "\n\t\t</div>";
 	$menu[] = array(true, 'Dashboard', '', 'Main Dashboard');
 	$menu[] = array($user->loggedin, 'Password', 'user/password/', 'Change Your Password');
 	$menu[] = array(true, 'Budget', 'budget/', 'Manage Show Budgets', array(
@@ -175,19 +183,19 @@ function makeHeader($title = '') {
 	foreach ( $menu as $key => $item ) {
 		if ( $item[0] ) {
 			$mitem = array();
-			$mitem[] = "<li><a tabindex=\"".($key+90)."\" href=\"{$TDTRAC_SITE}{$item[2]}\" title=\"{$item[3]}\" ";
+			$mitem[] = "<li><div class=\"menubut";
 			if ( preg_match("/\//", $item[2]) ) {
 				$tester = preg_split("/\//", $item[2]);
 				if ( ( $action['action'] == $tester[1] || $action['module'] == $tester[0] ) && $key <> 7 ) {
-					$mitem[] = "class=\"active\" ";
+					$mitem[] = " active";
 				} 
 			} else { 
 				if ( $key == 0 && $action['module'] == 'index' ) {
-					$mitem[] = "class=\"active\" ";
+					$mitem[] = " active";
 				}
 			}
 					
-			$mitem[] = ">{$item[1]}</a>";
+			$mitem[] = "\"><a tabindex=\"".($key+90)."\" href=\"{$TDTRAC_SITE}{$item[2]}\" title=\"{$item[3]}\">{$item[1]}</a></div>";
 			$subs = "";
 			if ( count($item) > 4 ) {
 				foreach( $item[4] as $subitem ) {
@@ -203,7 +211,7 @@ function makeHeader($title = '') {
 		}
 	}
 	
-	$html[] = "\t\t\t\t<li><a tabindex=\"100\" href=\"\" id=\"helplink\" title=\"Help Popup\" >Help</a></li>";
+	$html[] = "\t\t\t\t<li><div class=\"menubut\"><a tabindex=\"100\" href=\"\" id=\"helplink\" title=\"Help Popup\" >?</a></div></li>";
 	$html[] = "\t\t\t</ul>\n\t\t</div>\n\t\t<div id=\"menubottom\"></div>\n\n\t\t<div id=\"content\">\n\t\t\t<div id=\"normalcontent\">";
 
 	return $html;
@@ -212,14 +220,20 @@ function makeHeader($title = '') {
 /**
  * Make page footer
  * 
+ * @global array Dashboard block as appropriate
  * @return array Formatted HTML
  */
 function makeFooter() {
+	global $SITE_BLOCK;
 	$html[] = "\t\t\t</div>\n\t\t</div>";
 	$html[] = "\t\t<div id=\"footer\">";
 	$html[] = "\t\t\t<div class=\"left\">&copy; 2008-".date('Y')." JTSage. All rights reserved.</div>";
 	$html[] = "\t\t\t<div class=\"right\"><a href=\"http://tdtrac.com/\" title=\"TDTrac Homepage\">TDTrac Homepage</a></div>";
-	$html[] = "\t\t</div>\n\t</div>\n</body>\n</html>";
+	$html[] = "\t\t</div>\n\t</div>";
+	if ( count($SITE_BLOCK) > 0 ) { 
+		$html[] = "\t<div id=\"dashfloat\">". join($SITE_BLOCK) . "</div>"; 
+	}
+	$html[] = "\n</body>\n</html>";
 	return $html;
 }
 ?>

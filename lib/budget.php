@@ -351,10 +351,10 @@ class tdtrac_budget {
 		$html[] = "  <li>Manage Budget Items for each show.</li>";
 		$html[] = ( $this->user->can('addbudget') ) ? "  <li><a href=\"{$TDTRAC_SITE}budget/add/\">Add Budget Expense</a></li>" : "";
 		$html[] = ( $this->user->can('viewbudget') ) ? "  <li><a href=\"{$TDTRAC_SITE}budget/view/\">View Budgets</a></li>" : "";
-		$html[] = ( $this->user->can('viewbudget') ) ? "  <li><a href=\"{$TDTRAC_SITE}budget/view/id:0/type:pending/\">View Budgets (payment pending items only, all shows)</a></li>" : "";
-		$html[] = ( $this->user->can('viewbudget') ) ? "  <li><a href=\"{$TDTRAC_SITE}budget/view/id:0/type:reimb/\">View Budgets (reimbursment items only, all shows)</a></li>" : "";
-		$html[] = ( $this->user->can('viewbudget') ) ? "  <li><a href=\"{$TDTRAC_SITE}budget/view/id:0/type:paid/\">View Budgets (reimbursment recieved items only, all shows)</a></li>" : "";
-		$html[] = ( $this->user->can('viewbudget') ) ? "  <li><a href=\"{$TDTRAC_SITE}budget/view/id:0/type:unpaid/\">View Budgets (reimbursment not recieved items only, all shows)</a></li>" : "";
+		$html[] = ( $this->user->can('viewbudget') ) ? "  <li><a href=\"{$TDTRAC_SITE}budget/view/id:0/type:pending/\">View Budgets (payment pending items only)</a></li>" : "";
+		$html[] = ( $this->user->can('viewbudget') ) ? "  <li><a href=\"{$TDTRAC_SITE}budget/view/id:0/type:reimb/\">View Budgets (reimbursment items only)</a></li>" : "";
+		$html[] = ( $this->user->can('viewbudget') ) ? "  <li><a href=\"{$TDTRAC_SITE}budget/view/id:0/type:paid/\">View Budgets (reimbursment rcvd items only)</a></li>" : "";
+		$html[] = ( $this->user->can('viewbudget') ) ? "  <li><a href=\"{$TDTRAC_SITE}budget/view/id:0/type:unpaid/\">View Budgets (reimbursment not rcvd items)</a></li>" : "";
 		$html[] = "</ul></li></ul>";
 		return $html;
 	}

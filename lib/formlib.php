@@ -118,7 +118,7 @@ class tdform {
 		$SITE_SCRIPT[] = "\t$(function() {";
 		$SITE_SCRIPT[] = "\t\t$( \"#{$id}\" ).datepicker({ dateFormat: 'yy-mm-dd' });";
 		$SITE_SCRIPT[] = "\t});";
-		$temp  = "  <div class=\"frmele\" title=\"{$title}\">{$text}: <input tabindex=\"{$this->tabindex}\" type=\"text\" size=\"21\" name=\"{$name}\" id=\"{$id}\" ";
+		$temp  = "  <div class=\"frmele\" title=\"{$title}\"><label for=\"{$name}\">{$text}</label><input tabindex=\"{$this->tabindex}\" type=\"text\" name=\"{$name}\" id=\"{$id}\" ";
 		if ( $preset != null ) { $temp .= "value=\"{$preset}\" "; }
 		if ( !$enabled ) { $temp .= "disabled=\"disabled\" "; }
 		$temp .= "/></div>";
@@ -153,7 +153,7 @@ class tdform {
 		$SITE_SCRIPT[] = "\t\t\tsource: available{$name}";
 		$SITE_SCRIPT[] = "\t\t});";
 		$SITE_SCRIPT[] = "\t});";
-		$temp  = "  <div class=\"frmele\" title=\"{$title}\">{$text}: ".(($money) ? "$" : "")."<input tabindex=\"{$this->tabindex}\" type=\"text\" class=\"td{$temptype}\" size=\"".($money ? "34" : "35")."\" name=\"{$name}\" id=\"{$name}\" ";
+		$temp  = "  <div class=\"frmele\" title=\"{$title}\"><label".(($money)?" class=\"money\"":"")." for=\"{$name}\">{$text}</label><input tabindex=\"{$this->tabindex}\" type=\"text\" class=\"td{$temptype}\" name=\"{$name}\" id=\"{$name}\" ";
 		if ( $selected != false ) { $temp .= "value = \"{$selected}\" "; }
 		if ( !$enabled ) { $temp .= "disabled=\"disabled\" "; }
 		$temp .= "/></div>";
@@ -182,7 +182,7 @@ class tdform {
 		$SITE_SCRIPT[] = "\t$(function() {";
 		$SITE_SCRIPT[] = "\t\t$( \"#{$name}-{$this->tabindex}\" ).selectmenu();";
 		$SITE_SCRIPT[] = "\t});";
-		$temp  = "  <div class=\"frmele\" title=\"{$title}\">{$text}: <select name=\"{$name}\" id=\"{$name}-{$this->tabindex}\" tabindex=\"{$this->tabindex}\"".(!$enabled ? " disabled=\"disabled\"":"").">";
+		$temp  = "  <div class=\"frmele\" title=\"{$title}\"><label for=\"{$name}\">{$text}</label><select name=\"{$name}\" id=\"{$name}-{$this->tabindex}\" tabindex=\"{$this->tabindex}\"".(!$enabled ? " disabled=\"disabled\"":"").">";
 		if ( $preset != null ) {
 			foreach ( $preset as $option ) {
 				if ( is_array($option) ) {
@@ -213,7 +213,7 @@ class tdform {
 		$temptype = ($money) ? "textMoney" : "text";
 		$this->members[] = array($temptype, $name, $text, $title, $preset);
 		if ( $title == null ) { $title = $text; }
-		$temp  = "  <div class=\"frmele\" title=\"{$title}\">{$text}: ".(($money) ? "$" : "")."<input tabindex=\"{$this->tabindex}\" type=\"text\" class=\"td{$temptype}\" size=\"".($money ? "34" : "35")."\" name=\"{$name}\" ";
+		$temp  = "  <div class=\"frmele\" title=\"{$title}\"><label ".(($money)?" class=\"money\"":"")."for=\"{$name}\">{$text}</label><input tabindex=\"{$this->tabindex}\" type=\"text\" class=\"td{$temptype}\" name=\"{$name}\" ";
 		if ( $preset != null ) { $temp .= "value = \"{$preset}\" "; }
 		if ( !$enabled ) { $temp .= "disabled=\"disabled\" "; }
 		$temp .= "/></div>";
@@ -235,7 +235,7 @@ class tdform {
 	public function addPass($name = 'password', $text = null, $title = null, $preset = null, $enabled = True ) {
 		$this->members[] = array('password', $name, $text, $title, $preset);
 		if ( $title == null ) { $title = $text; }
-		$temp  = "  <div class=\"frmele\" title=\"{$title}\">{$text}: <input tabindex=\"{$this->tabindex}\" type=\"password\" class=\"tdpassword\" size=\"35\" name=\"{$name}\" ";
+		$temp  = "  <div class=\"frmele\" title=\"{$title}\"><label for=\"{$name}\">{$text}</label><input tabindex=\"{$this->tabindex}\" type=\"password\" class=\"tdpassword\" name=\"{$name}\" ";
 		if ( $preset != null ) { $temp .= "value = \"{$preset}\" "; }
 		if ( !$enabled ) { $temp .= "disabled=\"disabled\" "; }
 		$temp .= "/></div>";
@@ -301,7 +301,7 @@ class tdform {
 	public function addCheck($name = 'check', $text = null, $title = null, $preset = False, $enabled = True, $value = 'y') {
 		$this->members[] = array('checkbox', $name, $text, $title, $preset);
 		if ( $title == null ) { $title = $text; }
-		$this->html[] = "  <div class=\"frmele\" title=\"{$title}\">{$text}: <input class=\"tdformcheck\" type=\"checkbox\" name=\"{$name}\" value=\"{$value}\" tabindex=\"{$this->tabindex}\" ".($preset ? "checked=\"checked\"":"").(!$enabled ? "disabled=\"disabled\" ":"")." /></div>";
+		$this->html[] = "  <div class=\"frmele\" title=\"{$title}\"><label for=\"{$name}\">{$text}</label><input class=\"tdformcheck\" type=\"checkbox\" name=\"{$name}\" value=\"{$value}\" tabindex=\"{$this->tabindex}\" ".($preset ? "checked=\"checked\"":"").(!$enabled ? "disabled=\"disabled\" ":"")." /></div>";
 		$this->tabindex++;
 		return true;
 	}
@@ -319,7 +319,7 @@ class tdform {
 	public function addRadio($name = 'radio', $text = null, $title = null, $preset = False, $enabled = True ) {
 		$this->members[] = array('radio', $name, $text, $title, $preset);
 		if ( $title == null ) { $title = $text; }
-		$temp  = "  <div class=\"frmele\" title=\"{$title}\">{$text}";
+		$temp  = "  <div class=\"frmele\" title=\"{$title}\"><label for=\"{$name}\">{$text}</label>";
 		$temp .= "<input type=\"radio\" name=\"{$name}\" tabindex=\"{$this->tabindex}\" value=\"1\" ".($preset?"checked=\"checked\"":"")." />";
 		$this->tabindex++;
 		$temp .= "<input type=\"radio\" name=\"{$name}\" tabindex=\"{$this->tabindex}\" value=\"0\" ".($preset?"":"checked=\"checked\"")."/></div>";
