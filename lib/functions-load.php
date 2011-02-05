@@ -172,11 +172,13 @@ function get_dash($name) {
 			$html[] = make_dash('Total Expenditure', '$'.number_format(get_single("SELECT SUM(price) AS num FROM {$MYSQL_PREFIX}budget"),2));
 			$html[] = make_dash('Pending Payment', '$'.number_format(get_single("SELECT SUM(price) AS num FROM {$MYSQL_PREFIX}budget WHERE pending = 1"),2));
 			$html[] = make_dash('Pending Reimbursment', '$'.number_format(get_single("SELECT SUM(price) AS num FROM {$MYSQL_PREFIX}budget WHERE needrepay = 1 AND gotrepay = 0"),2));
-			$rPending = get_single("SELECT COUNT(*) AS num FROM {$MYSQL_PREFIX}rcpts WHERE handled = 0");
-			if ( $rPending > 0 ) {
-				$html[] = make_dash('Reciepts Pending', $rPending, 'dRed', 'budget/reciept/');
-			} else {
-				$html[] = make_dash('Reciepts Pending', $rPending, 'dGrn');
+			if ( $user->can('addbudget') ) {
+				$rPending = get_single("SELECT COUNT(*) AS num FROM {$MYSQL_PREFIX}rcpts WHERE handled = 0");
+				if ( $rPending > 0 ) {
+					$html[] = make_dash('Reciepts Pending', $rPending, 'dRed', 'budget/reciept/');
+				} else {
+					$html[] = make_dash('Reciepts Pending', $rPending, 'dGrn');
+				}
 			}
 			$html[] = "</dl>";
 			break;
@@ -194,22 +196,27 @@ function get_dash($name) {
 			$html[] = "</dl>";
 			break;
 		case "payroll":
+			if ( $user->isemp ) {
+				$extratxt = "Your "; $extrasql = " AND h.userid = {$user->id}"; $ulink = "hours/view/type:user/id:{$user->id}/";
+			} else {
+				$extratxt = ""; $extrasql = ""; $ulink="hours/view/type:unpaid/";
+			}
 			$html[] = "<dl class=\"dashboard\"><dt>Payroll Information</dt>";
-			$hPending = get_single("SELECT SUM(worked) AS num FROM {$MYSQL_PREFIX}hours WHERE submitted = 0");
-			$ePending = number_format(get_single("SELECT SUM(worked*payrate) AS num FROM {$MYSQL_PREFIX}hours h, {$MYSQL_PREFIX}users u WHERE h.userid = u.userid AND submitted = 0"),2);
+			$hPending = get_single("SELECT SUM(worked) AS num FROM {$MYSQL_PREFIX}hours h WHERE submitted = 0{$extrasql}");
+			$ePending = number_format(get_single("SELECT SUM(worked*payrate) AS num FROM {$MYSQL_PREFIX}hours h, {$MYSQL_PREFIX}users u WHERE h.userid = u.userid AND submitted = 0{$extrasql}"),2);
 			if ( empty($hPending) ) { $hPending = 0; }
 			if ( $hPending > 0 ) {
-				$html[] = make_dash('Payroll '.(($TDTRAC_DAYRATE)?"Days":"Hours").' Pending', $hPending, 'dRed', 'hours/view/type:unpaid/');
+				$html[] = make_dash($extratxt . 'Payroll '.(($TDTRAC_DAYRATE)?"Days":"Hours").' Pending', $hPending, 'dRed', $ulink);
 			} else {
-				$html[] = make_dash('Payroll '.(($TDTRAC_DAYRATE)?"Days":"Hours").' Pending', $hPending, 'dGrn');
+				$html[] = make_dash($extratxt . 'Payroll '.(($TDTRAC_DAYRATE)?"Days":"Hours").' Pending', $hPending, 'dGrn');
 			}
 			if ( $ePending > 0 ) {
-				$html[] = make_dash('Payroll Expenditure Pending', '$'.$ePending, 'dRed');
+				$html[] = make_dash($extratxt . 'Payroll Expenditure Pending', '$'.$ePending, 'dRed');
 			} else {
-				$html[] = make_dash('Payroll Expenditure Pending', '$'.$ePending, 'dGrn');
+				$html[] = make_dash($extratxt . 'Payroll Expenditure Pending', '$'.$ePending, 'dGrn');
 			}
-			$html[] = make_dash('Payroll Total '.(($TDTRAC_DAYRATE)?"Days":"Hours").' Worked', get_single("SELECT SUM(worked) AS num FROM {$MYSQL_PREFIX}hours"));
-			$html[] = make_dash('Payroll Total Expenditure', '$'.number_format(get_single("SELECT SUM(worked*payrate) as num FROM {$MYSQL_PREFIX}hours h, {$MYSQL_PREFIX}users u WHERE h.userid = u.userid"),2));
+			$html[] = make_dash($extratxt . 'Payroll Total '.(($TDTRAC_DAYRATE)?"Days":"Hours").' Worked', get_single("SELECT SUM(worked) AS num FROM {$MYSQL_PREFIX}hours h WHERE 1{$extrasql}"));
+			$html[] = make_dash($extratxt . 'Payroll Total Expenditure', '$'.number_format(get_single("SELECT SUM(worked*payrate) as num FROM {$MYSQL_PREFIX}hours h, {$MYSQL_PREFIX}users u WHERE h.userid = u.userid{$extrasql}"),2));
 			$html[] = "</dl>";
 			break;
 		case "mail":
@@ -226,7 +233,9 @@ function get_dash($name) {
 			} else {
 				$html[] = make_dash('Unread Mail You Sent', $mFm);
 			}
-			$html[] = make_dash('All Unread Messages', get_single("SELECT COUNT(id) as num FROM `{$MYSQL_PREFIX}msg`"));
+			if ( $user->admin ) {
+				$html[] = make_dash('All Unread Messages', get_single("SELECT COUNT(id) as num FROM `{$MYSQL_PREFIX}msg`"));
+			}
 			$html[] = "</dl>";
 			break;
 		case "todo":

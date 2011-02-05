@@ -78,6 +78,7 @@ figure img {width: 100%;}
 
 .dGrn {
 	color: green;
+	font-weight: bold;
 }
 
 dt { font-weight: bold; }
@@ -135,8 +136,8 @@ a:hover { text-decoration: none; }
 #headercontent h3	{ margin: 0; font-weight: normal; font-size: 16px; }
 #search 			{ position: absolute; top: 0px; right: 0px; }
 #search input		{ border-radius: .5em; }
-#footer 			{ text-align: center; color: grey; background-color: #F4F4F4; }
-#footer .right		{ text-align: right; }
+#footer 			{ text-align: center; color: grey; background-color: #F4F4F4; margin-top: .5em; border-top: 1px solid grey; border-radius: 0 0 .85em .85em; }
+#footer .right		{ text-align: right; margin-right: .5em;}
 
 /* DROP MENU BY DEFAULT - HIDE ON SMALL DISPLAY */
 #menu			{ text-align: center; height: 44px; border-bottom: 1px solid #888; margin-bottom: 1em; background-color: #464548; box-shadow: #6374AB 0px 2px 2px; }
@@ -264,10 +265,10 @@ dl.dashboard dd { font-size: .9em; margin-left: 10px; }
 
 #dashfloat { display: none; }
 
-#dashmenu { clear: both; margin-top: 2em; }
-#dashmenu ul.linklist { background-color: #6E6E6E; color: white; width: 290px; float: left; margin: 8px; padding: 6px; border: 1px solid black; border-radius: 1em;}
+#dashmenu { clear: both; margin-top: .5em; }
+#dashmenu ul.linklist { background-color: #6E6E6E; color: white; width: 290px; float: left; margin: 8px; padding: 6px; border: none; border-radius: 1em; box-shadow: 2px 2px 6px #888; }
 #dashmenu ul.linklist li { font-size: .85em; }
-#dashmenu ul.linklist li ul { width: auto; border: none; margin: 0; padding: 0;}
+#dashmenu ul.linklist li ul { width: auto; border: none; margin: 0; padding: 0; box-shadow: none;}
 #dashmenu a { color: #FFFCD1; }
 
 div.infobox		{ background-color: #6E6E6E; color: white; width: 290px; margin-left: auto; margin-right: auto; margin-top: 8px; margin-bottom: 8px; padding: 6px; border-radius: 1em; box-shadow: 2px 2px 6px #888; text-align: center; }
@@ -355,6 +356,9 @@ table.datatable img.ticon			{ border: none; }
 	dl.dashboard { width: 320px; }
 	#dashmenu ul.linklist { width: 320px; }
 	#dashfloat { z-index: 10; top: 20px; left: 3%; position: absolute; display: block;}
+	
+	#dashfloat .dashboard { background-color: #6E6E6E; }
+	#dashfloat .dashboard dd { line-height: 18px; }
 	#header { background-position: bottom left; }
 	#rcptbox { float: left; margin-left: 80px; }
 	

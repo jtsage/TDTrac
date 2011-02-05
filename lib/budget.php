@@ -347,7 +347,7 @@ class tdtrac_budget {
 	 */
 	public function index() {
 		global $TDTRAC_SITE;
-		$html[] = "<ul class=\"linklist\"><li><h3>Budget Tracking</h3><ul class=\"linklist\">";
+		$html[] = "<div class=\"tasks\"><ul class=\"linklist\"><li><h3>Budget Tracking</h3><ul class=\"linklist\">";
 		$html[] = "  <li>Manage Budget Items for each show.</li>";
 		$html[] = ( $this->user->can('addbudget') ) ? "  <li><a href=\"{$TDTRAC_SITE}budget/add/\">Add Budget Expense</a></li>" : "";
 		$html[] = ( $this->user->can('viewbudget') ) ? "  <li><a href=\"{$TDTRAC_SITE}budget/view/\">View Budgets</a></li>" : "";
@@ -355,7 +355,7 @@ class tdtrac_budget {
 		$html[] = ( $this->user->can('viewbudget') ) ? "  <li><a href=\"{$TDTRAC_SITE}budget/view/id:0/type:reimb/\">View Budgets (reimbursment items only)</a></li>" : "";
 		$html[] = ( $this->user->can('viewbudget') ) ? "  <li><a href=\"{$TDTRAC_SITE}budget/view/id:0/type:paid/\">View Budgets (reimbursment rcvd items only)</a></li>" : "";
 		$html[] = ( $this->user->can('viewbudget') ) ? "  <li><a href=\"{$TDTRAC_SITE}budget/view/id:0/type:unpaid/\">View Budgets (reimbursment not rcvd items)</a></li>" : "";
-		$html[] = "</ul></li></ul>";
+		$html[] = "</ul></li></ul></div>";
 		return $html;
 	}
 	

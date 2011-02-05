@@ -82,7 +82,6 @@ if ( !$user->loggedin ) {
 			break;
 		case "shows":
 			$shows = new tdtrac_shows($user, $action);
-			$SITE_BLOCK = ($user->can('viewshow')) ? get_dash('shows') : array();
 			$shows->output();
 			break;
 		case "hours":
@@ -120,8 +119,17 @@ if ( !$user->loggedin ) {
 			$admn = new tdtrac_admin($user, $action);
 
 			$html[] = "<div id=\"dashbubbles\">";
-			$SITE_SCRIPT[] = "$(function() { $('#dashbubbles').masonry({ singleMode: true }); });";
-			$SITE_SCRIPT[] = "$(function() { $('#dashmenu').masonry({ singleMode: true }); });";
+			$SITE_SCRIPT[] = "$(function() { $('#dashbubbles').masonry({ singleMode: true, itemSelector: '.dashboard', resizeable: false }); });";
+			$SITE_SCRIPT[] = "$(function() { $('#dashmenu').masonry({ singleMode: true, itemSelector: '.tasks', resizeable: false }); });";
+			$SITE_SCRIPT[] = "$(window).resize(function(){";
+			$SITE_SCRIPT[] = "	$('#dashbubbles').masonry({ columnWidth: $('#dashbubbles .dashboard').outerWidth(true) });";
+			$SITE_SCRIPT[] = "	$('#dashmenu').masonry({ columnWidth: $('#dashmenu .tasks').outerWidth(true) });";
+			$SITE_SCRIPT[] = "});";
+			$SITE_SCRIPT[] = "$(window).load(function(){";
+			$SITE_SCRIPT[] = "	$('#dashbubbles').masonry({ columnWidth: $('#dashbubbles .dashboard').outerWidth(true) });";
+			$SITE_SCRIPT[] = "	$('#dashmenu').masonry({ columnWidth: $('#dashmenu .tasks').outerWidth(true) });";
+			$SITE_SCRIPT[] = "});";
+			
 			$html = array_merge($html, $d_mail, $d_todo, $d_budg, $d_payr, $d_show, $d_user);
 			$html[] = "</div><div id=\"dashmenu\">";
 			$html = array_merge($html, $budg->index(), $hour->index(), $show->index(), $todo->index(), $admn->index());

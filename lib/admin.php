@@ -258,13 +258,13 @@ class tdtrac_admin {
 	public function index() {
 		global $TDTRAC_SITE;
 		if ( !$this->user->admin ) { return array('',''); }
-		$html[] = "<ul class=\"linklist\"><li><h3>Administrative Tasks</h3><ul class=\"linklist\">";
+		$html[] = "<div class=\"tasks\"><ul class=\"linklist\"><li><h3>Administrative Tasks</h3><ul class=\"linklist\">";
 		$html[] = "  <li>Manage users, groups and permissions.</li>";
 		$html[] = "  <li><a href=\"{$TDTRAC_SITE}admin/useradd/\">Add User</a></li>";
 		$html[] = "  <li><a href=\"{$TDTRAC_SITE}admin/users/\">View Users</a></li>";
 		$html[] = "  <li><a href=\"{$TDTRAC_SITE}admin/groups/\">Add / Edit Groups</a></li>"; 
 		$html[] = "  <li><a href=\"{$TDTRAC_SITE}admin/perms/\">View Permissions</a></li>";
-		$html[] = "  <li><a href=\"{$TDTRAC_SITE}admin/mail/\">Set TDTracMail Subject Code</a></li></ul></li></ul>";
+		$html[] = "  <li><a href=\"{$TDTRAC_SITE}admin/mail/\">Set TDTracMail Subject Code</a></li></ul></li></ul></div>";
 		return $html;
 	}
 

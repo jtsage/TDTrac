@@ -288,11 +288,11 @@ class tdtrac_shows {
 	 */
 	public function index() {
 		global $TDTRAC_SITE;
-		$html[] = "<ul class=\"linklist\"><li><h3>Show Information</h3><ul class=\"linklist\">";
+		$html[] = "<div class=\"tasks\"><ul class=\"linklist\"><li><h3>Show Information</h3><ul class=\"linklist\">";
 		$html[] = "  <li>Manage shows tracked by TDTrac</li>";
 		$html[] = ( $this->user->can('addshow') ) ? "  <li><a href=\"{$TDTRAC_SITE}shows/add/\">Add Show</a></li>" : "";
 		$html[] = ( $this->user->can('viewshow') ) ? "  <li><a href=\"{$TDTRAC_SITE}shows/view/\">View Shows</a></li>" : "";
-		$html[] = "</ul></li></ul>";
+		$html[] = "</ul></li></ul></div>";
 		return $html;
 	}
 }

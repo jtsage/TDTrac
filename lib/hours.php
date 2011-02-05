@@ -335,14 +335,14 @@ class tdtrac_hours {
 	 */
 	public function index() {
 		global $TDTRAC_SITE;
-		$html[] = "<ul class=\"linklist\"><li><h3>Payroll Tracking</h3><ul class=\"linklist\">";
+		$html[] = "<div class=\"tasks\"><ul class=\"linklist\"><li><h3>Payroll Tracking</h3><ul class=\"linklist\">";
 		$html[] = "<li>Manage payroll records for each employee</li>";
 		$html[] = ( $this->user->onpayroll ) 		? "  <li><a href=\"{$TDTRAC_SITE}hours/add/own:1/\">Add Hours For Yourself</a></li>" : "";
 		$html[] = ( $this->user->can('addhours') && !$this->user->isemp ) 	? "  <li><a href=\"{$TDTRAC_SITE}hours/add/\">Add Hours Worked</a></li>" : ""; // SUPPESS THIS ON ONLY ADD OWN.
 		$html[] = ( $this->user->can('viewhours') ) ? "  <li><a href=\"{$TDTRAC_SITE}hours/view/\">View Hours Worked</a></li>" : "";
 		$html[] = ( $this->user->admin ) 			? "  <li><a href=\"{$TDTRAC_SITE}hours/view/type:unpaid/\">View Hours Worked (unpaid)</a></li>" : "";
 		$html[] = ( $this->user->admin ) 			? "  <li><a href=\"{$TDTRAC_SITE}hours/remind/\">Send Payroll Due Reminder To Employees</a></li>" : "";
-		$html[] = "</ul></li></ul>";
+		$html[] = "</ul></li></ul></div>";
 		return $html;
 	}
 	

@@ -190,12 +190,12 @@ class tdtrac_todo {
 	 */
 	public function index() {
 		global $TDTRAC_SITE;
-		$html[] = "<ul class=\"linklist\"><li><h3>ToDo Lists</h3><ul class=\"linklist\">";
+		$html[] = "<div class=\"tasks\"><ul class=\"linklist\"><li><h3>ToDo Lists</h3><ul class=\"linklist\">";
 		$html[] = "  <li>Manage per-user and per-show task lists.</li>";
 		$html[] = ( $this->user->can('addtodo') ) ? "  <li><a href=\"{$TDTRAC_SITE}todo/add/\">Add ToDo Item</a></li>" : "";
 		$html[] = ( $this->user->can('viewtodo') ) ? "  <li><a href=\"{$TDTRAC_SITE}todo/view/\">View ToDo Items</a></li>" : "";
 		$html[] = "  <li><a href=\"{$TDTRAC_SITE}todo/view/id:{$this->user->id}/type:user/\">View Personal ToDo Items</a></li>";
-		$html[] = "</ul></li></ul>";
+		$html[] = "</ul></li></ul></div>";
 		return $html;
 	}
 	
