@@ -345,11 +345,24 @@ class tdtrac_todo {
 			$html[] = "<span class=\"upright\">[<a class=\"todo-email\" href=\"#\">E-Mail to Self</a>]</span>";
 
 			$tabl = new tdtable("todo", 'datatable', true);
-			$tabl->addHeader(array('Due', 'Priority', 'Assigned To', 'Description'));
+			if ( $type == 'user' ) {
+				$tabl->addHeader(array('Due', 'Priority', 'Show', 'Description'));
+			} else {
+				$tabl->addHeader(array('Due', 'Priority', 'Assigned To', 'Description'));
+			}
+			
 			$tabl->addAction(array('tdone',));
 			if ( $this->user->can('editbudget') ) { $tabl->addAction(array('tedit', 'tdel')); }
 			while ( $row = mysql_fetch_array($result) ) {
-				$tabl->addRow(array($row['duedate'], $priorities[$row['priority']][1], (($row['assigned'] > 0) ? $this->user->get_name($row['assigned']) : "-unassigned-"), $row['dscr']), $row, (($row['complete']=='1') ? "tododone" : (($row['remain'] < 0 ) ? "tododue": null))  );
+				if ( $type == 'user' ) {
+					$tabl->addRow(array($row['duedate'], $priorities[$row['priority']][1], $row['showname'], $row['dscr']), $row, (($row['complete']=='1') ? "tododone" : (($row['remain'] < 0 ) ? "tododue": null))  );
+				} else {
+					if ( $type == 'overdue' ) {
+						$tabl->addRow(array($row['duedate'], $priorities[$row['priority']][1], $row['showname']." :: ".(($row['assigned'] > 0) ? $this->user->get_name($row['assigned']) : "-unassigned-"), $row['dscr']), $row, (($row['complete']=='1') ? "tododone" : (($row['remain'] < 0 ) ? "tododue": null))  );
+					} else {
+						$tabl->addRow(array($row['duedate'], $priorities[$row['priority']][1], (($row['assigned'] > 0) ? $this->user->get_name($row['assigned']) : "-unassigned-"), $row['dscr']), $row, (($row['complete']=='1') ? "tododone" : (($row['remain'] < 0 ) ? "tododue": null))  );
+					}
+				}
 			}
 			$html = array_merge($html, $tabl->output(false));
 			return $html;
