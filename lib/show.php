@@ -178,17 +178,20 @@ class tdtrac_shows {
 	private function delete($id) {
 		GLOBAL $db, $MYSQL_PREFIX;
 		if ( !$this->user->admin || !is_numeric($id) || $id < 1 ) {
-			$json['success'] = false;
+			$this->json['success'] = false;
 		} else {
 			$sqla = "DELETE FROM `{$MYSQL_PREFIX}todo` WHERE showid = ".intval($id);
 			$sqlb = "DELETE FROM `{$MYSQL_PREFIX}hours` WHERE showid = ".intval($id);
 			$sqlc = "DELETE FROM `{$MYSQL_PREFIX}budget` WHERE showid = ".intval($id);
 			$sqld = "DELETE FROM `{$MYSQL_PREFIX}shows` WHERE showid = ".intval($id);
+			// GARBAGE COLLECT RECIEPTS - DELETES ALL HANDLED, UNREFERNCED RECIEPTS.
+			$rgc = "DELETE FROM `{$MYSQL_PREFIX}rcpts` WHERE imgid NOT IN (SELECT imgid FROM `{$MYSQL_PREFIX}budget`) AND handled = 1";
 			$result = mysql_query($sqla, $db);
 			$result = mysql_query($sqlb, $db);
 			$result = mysql_query($sqlc, $db);
 			$result = mysql_query($sqld, $db);
-			$json['success'] = true;
+			$result = mysql_query($rgc, $db);
+			$this->json['success'] = true;
 		}
 	}
 
