@@ -1,0 +1,12 @@
+# TDTRAC Rewrite rules for lighttpd.
+#
+# Pulled from a working installation.  Update your path and host as needed.
+#
+$HTTP["host"] =~ "host\.tdtrac\.com" {
+	server.document-root = "/path/to/tdtrac/installation/"
+        url.rewrite-once = (
+          "/(.*)\.(.*)" => "$0",
+          "^/([^.]+)$" => "/index.php?action=$1",
+          "^/$" => "/index.php"
+) }
+
