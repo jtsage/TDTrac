@@ -15,6 +15,5 @@ Installation Instructions:
 
 Other Defaults you may wish to change:
     * Notifications are off by default.  Turn them on if you wish to use them using the user editor
-    * By default, noone has permissions to do anything (save the administrator can edit permissions) - use the permission editor to change this.
-	SEE ALSO: PERMISSIONS
+    * By default, no-one has permissions to do anything (save the administrator can edit permissions) - use the permission editor to change this.
 
