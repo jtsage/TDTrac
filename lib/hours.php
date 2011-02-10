@@ -563,7 +563,7 @@ class tdtrac_hours {
 	 */
 	private function remind_form() {
 		GLOBAL $db, $MYSQL_PREFIX, $TDTRAC_SITE;
-		$sql = "SELECT CONCAT(first, ' ', last) as name, userid FROM {$MYSQL_PREFIX}users WHERE payroll = 1 ORDER BY last DESC";
+		$sql = "SELECT CONCAT(first, ' ', last) as name, userid FROM {$MYSQL_PREFIX}users WHERE payroll = 1 AND active = 1 ORDER BY last DESC";
 		$result = mysql_query($sql, $db);
 		$form = new tdform("{$TDTRAC_SITE}hours/remind/", 'form2', 1, 'genform', 'Send Payroll Reminder');
 		
@@ -596,7 +596,7 @@ class tdtrac_hours {
 				mysql_real_escape_string($_REQUEST['edate'])
 			);
 		}
-		return "Sent Reminders<br />" . join($results);
+		return "Sent Reminders<br />" . join('<br />', $results);
 	}
 	
 	/**
