@@ -309,20 +309,24 @@ class tdtrac_admin {
 		$grop_res = mysql_query($grop_sql, $db);
 		
 		$html[] = "<h3>Permissions</h3>";
-		$html[] = "<div style=\"font-size: .75em;\"><div style=\"width: 49%; float: left\">".
-			"<dl><dt>addshow</dt><dd>Can Add New Shows / Jobs</dd>" .
-			"<dt>viewshow</dt><dd>Can View Current and Past Shows / Jobs</dd>" .
-			"<dt>editshow</dt><dd>Can Edit Shows / Jobs information</dd>" .
-			"<dt>addbudget</dt><dd>Can Add Expenses</dd>" .
-			"<dt>editbudget</dt><dd>Can Edit or Delete Expenses Information</dd>" .
-			"<dt>viewbudget</dt><dd>Can View budget details, including the labor cost overview</dd></dl></div>";
-		$html[] = "<div style=\"width: 49%; float: right\">".
-			"<dl><dt>addhours</dt><dd>Can Add Hours for employees on payroll.</dd>" .
-			"<dt>edithours</dt><dd>Can Edit or Delete Hours for employees on payroll.</dd>" .
-			"<dt>viewhours</dt><dd>Can View Labor reports.</dd>" .
-			"<dt>addtodo</dt><dd>Can Add ToDo List Items</dd>".
-			"<dt>edittodo</dt><dd>Can Edit ToDo List Items</dd>".
-			"<dt>viewtodo</dt><dd>Can View Todo Lists other than their personal list</dd></dl></div></div>";
+		$html[] = "<div style=\"font-size: .75em;\"><div style=\"width: 46%; float: left; margin-left: 4%;\">".
+			"<dl><dt>Show</dt>".
+				"<dd>A :: Can Add New Shows / Jobs</dd>" .
+				"<dd>E :: Can Edit Shows / Jobs information</dd>" .
+				"<dd>V :: Can View Current and Past Shows / Jobs</dd>" .
+			"<dt>Budget</dt>".
+				"<dd>A :: Can Add Expenses</dd>" .
+				"<dd>E :: Can Edit or Delete Expenses Information</dd>" .
+				"<dd>V :: Can View budget details, including labor cost</dd></dl></div>";
+		$html[] = "<div style=\"width: 46%; float: left; margin-left: 4%;\">".
+			"<dl><dt>Hours</dt>".
+				"<dd>A :: Can Add Hours for employees on payroll.</dd>" .
+				"<dd>E :: Can Edit or Delete payroll items.</dd>" .
+				"<dd>V :: Can View Labor reports.</dd>" .
+			"<dt>Todo</dt>".
+				"<dd>A :: Can Add ToDo List Items</dd>".
+				"<dd>E :: Can Edit ToDo List Items</dd>".
+				"<dd>V :: Can View All Todo Lists</dd></dl></div></div>";
 		$html[] = "<div style=\"clear: both\"><br /></div>";
 		
 		
