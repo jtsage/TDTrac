@@ -8,7 +8,7 @@ Installation Requirements:
 Installation Instructions:
     * Download lastest source package, or from the master branch of the GIT repository
     * Unzip the file to a folder on your web server
-    * Make "config.php" world writeable (CHMOD 666)
+    * Copy "config.dist.php" to "config.php" world writeable (CHMOD 666)
     * Either create a new MySQL database for TDTrac's data, or plan on using a prefix and an existing database
     * Run "install.php" from a webserver - all server and host setting are configurable from your browser window
     * After installation, be sure to change the admin password (which is 'password' by default), and set config.php to only readable (CHMOD 444)
