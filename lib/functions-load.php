@@ -174,10 +174,10 @@ function get_dash($name) {
 		case "budget":
 			$html[] = "<dl class=\"dashboard\"><dt>Budget Information</dt>";
 			$html[] = make_dash('Budget Items', get_single("SELECT COUNT(*) AS num FROM {$MYSQL_PREFIX}budget"));
-			$html[] = make_dash('Total Expenditure', '$'.number_format(get_single("SELECT SUM(price) AS num FROM {$MYSQL_PREFIX}budget"),2));
-			$html[] = make_dash('Pending Payment', '$'.number_format(get_single("SELECT SUM(price) AS num FROM {$MYSQL_PREFIX}budget WHERE pending = 1"),2));
-			$html[] = make_dash('Pending Reimbursment', '$'.number_format(get_single("SELECT SUM(price) AS num FROM {$MYSQL_PREFIX}budget WHERE needrepay = 1 AND gotrepay = 0"),2));
-			$yPending = get_single("SELECT SUM(price) AS num FROM {$MYSQL_PREFIX}budget WHERE needrepay = 1 AND gotrepay = 0 AND payto = {$user->id}");
+			$html[] = make_dash('Total Expenditure', '$'.number_format(get_single("SELECT SUM(price+tax) AS num FROM {$MYSQL_PREFIX}budget"),2));
+			$html[] = make_dash('Pending Payment', '$'.number_format(get_single("SELECT SUM(price+tax) AS num FROM {$MYSQL_PREFIX}budget WHERE pending = 1"),2));
+			$html[] = make_dash('Pending Reimbursment', '$'.number_format(get_single("SELECT SUM(price+tax) AS num FROM {$MYSQL_PREFIX}budget WHERE needrepay = 1 AND gotrepay = 0"),2));
+			$yPending = get_single("SELECT SUM(price+tax) AS num FROM {$MYSQL_PREFIX}budget WHERE needrepay = 1 AND gotrepay = 0 AND payto = {$user->id}");
 			if ( $yPending > 0 ) {
 				$html[] = make_dash('Your Pending Reimbursments', '$'.number_format($yPending, 2), 'dRed', "budget/view/id:0/type:unpaid/user:{$user->id}/");
 			} else {
