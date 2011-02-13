@@ -4,11 +4,11 @@
  * 
  * Contains main program logic.
  * @package tdtrac
- * @version 2.0.0 (db: 1.3.1)
+ * @version 2.0.0 (db: 2.0.1)
  * @author J.T.Sage <jtsage@gmail.com>
  */
 GLOBAL $MYSQL_PREFIX, $db;
-//This is version 1.3.1
+//This is version 2.0.1
 
 $sql_budget  = "CREATE TABLE IF NOT EXISTS `{$MYSQL_PREFIX}budget` (";
 $sql_budget .= "  `id` int(10) unsigned NOT NULL auto_increment,";
@@ -23,6 +23,7 @@ $sql_budget .= "  `needrepay` tinyint(4) unsigned NOT NULL default '0',";
 $sql_budget .= "  `gotrepay` tinyint(4) unsigned NOT NULL default '0',";
 $sql_budget .= "  `tax` float NOT NULL default '0',";
 $sql_budget .= "  `imgid` MEDIUMINT UNSIGNED NOT NULL DEFAULT '0',";
+$sql_budget .= "  `payto` MEDIUMINT UNSIGNED NOT NULL DEFAULT '0',";
 $sql_budget .= "  PRIMARY KEY  (`id`),";
 $sql_budget .= "  KEY `showid` (`showid`,`vendor`)";
 $sql_budget .= ") ENGINE=MyISAM  DEFAULT CHARSET=latin1;";
