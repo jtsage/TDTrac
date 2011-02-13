@@ -128,6 +128,11 @@ function get_sql_const($name, $extra = null) {
 		$sql .= $user->isemp ? " username = '{$user->username}' AND" : "";
 		$sql .= " active = 1 AND payroll = 1 AND ug.userid = u.userid ORDER BY last ASC";
 		return $sql; }
+	if ( $name == "reimb" ) {
+		$sql  = "SELECT u.userid, CONCAT(first, ' ', last) as name FROM {$MYSQL_PREFIX}users u, {$MYSQL_PREFIX}usergroups ug WHERE";
+		$sql .= $user->isemp ? " username = '{$user->username}' AND" : "";
+		$sql .= " active = 1 AND ug.userid = u.userid ORDER BY last ASC";
+		return $sql; }
 	if ( $name == "todo" ) { return "SELECT u.userid, CONCAT(first, ' ', last) as name FROM {$MYSQL_PREFIX}users u WHERE active = 1 ORDER BY last ASC"; }
 	return False;
 }
@@ -172,6 +177,12 @@ function get_dash($name) {
 			$html[] = make_dash('Total Expenditure', '$'.number_format(get_single("SELECT SUM(price) AS num FROM {$MYSQL_PREFIX}budget"),2));
 			$html[] = make_dash('Pending Payment', '$'.number_format(get_single("SELECT SUM(price) AS num FROM {$MYSQL_PREFIX}budget WHERE pending = 1"),2));
 			$html[] = make_dash('Pending Reimbursment', '$'.number_format(get_single("SELECT SUM(price) AS num FROM {$MYSQL_PREFIX}budget WHERE needrepay = 1 AND gotrepay = 0"),2));
+			$yPending = get_single("SELECT SUM(price) AS num FROM {$MYSQL_PREFIX}budget WHERE needrepay = 1 AND gotrepay = 0 AND payto = {$user->id}");
+			if ( $yPending > 0 ) {
+				$html[] = make_dash('Your Pending Reimbursments', '$'.number_format($yPending, 2), 'dRed', "budget/view/id:0/type:unpaid/user:{$user->id}/");
+			} else {
+				$html[] = make_dash('Your Pending Reimbursments', '$'.number_format(0, 2), 'dGrn');
+			}
 			if ( $user->can('addbudget') ) {
 				$rPending = get_single("SELECT COUNT(*) AS num FROM {$MYSQL_PREFIX}rcpts WHERE handled = 0");
 				if ( $rPending > 0 ) {

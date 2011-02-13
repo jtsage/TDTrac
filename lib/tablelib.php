@@ -416,10 +416,11 @@ class tdtable {
 	 * @return string Formatted HTML
 	 */
 	private function act_breim($raw) {
-		global $TDTRAC_SITE, $SITE_SCRIPT;
+		global $TDTRAC_SITE, $SITE_SCRIPT, $user;
 		if ( $raw['needrepay'] ) {
+			if ( $raw['payto'] == 0 ) { $titleex = ""; } else { $titleex = " (" . $user->get_name($raw['payto']) . ")"; }
 			if ( $raw['gotrepay'] ) {
-				return "<img class=\"ticon\" src=\"/images/reim-yes.png\" title=\"Reimbursment Recieved\" alt=\"Reimbursment Recieved\" />";
+				return "<img class=\"ticon\" src=\"/images/reim-yes.png\" title=\"Reimbursment Recieved{$titleex}\" alt=\"Reimbursment Recieved\" />";
 			} else {
 				$SITE_SCRIPT[] = "var bremrow{$this->currentrow} = true;";
 				$SITE_SCRIPT[] = "$(function() { $('.brem-{$this->tablename}-row-{$this->currentrow}').click( function() {";
@@ -427,14 +428,14 @@ class tdtable {
 				$SITE_SCRIPT[] = "		$.getJSON(\"{$TDTRAC_SITE}budget/reimb/json:1/id:{$raw['id']}/\", function(data) {";
 				$SITE_SCRIPT[] = "			if ( data.success === true ) { ";
 				$SITE_SCRIPT[] = "				$('#popper').html(\"Budget Item #{$raw['id']} Reimbursment Recieved\");";
-				$SITE_SCRIPT[] = "				$('.brem-{$this->tablename}-row-{$this->currentrow}').find('img').attr('src', '/images/reim-yes.png').attr('title', 'Reimbursment Recieved');";
+				$SITE_SCRIPT[] = "				$('.brem-{$this->tablename}-row-{$this->currentrow}').find('img').attr('src', '/images/reim-yes.png').attr('title', 'Reimbursment Recieved{$titleex}');";
 				$SITE_SCRIPT[] = "			} else { $('#popper').html(\"Budget Item #{$raw['id']} Mark :: Failed\"); }";
 				$SITE_SCRIPT[] = "			bremrow{$this->currentrow} = false;";
 				$SITE_SCRIPT[] = "			$('#popperdiv').show('blind');";			
 				$SITE_SCRIPT[] = "	});} return false;";
 				$SITE_SCRIPT[] = "});});";
 			
-				return "<a class=\"brem-{$this->tablename}-row-{$this->currentrow}\" href=\"#\"><img class=\"ticon\" src=\"/images/reim-no.png\" title=\"Reimbursment Needed\" alt=\"Reimbursment Needed\" /></a>";
+				return "<a class=\"brem-{$this->tablename}-row-{$this->currentrow}\" href=\"#\"><img class=\"ticon\" src=\"/images/reim-no.png\" title=\"Reimbursment Needed{$titleex}\" alt=\"Reimbursment Needed\" /></a>";
 			}
 		} else { 
 			return "<img class=\"ticon\" src=\"/images/blank.png\" alt=\"Spacer\" />";

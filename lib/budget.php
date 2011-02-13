@@ -32,7 +32,7 @@ class tdtrac_budget {
 	private $html = array();
 	
 	/** @var string Page Title */
-	private $title = "To-Do Lists";
+	private $title = "Budget";
 	
 	/** @var array JSON Data */
 	private $json = array();
@@ -73,9 +73,16 @@ class tdtrac_budget {
 					} else {
 						thrower('Access Denied :: You cannot add new budget items', 'budget/');
 					} break;
+				case "reimb":
+					$this->title .= " :: Reimbursments Owed";
+					if ( $this->user->admin ) {
+						$this->html = $this->reimb();
+					} else {
+						thrower('Access Denied :: You cannot view this list', 'budget/');
+					} break;
 				case "view":
 					$this->title .= " :: View";
-					if ( $this->user->can("viewbudget") ) {
+					if ( $this->user->can("viewbudget") || ( ( $this->action['type'] == 'reimb' || $this->action['type'] == 'unpaid' || $this->action['type'] == 'paid' ) && $action['user'] == $this->user->id ) ) {
 						if ( $this->post ) {
 							$type = ( isset($_REQUEST['type']) && ( $_REQUEST['type'] == 'reimb' || $_REQUEST['type'] == 'unpaid' || $_REQUEST['type'] == 'paid' || $_REQUEST['type'] == 'pending') ) ? $_REQUEST['type'] : "show";
 							$id   = ( isset($_REQUEST['id']) && is_numeric($_REQUEST['id']) ) ? intval($_REQUEST['id']) : 1;
@@ -89,7 +96,9 @@ class tdtrac_budget {
 								$this->html = $this->view($id, $type);
 							}
 						}
-					} break;
+					} else {
+						thrower('Access Denied :: You Cannot view budgets');
+					}break;
 				case "search":
 					$this->title .= " :: Search Results";
 					if ( $this->user->can("viewbudget") ) {
@@ -351,14 +360,46 @@ class tdtrac_budget {
 		$html[] = "  <li>Manage Budget Items for each show.</li>";
 		$html[] = ( $this->user->can('addbudget') ) ? "  <li><a href=\"{$TDTRAC_SITE}budget/add/\">Add Budget Expense</a></li>" : "";
 		$html[] = ( $this->user->can('viewbudget') ) ? "  <li><a href=\"{$TDTRAC_SITE}budget/view/\">View Budgets</a></li>" : "";
-		$html[] = ( $this->user->can('viewbudget') ) ? "  <li><a href=\"{$TDTRAC_SITE}budget/view/id:0/type:pending/\">View Budgets (payment pending items only)</a></li>" : "";
-		$html[] = ( $this->user->can('viewbudget') ) ? "  <li><a href=\"{$TDTRAC_SITE}budget/view/id:0/type:reimb/\">View Budgets (reimbursment items only)</a></li>" : "";
-		$html[] = ( $this->user->can('viewbudget') ) ? "  <li><a href=\"{$TDTRAC_SITE}budget/view/id:0/type:paid/\">View Budgets (reimbursment rcvd items only)</a></li>" : "";
-		$html[] = ( $this->user->can('viewbudget') ) ? "  <li><a href=\"{$TDTRAC_SITE}budget/view/id:0/type:unpaid/\">View Budgets (reimbursment not rcvd items)</a></li>" : "";
+		$html[] = ( $this->user->can('viewbudget') ) ? "  <li><a href=\"{$TDTRAC_SITE}budget/view/id:0/type:pending/\">View All Payment Pending Items</a></li>" : "";
+		$html[] = ( $this->user->can('viewbudget') && !$this->user->isemp ) ? "  <li><a href=\"{$TDTRAC_SITE}budget/view/id:0/type:reimb/\">View All Reimbursments</a></li>" : "";
+		$html[] = ( $this->user->can('viewbudget') && !$this->user->isemp ) ? "  <li><a href=\"{$TDTRAC_SITE}budget/view/id:0/type:paid/\">View All Reimbursments (unpaid)</a></li>" : "";
+		$html[] = ( $this->user->can('viewbudget') && !$this->user->isemp ) ? "  <li><a href=\"{$TDTRAC_SITE}budget/view/id:0/type:unpaid/\">View All Reimbursments (paid)</a></li>" : "";
+		$html[] = "  <li><a href=\"{$TDTRAC_SITE}budget/view/id:0/type:reimb/user:{$this->user->id}/\">View Reimbusments Owed to You (all)</a></li>";
+		$html[] = "  <li><a href=\"{$TDTRAC_SITE}budget/view/id:0/type:paid/user:{$this->user->id}/\">View Reimbusments Owed to You (paid)</a></li>";
+		$html[] = "  <li><a href=\"{$TDTRAC_SITE}budget/view/id:0/type:unpaid/user:{$this->user->id}/\">View Reimbusments Owed to You (unpaid)</a></li>";
+		$html[] = ( $this->user->admin ) 			 ? "  <li><a href=\"{$TDTRAC_SITE}budget/reimb/\">View Reimbusments Owed to Others (unpaid)</a></li>" : "";
 		$html[] = "</ul></li></ul></div>";
 		return $html;
 	}
 	
+	public function reimb() {
+		global $TDTRAC_SITE, $MYSQL_PREFIX, $db;
+		$html[] = "<div class=\"tasks\"><ul class=\"linklist\"><li><h3>Reimbursment Tracking</h3><ul class=\"linklist\">";
+		$html[] = "  <li>View Reimbursment Items owed to each user.</li>";
+		$sql = "SELECT CONCAT(user.first, ' ', user.last) as name, user.userid id, count(b.payto) cnt, sum(b.price + b.tax) amount FROM `{$MYSQL_PREFIX}users` user, `{$MYSQL_PREFIX}budget` b WHERE b.payto = user.userid AND b.needrepay = 1 AND b.gotrepay = 0 GROUP BY b.payto ORDER BY b.payto";
+		$result = mysql_query($sql, $db);
+		if ( mysql_num_rows($result) < 1 ) {
+			$html[] = "  <li>No Users owed reimbursments</li>";
+			$html[] = "</ul></li></ul></div>";
+		} else {
+			$html[] = "</ul></li></ul></div>";
+			$tabl = new tdtable('reimb', 'datatable', false);
+			$tresult = $tabl->addHeader(array('User', 'Count', 'Amount'));
+			$tresult = $tabl->setAlign('Count', 'right');
+			$tresult = $tabl->setAlign('Amount', 'right');
+			while ( $row = mysql_fetch_array($result) ) {
+				$tresult = $tabl->addRow(array(
+					"<a href=\"{$TDTRAC_SITE}budget/view/id:0/type:unpaid/user:{$row['id']}/\">{$row['name']}</a>",
+					$row['cnt'],
+					'$'.number_format($row['amount'],2)
+				));
+			}
+			$html = array_merge($html, $tabl->output(false));
+		}
+		
+		return $html;
+	}
+		
 	/**
 	 * Form to add a new budget item
 	 * 
@@ -369,7 +410,7 @@ class tdtrac_budget {
 	 * @return array HTML Output
 	 */
 	private function add_form($rcpt = 0) {
-		GLOBAL $db, $MYSQL_PREFIX, $TDTRAC_SITE;
+		GLOBAL $db, $MYSQL_PREFIX, $TDTRAC_SITE, $SITE_SCRIPT;
 		$form = new tdform("{$TDTRAC_SITE}budget/add/", 'budget-add-form', 1, null, 'Add Budget Expense');
 		
 		$fesult = $form->addDrop('showid', 'Show', 'Show to Charge', db_list(get_sql_const('showid'), array(showid, showname)), False);
@@ -382,6 +423,18 @@ class tdtrac_budget {
 		$fesult = $form->addCheck('pending', 'Pending Payment');
 		$fesult = $form->addCheck('needrepay', 'Reimbursable Charge');
 		$fesult = $form->addCheck('gotrepay', 'Reimbursment Recieved');
+		$SITE_SCRIPT[] = "$(function() {";
+		$SITE_SCRIPT[] = "	$('.drop-payto').hide();";
+		$SITE_SCRIPT[] = "	$('.check-needrepay').click(function() { ";
+		$SITE_SCRIPT[] = "		if ( $('input[name=needrepay]').is(':checked') ) { $('.drop-payto').show(); }";
+		$SITE_SCRIPT[] = "		else { $('.drop-payto').hide(); }";
+		$SITE_SCRIPT[] = "});});";
+		if ( $this->user->onpayroll ) {
+			$result = $form->addDrop('payto', 'Owed to', 'Reimbursment Payable To', array_merge(array(0, 'N/A'), db_list(get_sql_const('reimb'), array('userid', 'name'))), False);
+		} else {
+			$result = $form->addDrop('payto', 'Owed to', 'Reimbursment Payable To', array_merge(array(0 => 'N/A'), db_list(get_sql_const('reimb'), array('userid', 'name'))), False);
+		}
+		 
 		$fesult = $form->addHidden('rcptid', intval($rcpt));
 		return $form->output('Add Expense');
 	}
@@ -415,6 +468,17 @@ class tdtrac_budget {
 		$fesult = $form->addCheck('pending', 'Pending Payment', null, $row['pending']);
 		$fesult = $form->addCheck('needrepay', 'Reimbursable Charge', null, $row['needrepay']);
 		$fesult = $form->addCheck('gotrepay', 'Reimbursment Recieved', null, $row['gotrepay']);
+		$SITE_SCRIPT[] = "$(function() {";
+		if ( $row['payto'] == 0 ) { $SITE_SCRIPT[] = "	$('.drop-payto').hide();"; }
+		$SITE_SCRIPT[] = "	$('.check-needrepay').click(function() { ";
+		$SITE_SCRIPT[] = "		if ( $('input[name=needrepay]').is(':checked') ) { $('.drop-payto').show(); }";
+		$SITE_SCRIPT[] = "		else { $('.drop-payto').hide(); }";
+		$SITE_SCRIPT[] = "});});";
+		if ( $this->user->onpayroll ) {
+			$result = $form->addDrop('payto', 'Owed to', 'Reimbursment Payable To', array_merge(array(0, 'N/A'), db_list(get_sql_const('reimb'), array('userid', 'name'))), False, $row['payto']);
+		} else {
+			$result = $form->addDrop('payto', 'Owed to', 'Reimbursment Payable To', array_merge(array(0 => 'N/A'), db_list(get_sql_const('reimb'), array('userid', 'name'))), False, $row['payto']);
+		}
 		$fesult = $form->addHidden('id', $id);
 		return array_merge($html, $form->output('Update Expense'));
 	}
@@ -434,8 +498,8 @@ class tdtrac_budget {
 		if ( !$exists ) {
 			$rcptid = ( $_REQUEST['rcptid'] > 0 && is_numeric($_REQUEST['rcptid'])) ? $_REQUEST['rcptid'] : 0;
 			$sqlstring  = "INSERT INTO `{$MYSQL_PREFIX}budget` ";
-			$sqlstring .= "( showid, price, tax, imgid, vendor, category, dscr, date, pending, needrepay, gotrepay )";
-			$sqlstring .= " VALUES ( '%d','%f','%f','%d','%s','%s','%s','%s','%d','%d','%d' )";
+			$sqlstring .= "( showid, price, tax, imgid, vendor, category, dscr, date, pending, needrepay, gotrepay, payto )";
+			$sqlstring .= " VALUES ( '%d','%f','%f','%d','%s','%s','%s','%s','%d','%d','%d', '%d' )";
 		
 			$sql = sprintf($sqlstring,
 				intval($_REQUEST['showid']),
@@ -448,7 +512,8 @@ class tdtrac_budget {
 				make_date($_REQUEST['date']),
 				(($_REQUEST['pending'] == "y") ? "1" : "0"),
 				(($_REQUEST['needrepay'] == "y") ? "1" : "0"),
-				(($_REQUEST['gotrepay'] == "y") ? "1" : "0")
+				(($_REQUEST['gotrepay'] == "y") ? "1" : "0"),
+				intval($_REQUEST['payto'])
 			);
 			
 			if ( $rcptid > 0 ) {
@@ -457,7 +522,7 @@ class tdtrac_budget {
 			}
 		} else {
 			$sqlstring  = "UPDATE `{$MYSQL_PREFIX}budget` SET showid = '%d', price = '%f', tax = '%f' , vendor = '%s', ";
-			$sqlstring .= "category = '%s', dscr = '%s' , date = '%s', pending = '%d', needrepay = '%d', gotrepay = '%d'";
+			$sqlstring .= "category = '%s', dscr = '%s' , date = '%s', pending = '%d', needrepay = '%d', gotrepay = '%d', payto = '%d'";
 			$sqlstring .= " WHERE id = %d";
 			
 			$sql = sprintf($sqlstring,
@@ -471,6 +536,7 @@ class tdtrac_budget {
 				(($_REQUEST['pending'] == "y") ? "1" : "0"),
 				(($_REQUEST['needrepay'] == "y") ? "1" : "0"),
 				(($_REQUEST['gotrepay'] == "y") ? "1" : "0"),
+				intval($_REQUEST['payto']),
 				intval($_REQUEST['id'])
 			);
 		}
@@ -589,14 +655,23 @@ class tdtrac_budget {
 			case "reimb":
 				$rhtml[] = "<h3>All Reimbursment Budget Items</h3><br /><br />";
 				$sqlwhere = " AND needrepay = 1";
+				if ( isset($this->action['user']) && is_numeric($this->action['user']) ) {
+					$sqlwhere .= " AND payto = {$this->action['user']}";
+				}
 				break;
 			case "paid":
 				$rhtml[] = "<h3>Reimbursment Paid Budget Items</h3><br /><br />";
 				$sqlwhere = " AND gotrepay = 1";
+				if ( isset($this->action['user']) && is_numeric($this->action['user']) ) {
+					$sqlwhere .= " AND payto = {$this->action['user']}";
+				}
 				break;
 			case "unpaid":
 				$rhtml[] = "<h3>Reimbursment UNPaid Budget Items</h3><br /><br />";
 				$sqlwhere = " AND needrepay = 1 AND gotrepay = 0";
+				if ( isset($this->action['user']) && is_numeric($this->action['user']) ) {
+					$sqlwhere .= " AND payto = {$this->action['user']}";
+				}
 				break;
 			default:
 				$rhtml[] = "";
@@ -612,6 +687,9 @@ class tdtrac_budget {
 			$html[] = "<ul class=\"datalist\"><li><strong>Company</strong>: {$row['company']}</li>";
 			$html[] = "<li><strong>Venue</strong>: {$row['venue']}</li>";
 			$html[] = "<li><strong>Dates</strong>: {$row['dates']}</li>";
+			if ( isset($this->action['user']) && is_numeric($this->action['user']) ) {
+				$html[] = "<li><strong>Owed to</strong>: " . $this->user->get_name($this->action['user']) . "</li>";
+			}
 			$html[] = "</ul>";
 			
 			$sql_exp = "SELECT * FROM {$MYSQL_PREFIX}budget WHERE showid = {$row['showid']}{$sqlwhere} ORDER BY category ASC, date ASC, vendor ASC";

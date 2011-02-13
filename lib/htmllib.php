@@ -154,7 +154,9 @@ function makeHeader($title = '') {
 	$menu[] = array($user->loggedin, 'Password', 'user/password/', 'Change Your Password');
 	$menu[] = array(true, 'Budget', 'budget/', 'Manage Show Budgets', array(
 		array(($user->loggedin && $user->can('addbudget')), 'Add Expense', 'budget/add/', 'Add An Expense'),
-		array(($user->loggedin && $user->can('viewbudget')), 'View Expenses', 'budget/view/', 'View Show Budgets')
+		array(($user->loggedin && $user->can('viewbudget')), 'View Expenses', 'budget/view/', 'View Show Budgets'),
+		array(($user->loggedin), 'Your Reimbursments', "budget/view/id:0/type:unpaid/user:{$user->id}/", 'View Your Owed Reimbursments'),
+		array(($user->loggedin && $user->admin), 'Owed Reimbursments', 'budget/reimb/', 'View Owed Reimbursments')
 	));
 	$menu[] = array(true, 'Payroll', 'hours/', 'Manage Payroll', array(
 		array(($user->loggedin && $user->onpayroll && $user->can('addhours')), 'Add Own Hours', 'hours/add/own:1/', 'Add Hours to Yourself'),
