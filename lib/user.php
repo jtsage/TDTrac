@@ -217,7 +217,7 @@ class tdtrac_user {
 			if ( $row['userid'] == 1 ) { //CHECK UPGRADE STATUS ON ADMIN LOGIN (USER #1)
 				$sql2 = "SELECT value FROM {$MYSQL_PREFIX}tdtrac WHERE name = 'version' AND value = '{$TDTRAC_DBVER}'";
 				$res2 = mysql_query($sql2, $db);
-				if ( mysql_num_rows($res2) < 1 ) { $infodata .= "<br><strong>WARNING:</strong> Database not up-to-date, please run upgrade script!"; }
+				if ( mysql_num_rows($res2) < 1 ) { $infodata .= "<br><strong>WARNING:</strong> Database not up-to-date, please run upgrade"; }
 			}
 	    		if ( $row['chpass'] <> 0 ) { 
 				$infodata = "Login Successful, Please Change Your Password!"; header("Location: {$TDTRAC_SITE}user/password/"); ob_flush();
