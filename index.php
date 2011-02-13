@@ -130,7 +130,7 @@ if ( !$user->loggedin ) {
 			$SITE_SCRIPT[] = "	$('#dashmenu').masonry({ columnWidth: $('#dashmenu .tasks').outerWidth(true) });";
 			$SITE_SCRIPT[] = "});";
 			
-			$html = array_merge($html, $d_mail, $d_todo, $d_budg, $d_payr, $d_show, $d_user);
+			$html = array_merge($html, $d_mail, $d_todo, $d_budg, $d_payr, $d_user, $d_show);
 			$html[] = "</div><div id=\"dashmenu\">";
 			$html = array_merge($html, $budg->index(), $hour->index(), $show->index(), $todo->index(), $admn->index());
 			$html[] = "</div>";
