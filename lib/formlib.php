@@ -182,7 +182,7 @@ class tdform {
 		$SITE_SCRIPT[] = "\t$(function() {";
 		$SITE_SCRIPT[] = "\t\t$( \"#{$name}-{$this->tabindex}\" ).selectmenu();";
 		$SITE_SCRIPT[] = "\t});";
-		$temp  = "  <div class=\"frmele\" title=\"{$title}\"><label for=\"{$name}\">{$text}</label><select name=\"{$name}\" id=\"{$name}-{$this->tabindex}\" tabindex=\"{$this->tabindex}\"".(!$enabled ? " disabled=\"disabled\"":"").">";
+		$temp  = "  <div class=\"frmele drop-{$name}\" title=\"{$title}\"><label for=\"{$name}\">{$text}</label><select name=\"{$name}\" id=\"{$name}-{$this->tabindex}\" tabindex=\"{$this->tabindex}\"".(!$enabled ? " disabled=\"disabled\"":"").">";
 		if ( $preset != null ) {
 			foreach ( $preset as $option ) {
 				if ( is_array($option) ) {
@@ -301,7 +301,7 @@ class tdform {
 	public function addCheck($name = 'check', $text = null, $title = null, $preset = False, $enabled = True, $value = 'y') {
 		$this->members[] = array('checkbox', $name, $text, $title, $preset);
 		if ( $title == null ) { $title = $text; }
-		$this->html[] = "  <div class=\"frmele\" title=\"{$title}\"><label for=\"{$name}\">{$text}</label><input class=\"tdformcheck\" type=\"checkbox\" name=\"{$name}\" value=\"{$value}\" tabindex=\"{$this->tabindex}\" ".($preset ? "checked=\"checked\"":"").(!$enabled ? "disabled=\"disabled\" ":"")." /></div>";
+		$this->html[] = "  <div class=\"frmele check-{$name}\" title=\"{$title}\"><label for=\"{$name}\">{$text}</label><input class=\"tdformcheck\" type=\"checkbox\" name=\"{$name}\" value=\"{$value}\" tabindex=\"{$this->tabindex}\" ".($preset ? "checked=\"checked\"":"").(!$enabled ? "disabled=\"disabled\" ":"")." /></div>";
 		$this->tabindex++;
 		return true;
 	}
