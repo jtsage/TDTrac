@@ -449,7 +449,7 @@ class tdtrac_budget {
 	 * @return array HTML Output
 	 */
 	private function edit_form($id) {
-		GLOBAL $db, $MYSQL_PREFIX, $TDTRAC_SITE;
+		GLOBAL $db, $MYSQL_PREFIX, $TDTRAC_SITE, $SITE_SCRIPT;
 		$html = array();
 		$sql = "SELECT showname, {$MYSQL_PREFIX}budget.* FROM `{$MYSQL_PREFIX}shows`, `{$MYSQL_PREFIX}budget` WHERE {$MYSQL_PREFIX}budget.id = {$id} AND {$MYSQL_PREFIX}budget.showid = {$MYSQL_PREFIX}shows.showid LIMIT 1;";
 		$result = mysql_query($sql, $db);
