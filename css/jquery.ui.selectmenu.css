@@ -31,6 +31,7 @@
 	-moz-border-radius: 1em;
 	background-color: #fffacd;
 	background: -webkit-gradient(linear, left top, left bottom, from(#fffacd), to(#ddd9ab));
+	background: -moz-linear-gradient(top, #fffacd, #ddd9ab);
 	box-shadow: 3px 3px 3px #818181;
 	-webkit-box-shadow: 3px 3px 3px #818181;
 	-moz-box-shadow: 3px 3px 3px #818181;
