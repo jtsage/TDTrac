@@ -30,7 +30,7 @@ class tdtrac_hours {
 	private $html = array();
 	
 	/** @var string Page Title */
-	private $title = "Shows";
+	private $title = "Payroll";
 	
 	/** @var array JSON Data */
 	private $json = array();
