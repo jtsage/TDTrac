@@ -77,7 +77,6 @@ if ( !$user->loggedin ) {
 			break;
 		case "todo":
 			$todo = new tdtrac_todo($user, $action);
-			$SITE_BLOCK = get_dash('todo');
 			$todo->output();
 			break;
 		case "shows":
@@ -86,22 +85,18 @@ if ( !$user->loggedin ) {
 			break;
 		case "hours":
 			$hours = new tdtrac_hours($user, $action);
-			$SITE_BLOCK = ($user->can('viewhours')) ? get_dash('payroll') : array();
 			$hours->output();
 			break;
 		case "mail":
 			$mail = new tdtrac_mail($user, $action);
-			$SITE_BLOCK = get_dash('mail');
 			$mail->output();
 			break;
 		case "admin":
 			$admin = new tdtrac_admin($user, $action);
-			$SITE_BLOCK = ($user->admin) ? get_dash('user') : array();
 			$admin->output();
 			break;
 		case "budget":
 			$budget = new tdtrac_budget($user, $action);
-			$SITE_BLOCK = ($user->can('viewbudget')) ? get_dash('budget') : array();
 			$budget->output();
 			break;
 		default: 
@@ -110,39 +105,28 @@ if ( !$user->loggedin ) {
 			$mail_num = get_single("SELECT COUNT(id) as num FROM `{$MYSQL_PREFIX}msg` WHERE toid = ".$user->id);
 			$todo_num = get_single("SELECT COUNT(*) as num FROM {$MYSQL_PREFIX}todo WHERE assigned = {$user->id} AND complete = 0");
 			
+			$payr_num = (!$user->isemp) ?
+				number_format(get_single("SELECT SUM(worked*payrate) AS num FROM {$MYSQL_PREFIX}hours h, {$MYSQL_PREFIX}users u WHERE h.userid = u.userid AND submitted = 0{$extrasql}"),2) :
+				number_format(get_single("SELECT SUM(worked*payrate) AS num FROM {$MYSQL_PREFIX}hours h, {$MYSQL_PREFIX}users u WHERE h.userid = u.userid AND submitted = 0 AND h.userid = {$user->id}"),2);
+			
 			$html[] = "	<li><a href=\"/mail/inbox/\">Message Inbox</a> <span class=\"ui-li-count\">{$mail_num}</span></li>";
 			$html[] = "	<li><a href=\"/todo/\">Todo Lists</a> <span class=\"ui-li-count\">{$todo_num}</span></li>";
-			$html[] = "</ul>";
-			/*
-			$d_mail = get_dash('mail');
-			$d_budg = ($user->can('viewbudget')) ? get_dash('budget') : array();
-			$d_user = ($user->admin) ? get_dash('user') : array();
-			$d_todo = get_dash('todo');
-			$d_payr = ($user->can('viewhours')) ? get_dash('payroll') : array();
-			$d_show = ($user->can('viewshow')) ? get_dash('shows') : array();
+			$html[] = "	<li><a href=\"/hours/\">".(($user->isemp)?"Your ":"")."Payroll</a> <span class=\"ui-li-count\">\${$payr_num}</span></li>";
 			
-			$budg = new tdtrac_budget($user, $action);
-			$hour = new tdtrac_hours($user, $action);
-			$show = new tdtrac_shows($user, $action);
-			$todo = new tdtrac_todo($user, $action);
-			$admn = new tdtrac_admin($user, $action);
+			if ( $user->can('viewbudget') ) {
+				$budg_num = number_format(get_single("SELECT SUM(price+tax) AS num FROM {$MYSQL_PREFIX}budget"),2);
+				$html[] = "	<li><a href=\"/budget/\">Budgets</a> <span class=\"ui-li-count\">\${$budg_num}</span></li>";
+			}
+			if ( $user->can('editshow') ) {
+				$show_num = get_single("SELECT COUNT(*) AS num FROM {$MYSQL_PREFIX}shows WHERE closed = 0");
+				$html[] = "	<li><a href=\"/shows/\">Show Management</a> <span class=\"ui-li-count\">{$show_num}</span></li>";
+			}
+			if ( $user->admin ) {
+				$html[] = " <li><a href=\"/admin/\">Administration</a></li>";
+			}
+			$html[] = "	<li><a href=\"/user/logout/\">Logout</a></li>";
 
-			$html[] = "<div id=\"dashbubbles\">";
-			$SITE_SCRIPT[] = "$(function() { $('#dashbubbles').masonry({ singleMode: true, itemSelector: '.dashboard', resizeable: false }); });";
-			$SITE_SCRIPT[] = "$(function() { $('#dashmenu').masonry({ singleMode: true, itemSelector: '.tasks', resizeable: false }); });";
-			$SITE_SCRIPT[] = "$(window).resize(function(){";
-			$SITE_SCRIPT[] = "	$('#dashbubbles').masonry({ columnWidth: $('#dashbubbles .dashboard').outerWidth(true) });";
-			$SITE_SCRIPT[] = "	$('#dashmenu').masonry({ columnWidth: $('#dashmenu .tasks').outerWidth(true) });";
-			$SITE_SCRIPT[] = "});";
-			$SITE_SCRIPT[] = "$(window).load(function(){";
-			$SITE_SCRIPT[] = "	$('#dashbubbles').masonry({ columnWidth: $('#dashbubbles .dashboard').outerWidth(true) });";
-			$SITE_SCRIPT[] = "	$('#dashmenu').masonry({ columnWidth: $('#dashmenu .tasks').outerWidth(true) });";
-			$SITE_SCRIPT[] = "});";
-			
-			$html = array_merge($html, $d_mail, $d_todo, $d_budg, $d_payr, $d_user, $d_show);
-			$html[] = "</div><div id=\"dashmenu\">";
-			$html = array_merge($html, $budg->index(), $hour->index(), $show->index(), $todo->index(), $admn->index());
-			$html[] = "</div>";*/
+			$html[] = "</ul>";
 			makePage($html, 'TD Tracking Made Easy');
 			break;
 	}
