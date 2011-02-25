@@ -44,8 +44,7 @@ class tdform {
 	 * @return object Form Object
 	 */
 	public function __construct($action = null, $id = 'genform', $tab = 1, $div = 'genform', $legend = 'Form') {
-		$this->html[] = "<div id=\"{$div}\" class=\"genform\"><form method=\"post\" action=\"{$action}\" name=\"{$id}\">";
-		$this->html[] = "<fieldset><legend>{$legend}</legend>";
+		$this->html[] = "<form method=\"post\" action=\"{$action}\">";
 		$this->formname = $id;
 		$this->tabindex = $tab;
 	}
@@ -61,17 +60,17 @@ class tdform {
 	public function output($actioname = 'Submit', $extra = null, $nobutton = False) {
 		$output = $this->html;
 		if ( !$nobutton ) {
-			$temp = "  <div class=\"frmele\">";
+			$temp = "  <div data-role=\"fieldcontain\">";
 			if ( is_array($this->hidden) ) {
 				foreach( $this->hidden as $hide) {
 					$temp .= "<input type=\"hidden\" name=\"{$hide[0]}\" value=\"{$hide[1]}\" />";
 				}
 			}
-			$temp .= ((!is_null($extra)) ? "{$extra}&nbsp;&nbsp;&nbsp;" : "");
-			$temp .= "<input type=\"submit\" class=\"subbie\" tabindex=\"{$this->tabindex}\" value=\"{$actioname}\" title=\"{$actioname}\" /></div>";
+			//$temp .= ((!is_null($extra)) ? "{$extra}&nbsp;&nbsp;&nbsp;" : "");
+			$temp .= "<input type=\"submit\" class=\"subbie\" value=\"{$actioname}\" title=\"{$actioname}\" /></div>";
 			$output[] = $temp;
 		}
-		$output[] = "</fieldset></form></div>";
+		$output[] = "</form>";
 		$this->tabindex++;
 		return $output;
 	}
@@ -118,7 +117,7 @@ class tdform {
 		$SITE_SCRIPT[] = "\t$(function() {";
 		$SITE_SCRIPT[] = "\t\t$( \"#{$id}\" ).datepicker({ dateFormat: 'yy-mm-dd', constrainInput: false });";
 		$SITE_SCRIPT[] = "\t});";
-		$temp  = "  <div class=\"frmele\" title=\"{$title}\"><label for=\"{$name}\">{$text}</label><input tabindex=\"{$this->tabindex}\" type=\"text\" name=\"{$name}\" id=\"{$id}\" ";
+		$temp  = "  <div data-role=\"fieldcontain\" title=\"{$title}\"><label for=\"{$name}\">{$text}</label><input tabindex=\"{$this->tabindex}\" type=\"text\" name=\"{$name}\" id=\"{$id}\" ";
 		if ( $preset != null ) { $temp .= "value=\"{$preset}\" "; }
 		if ( !$enabled ) { $temp .= "disabled=\"disabled\" "; }
 		$temp .= "/></div>";
@@ -153,7 +152,7 @@ class tdform {
 		$SITE_SCRIPT[] = "\t\t\tsource: available{$name}";
 		$SITE_SCRIPT[] = "\t\t});";
 		$SITE_SCRIPT[] = "\t});";
-		$temp  = "  <div class=\"frmele\" title=\"{$title}\"><label".(($money)?" class=\"money\"":"")." for=\"{$name}\">{$text}</label><input tabindex=\"{$this->tabindex}\" type=\"text\" class=\"td{$temptype}\" name=\"{$name}\" id=\"{$name}\" ";
+		$temp  = "  <div data-role=\"fieldcontain\" title=\"{$title}\"><label".(($money)?" class=\"money\"":"")." for=\"{$name}\">{$text}</label><input tabindex=\"{$this->tabindex}\" type=\"text\" class=\"td{$temptype}\" name=\"{$name}\" id=\"{$name}\" ";
 		if ( $selected != false ) { $temp .= "value = \"{$selected}\" "; }
 		if ( !$enabled ) { $temp .= "disabled=\"disabled\" "; }
 		$temp .= "/></div>";
@@ -213,7 +212,7 @@ class tdform {
 		$temptype = ($money) ? "textMoney" : "text";
 		$this->members[] = array($temptype, $name, $text, $title, $preset);
 		if ( $title == null ) { $title = $text; }
-		$temp  = "  <div class=\"frmele\" title=\"{$title}\"><label ".(($money)?" class=\"money\"":"")."for=\"{$name}\">{$text}</label><input tabindex=\"{$this->tabindex}\" type=\"text\" class=\"td{$temptype}\" name=\"{$name}\" ";
+		$temp  = "  <div data-role=\"fieldcontain\"><label for=\"{$name}\">{$text}</label> <input type=\"text\" id=\"{$name}\" name=\"{$name}\" ";
 		if ( $preset != null ) { $temp .= "value = \"{$preset}\" "; }
 		if ( !$enabled ) { $temp .= "disabled=\"disabled\" "; }
 		$temp .= "/></div>";
@@ -235,7 +234,7 @@ class tdform {
 	public function addPass($name = 'password', $text = null, $title = null, $preset = null, $enabled = True ) {
 		$this->members[] = array('password', $name, $text, $title, $preset);
 		if ( $title == null ) { $title = $text; }
-		$temp  = "  <div class=\"frmele\" title=\"{$title}\"><label for=\"{$name}\">{$text}</label><input tabindex=\"{$this->tabindex}\" type=\"password\" class=\"tdpassword\" name=\"{$name}\" ";
+		$temp  = "  <div data-role=\"fieldcontain\"><label for=\"{$name}\">{$text}</label> <input type=\"password\" id=\"{$name}\" name=\"{$name}\" ";
 		if ( $preset != null ) { $temp .= "value = \"{$preset}\" "; }
 		if ( !$enabled ) { $temp .= "disabled=\"disabled\" "; }
 		$temp .= "/></div>";
@@ -267,7 +266,7 @@ class tdform {
 	 */
 	public function addInfo($text) {
 		$this->members[] = array('info', null, $text, null, null);
-		$this->html[] = "  <div class=\"frmele\">{$text}</div>";
+		$this->html[] = "  <div data-role=\"fieldcontain\">{$text}</div>";
 		return true;
 	}
 	
@@ -319,7 +318,7 @@ class tdform {
 	public function addRadio($name = 'radio', $text = null, $title = null, $preset = False, $enabled = True ) {
 		$this->members[] = array('radio', $name, $text, $title, $preset);
 		if ( $title == null ) { $title = $text; }
-		$temp  = "  <div class=\"frmele\" title=\"{$title}\"><label for=\"{$name}\">{$text}</label>";
+		$temp  = "  <div data-role=\"fieldcontain\" title=\"{$title}\"><label for=\"{$name}\">{$text}</label>";
 		$temp .= "<input type=\"radio\" name=\"{$name}\" tabindex=\"{$this->tabindex}\" value=\"1\" ".($preset?"checked=\"checked\"":"")." />";
 		$this->tabindex++;
 		$temp .= "<input type=\"radio\" name=\"{$name}\" tabindex=\"{$this->tabindex}\" value=\"0\" ".($preset?"":"checked=\"checked\"")."/></div>";

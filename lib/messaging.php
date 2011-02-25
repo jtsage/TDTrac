@@ -10,34 +10,6 @@
  * @since 1.0.0beta1
  */
 
-/** 
- * Check for messages
- * 
- * @global object Database Link
- * @global string MySQL Table Prefix
- * @global object User Object
- * @global string Site Address for links
- * @return string HTML Output
- */
-function mail_check() {
-	GLOBAL $db, $MYSQL_PREFIX, $user, $TDTRAC_SITE;
-	$html  = "<div class=\"infobox\"><span style=\"font-size: .7em\">";
-	$tosql = "SELECT COUNT(id) as num FROM `{$MYSQL_PREFIX}msg` WHERE toid = ".$user->id;
-	$fmsql = "SELECT COUNT(id) as num FROM `{$MYSQL_PREFIX}msg` WHERE fromid = ".$user->id;
-	$result1 = mysql_query($tosql, $db);
-	$result2 = mysql_query($fmsql, $db);
-	$row1 = mysql_fetch_array($result1);
-	$row2 = mysql_fetch_array($result2);
-	mysql_free_result($result1);
-	mysql_free_result($result2);
-	$ret = 0;
-	if ( !is_null($row1['num']) && $row1['num'] > 0 ) { $html .= "You Have <strong>{$row1['num']}</strong> Unread Messages Waiting (<a href=\"{$TDTRAC_SITE}mail/inbox/\">[-Read-]</a>)<br />"; $ret = 1; }
-	if ( !is_null($row2['num']) && $row2['num'] > 0 ) { $html .= "You Have <strong>{$row2['num']}</strong> Sent Messages Waiting (<a href=\"{$TDTRAC_SITE}mail/outbox/\">[-View-]</a>)"; $ret = 1; }
-	$html .= "</span></div>\n";
-	if ( $ret ) { return $html; } else { return ""; }
-}
-
-
 /**
  * MAIL Module
  *  Allows viewing of in-system messages.

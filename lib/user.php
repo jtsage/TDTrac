@@ -138,7 +138,7 @@ class tdtrac_user {
 		$result = $form->addText('tracuser', 'User Name');
 		$result = $form->addPass('tracpass', 'Password');
 	
-		return $form->output('Login', "[-<a href=\"{$TDTRAC_SITE}user/forgot/\">Forgot Password?</a>-] ");
+		return array_merge($form->output('Login'), array("<a data-role=\"button\" data-theme=\"c\" href=\"{$TDTRAC_SITE}user/forgot/\">Forgot Password?</a>"));
 	}
 	
 	/** 
