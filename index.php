@@ -105,6 +105,15 @@ if ( !$user->loggedin ) {
 			$budget->output();
 			break;
 		default: 
+			$html[] = "<ul data-role=\"listview\" data-inset=\"true\">";
+			
+			$mail_num = get_single("SELECT COUNT(id) as num FROM `{$MYSQL_PREFIX}msg` WHERE toid = ".$user->id);
+			$todo_num = get_single("SELECT COUNT(*) as num FROM {$MYSQL_PREFIX}todo WHERE assigned = {$user->id} AND complete = 0");
+			
+			$html[] = "	<li><a href=\"/mail/inbox/\">Message Inbox</a> <span class=\"ui-li-count\">{$mail_num}</span></li>";
+			$html[] = "	<li><a href=\"/todo/\">Todo Lists</a> <span class=\"ui-li-count\">{$todo_num}</span></li>";
+			$html[] = "</ul>";
+			/*
 			$d_mail = get_dash('mail');
 			$d_budg = ($user->can('viewbudget')) ? get_dash('budget') : array();
 			$d_user = ($user->admin) ? get_dash('user') : array();
@@ -133,7 +142,7 @@ if ( !$user->loggedin ) {
 			$html = array_merge($html, $d_mail, $d_todo, $d_budg, $d_payr, $d_user, $d_show);
 			$html[] = "</div><div id=\"dashmenu\">";
 			$html = array_merge($html, $budg->index(), $hour->index(), $show->index(), $todo->index(), $admn->index());
-			$html[] = "</div>";
+			$html[] = "</div>";*/
 			makePage($html, 'TD Tracking Made Easy');
 			break;
 	}
