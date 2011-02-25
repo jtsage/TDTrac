@@ -42,10 +42,11 @@ function makePage($body = '', $title = '') {
  * @global string Base HREF
  * @global object User object
  * @global array JavaScript
+ * @global array Link for Right Side of Header
  * @return array Formatted HTML
  */
 function makeHeader($title = '') {
-	GLOBAL $TDTRAC_VERSION, $TDTRAC_CPNY, $TDTRAC_SITE, $SITE_SCRIPT;
+	GLOBAL $TDTRAC_VERSION, $TDTRAC_CPNY, $TDTRAC_SITE, $SITE_SCRIPT, $HEAD_LINK, $CANCEL;
 
 	$html = array();
 	$html[] = '<!DOCTYPE html>';
@@ -64,10 +65,12 @@ function makeHeader($title = '') {
 	}
 	$html[] = "\n\t</script>\n</head>\n\n<body>";
 	
-	$html[] = "	<div data-role=\"page\" data-theme=\"b\" id=\"main\">";
+	$html[] = "	<div data-role=\"page\" data-theme=\"b\" id=\"main\"".((isset($CANCEL) && $CANCEL === true)?" data-back-btn-text=\"Cancel\"":"").">";
 	$html[] = "		<div data-role=\"header\">";
 	$html[] = "			<h1>TDTrac::{$title}</h1>";
-	$html[] = "			<a href=\"/\" data-icon=\"home\" data-direction=\"reverse\" data-iconpos=\"notext\" class=\"ui-btn-right\">Home</a>";
+	if ( count($HEAD_LINK) == 3 ) {
+		$html[] = "			<a href=\"{$HEAD_LINK[0]}\" data-icon=\"{$HEAD_LINK[1]}\" data-direction=\"reverse\" class=\"ui-btn-right\">{$HEAD_LINK[2]}</a>";
+	}
 	$html[] = "		</div>";
 	$html[] = "		<div data-role=\"content\">";
 	
@@ -86,9 +89,13 @@ function makeHeader($title = '') {
 function makeFooter($title = '') {
 	global $SITE_BLOCK, $action, $helpnode;
 	$html[] = "		</div>";
-	$html[] = "		<div data-role=\"footer\" data-theme=\"c\">";
-	$html[] = "			&copy; 2008-".date('Y')." JTSage. All rights reserved. <a data-icon=\"home\" href=\"http://tdtrac.com/\" title=\"TDTrac Homepage\">TDTrac Homepage</a>";
-	$html[] = "			<a href=\"#help\" data-transition=\"slideup\" data-icon=\"info\">Help</a>";
+	$html[] = "		<div data-role=\"footer\" data-theme=\"a\">";
+	$html[] = "			<div data-role=\"navbar\"><ul>";
+	$html[] = "				<li><a href=\"/\" data-icon=\"home\">Home</a></li>";
+	$html[] = "				<li><a href=\"#help\" data-transition=\"slideup\" data-icon=\"info\">Help</a></li>";
+	$html[] = "				<li><a href=\"/user/logout/\" data-transition=\"slidedown\" data-icon=\"alert\">Logout</a></li>";
+	$html[] = "			</ul></div>";
+	$html[] = "			<h3>&copy; 2008-".date('Y')." JTSage. All rights reserved. <a href=\"http://tdtrac.com/\" title=\"TDTrac Homepage\">TDTrac Homepage</a></h3>";
 	$html[] = "		</div>\n\t</div>";
 	
 	/* HELP SECTION */
@@ -105,7 +112,7 @@ function makeFooter($title = '') {
 		}
 	}
 	$html[] = "	<div data-role=\"page\" id=\"help\" title=\"{$hdivTitle}\">";
-	$html[] = "		<div data-role=\"header\"><h1>Help::{$hdivTitle}</h1></div>";
+	$html[] = "		<div data-role=\"header\" data-backbtn=\"false\"><a href=\"#main\" data-rel=\"back\" data-transition=\"slidedown\" data-icon=\"delete\" >Close</a><h1>Help::{$hdivTitle}</h1></div>";
 	$html[] = "		<div data-role=\"content\">";
 	foreach ( $hdivData as $line ) {
 		$html[] = "			<p>{$line}</p>";

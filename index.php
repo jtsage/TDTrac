@@ -13,6 +13,8 @@ ob_start(); session_start();
 $TDTRAC_VERSION = "2.0.1";
 $TDTRAC_DBVER = "2.0.1";
 $SITE_SCRIPT = array('');
+$CANCEL = false;
+$HEAD_LINK = array('');
 
 /** Site Confiuration File */
 require_once("config.php");
@@ -122,7 +124,7 @@ if ( !$user->loggedin ) {
 				$html[] = "	<li><a href=\"/shows/\">Show Management</a> <span class=\"ui-li-count\">{$show_num}</span></li>";
 			}
 			if ( $user->admin ) {
-				$html[] = " <li><a href=\"/admin/\">Administration</a></li>";
+				$html[] = "	<li><a href=\"/admin/\">Administration</a></li>";
 			}
 			$html[] = "	<li><a href=\"/user/logout/\">Logout</a></li>";
 
