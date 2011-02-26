@@ -19,6 +19,8 @@ require_once("tablelib.php");
 require_once("htmllib.php");
 /** Library: tdtrac_user */
 require_once("user.php");
+/** Library: Lists */
+require_once("listlib.php");
 
 /** Module: tdtrac_mail */
 require_once("messaging.php");
@@ -90,6 +92,10 @@ function db_list($sql, $columns) {
 	 return $row[$col];
 }
 
+function tdebug($text) {
+	GLOBAL $SITE_SCRIPT;
+	$SITE_SCRIPT[] = "// ".$text;
+}
 /**
  * Return a SQL Query constant by name
  * 

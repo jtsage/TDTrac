@@ -43,8 +43,8 @@ class tdform {
 	 * @param string ID for enclosing div
 	 * @return object Form Object
 	 */
-	public function __construct($action = null, $id = 'genform', $tab = 1, $div = 'genform', $legend = 'Form') {
-		$this->html[] = "<form method=\"post\" action=\"{$action}\">";
+	public function __construct($action = null, $id = 'genform', $tab = 1, $div = 'genform', $legend = 'Form', $theme = 'c') {
+		$this->html[] = "<form method=\"post\" data-theme=\"{$theme}\" action=\"{$action}\">";
 		$this->formname = $id;
 		$this->tabindex = $tab;
 	}
@@ -178,10 +178,7 @@ class tdform {
 		$this->members[] = array('dropdown', $name, $text, $title, $preset);
 		if ( $title == null ) { $title = $text; }
 
-		$SITE_SCRIPT[] = "\t$(function() {";
-		$SITE_SCRIPT[] = "\t\t$( \"#{$name}-{$this->tabindex}\" ).selectmenu();";
-		$SITE_SCRIPT[] = "\t});";
-		$temp  = "  <div class=\"frmele drop-{$name}\" title=\"{$title}\"><label for=\"{$name}\">{$text}</label><select name=\"{$name}\" id=\"{$name}-{$this->tabindex}\" tabindex=\"{$this->tabindex}\"".(!$enabled ? " disabled=\"disabled\"":"").">";
+		$temp  = "  <div data-role=\"fieldcontain\"><label for=\"{$name}\">{$text}</label><select name=\"{$name}\" id=\"{$name}\" ".(!$enabled ? " disabled=\"disabled\"":"").">";
 		if ( $preset != null ) {
 			foreach ( $preset as $option ) {
 				if ( is_array($option) ) {

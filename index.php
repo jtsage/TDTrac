@@ -56,6 +56,7 @@ if ( !$user->loggedin ) {
 				makePage($user->password_form(), 'Forgotten Password');
 			} break;
 		default:
+			if ( !isset($_SESSION['infodata']) ) { $_SESSION['infodata'] = "Please Login"; }
 			makePage($user->login_form(), 'Please Login');
 			break;
 	}
