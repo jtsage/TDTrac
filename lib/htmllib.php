@@ -59,11 +59,13 @@ function makeHeader($title = '') {
 	$html[] = "\t\t<script src=\"http://html5shim.googlecode.com/svn/trunk/html5.js\"></script>";
 	$html[] = "\t<![endif]-->";
 	$html[] = "\t<link type=\"text/css\" href=\"/css/jquery.mobile-1.0a3.min.css\" rel=\"stylesheet\" />";
+	$html[] = "\t<link type=\"text/css\" href=\"/css/jquery.mobile.datebox.css\" rel=\"stylesheet\" />";
 	$html[] = "\t<script type=\"text/javascript\" src=\"https://ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.min.js\"></script>";
 	$html[] = "\t<script type=\"text/javascript\">";
-	$html[] = "		$(document).bind(\"mobileinit\", function(){ $.extend(  $.mobile , { ajaxEnabled: false }); });";
+	$html[] = "		$(document).bind(\"mobileinit\", function(){ $.extend(  $.mobile , { ajaxEnabled: false });  });";
 	$html[] = "\t</script>";
 	$html[] = "\t<script type=\"text/javascript\" src=\"/js/jquery.mobile-1.0a3.min.js\"></script>";
+	$html[] = "\t<script type=\"text/javascript\" src=\"/js/jquery.mobile.datebox.js\"></script>";
 	$html[] = "\t<script type=\"text/javascript\">";
 	$html[] = "		var p1, p2;";
 	$html[] = "		function infobox(text) {";

@@ -217,7 +217,7 @@ class tdtrac_todo {
 	 */
 	private function add_form() {
 		global $TDTRAC_SITE;
-		$form = new tdform("{$TDTRAC_SITE}todo/add/", 'todo-add-form', 1, 'genform', 'Add To-Do Item');
+		$form = new tdform("{$TDTRAC_SITE}todo/add/", 'todo_add_form', 1, 'genform', 'Add To-Do Item');
 		$result = $form->addDrop('showid', 'Show', null, db_list(get_sql_const('showid'), array('showid', 'showname')), False);
 		$result = $form->addDrop('prio', 'Priority', null, $this->priorities, False, 1);
 		$result = $form->addDate('date', 'Due Date');
@@ -333,7 +333,7 @@ class tdtrac_todo {
 					$list->addRow(array("/todo/view/type:show/id:{$row['showid']}/", $row['showname'], $row['num']));
 				}
 			}
-			$todo_num = get_single("SELECT COUNT(*) as num FROM {$MYSQL_PREFIX}todo WHERE assigned = {$user->id} AND complete = 0");
+			$todo_num = get_single("SELECT COUNT(*) as num FROM {$MYSQL_PREFIX}todo WHERE assigned = {$this->user->id} AND complete = 0");
 			$odue_num = get_single("SELECT COUNT(*) as num FROM {$MYSQL_PREFIX}todo WHERE complete = 0 AND due < NOW()");
 			
 			$list->addRow("<li data-role=\"list-divider\">Other Options</li>", null, null, true);

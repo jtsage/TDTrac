@@ -115,9 +115,9 @@ class tdform {
 		$this->members[] = array('date', $name, $text, $title, $preset);
 		if ( $title == null ) { $title = $text; }
 		$SITE_SCRIPT[] = "\t$(function() {";
-		$SITE_SCRIPT[] = "\t\t$( \"#{$id}\" ).datepicker({ dateFormat: 'yy-mm-dd', constrainInput: false });";
+		$SITE_SCRIPT[] = "\t\t$( \"#{$id}\" ).datebox();";
 		$SITE_SCRIPT[] = "\t});";
-		$temp  = "  <div data-role=\"fieldcontain\" title=\"{$title}\"><label for=\"{$name}\">{$text}</label><input tabindex=\"{$this->tabindex}\" type=\"text\" name=\"{$name}\" id=\"{$id}\" ";
+		$temp  = "  <div data-role=\"fieldcontain\" title=\"{$title}\"><label for=\"{$name}\">{$text}</label><input date-role=\"none\" tabindex=\"{$this->tabindex}\" type=\"datebox\" name=\"{$name}\" id=\"{$id}\" ";
 		if ( $preset != null ) { $temp .= "value=\"{$preset}\" "; }
 		if ( !$enabled ) { $temp .= "disabled=\"disabled\" "; }
 		$temp .= "/></div>";
