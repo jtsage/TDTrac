@@ -128,7 +128,7 @@ class tdtrac_todo {
 			makePage($this->html, $this->title);
 		} else { // JSON METHODS
 			switch($this->action['action']) {
-				case "mark":
+				/*case "mark":
 					if ( isset($this->action['id']) && is_numeric($this->action['id']) ) {
 						$this->mark(intval($this->action['id']));
 					} else {
@@ -145,9 +145,9 @@ class tdtrac_todo {
 						$this->delete(intval($this->action['id']));
 					} else {
 						$this->json['success'] = false;
-					} break;
+					} break;*/
 				default:
-					$this->json['success'] = false;
+					$this->json['success'] = true;//false;
 					break;
 			} echo json_encode($this->json);
 		}
