@@ -47,8 +47,6 @@ function makePage($body = '', $title = '') {
  */
 function makeHeader($title = '') {
 	GLOBAL $TDTRAC_VERSION, $TDTRAC_CPNY, $TDTRAC_SITE, $SITE_SCRIPT, $HEAD_LINK, $CANCEL, $action;
-	
-	if ( $action['module'] == 'index' ) { unset($_SESSION['back']); }
 
 	$html = array();
 	$html[] = '<!DOCTYPE html>';
@@ -62,31 +60,22 @@ function makeHeader($title = '') {
 	$html[] = '	<link type="text/css" href="http://dev.jtsage.com/cdn/datebox/latest/jquery.mobile.datebox.css" rel="stylesheet" /> ';
 	$html[] = "\t<script type=\"text/javascript\" src=\"https://ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.min.js\"></script>";
 	$html[] = "\t<script type=\"text/javascript\">";
-	$html[] = "		$(document).bind(\"mobileinit\", function(){ $.mobile.page.prototype.options.degradeInputs.date = 'text'; $.extend(  $.mobile , { ajaxEnabled: false });  });";
+	$html[] = "		$(document).bind(\"mobileinit\", function(){ $.mobile.page.prototype.options.degradeInputs.date = 'text'; }); //$.extend(  $.mobile , { ajaxEnabled: false });  });";
 	$html[] = "\t</script>";
 	$html[] = '	<script type="text/javascript" src="http://code.jquery.com/mobile/1.0a3/jquery.mobile-1.0a3.min.js"></script>';
 	$html[] = '	<script type="text/javascript" src="http://dev.jtsage.com/cdn/datebox/latest/jquery.mobile.datebox.js"></script>';
+	$html[] = "	<script type=\"text/javascript\" src=\"{$TDTRAC_SITE}js/tdtrac.jquery.js\"></script>";
 	$html[] = "\t<script type=\"text/javascript\">";
-	$html[] = "		var p1, p2;";
-	$html[] = "		function infobox(text) {";
-	$html[] = "			$('#infobox h4').fadeTo(300, .01, function() {";
-	$html[] = "				$(this).html(text).fadeTo(1000,1, function() {";
-	$html[] = "					$(this).delay(4000).delay(4000).fadeTo(300, .01, function() {";
-	$html[] = "						$(this).html('--').fadeTo(1000,1); }); ";
-	$html[] = "			}); }); }";
 	foreach ( $SITE_SCRIPT as $line ) {
 		$html[] = "\t\t{$line}";
 	}
 	$html[] = "\n\t</script>\n</head>\n\n<body>";
 	
-	$html[] = "	<div data-role=\"page\" data-theme=\"a\" id=\"main\">";
+	$html[] = "	<div data-role=\"page\" data-theme=\"a\" id=\"{$action['module']}-{$action['action']}\">";
 	$html[] = "		<div data-role=\"header\" data-position=\"fixed\">";
-	if ( $_SESSION['back'] ) {
-		$html[] = "			<a data-icon=\"back\" href=\"javascript: history.go(-1)\">".(($CANCEL)?"Cancel":"Back")."</a>";
-	}
 	$html[] = "			<h1>TDTrac::{$title}</h1>";
 	if ( count($HEAD_LINK) == 3 ) {
-		$html[] = "			<a href=\"{$HEAD_LINK[0]}\" data-icon=\"{$HEAD_LINK[1]}\" data-direction=\"reverse\" class=\"ui-btn-right\">{$HEAD_LINK[2]}</a>";
+		$html[] = "			<a href=\"{$HEAD_LINK[0]}\" data-icon=\"{$HEAD_LINK[1]}\" class=\"ui-btn-right\">{$HEAD_LINK[2]}</a>";
 	}
 	$html[] = "		</div>";
 	$html[] = "		<div data-role=\"content\" data-theme=\"c\">";
@@ -94,7 +83,6 @@ function makeHeader($title = '') {
 	$html[] = "				<li><h4 style=\"text-align: center\">".((isset($_SESSION['infodata']))?$_SESSION['infodata']:"--")."</h4></li>";
 	unset($_SESSION['infodata']);
 	$html[] = "			</ul><br />";
-	$_SESSION['back'] = 1;
 	
 	return $html;
 }

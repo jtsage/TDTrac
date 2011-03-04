@@ -302,13 +302,12 @@ class tdtrac_todo {
 	 * @global object Database Link
 	 * @global string MySQL Table Prefix
 	 * @global string Base HREF
-	 * @global array Javascript Output
 	 * @param integer UserID or ShowID for display
 	 * @param string Type of display (user, show, overdue)
 	 * @return array HTML output
 	 */
 	private function view($condition = null, $type = 'user') {
-		GLOBAL $db, $MYSQL_PREFIX, $TDTRAC_SITE, $SITE_SCRIPT;
+		GLOBAL $db, $MYSQL_PREFIX, $TDTRAC_SITE;
 		if ( is_null($condition) ) {
 		
 			$list = new tdlist('todo_view_pick', false);
@@ -347,7 +346,7 @@ class tdtrac_todo {
 			else { $thiscond = perms_getidbyname($condition); }
 			
 			$list = new tdlist('todo_view');
-			$list->setFormat("<a id=\"link_tmark_todo_view_%d\" href=\"#\"></a><h3>%s</h3><p>".(($type=="user")?"<strong>Show:</strong> %s":"<strong>User:</strong> %s")."</p><span class=\"ui-li-count\">%s</span>");
+			$list->setFormat("<a class=\"todo-done\" data-done=\"%d\" data-recid=\"%d\" href=\"#\"></a><h3>%s</h3><p>".(($type=="user")?"<strong>Show:</strong> %s":"<strong>User:</strong> %s")."</p><span class=\"ui-li-count\">%s</span>");
 			
 			if ( $type == 'user' ) {
 				$sql = "SELECT todo.*, showname, DATE_FORMAT(`due`, '%Y-%m-%d') as duedate, TIME_TO_SEC( TIMEDIFF(`due` , NOW())) AS remain FROM {$MYSQL_PREFIX}todo as todo, {$MYSQL_PREFIX}shows as shows WHERE shows.showid = todo.showid AND todo.assigned = '{$thiscond}' ORDER BY due DESC, added DESC";
@@ -375,20 +374,11 @@ class tdtrac_todo {
 					$theme = (($row['remain'] < 0 && $row['complete'] == 0) ? 'e': 'c');
 					$assig = ( $type == 'user' ) ? $row['showname'] : (($row['assigned'] > 0) ? $this->user->get_name($row['assigned']) : "-unassigned-");
 					$statu = (($row['complete'] == 1 ) ? 'done' : "Due: {$row['duedate']}");
-					$list->addRow(array($list->currentrow, $row['dscr'], $assig, $statu), $row, false, false, $theme);
+					$list->addRow(array($row['complete'], $row['id'], $row['dscr'], $assig, $statu), $row, false, false, $theme);
 				}
 			}
 			
-			$SITE_SCRIPT[] = "$(function() { $('#link_email_todo').click( function() {";
-			$SITE_SCRIPT[] = "  infobox(\"Please Wait...\");";
-			$SITE_SCRIPT[] = "	$.getJSON(\"{$TDTRAC_SITE}todo/email/json:1/id:{$thiscond}/type:{$type}/\", function(data) {";
-			$SITE_SCRIPT[] = "		if ( data.success === true ) { ";
-			$SITE_SCRIPT[] = "			infobox(\"Todo List :: Sent\");";
-			$SITE_SCRIPT[] = "		} else { infobox(\"E-Mail Send :: Failed\"); }";
-			$SITE_SCRIPT[] = "	}); return false;";
-			$SITE_SCRIPT[] = "});});";
-			
-			return array_merge($list->output(), array("<br /><br /><a id=\"link_email_todo\" data-role=\"button\" data-theme=\"e\" href=\"#\">E-Mail this Report to Yourself</a>"));
+			return array_merge($list->output(), array("<br /><br /><a class=\"ajax-email\" data-email='{\"action\": \"todo\", \"id\": \"{$thiscond}\", \"type\": \"{$type}\"}' data-role=\"button\" data-theme=\"e\" href=\"#\">E-Mail this Report to Yourself</a>"));
 		}
 	}
 

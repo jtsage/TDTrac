@@ -135,12 +135,6 @@ class tdlist {
 				case "mdel":
 					$rethtml .= $this->act_mdel($raw);
 					break;
-				case "tdone":
-					$rethtml .= $this->act_tdone($raw);
-					break;
-				case "tedit":
-					$rethtml .= $this->act_tedit($raw);
-					break;
 				case "tdel":
 					$rethtml .= $this->act_tdel($raw);
 					break;
@@ -161,51 +155,7 @@ class tdlist {
 	 * @return string Formatted HTML
 	 */
 	private function act_tdel($raw) {
-		global $TDTRAC_SITE, $SITE_SCRIPT;
-		$SITE_SCRIPT[] = "var tdelrow{$this->currentrow} = true;";
-		$SITE_SCRIPT[] = "$(function() { $('#link_tdel_{$this->listname}_{$this->currentrow}').click( function() {";
-		$SITE_SCRIPT[] = "	if ( tdelrow{$this->currentrow} && confirm('Delete Item #{$raw['id']}?')) {";
-		$SITE_SCRIPT[] = "		$.getJSON(\"{$TDTRAC_SITE}todo/delete/json:1/id:{$raw['id']}/\", function(data) {";
-		$SITE_SCRIPT[] = "			if ( data.success === true ) { ";
-		$SITE_SCRIPT[] = "				$('#link_tdel_{$this->listname}_{$this->currentrow}').parent().find('h3').html('--Removed--');";
-		$SITE_SCRIPT[] = "				$('#link_tdel_{$this->listname}_{$this->currentrow}').parent().find('span.ui-li-count').html('deleted');";
-		$SITE_SCRIPT[] = "				infobox(\"To-Do Item #{$raw['id']} Deleted\");";
-		$SITE_SCRIPT[] = "			} else { infobox(\"To-Do Item #{$raw['id']} Delete :: Failed\"); }";
-		$SITE_SCRIPT[] = "			tdelrow{$this->currentrow} = false;";
-		$SITE_SCRIPT[] = "			tdonerow{$this->currentrow} = false;";
-		$SITE_SCRIPT[] = "			setTimeout(function () { $('#infobox h4').html('--'); }, 10000);";		
-		$SITE_SCRIPT[] = "	});} return false;";
-		$SITE_SCRIPT[] = "});});";
-
-		return "<a id=\"link_tdel_{$this->listname}_{$this->currentrow}\" href=\"#\">Delete Item</a>";
-	}
-	
-	/**
-	 * Action: Todo mark item done button
-	 * 
-	 * @global string Base HREF
-	 * @global array JavaScript
-	 * @param array Raw SQL Array
-	 * @return string Formatted HTML
-	 */
-	private function act_tdone($raw) {
-		global $TDTRAC_SITE, $SITE_SCRIPT;
-		if ( ! $raw['complete'] ) {
-			$SITE_SCRIPT[] = "var tdonerow{$this->currentrow} = true;";
-			$SITE_SCRIPT[] = "$(function() { $('#link_tmark_{$this->listname}_{$this->currentrow}').click( function() {";
-			$SITE_SCRIPT[] = "	if ( tdonerow{$this->currentrow} && confirm('Mark Item #{$raw['id']} Done?')) {";
-			$SITE_SCRIPT[] = "		$.getJSON(\"{$TDTRAC_SITE}todo/mark/json:1/id:{$raw['id']}/\", function(data) {";
-			$SITE_SCRIPT[] = "			if ( data.success === true ) { ";
-			$SITE_SCRIPT[] = "				$('#link_tmark_{$this->listname}_{$this->currentrow}').parent().find('span.ui-li-count').html('done');";
-			$SITE_SCRIPT[] = "				infobox(\"To-Do Item #{$raw['id']} Marked Done\");";
-			$SITE_SCRIPT[] = "			} else { infobox(\"To-Do Item #{$raw['id']} Mark :: Failed\"); }";
-			$SITE_SCRIPT[] = "			tdonerow{$this->currentrow} = false;";
-			$SITE_SCRIPT[] = "			setTimeout(function () { $('#infobox h4').html('--'); }, 10000);";	
-			$SITE_SCRIPT[] = "	});} return false;";
-			$SITE_SCRIPT[] = "});});";
-			return '';
-		}
-		else { return ''; }
+		return "<a class=\"todo-delete\" data-done=\"0\" data-recid=\"{$raw['id']}\" href=\"#\">Delete Item</a>";
 	}
 	
 	/**
