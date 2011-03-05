@@ -58,10 +58,11 @@ class tdtrac_todo {
 	 * 
 	 * @global array Extra Header Link
 	 * @global bool Make 'back' link a 'cancel' link
+	 * @global bool Set app into test mode
 	 * @return void
 	 */
 	public function output() {
-		global $HEAD_LINK, $CANCEL;
+		global $HEAD_LINK, $CANCEL, $TEST_MODE
 		if ( !$this->output_json ) { // HTML METHODS
 			switch ( $this->action['action'] ) {
 				case "add":
@@ -128,11 +129,15 @@ class tdtrac_todo {
 			makePage($this->html, $this->title);
 		} else { // JSON METHODS
 			switch($this->action['action']) {
-				/*case "mark":
-					if ( isset($this->action['id']) && is_numeric($this->action['id']) ) {
-						$this->mark(intval($this->action['id']));
+				case "mark":
+					if ( $TEST_MODE ) {
+						$this->json['success'] = true;
 					} else {
-						$this->json['success'] = false;
+						if ( isset($this->action['id']) && is_numeric($this->action['id']) ) {
+							$this->mark(intval($this->action['id']));
+						} else {
+							$this->json['success'] = false;
+						}
 					} break;
 				case "email":
 					if ( isset($this->action['id']) && is_numeric($this->action['id']) && isset($this->action['type']) ) {
@@ -141,11 +146,15 @@ class tdtrac_todo {
 						$this->json['success'] = false;
 					} break;
 				case "delete":
-					if ( isset($this->action['id']) && is_numeric($this->action['id']) && $this->user->can('edittodo') ) {
-						$this->delete(intval($this->action['id']));
+					if ( $TEST_MODE ) {
+						$this->json['success'] = true;
 					} else {
-						$this->json['success'] = false;
-					} break;*/
+						if ( isset($this->action['id']) && is_numeric($this->action['id']) && $this->user->can('edittodo') ) {
+							$this->delete(intval($this->action['id']));
+						} else {
+							$this->json['success'] = false;
+						}
+					} break;
 				default:
 					$this->json['success'] = true;//false;
 					break;

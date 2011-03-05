@@ -110,13 +110,9 @@ class tdform {
 	 * @return bool True on success
 	 */
 	public function addDate($name = 'date', $text = null, $title = null, $preset = null, $enabled = True, $id = null ) {
-		global $SITE_SCRIPT;
 		if ( $id == null ) { $id = $name; }
 		$this->members[] = array('date', $name, $text, $title, $preset);
 		if ( $title == null ) { $title = $text; }
-		$SITE_SCRIPT[] = "\t$(function() {";
-		$SITE_SCRIPT[] = "\t\t$( \"#{$id}\" ).datebox();";
-		$SITE_SCRIPT[] = "\t});";
 		$temp  = "  <div data-role=\"fieldcontain\" title=\"{$title}\"><label for=\"{$name}\">{$text}</label><input data-role=\"datebox\" tabindex=\"{$this->tabindex}\" type=\"date\" name=\"{$name}\" id=\"{$id}\" ";
 		if ( $preset != null ) { $temp .= "value=\"{$preset}\" "; }
 		if ( !$enabled ) { $temp .= "disabled=\"disabled\" "; }
