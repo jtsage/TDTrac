@@ -15,6 +15,7 @@ $TDTRAC_DBVER = "2.0.1";
 $TEST_MODE = false;
 $SITE_SCRIPT = array('');
 $CANCEL = false;
+$CLOSE = false;
 $HEAD_LINK = array('');
 
 /** Site Confiuration File */
@@ -103,6 +104,21 @@ if ( !$user->loggedin ) {
 			$budget = new tdtrac_budget($user, $action);
 			$budget->output();
 			break;
+		case "help":
+			if ( !isset($helpnode[$action['action']][$action['oper']]) ) {
+				$hdivTitle = $helpnode['error']['title'];
+				$hdivData = $helpnode['error']['data'];
+			} else {
+				$hdivTitle = $helpnode[$action['action']][$action['oper']]['title'];
+				$hdivData = $helpnode[$action['action']][$action['oper']]['data'];
+			}
+			foreach ( $hdivData as $line ) {
+				$html[] = "			<p>{$line}</p>";
+			}
+			$CLOSE = true;
+			makePage($html, "TDTrac Help");
+			break;
+	
 		default: 
 			$html[] = "<ul data-role=\"listview\" data-inset=\"true\">";
 			

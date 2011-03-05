@@ -41,38 +41,39 @@ function makePage($body = '', $title = '') {
  * @global string Company Name
  * @global string Base HREF
  * @global object User object
- * @global array JavaScript
  * @global array Link for Right Side of Header
+ * @global bool Make back link say CANCEL
+ * @global bool Make back link say CLOSE
  * @return array Formatted HTML
  */
 function makeHeader($title = '') {
-	GLOBAL $TDTRAC_VERSION, $TDTRAC_CPNY, $TDTRAC_SITE, $SITE_SCRIPT, $HEAD_LINK, $CANCEL, $action;
+	GLOBAL $TDTRAC_VERSION, $TDTRAC_CPNY, $TDTRAC_SITE, $HEAD_LINK, $CANCEL, $CLOSE, $action;
 
 	$html = array();
 	$html[] = '<!DOCTYPE html>';
 	$html[] = '<html lang="en">';
-	$html[] = "<head>\n\t<meta http-equiv=\"Content-Type\" content=\"text/html; charset=iso-8859-1\" />";
-	$html[] = "\t<title>TDTrac{$TDTRAC_CPNY}:v{$TDTRAC_VERSION} - {$title}</title>";
-	$html[] = "\t<!--[if lt IE 9]>";
-	$html[] = "\t\t<script src=\"http://html5shim.googlecode.com/svn/trunk/html5.js\"></script>";
-	$html[] = "\t<![endif]-->";
+	$html[] = '<head>';
+	$html[] = '	<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />';
+	$html[] = "	<title>TDTrac{$TDTRAC_CPNY}:v{$TDTRAC_VERSION} - {$title}</title>";
+	$html[] = '	<!--[if lt IE 9]>';
+	$html[] = '		<script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>';
+	$html[] = '	<![endif]-->';
 	$html[] = '	<link rel="stylesheet" href="http://code.jquery.com/mobile/1.0a3/jquery.mobile-1.0a3.min.css" />';
 	$html[] = '	<link type="text/css" href="http://dev.jtsage.com/cdn/datebox/latest/jquery.mobile.datebox.css" rel="stylesheet" /> ';
-	$html[] = "\t<script type=\"text/javascript\" src=\"https://ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.min.js\"></script>";
-	$html[] = "\t<script type=\"text/javascript\">";
-	$html[] = "		$(document).bind(\"mobileinit\", function(){ $.mobile.page.prototype.options.degradeInputs.date = 'text'; }); //$.extend(  $.mobile , { ajaxEnabled: false });  });";
-	$html[] = "\t</script>";
+	$html[] = '	<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.min.js"></script>';
+	$html[] = '	<script type="text/javascript">';
+	$html[] = "		$(document).bind('mobileinit', function(){ $.mobile.page.prototype.options.degradeInputs.date = 'text'; });";
+	$html[] = '	</script>';
 	$html[] = '	<script type="text/javascript" src="http://code.jquery.com/mobile/1.0a3/jquery.mobile-1.0a3.min.js"></script>';
 	$html[] = '	<script type="text/javascript" src="http://dev.jtsage.com/cdn/datebox/latest/jquery.mobile.datebox.js"></script>';
-	$html[] = "	<script type=\"text/javascript\" src=\"{$TDTRAC_SITE}js/tdtrac.jquery.js\"></script>";
-	$html[] = "\t<script type=\"text/javascript\">";
-	foreach ( $SITE_SCRIPT as $line ) {
-		$html[] = "\t\t{$line}";
-	}
-	$html[] = "\n\t</script>\n</head>\n\n<body>";
+	$html[] = '	<script type="text/javascript" src="'.$TDTRAC_SITE.'js/tdtrac.jquery.js"></script>';
+	$html[] = "</head>\n\n<body>";
+	$pageid = ( $action['module'] == 'help' ) ? "help-{$action['action']}-{$action['oper']}" : "{$action['module']}-{$action['action']}";
+	$html[] = "	<div data-role=\"page\" data-theme=\"a\" id=\"{$pageid}\">";
 	
-	$html[] = "	<div data-role=\"page\" data-theme=\"a\" id=\"{$action['module']}-{$action['action']}\">";
 	$html[] = "		<div data-role=\"header\">";
+	if ( $CANCEL ) { $html[] = "			<a href='#' data-icon='delete' data-rel='back'>Cancel</a>";	}
+	if ( $CLOSE )  { $html[] = "			<a href='#' data-icon='arrow-d' data-rel='back'>Close</a>";	}
 	$html[] = "			<h1>TDTrac::{$title}</h1>";
 	if ( count($HEAD_LINK) == 3 ) {
 		$html[] = "			<a href=\"{$HEAD_LINK[0]}\" data-icon=\"{$HEAD_LINK[1]}\" class=\"ui-btn-right\">{$HEAD_LINK[2]}</a>";
@@ -95,39 +96,16 @@ function makeHeader($title = '') {
  * @return array Formatted HTML
  */
 function makeFooter($title = '') {
-	global $SITE_BLOCK, $action, $helpnode;
+	global $SITE_BLOCK, $action;
 	$html[] = "		</div>";
 	$html[] = "		<div data-role=\"footer\" data-theme=\"a\">";
 	$html[] = "			<div data-role=\"navbar\"><ul>";
 	$html[] = "				<li><a href=\"/\" data-icon=\"home\">Home</a></li>";
-	$html[] = "				<li><a href=\"#help\" data-transition=\"slideup\" data-icon=\"info\">Help</a></li>";
+	$html[] = "				<li><a href=\"/help/{$action['module']}/oper:{$action['action']}/\" data-transition=\"slideup\" data-icon=\"info\">Help</a></li>";
 	$html[] = "				<li><a href=\"/user/logout/\" data-transition=\"slidedown\" data-icon=\"alert\">Logout</a></li>";
 	$html[] = "			</ul></div>";
 	$html[] = "			<h3>&copy; 2008-".date('Y')." JTSage. All rights reserved. <a href=\"http://tdtrac.com/\" title=\"TDTrac Homepage\">TDTrac Homepage</a></h3>";
 	$html[] = "		</div>\n\t</div>";
-	
-	/* HELP SECTION */
-	if ( $action['module'] == 'index' ) {
-		$hdivTitle = $helpnode['index']['title'];
-		$hdivData = $helpnode['index']['data'];
-	} else {
-		if ( !isset($helpnode[$action['module']][$action['action']])) {
-			$hdivTitle = $helpnode['error']['title'];
-			$hdivData = $helpnode['error']['data'];
-		} else {
-			$hdivTitle = $helpnode[$action['module']][$action['action']]['title'];
-			$hdivData = $helpnode[$action['module']][$action['action']]['data'];
-		}
-	}
-	$html[] = "	<div data-role=\"page\" id=\"help\" title=\"{$hdivTitle}\">";
-	$html[] = "		<div data-role=\"header\" data-backbtn=\"false\"><a href=\"#main\" data-rel=\"back\" data-transition=\"slidedown\" data-icon=\"delete\" >Close</a><h1>Help::{$hdivTitle}</h1></div>";
-	$html[] = "		<div data-role=\"content\">";
-	foreach ( $hdivData as $line ) {
-		$html[] = "			<p>{$line}</p>";
-	}
-	$html[] = "		</div>\n	</div>";
-	/* END HELP SECTION */
-	
 	$html[] = "\n</body>\n</html>";
 	return $html;
 }
