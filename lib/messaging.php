@@ -54,8 +54,10 @@ class tdtrac_mail {
 	 * Output todo list operation
 	 * 
 	 * @return void
+	 * @global bool App in test mode
 	 */
 	public function output() {
+		global $TEST_MODE;
 		if ( !$this->output_json ) { // HTML METHODS
 			switch ( $this->action['action'] ) {
 				case "inbox":
@@ -73,12 +75,16 @@ class tdtrac_mail {
 			makePage($this->html, $this->title);
 		} else { 
 			switch($this->action['action']) {
-				/*case "delete":
-					if ( isset($this->action['id']) && is_numeric($this->action['id']) ) {
-						$this->delete(intval($this->action['id']));
+				case "delete":
+					if ( $TEST_MODE ) {
+						$this->json['success'] = true;
 					} else {
-						$this->json['success'] = false;
-					} break;*/
+						if ( isset($this->action['id']) && is_numeric($this->action['id']) ) {
+							$this->delete(intval($this->action['id']));
+						} else {
+							$this->json['success'] = false;
+						}
+					} break;
 				default:
 					$this->json['success'] = false;
 					break;
@@ -113,7 +119,7 @@ class tdtrac_mail {
 		while ( $row = mysql_fetch_array($result) ) {
 			$list->addRow(array($row['body'], $this->user->get_name($row['fromid']), $row['wtime']), $row);
 		}
-		return array_merge($list->output(), array("<br /><br /><a href=\"{$TDTRAC_SITE}mail/clean/\" data-role=\"button\" data-theme=\"e\">Clear Inbox</a>"));
+		return array_merge($list->output(), array("<br /><br /><a href=\"{$TDTRAC_SITE}mail/clear/\" data-role=\"button\" data-theme=\"e\">Clear Inbox</a>"));
 	}
 
 	/** 
@@ -148,16 +154,21 @@ class tdtrac_mail {
 	 * 
 	 * @global object Database Link
 	 * @global string MySQL Table Prefix
+	 * @global bool App In Test Mode
 	 * @return void
 	 */
 	private function clear() {
-		GLOBAL $db, $MYSQL_PREFIX;
-		$sql = "DELETE FROM {$MYSQL_PREFIX}msg WHERE toid = {$this->user->id}";
-		$result = mysql_query($sql, $db);
-		if ( $result ) {
+		GLOBAL $db, $MYSQL_PREFIX, $TEST_MODE;
+		if ( $TEST_MODE ) {
 			thrower("Inbox Cleared");
 		} else {
-			thrower("Inbox Clear :: Operation Failed");
+			$sql = "DELETE FROM {$MYSQL_PREFIX}msg WHERE toid = {$this->user->id}";
+			$result = mysql_query($sql, $db);
+			if ( $result ) {
+				thrower("Inbox Cleared");
+			} else {
+				thrower("Inbox Clear :: Operation Failed");
+			}
 		}
 	}
 	

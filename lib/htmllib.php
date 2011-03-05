@@ -72,17 +72,15 @@ function makeHeader($title = '') {
 	$html[] = "\n\t</script>\n</head>\n\n<body>";
 	
 	$html[] = "	<div data-role=\"page\" data-theme=\"a\" id=\"{$action['module']}-{$action['action']}\">";
-	$html[] = "		<div data-role=\"header\" data-position=\"fixed\">";
+	$html[] = "		<div data-role=\"header\">";
 	$html[] = "			<h1>TDTrac::{$title}</h1>";
 	if ( count($HEAD_LINK) == 3 ) {
 		$html[] = "			<a href=\"{$HEAD_LINK[0]}\" data-icon=\"{$HEAD_LINK[1]}\" class=\"ui-btn-right\">{$HEAD_LINK[2]}</a>";
 	}
-	$html[] = "		</div>";
-	$html[] = "		<div data-role=\"content\" data-theme=\"c\">";
-	$html[] = "			<ul data-role=\"listview\" id=\"infobox\" data-inset=\"true\">";
-	$html[] = "				<li><h4 style=\"text-align: center\">".((isset($_SESSION['infodata']))?$_SESSION['infodata']:"--")."</h4></li>";
+	$html[] = "		</div><div id='infobox' data-backbtn='false' data-role='header' data-theme='d'><h2>".((isset($_SESSION['infodata']))?$_SESSION['infodata']:"--")."</h2></div>";
 	unset($_SESSION['infodata']);
-	$html[] = "			</ul><br />";
+	
+	$html[] = "		<div data-role=\"content\" data-theme=\"c\">";
 	
 	return $html;
 }

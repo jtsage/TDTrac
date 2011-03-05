@@ -167,19 +167,7 @@ class tdlist {
 	 * @return string Formatted HTML
 	 */
 	private function act_mdel($raw) {
-		global $TDTRAC_SITE, $SITE_SCRIPT;
-		$SITE_SCRIPT[] = "var mdelrow{$this->currentrow} = true;";
-		$SITE_SCRIPT[] = "$(function() { $('#link_mdel_{$this->listname}_{$this->currentrow}').click( function() {";
-		$SITE_SCRIPT[] = "	if ( mdelrow{$this->currentrow} && confirm('Delete Message #{$raw['id']}?')) {";
-		$SITE_SCRIPT[] = "		$.getJSON(\"{$TDTRAC_SITE}mail/delete/json:1/id:{$raw['id']}/\", function(data) {";
-		$SITE_SCRIPT[] = "			if ( data.success === true ) { ";
-		$SITE_SCRIPT[] = "				$('#link_mdel_{$this->listname}_{$this->currentrow}').parent().find('h3').html('--Deleted--');";
-		$SITE_SCRIPT[] = "				infobox(\"Message #{$raw['id']} Deleted\");";
-		$SITE_SCRIPT[] = "			} else { infobox(\"Message #{$raw['id']} Delete :: Failed\"); }";
-		$SITE_SCRIPT[] = "			mdelrow{$this->currentrow} = false;";
-		$SITE_SCRIPT[] = "	});} return false;";
-		$SITE_SCRIPT[] = "});});";
-		return "<a id=\"link_mdel_{$this->listname}_{$this->currentrow}\" href=\"#\">Delete Message</a>";
+		return "<a class=\"msg-delete\" data-done=\"0\" data-recid=\"{$raw['id']}\" href=\"#\">Delete Message</a>";
 	}
 	
 }

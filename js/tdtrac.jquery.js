@@ -1,7 +1,7 @@
 (function($) {
 	
 	function infobox(text) { // CONTROL INFOBOX CONTENT
-		$('#infobox h4').fadeTo(300, .01, function() {
+		$('#infobox h2').fadeTo(300, .01, function() {
 			$(this).html(text).fadeTo(1000,1, function() {
 				$(this).delay(4000).delay(4000).fadeTo(300, .01, function() {
 					$(this).html('--').fadeTo(1000,1); 
@@ -73,25 +73,20 @@
 		e.preventDefault();
 	}); // END: Mark Todo Delete
 	
-	
+	$('.msg-delete').live('click', function (e) { // BEGIN: Delete Message
+		var linkie = this;
+		if ( ! $(this).data('done') && confirm('Delete Message #'+$(this).data('recid')+'?')) {
+			$.getJSON("/mail/delete/json:1/id:"+$(linkie).data('recid')+"/", function(data) {
+				if ( data.success === true ) {
+					$(linkie).parent().find('h3').html('--Removed--');
+					infobox("Message #"+$(linkie).data('recid')+" Deleted");
+				} else {
+					infobox("Message #"+$(linkie).data('recid')+" Delete Failed!");
+				}
+				$(linkie).data('done', 1);
+			});
+		}
+		e.preventDefault();
+	}); // END: Delete Message
 	
 }) ( jQuery );
-	/*	
-		
-		
-		global $TDTRAC_SITE, $SITE_SCRIPT;
-		$SITE_SCRIPT[] = "var tdelrow{$this->currentrow} = true;";
-		$SITE_SCRIPT[] = "$(function() { $('#link_tdel_{$this->listname}_{$this->currentrow}').click( function() {";
-		$SITE_SCRIPT[] = "	if ( tdelrow{$this->currentrow} && confirm('Delete Item #{$raw['id']}?')) {";
-		$SITE_SCRIPT[] = "		$.getJSON(\"{$TDTRAC_SITE}todo/delete/json:1/id:{$raw['id']}/\", function(data) {";
-		$SITE_SCRIPT[] = "			if ( data.success === true ) { ";
-		$SITE_SCRIPT[] = "				$('#link_tdel_{$this->listname}_{$this->currentrow}').parent().find('h3').html('--Removed--');";
-		$SITE_SCRIPT[] = "				$('#link_tdel_{$this->listname}_{$this->currentrow}').parent().find('span.ui-li-count').html('deleted');";
-		$SITE_SCRIPT[] = "				infobox(\"To-Do Item #{$raw['id']} Deleted\");";
-		$SITE_SCRIPT[] = "			} else { infobox(\"To-Do Item #{$raw['id']} Delete :: Failed\"); }";
-		$SITE_SCRIPT[] = "			tdelrow{$this->currentrow} = false;";
-		$SITE_SCRIPT[] = "			tdonerow{$this->currentrow} = false;";
-		$SITE_SCRIPT[] = "			setTimeout(function () { $('#infobox h4').html('--'); }, 10000);";		
-		$SITE_SCRIPT[] = "	});} return false;";
-		$SITE_SCRIPT[] = "});});";
-*/
