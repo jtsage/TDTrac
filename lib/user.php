@@ -133,10 +133,10 @@ class tdtrac_user {
 	public function login_form() {
 		GLOBAL $TDTRAC_SITE;
 		setcookie("loginredirect", $_REQUEST['action'], time()+600, "/");
-		$form = new tdform("{$TDTRAC_SITE}user/login/", "loginform", 1, "loginform", 'Login');
+		$form = new tdform(array('action' => "{$TDTRAC_SITE}user/login/", 'id' => "loginform"));
 	
-		$result = $form->addText('tracuser', 'User Name');
-		$result = $form->addPass('tracpass', 'Password');
+		$result = $form->addText(array('name' => 'tracuser', 'label' => 'User Name'));
+		$result = $form->addPass(array('name' => 'tracpass', 'label' => 'Password'));
 	
 		return array_merge($form->output('Login'), array("<a data-role=\"button\" data-theme=\"c\" href=\"{$TDTRAC_SITE}user/forgot/\">Forgot Password?</a>"));
 	}
@@ -208,8 +208,8 @@ class tdtrac_user {
 		$row = mysql_fetch_array($result);
 		if ( $row['active'] == 0 ) { thrower("User Account is Locked!"); }
 		if ( $row['password'] == $checkpass ) { 
-			$infodata  = "Login Successful";
-			$infodata .= "<br />Last Login: {$row['lastlog']}";
+			$json['msg'] = "Login Successful<br />Last Login: {$row['lastlog']}";
+			$json['success'] = true;
 			$_SESSION['tdtracuser'] = $checkname;
 			$_SESSION['tdtracpass'] = md5("havesomesalt".$checkpass);
 			$setlastloginsql = "UPDATE {$MYSQL_PREFIX}users SET lastlogin = CURRENT_TIMESTAMP WHERE userid = {$row['userid']}";
@@ -217,20 +217,22 @@ class tdtrac_user {
 			if ( $row['userid'] == 1 ) { //CHECK UPGRADE STATUS ON ADMIN LOGIN (USER #1)
 				$sql2 = "SELECT value FROM {$MYSQL_PREFIX}tdtrac WHERE name = 'version' AND value = '{$TDTRAC_DBVER}'";
 				$res2 = mysql_query($sql2, $db);
-				if ( mysql_num_rows($res2) < 1 ) { $infodata .= "<br><strong>WARNING:</strong> Database not up-to-date, please run upgrade"; }
+				if ( mysql_num_rows($res2) < 1 ) { $json['msg'] .= "<br><strong>WARNING:</strong> Database not up-to-date, please run upgrade"; }
 			}
 	    		if ( $row['chpass'] <> 0 ) { 
-				$infodata = "Login Successful, Please Change Your Password!"; header("Location: {$TDTRAC_SITE}user/password/"); ob_flush();
+				$json['msg'] .= "Login Successful, Please Change Your Password!";
 			} 
 		}
 		else {
-			$infodata = "Login Failed!";
+			$json['msg'] = "Login Failed!";
+			$json['success'] = false;
 		}
 		if ( isset($_COOKIE['loginredirect']) ) {
-			thrower($infodata, $_COOKIE['loginredirect']);
+			$json['location'] = $_COOKIE['loginredirect'];
 		} else {
-			thrower($infodata);
+			$json['location'] = "/";
 		}
+		return json_encode($json);
 	}
 
 	/**

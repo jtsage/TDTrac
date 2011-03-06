@@ -49,7 +49,7 @@ foreach ( $rawaction as $maybevar ) {
 if ( !$user->loggedin ) {
 	switch( $action['action'] ) {
 		case "login":
-			$user->login();
+			echo $user->login();
 			break;
 		case "forgot":
 			if ( $_SERVER['REQUEST_METHOD'] == "POST" ) {
