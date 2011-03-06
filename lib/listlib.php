@@ -93,6 +93,10 @@ class tdlist {
 		$this->currentrow++;
 	}
 	
+	public function addDivide($text, $theme='c') {
+		$this->addRow("<li data-role='list-divider' data-theme='{$theme}'>{$text}</li>", null, null, true);
+	}
+	
 	public function addRaw($row) {
 		$this->addRow($row, null, null, true);
 	}
@@ -132,14 +136,18 @@ class tdlist {
 				case "pdel":
 					$rethtml .= $this->act_pdel($raw);
 					break;
+				case "pmedit":
+					$rethtml .= $this->act_pmedit($raw);
+					break;
+					
+				case "sdel":
+					$rethtml .= $this->act_sdel($raw);
+					break;
 				case "mdel":
 					$rethtml .= $this->act_mdel($raw);
 					break;
 				case "tdel":
 					$rethtml .= $this->act_tdel($raw);
-					break;
-				case "pmedit":
-					$rethtml .= $this->act_pmedit($raw);
 					break;
 			}
 		}
@@ -147,10 +155,18 @@ class tdlist {
 	}
 	
 	/**
+	 * Action: Show delete item button
+	 * 
+	 * @param array Raw SQL Array
+	 * @return string Formatted HTML
+	 */
+	private function act_sdel($raw) {
+		return "<a class=\"show-delete\" data-done=\"0\" data-recid=\"{$raw['showid']}\" href=\"#\">Delete Show</a>";
+	}
+	
+	/**
 	 * Action: Todo delete item button
 	 * 
-	 * @global string Base HREF
-	 * @global array JavaScript
 	 * @param array Raw SQL Array
 	 * @return string Formatted HTML
 	 */
@@ -161,8 +177,6 @@ class tdlist {
 	/**
 	 * Action: Message delete item button
 	 * 
-	 * @global string Base HREF
-	 * @global array JavaScript
 	 * @param array Raw SQL Array
 	 * @return string Formatted HTML
 	 */
