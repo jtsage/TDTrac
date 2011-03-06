@@ -5,6 +5,7 @@
 		var formdata = $(this).serialize();
 		var formurl = $(this).attr('action');
 		$.post(formurl, formdata, function(dta) {
+			console.log(dta);
 			if ( dta.success === true ) {
 				$.mobile.changePage({ url: dta.location, type: 'post', data: {'infobox': dta.msg} },'slide', true);
 			} else {
@@ -13,12 +14,12 @@
 		}, 'json');
 		e.preventDefault();
 	});
-	
+			
 	function infobox(text) { // CONTROL INFOBOX CONTENT
 		$('.ui-page-active #infobox h2').fadeTo(300, .01, function() {
 			$(this).html(text).fadeTo(1000,1, function() {
 				$(this).delay(4000).delay(4000).fadeTo(300, .01, function() {
-					$(this).html('--').fadeTo(1000,1); 
+					$(this).html('&nbsp;').fadeTo(1000,1); 
 				}); 
 			});
 		});

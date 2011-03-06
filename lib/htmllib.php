@@ -78,7 +78,10 @@ function makeHeader($title = '') {
 	if ( count($HEAD_LINK) == 3 ) {
 		$html[] = "			<a href=\"{$HEAD_LINK[0]}\" data-icon=\"{$HEAD_LINK[1]}\" class=\"ui-btn-right\">{$HEAD_LINK[2]}</a>";
 	}
-	$html[] = "		</div><div id='infobox' data-backbtn='false' data-role='header' data-theme='d'><h2>".(($_SEVER['REQUEST_METHOD'] = "POST" && isset($_REQUEST['infobox']))?$_REQUEST['infobox']:"--")."</h2></div>";
+	$html[] = "		</div><div id='infobox' data-backbtn='false' data-role='header' data-theme='d'><h2>".(($_SEVER['REQUEST_METHOD'] = "POST" && isset($_REQUEST['infobox']))?$_REQUEST['infobox']:"&nbsp;")."</h2></div>";
+	if ( $_SEVER['REQUEST_METHOD'] = "POST" && isset($_REQUEST['infobox']) ) {
+		$html[] = "		<script type='text/javascript'>setTimeout(\"$('.ui-page-active #infobox h2').fadeTo(300, .01, function() { $(this).html('&nbsp;').fadeTo(1000,1); });\", 9000);</script>";
+	}
 	unset($_SESSION['infodata']);
 	
 	$html[] = "		<div data-role=\"content\" data-theme=\"c\">";
