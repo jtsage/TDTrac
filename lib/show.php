@@ -55,22 +55,20 @@ class tdtrac_shows {
 	 * @return void
 	 */
 	public function output() {
-		global $TEST_MODE, $HEAD_LINK;
+		global $TEST_MODE, $HEAD_LINK, $CANCEL;
 		if ( !$this->output_json ) { // HTML METHODS
 			switch ( $this->action['action'] ) {
 				case "add":
-					$this->title .= " :: Add";
+					$CANCEL = true;
+					$this->title .= "::Add";
 					if ( $this->user->can("addshow") ) {
-						if ( $this->post ) {
-							thrower($this->save(false), 'shows/');
-						} else {
-							$this->html = $this->add_form();
-						}
+						$this->html = $this->add_form();
 					} else {
 						thrower('Access Denied :: You cannot add new shows', 'shows/');
 					} break;
 				case "edit":
-					$this->title .= " :: Edit";
+					$CANCEL = true;
+					$this->title .= "::Edit";
 					if ( $this->user->can("editshow") ) {
 						if ( isset($this->action['id']) && is_numeric($this->action['id']) ) {
 							$this->html = $this->edit_form(intval($this->action['id']));
@@ -83,7 +81,7 @@ class tdtrac_shows {
 				default:
 					if ( $this->user->can('viewshow') ) {
 						$HEAD_LINK = array('/shows/add/', 'plus', 'Add Show'); 
-						$this->title .= " :: View";
+						$this->title .= "::View";
 						$this->html = $this->view();
 					} else {
 						thrower("Access Denied :: You Cannot View Shows");
