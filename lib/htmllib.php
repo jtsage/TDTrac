@@ -69,7 +69,7 @@ function makeHeader($title = '') {
 	$html[] = '	<script type="text/javascript" src="'.$TDTRAC_SITE.'js/tdtrac.jquery.js"></script>';
 	$html[] = "</head>\n\n<body>";
 	$pageid = ( $action['module'] == 'help' ) ? "help-{$action['action']}-{$action['oper']}" : "{$action['module']}-{$action['action']}";
-	$html[] = "	<div data-role=\"page\" data-theme=\"a\" id=\"{$pageid}\">";
+	$html[] = "	<div data-role=\"page\" data-theme=\"a\" data-id=\"{$pageid}\">";
 	
 	$html[] = "		<div data-role=\"header\">";
 	if ( $CANCEL ) { $html[] = "			<a href='#' data-icon='delete' data-rel='back'>Cancel</a>";	}
@@ -78,7 +78,7 @@ function makeHeader($title = '') {
 	if ( count($HEAD_LINK) == 3 ) {
 		$html[] = "			<a href=\"{$HEAD_LINK[0]}\" data-icon=\"{$HEAD_LINK[1]}\" class=\"ui-btn-right\">{$HEAD_LINK[2]}</a>";
 	}
-	$html[] = "		</div><div id='infobox' data-backbtn='false' data-role='header' data-theme='d'><h2>".((isset($_SESSION['infodata']))?$_SESSION['infodata']:"--")."</h2></div>";
+	$html[] = "		</div><div id='infobox' data-backbtn='false' data-role='header' data-theme='d'><h2>".(($_SEVER['REQUEST_METHOD'] = "POST" && isset($_REQUEST['infobox']))?$_REQUEST['infobox']:"--")."</h2></div>";
 	unset($_SESSION['infodata']);
 	
 	$html[] = "		<div data-role=\"content\" data-theme=\"c\">";
@@ -100,9 +100,9 @@ function makeFooter($title = '') {
 	$html[] = "		</div>";
 	$html[] = "		<div data-role=\"footer\" data-theme=\"a\">";
 	$html[] = "			<div data-role=\"navbar\"><ul>";
-	$html[] = "				<li><a href=\"/\" data-icon=\"home\">Home</a></li>";
+	$html[] = "				<li><a href=\"/\" data-direction='reverse' data-icon=\"home\">Home</a></li>";
 	$html[] = "				<li><a href=\"/help/{$action['module']}/oper:{$action['action']}/\" data-transition=\"slideup\" data-icon=\"info\">Help</a></li>";
-	$html[] = "				<li><a href=\"/user/logout/\" data-transition=\"slidedown\" data-icon=\"alert\">Logout</a></li>";
+	$html[] = "				<li><a href=\"/user/logout/\" rel='external' data-transition=\"slidedown\" data-icon=\"alert\">Logout</a></li>";
 	$html[] = "			</ul></div>";
 	$html[] = "			<h3>&copy; 2008-".date('Y')." JTSage. All rights reserved. <a href=\"http://tdtrac.com/\" title=\"TDTrac Homepage\">TDTrac Homepage</a></h3>";
 	$html[] = "		</div>\n\t</div>";
