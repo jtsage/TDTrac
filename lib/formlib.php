@@ -214,7 +214,8 @@ class tdform {
 			'options' => null,
 			'selected' => False,
 			'enabled' => True,
-			'allownew' => False
+			'allownew' => False,
+			'header' => True,
 		);
 		$options = merge_defaults($default, $passed);
 		$this->members[] = array('dropdown', $option['name'], $option['label'], $option['title'], $option['options']);
@@ -223,15 +224,17 @@ class tdform {
 		if ( $options['title'] == null ) { $options['title'] = $options['label']; }
 
 		$temp  = "  <div data-role='fieldcontain'><label for='{$options['id']}'>{$options['label']}</label><select name='{$options['name']}' id='{$options['id']}' ".(!$options['enabled'] ? " disabled='disabled'":"").">";
-		if ( $options['preset'] != null ) {
-			foreach ( $options['options'] as $option ) {
-				if ( is_array($option) ) {
-					$temp .= "<option value='{$option[0]}'".(($options['selected'] == $option[0]) ? " selected='selected'":"").">{$option[1]}</option>";
-				} else {
-					$temp .= "<option value='{$option}'".(($options['selected'] == $option) ? " selected='selected'":"").">{$option}</option>";
-				}
+		if ( $options['header'] ) {
+			$temp .= "<option data-placeholder='true'>Choose one...</option>";
+		}
+		foreach ( $options['options'] as $option ) {
+			if ( is_array($option) ) {
+				$temp .= "<option value='{$option[0]}'".(($options['selected'] == $option[0]) ? " selected='selected'":"").">{$option[1]}</option>";
+			} else {
+				$temp .= "<option value='{$option}'".(($options['selected'] == $option) ? " selected='selected'":"").">{$option}</option>";
 			}
 		}
+		
 		$temp .= "</select></div>";
 		$this->html[] = $temp;
 		return true;
