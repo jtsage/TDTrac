@@ -26,10 +26,6 @@ class tdform {
 	 */
 	private $formname = "";
 	/**
-	 * @var integer Current Tab Index
-	 */
-	private $tabindex = 0;
-	/**
 	 * @var array Hidden Element Storage
 	 */
 	private $hidden = "";
@@ -43,10 +39,11 @@ class tdform {
 	 * @param string ID for enclosing div
 	 * @return object Form Object
 	 */
-	public function __construct($action = null, $id = 'genform', $tab = 1, $div = 'genform', $legend = 'Form', $theme = 'c') {
-		$this->html[] = "<form method=\"post\" data-theme=\"{$theme}\" action=\"{$action}\">";
-		$this->formname = $id;
-		$this->tabindex = $tab;
+	public function __construct($passed) {
+		$default = array( 'action' => '/', 'theme' => 'c', 'id' => 'tdform' );
+		$options = merge_defaults($default, $passed);
+		$this->html[] = "<form method='post' data-ajax='false' data-theme='{$options['theme']}' action='{$options['action']}'>";
+		$this->formname = $options['id'];
 	}
 	
 	/**
@@ -60,18 +57,16 @@ class tdform {
 	public function output($actioname = 'Submit', $extra = null, $nobutton = False) {
 		$output = $this->html;
 		if ( !$nobutton ) {
-			$temp = "  <div data-role=\"fieldcontain\">";
+			$temp = "  <div data-role='fieldcontain'>";
 			if ( is_array($this->hidden) ) {
 				foreach( $this->hidden as $hide) {
-					$temp .= "<input type=\"hidden\" name=\"{$hide[0]}\" value=\"{$hide[1]}\" />";
+					$temp .= "<input type='hidden' name='{$hide[0]}' value='{$hide[1]}' />";
 				}
 			}
-			//$temp .= ((!is_null($extra)) ? "{$extra}&nbsp;&nbsp;&nbsp;" : "");
-			$temp .= "<input type=\"submit\" class=\"subbie\" value=\"{$actioname}\" title=\"{$actioname}\" /></div>";
+			$temp .= "<input type='submit' class='subbie' value='{$actioname}' title='{$actioname}' /></div>";
 			$output[] = $temp;
 		}
 		$output[] = "</form>";
-		$this->tabindex++;
 		return $output;
 	}
 	
@@ -90,165 +85,187 @@ class tdform {
 	}
 	
 	/**
-	 * Return the next tab index for document
-	 * 
-	 * @return integer Next Tab Element
-	 */
-	public function getlasttab() {
-		return $this->tabindex + 1;
-	}
-	
-	/**
 	 * Add a DATE input to the form
 	 * 
-	 * @param string Name of input field
-	 * @param string Text to display before input
-	 * @param string Hover text for element
-	 * @param string Preset value of element
-	 * @param bool Element is enabled
-	 * @param string ID for element
+	 * Options:
+	 * 	'id' => Label ID
+	 * 	'name' => Input Name
+	 * 	'label' => Label Text
+	 * 	'title' => Mouseover Text
+	 * 	'preset' => Preset Value
+	 * 	'enabled' => Field Enabled
+	 * 	'type' => Type of field
+	 * 	'role' => data-role of field
+	 * 
+	 * @param array Array of named options
 	 * @return bool True on success
 	 */
-	public function addDate($name = 'date', $text = null, $title = null, $preset = null, $enabled = True, $id = null ) {
-		if ( $id == null ) { $id = $name; }
-		$this->members[] = array('date', $name, $text, $title, $preset);
-		if ( $title == null ) { $title = $text; }
-		$temp  = "  <div data-role=\"fieldcontain\" title=\"{$title}\"><label for=\"{$name}\">{$text}</label><input data-role=\"datebox\" tabindex=\"{$this->tabindex}\" type=\"date\" name=\"{$name}\" id=\"{$id}\" ";
-		if ( $preset != null ) { $temp .= "value=\"{$preset}\" "; }
-		if ( !$enabled ) { $temp .= "disabled=\"disabled\" "; }
-		$temp .= "/></div>";
-		$this->html[] = $temp;
-		$this->tabindex++;
-		return true;
+	public function addDate($passed) {
+		$default = array(
+			'name' 		=> 'date',
+			'label'		=> 'Date Field',
+			'title'		=> null,
+			'preset'	=> null,
+			'enabled'	=> True,
+			'id'		=> null,
+			'type'		=> 'date',
+			'role'		=> 'datebox'
+			);
+		$options = merge_defaults($default, $passed);
+		return $this->addText($options);
 	}
 
+	/**
+	 * Add a PASSWORD input to the form
+	 * 
+	 * Options:
+	 * 	'id' => Label ID
+	 * 	'name' => Input Name
+	 * 	'label' => Label Text
+	 * 	'title' => Mouseover Text
+	 * 	'preset' => Preset Value
+	 * 	'enabled' => Field Enabled
+	 * 	'type' => Type of field
+	 * 	'role' => data-role of field
+	 * 
+	 * @param array Array of named options
+	 * @return bool True on success
+	 */
+	public function addPass($passed) {
+		$default = array(
+			'name' 		=> 'password',
+			'label'		=> 'Password Field',
+			'title'		=> null,
+			'preset'	=> null,
+			'enabled'	=> True,
+			'id'		=> null,
+			'type'		=> 'password',
+			'role'		=> null
+			);
+		$options = merge_defaults($default, $passed);
+		return $this->addText($options);
+	}
 	
 	/**
-	 * Add a AUTOCOMPLETE TEXT method to from
+	 * Add a TEXT input to the form
 	 * 
-	 * @param string Name of input field
-	 * @param string Text to display before input
-	 * @param string Hover text for element
-	 * @param array Preset values for autocomplete
-	 * @param string Selected element
-	 * @param bool Element is enabled
+	 * Options:
+	 * 	'id' => Label ID
+	 * 	'name' => Input Name
+	 * 	'label' => Label Text
+	 * 	'title' => Mouseover Text
+	 * 	'preset' => Preset Value
+	 * 	'enabled' => Field Enabled
+	 * 	'type' => Type of field
+	 * 	'role' => data-role of field
+	 * 
+	 * @param array Array of named options
 	 * @return bool True on success
-	*/
-	public function addACText($name = 'actext', $text = null, $title = null, $preset = null, $selected = False, $enabled = True) {
-		global $SITE_SCRIPT;
-		$this->members[] = array('autocomplete', $name, $text, $title, $preset);
-		if ( $title == null ) { $title = $text; }
-		$SITE_SCRIPT[] = "\t$(function() {";
-		$SITE_SCRIPT[] = "\t\tvar available{$name} = [";
-		foreach ( $preset as $option ) {
-			$SITE_SCRIPT[] = "\t\t\t\"{$option}\",";
-		}
-		$SITE_SCRIPT[] = "\t\t];";
-		$SITE_SCRIPT[] = "\t\t$( \"#{$name}\" ).autocomplete({";
-		$SITE_SCRIPT[] = "\t\t\tsource: available{$name}";
-		$SITE_SCRIPT[] = "\t\t});";
-		$SITE_SCRIPT[] = "\t});";
-		$temp  = "  <div data-role=\"fieldcontain\" title=\"{$title}\"><label".(($money)?" class=\"money\"":"")." for=\"{$name}\">{$text}</label><input tabindex=\"{$this->tabindex}\" type=\"text\" class=\"td{$temptype}\" name=\"{$name}\" id=\"{$name}\" ";
-		if ( $selected != false ) { $temp .= "value = \"{$selected}\" "; }
-		if ( !$enabled ) { $temp .= "disabled=\"disabled\" "; }
+	 */
+	public function addText($passed) {
+		$default = array(
+			'name' 		=> 'text',
+			'label'		=> 'Text Field',
+			'title'		=> null,
+			'preset'	=> null,
+			'enabled'	=> True,
+			'id'		=> null,
+			'type'		=> 'text',
+			'role'		=> null
+			);
+		$options = merge_defaults($default, $passed);
+
+		if ( $options['id'] == null )		{ $options['id'] = $options['name']; }
+		if ( $options['title'] == null )	{ $options['title'] = $options['label']; }
+		
+		$this->members[] = array($options['type'], $options['name'], $options['label'], $options['title'], $options['preset']);
+		
+		$temp  = "  <div data-role='fieldcontain' title='{$options['title']}'><label for='{$options['id']}'>{$options['label']}</label><input ".(($options['role'] != null)?"data-role='{$options['role']}' ":"")."type='{$options['type']}' name='{$options['name']}' id='{$options['id']}' ";
+		if ( $options['preset'] != null )	{ $temp .= "value='{$options['preset']}' "; }
+		if ( ! $options['enabled'] )		{ $temp .= "disabled='disabled' "; }
 		$temp .= "/></div>";
+		
 		$this->html[] = $temp;
-		$this->tabindex++;
 		return true;
 	}
 
 	/**
 	 * Add a SELECT method to from
 	 * 
-	 * @param string Name of input field
-	 * @param string Text to display before input
-	 * @param string Hover text for element
-	 * @param array Preset values for dropdown
-	 * @param bool Allow user defined values
-	 * @param string Selected element
-	 * @param bool Element is enabled
+	 * Options:
+	 * 	id => Element ID
+	 * 	name => Submitted Value Key
+	 * 	label => Visible Label
+	 * 	title => Mouseover Title
+	 * 	options => Array of options
+	 * 	selected => Selected element, if any (key/index is options is keyed)
+	 * 	enabled => Element enabled
+	 * 	allownew => Allow new elements to be added
+	 * 
+	 * @param array Options
 	 * @return bool True on success
 	 */
-	public function addDrop($name = 'drop', $text = null, $title = null, $preset = null, $new = True, $selected = False, $enabled = True) {
-		global $SITE_SCRIPT;
-		$this->members[] = array('dropdown', $name, $text, $title, $preset);
-		if ( $title == null ) { $title = $text; }
+	public function addDrop($passed) {
+		$default = array(
+			'id' => null,
+			'name' => 'drop',
+			'title' => null,
+			'label' => 'Drop List',
+			'options' => null,
+			'selected' => False,
+			'enabled' => True,
+			'allownew' => False
+		);
+		$options = merge_defaults($default, $passed);
+		$this->members[] = array('dropdown', $option['name'], $option['label'], $option['title'], $option['options']);
+		
+		if ( $options['id'] == null )		{ $options['id'] = $options['name']; }
+		if ( $options['title'] == null ) { $options['title'] = $options['label']; }
 
-		$temp  = "  <div data-role=\"fieldcontain\"><label for=\"{$name}\">{$text}</label><select name=\"{$name}\" id=\"{$name}\" ".(!$enabled ? " disabled=\"disabled\"":"").">";
-		if ( $preset != null ) {
-			foreach ( $preset as $option ) {
+		$temp  = "  <div data-role='fieldcontain'><label for='{$options['id']}'>{$options['label']}</label><select name='{$options['name']}' id='{$options['id']}' ".(!$options['enabled'] ? " disabled='disabled'":"").">";
+		if ( $options['preset'] != null ) {
+			foreach ( $options['options'] as $option ) {
 				if ( is_array($option) ) {
-					$temp .= "<option value=\"{$option[0]}\"".(($selected == $option[0]) ? " selected=\"selected\"":"").">{$option[1]}</option>";
+					$temp .= "<option value='{$option[0]}'".(($options['selected'] == $option[0]) ? " selected='selected'":"").">{$option[1]}</option>";
 				} else {
-					$temp .= "<option value=\"{$option}\"".(($selected == $option) ? " selected=\"selected\"":"").">{$option}</option>";
+					$temp .= "<option value='{$option}'".(($options['selected'] == $option) ? " selected='selected'":"").">{$option}</option>";
 				}
 			}
 		}
 		$temp .= "</select></div>";
 		$this->html[] = $temp;
-		$this->tabindex++;
-		return true;
-	}
-	
-	/**
-	 * Add a TEXT or MONEY input to the form
-	 * 
-	 * @param string Name of input field
-	 * @param string Text to display before input
-	 * @param string Hover text for element
-	 * @param string Preset value of element
-	 * @param bool Element is enabled
-	 * @param bool True if MONEY input
-	 * @return bool True on success
-	 */
-	public function addText($name = 'text', $text = null, $title = null, $preset = null, $enabled = True, $money = False) {
-		$temptype = ($money) ? "textMoney" : "text";
-		$this->members[] = array($temptype, $name, $text, $title, $preset);
-		if ( $title == null ) { $title = $text; }
-		$temp  = "  <div data-role=\"fieldcontain\"><label for=\"{$name}\">{$text}</label> <input type=\"text\" id=\"{$name}\" name=\"{$name}\" ";
-		if ( $preset != null ) { $temp .= "value = \"{$preset}\" "; }
-		if ( !$enabled ) { $temp .= "disabled=\"disabled\" "; }
-		$temp .= "/></div>";
-		$this->html[] = $temp;
-		$this->tabindex++;
-		return true;
-	}
-	
-	/**
-	 * Add a PASSWORD input to the form
-	 * 
-	 * @param string Name of input field
-	 * @param string Text to display before input
-	 * @param string Hover text for element
-	 * @param string Preset value of element
-	 * @param bool Element is enabled
-	 * @return bool True on success
-	 */
-	public function addPass($name = 'password', $text = null, $title = null, $preset = null, $enabled = True ) {
-		$this->members[] = array('password', $name, $text, $title, $preset);
-		if ( $title == null ) { $title = $text; }
-		$temp  = "  <div data-role=\"fieldcontain\"><label for=\"{$name}\">{$text}</label> <input type=\"password\" id=\"{$name}\" name=\"{$name}\" ";
-		if ( $preset != null ) { $temp .= "value = \"{$preset}\" "; }
-		if ( !$enabled ) { $temp .= "disabled=\"disabled\" "; }
-		$temp .= "/></div>";
-		$this->html[] = $temp;
-		$this->tabindex++;
 		return true;
 	}
 	
 	/**
 	 * Add a MONEY input to the form
 	 * 
-	 * @param string Name of input field
-	 * @param string Text to display before input
-	 * @param string Hover text for element
-	 * @param string Preset value of element
-	 * @param bool Element is enabled
+	 * Options:
+	 * 	'id' => Label ID
+	 * 	'name' => Input Name
+	 * 	'label' => Label Text
+	 * 	'title' => Mouseover Text
+	 * 	'preset' => Preset Value
+	 * 	'enabled' => Field Enabled
+	 * 	'type' => Type of field
+	 * 	'role' => data-role of field
+	 * 
+	 * @param array Array of named options
 	 * @return bool True on success
 	 */
-	public function addMoney($name = 'money', $text = null, $title = null, $preset = null, $enabled = True) {
-		$result = $this->addText($name, $text, $title, $preset, $enabled, True);
-		return $result;
+	public function addMoney($passed) {
+		$default = array(
+			'name' 		=> 'money',
+			'label'		=> 'Money Field',
+			'title'		=> null,
+			'preset'	=> null,
+			'enabled'	=> True,
+			'id'		=> null,
+			'type'		=> 'text',
+			'role'		=> null
+			);
+		$options = merge_defaults($default, $passed);
+		return $this->addText($options);
 	}
 	
 	/**
@@ -259,7 +276,7 @@ class tdform {
 	 */
 	public function addInfo($text) {
 		$this->members[] = array('info', null, $text, null, null);
-		$this->html[] = "  <div data-role=\"fieldcontain\">{$text}</div>";
+		$this->html[] = "  <div data-role='fieldcontain'>{$text}</div>";
 		return true;
 	}
 	
@@ -282,19 +299,65 @@ class tdform {
 	/**
 	 * Add a CHECKBOX input to the form
 	 * 
-	 * @param string Name of input field
-	 * @param string Text to display before input
-	 * @param string Hover text for element
-	 * @param string Preset value of element
-	 * @param bool Element is enabled
-	 * @param string Value on true
+	 * @param array Options
 	 * @return bool True on success
 	 */
-	public function addCheck($name = 'check', $text = null, $title = null, $preset = False, $enabled = True, $value = 'y') {
-		$this->members[] = array('checkbox', $name, $text, $title, $preset);
-		if ( $title == null ) { $title = $text; }
-		$this->html[] = "  <div class=\"frmele check-{$name}\" title=\"{$title}\"><label for=\"{$name}\">{$text}</label><input class=\"tdformcheck\" type=\"checkbox\" name=\"{$name}\" value=\"{$value}\" tabindex=\"{$this->tabindex}\" ".($preset ? "checked=\"checked\"":"").(!$enabled ? "disabled=\"disabled\" ":"")." /></div>";
-		$this->tabindex++;
+	public function addCheck($passed) {
+		$default = array(
+			'id' => null,
+			'name' => 'check',
+			'label' => 'Checkmark Input',
+			'text' => 'Yes',
+			'preset' => False,
+			'title' => null,
+			'enabled' => True,
+			'value' => 'y'
+		);
+		
+		$options = merge_defaults($default, $passed);
+		
+		if ( $options['id'] == null )		{ $options['id'] = $options['name']; }
+		if ( $options['title'] == null )	{ $options['title'] = $options['label']; }
+		
+		$this->members[] = array('checkbox', $options['name'], $options['label'], $options['title'], $options['preset']);
+		
+		$this->html[] = "  <div data-role='fieldcontain'><fieldset data-role='controlgroup'><legend>{$options['label']}</legend><input type='checkbox' name='{$options['name']}' id='{$options['id']}' class='custom' value='{$options['value']}'".($options['preset']?"checked='checked' ":"").(!$options['enabled']?"disabled='disabled' ":"")." /><label for='{$options['id']}'>{$options['text']}</label></fieldset></div>";
+		return true;
+	}
+	
+	/**
+	 * Add a CHECKBOX input to the form
+	 * 
+	 * @param array Options
+	 * @return bool True on success
+	 */
+	public function addToggle($passed) {
+		$default = array(
+			'id' => null,
+			'name' => 'slider',
+			'label' => 'Toggle Input',
+			'options' => array(array(0,'False'),array(1,'True' )),
+			'preset' => False,
+			'title' => null,
+			'enabled' => True,
+		);
+		
+		$options = merge_defaults($default, $passed);
+		
+		if ( $options['id'] == null )		{ $options['id'] = $options['name']; }
+		if ( $options['title'] == null )	{ $options['title'] = $options['label']; }
+		
+		$this->members[] = array('toggle', $options['name'], $options['label'], $options['title'], $options['preset']);
+		
+		$temp[] = "  <div data-role='fieldcontain'>";
+		$temp[] = "<label for='{$options['id']}'>{$options['label']}</label>";
+		$temp[] = "<select name='{$options['name']}' id='{$options['id']}' data-role='slider'>";
+		foreach ( $options['options'] as $opt ) {
+			$temp[] = "<option value='{$opt[0]}'".(($options['preset'] == $opt[0])?" selected='selected'":"").">{$opt[1]}</option>";
+		}
+		$temp[] = "</select></div>";
+		
+		$this->html[] = join($temp);
 		return true;
 	}
 	
