@@ -69,66 +69,72 @@ class tdtrac_todo {
 					$CANCEL = true;
 					$this->title .= "::Add";
 					if ( $this->user->can("addtodo") ) {
-						if ( $this->post ) {
-							thrower($this->save(false), 'todo/add/');
-						} else {
-							$this->html = $this->add_form();
-						}
+						$this->html = $this->add_form();
 					} else {
 						thrower('Access Denied :: You cannot add new todo items', 'todo/');
 					} break;
-				case "view":
-					$this->title .= "::View";
-					if ( $this->post ) {
-						$type = ( isset($_REQUEST['type']) && ( $_REQUEST['type'] == 'show' || $_REQUEST['type'] == 'overdue') ) ? $_REQUEST['type'] : "user";
-						$id   = ( isset($_REQUEST['id']) && is_numeric($_REQUEST['id']) ) ? intval($_REQUEST['id']) : 1;
-						thrower(false, "todo/view/id:{$id}/type:{$type}/");
-					} else {
-						if ( $this->user->can('addtodo') ) {
-							$HEAD_LINK = array('/todo/add/', 'plus', 'Add Item'); 
-						}
-						if ( !isset($this->action['id']) ) {
-							$this->html = $this->view(null);	
-						} else {
-							if ( !$this->user->can("viewtodo") ) {
-								$this->html = $this->view($this->user->id, 'user');
-							} else {
-								$type = ( isset($this->action['type']) && ( $this->action['type'] == 'overdue' || $this->action['type'] == 'show' ) ) ? $this->action['type'] : "user";
-								$id   = ( isset($this->action['id']) && is_numeric($this->action['id']) ) ? intval($this->action['id']) : 1;
-								$this->html = $this->view($id, $type);
-							}
-						}
-					} break;
 				case "edit":
-					$this->title .= " :: Edit";
+					$this->title .= "::Edit";
 					if ( $this->user->can("edittodo") ) {
-						if ( $this->post ) {
-							if ( isset($_REQUEST['id']) && is_numeric($_REQUEST['id']) ) {
-								thrower($this->save(true), "todo/edit/id:".intval($_REQUEST['id'])."/");
-							} else {
-								thrower('Error :: Data Mismatch Detected', 'todo/');
-							}
+						if ( isset($this->action['id']) && is_numeric($this->action['id']) ) {
+							$this->html = $this->edit_form(intval($this->action['id']));
 						} else {
-							if ( isset($this->action['id']) && is_numeric($this->action['id']) ) {
-								$this->html = $this->edit_form(intval($this->action['id']));
-							} else {
-								thrower("Error :: Data Mismatch Detected", 'todo/');
-							}
+							thrower("Error :: Data Mismatch Detected", 'todo/');
 						}
 					} else {
 						thrower('Access Denied :: You Cannot Edit Todo Items', 'todo/');
 					} break;
 				default:
-					if ( $this->user->can('viewtodo') ) {
-						thrower(false, 'todo/view/');
-					} else {
-						thrower(flase, 'todo/view/id:{$this->user->id}/type:user/');
+					$this->title .= "::View";
+					if ( $this->user->can('addtodo') ) {
+						$HEAD_LINK = array('/todo/add/', 'plus', 'Add Item'); 
 					}
-					break;
+					if ( !$this->user->can("viewtodo") ) {
+						$this->html = $this->view($this->user->id, 'user');
+					} else {
+						if ( !isset($this->action['id']) ) {
+							$this->html = $this->view(null);	
+						} else {
+							$type = ( isset($this->action['type']) && ( $this->action['type'] == 'overdue' || $this->action['type'] == 'show' ) ) ? $this->action['type'] : "user";
+							$id   = ( isset($this->action['id']) && is_numeric($this->action['id']) ) ? intval($this->action['id']) : 1;
+							$this->html = $this->view($id, $type);
+						}
+					} break;
 			}
 			makePage($this->html, $this->title);
 		} else { // JSON METHODS
 			switch($this->action['action']) {
+				case "save":
+					if ( $this->action['new'] == 0 ) {
+						if ( $this->user->can("edittodo") ) {
+							if ( isset($_REQUEST['id']) && is_numeric($_REQUEST['id']) ) {
+								$this->json = $this->save(true);
+								if ( isset($_SESSION['tdpage']['one']) ) {
+									$this->json['location'] = $_SESSION['tdpage']['one'];
+								} else {
+									$this->json['location'] = "/todo/";
+								}
+							}
+						} else {
+							$this->json['success'] = false;
+							$this->json['msg'] = "Access Denied";
+						}
+					} elseif ( $this->action['new'] == 1 ) {
+						if ( $this->user->can("addtodo") ) {
+							$this->json = $this->save(false);
+							if ( isset($_SESSION['tdpage']['one']) ) {
+								$this->json['location'] = $_SESSION['tdpage']['one'];
+							} else {
+								$this->json['location'] = "/todo/";
+							}
+						} else {
+							$this->json['success'] = false;
+							$this->json['msg'] = "Access Denied";
+						}
+					} else {
+						$this->json['success'] = false;
+						$this->json['msg'] = "Poorly Formed Request";
+					} break;
 				case "mark":
 					if ( $TEST_MODE ) {
 						$this->json['success'] = true;
@@ -156,7 +162,7 @@ class tdtrac_todo {
 						}
 					} break;
 				default:
-					$this->json['success'] = true;//false;
+					$this->json['success'] = true;
 					break;
 			} echo json_encode($this->json);
 		}
@@ -226,7 +232,7 @@ class tdtrac_todo {
 	 */
 	private function add_form() {
 		global $TDTRAC_SITE;
-		$form = new tdform(array('action' => "{$TDTRAC_SITE}todo/add/", 'id' => 'todo_add_form'));
+		$form = new tdform(array('action' => "{$TDTRAC_SITE}todo/save/json:1/new:1/", 'id' => 'todo_add_form'));
 		$result = $form->addDrop(array(
 			'name' => 'showid', 
 			'label' => 'Show',
@@ -263,18 +269,33 @@ class tdtrac_todo {
 		$result = mysql_query($sql, $db);
 		$row = mysql_fetch_array($result);
 		
-		$form = new tdform(array('action' => "{$TDTRAC_SITE}todo/edit/id:{$id}/", 'id' => 'todo-edit-form'));
+		$form = new tdform(array('action' => "{$TDTRAC_SITE}todo/save/json:1/new:0/id:{$id}/", 'id' => 'todo-edit-form'));
 		$result = $form->addDrop(array(
 			'name' => 'showid', 
 			'label' => 'Show', 
 			'selected' => $row['showid'], 
 			'options' => db_list(get_sql_const('showid'), array('showid', 'showname'))
 		));
-		//$result = $form->addDrop(array('name' => 'prio', 'label' => 'Priority', 'preset' => $row['priority'], 'options' => $this->priorities));
-		//$result = $form->addDate(array('name' => 'date', 'label' => 'Due Date', 'preset' => $row['duedate']));
-		//$result = $form->addDrop(array('name' => 'assign', 'label' => 'Assigned To', 'preset' => $row['assigned'], 'options' => array_merge(array(array('0', '-unassigned-')), db_list(get_sql_const('todo'), array('userid', 'name')))));
+		$result = $form->addDrop(array(
+			'name' => 'prio',
+			'label' => 'Priority',
+			'selected' => $row['priority'],
+			'options' => $this->priorities
+		));
+		$result = $form->addDate(array('name' => 'date', 'label' => 'Due Date', 'preset' => $row['duedate']));
+		$result = $form->addDrop(array(
+			'name' => 'assign',
+			'label' => 'Assigned To',
+			'selected' => $row['assigned'],
+			'options' => array_merge(array(array('0', '-unassigned-')), db_list(get_sql_const('todo'), array('userid', 'name')))
+		));
 		$result = $form->addText(array('name' => 'desc', 'label' => 'Description', 'preset' => $row['dscr']));
-		$result = $form->addCheck(array('name' => 'complete', 'label' => 'Completed', 'preset' => $row['complete']));
+		$result = $form->addToggle(array(
+			'name' => 'complete',
+			'label' => 'Task Completed',
+			'preset' => $row['complete'],
+			'options' => array(array(0,'Pending'),array(1,'Complete'))
+		));
 		$result = $form->addHidden('id', $id);
 		return $form->output('Edit Todo');
 	}
@@ -310,15 +331,18 @@ class tdtrac_todo {
 				intval($_REQUEST['assign']),
 				mysql_real_escape_string($_REQUEST['desc']),
 				make_date($_REQUEST['date']),
-				(($_REQUEST['complete'] == "y") ? 1 : 0),
+				intval($_REQUEST['complete']),
 				intval($_REQUEST['id'])
 		); }
 		
+		if ( empty($_REQUEST['showid']) ) { return json_error('Please pick a show'); }
+		if ( empty($_REQUEST['desc'])   ) { return json_error('Description is required'); }
+		
 		$result = mysql_query($sql, $db);
 		if ( $result ) {
-			return "To-Do Item Saved";
+			return array('success' => true, 'msg' => "Todo Item Saved");
 		} else {
-			return "To-Do Item Save :: Failed" . (($MYSQL_DEBUG) ? " (".mysql_error().")" : "");
+			return array('success' => false, 'msg' => "Todo Save Failed".(($TEST_MODE)?mysql_error():""));
 		}
 	}
 	
@@ -372,7 +396,7 @@ class tdtrac_todo {
 			else { $thiscond = perms_getidbyname($condition); }
 			
 			$list = new tdlist('todo_view');
-			$list->setFormat("<a class=\"todo-done\" data-done=\"%d\" data-recid=\"%d\" href=\"#\"></a><h3>%s</h3><p>".(($type=="user")?"<strong>Show:</strong> %s":"<strong>User:</strong> %s").(($this->user->can('edittodo'))?"<br /><strong>Actions: </strong>[<a href='/todo/edit/id:%d' data-role='none'>Edit</a>]":"")."</p><span class=\"ui-li-count\">%s</span>");
+			$list->setFormat("<a class=\"todo-done\" data-done=\"%d\" data-recid=\"%d\" href=\"#\"></a><h3>%s</h3><p>".(($type=="user")?"<strong>Show:</strong> %s":"<strong>User:</strong> %s").(($this->user->can('edittodo'))?"<br /><strong>Actions: </strong>[<a href='/todo/edit/id:%d/' data-role='none'>Edit</a>]":"")."</p><span class=\"ui-li-count\">%s</span>");
 			
 			if ( $type == 'user' ) {
 				$sql = "SELECT todo.*, showname, DATE_FORMAT(`due`, '%Y-%m-%d') as duedate, TIME_TO_SEC( TIMEDIFF(`due` , NOW())) AS remain FROM {$MYSQL_PREFIX}todo as todo, {$MYSQL_PREFIX}shows as shows WHERE shows.showid = todo.showid AND todo.assigned = '{$thiscond}' ORDER BY complete ASC, due DESC, added DESC";
