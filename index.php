@@ -45,11 +45,6 @@ foreach ( $rawaction as $maybevar ) {
 		$action[$goodvar[0]] = $goodvar[1];
 	}
 }
-if ( !isset($action['json']) || $action['json'] == 0 ) { // Track 'real' pages
-	$_SESSION['tdpage']['two'] = $_SESSION['tdpage']['one'];
-	$_SESSION['tdpage']['one'] = $_SESSION['tdpage']['this'];
-	$_SESSION['tdpage']['this'] = $_REQUEST['action'];
-}
 
 if ( !$user->loggedin ) {
 	switch( $action['action'] ) {
