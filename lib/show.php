@@ -55,62 +55,81 @@ class tdtrac_shows {
 	 * @return void
 	 */
 	public function output() {
+		global $TEST_MODE, $HEAD_LINK;
 		if ( !$this->output_json ) { // HTML METHODS
 			switch ( $this->action['action'] ) {
 				case "add":
 					$this->title .= " :: Add";
 					if ( $this->user->can("addshow") ) {
 						if ( $this->post ) {
-							thrower($this->save(false), 'shows/add/');
+							thrower($this->save(false), 'shows/');
 						} else {
 							$this->html = $this->add_form();
 						}
 					} else {
 						thrower('Access Denied :: You cannot add new shows', 'shows/');
 					} break;
-				case "view":
-					if ( $this->user->can('viewshow') ) {
-						$this->title .= " :: View";
-						$this->html = $this->view();
-					} else {
-						thrower("Access Denied :: You Cannot View Shows");
-					} break;
 				case "edit":
 					$this->title .= " :: Edit";
 					if ( $this->user->can("editshow") ) {
-						if ( $this->post ) {
-							if ( isset($_REQUEST['id']) && is_numeric($_REQUEST['id']) ) {
-								thrower($this->save(true), "shows/edit/id:".intval($_REQUEST['id'])."/");
-							} else {
-								thrower('Error :: Data Mismatch Detected', 'shows/');
-							}
+						if ( isset($this->action['id']) && is_numeric($this->action['id']) ) {
+							$this->html = $this->edit_form(intval($this->action['id']));
 						} else {
-							if ( isset($this->action['id']) && is_numeric($this->action['id']) ) {
-								$this->html = $this->edit_form(intval($this->action['id']));
-							} else {
-								thrower("Error :: Data Mismatch Detected", 'shows/');
-							}
+							thrower("Error :: Data Mismatch Detected", 'shows/');
 						}
 					} else {
 						thrower('Access Denied :: You Cannot Edit Shows', 'shows/');
 					} break;
 				default:
-					$this->html = $this->index();
-					break;
+					if ( $this->user->can('viewshow') ) {
+						$HEAD_LINK = array('/shows/add/', 'plus', 'Add Show'); 
+						$this->title .= " :: View";
+						$this->html = $this->view();
+					} else {
+						thrower("Access Denied :: You Cannot View Shows");
+					} break;
 			}
 			makePage($this->html, $this->title);
 		} else { 
 			switch($this->action['action']) {
-				case "delete":
-					if ( isset($this->action['id']) && is_numeric($this->action['id']) && $this->user->admin ) {
-						$this->delete(intval($this->action['id']));
+				case "save":
+					if ( $this->action['new'] == 0 ) {
+						if ( $this->user->can("editshow") ) {
+							if ( isset($_REQUEST['id']) && is_numeric($_REQUEST['id']) ) {
+								$this->json = $this->save(true);
+								$this->json['location'] = "/shows/";
+							}
+						} else {
+							$this->json['success'] = false;
+							$this->json['msg'] = "Access Denied";
+						}
+					} elseif ( $this->action['new'] == 1 ) {
+						if ( $this->user->can("addshow") ) {
+							$this->json = $this->save(false);
+							$this->json['location'] = "/shows/";
+						} else {
+							$this->json['success'] = false;
+							$this->json['msg'] = "Access Denied";
+						}
 					} else {
 						$this->json['success'] = false;
+						$this->json['msg'] = "Poorly Formed Request";
+					} break;
+				case "delete":
+					if ( $TEST_MODE ) {
+						$this->json['success'] = true;
+					} else {
+						if ( isset($this->action['id']) && is_numeric($this->action['id']) && $this->user->admin ) {
+							$this->delete(intval($this->action['id']));
+						} else {
+							$this->json['success'] = false;
+						}
 					} break;
 				default:
 					$this->json['success'] = false;
 					break;
 			}
+			//echo var_dump($this->json, true);
 			echo json_encode($this->json);
 		}
 	} // END OUTPUT FUNCTION
@@ -123,12 +142,12 @@ class tdtrac_shows {
 	 */
 	private function add_form() {
 		GLOBAL $TDTRAC_SITE;
-		$form = new tdform("{$TDTRAC_SITE}shows/add/", 'show-add-form', 1, 'genform', 'Add A Show');
+		$form = new tdform(array('action' => "{$TDTRAC_SITE}shows/save/json:1/new:1/", 'id' => 'show-add-form'));
 		
-		$result = $form->addText('showname', 'Show Name');
-		$result = $form->addText('company', 'Show Company');
-		$result = $form->addText('venue', 'Show Venue');
-		$result = $form->addDate('dates', 'Show Opening');
+		$result = $form->addText(array('name' => 'showname', 'label' => 'Show Name'));
+		$result = $form->addText(array('name' => 'company', 'label' => 'Show Company'));
+		$result = $form->addText(array('name' => 'venue', 'label' => 'Show Venue'));
+		$result = $form->addDate(array('name' => 'dates', 'label' => 'Show Opening'));
 		
 		return $form->output('Add Show');
 	}
@@ -154,17 +173,15 @@ class tdtrac_shows {
 	
 		$result = mysql_query($sql, $db);
 		$row = mysql_fetch_array($result);
-		$form = new tdform("{$TDTRAC_SITE}shows/edit/id:{$id}/", "showedit", 1, 'genform', 'Edit Show');
+		$form = new tdform(array('action' => "{$TDTRAC_SITE}shows/save/json:1/new:0/id:{$id}/", 'id' => "showedit"));
 		
-		$fesult = $form->addText('showname', 'Show Name', null, $row['showname']);
-		$result = $form->addText('company', 'Show Company', null, $row['company']);
-		$result = $form->addText('venue', 'Show Venue', null, $row['venue']);
-		$result = $form->addDate('dates', 'Show Dates', null, $row['dates']);
-		$openshow =  ( $row['closed'] ? 0 : 1 );
-		$result = $form->addCheck('closed', 'Show Record Open', null, $openshow);
+		$fesult = $form->addText(array('name' => 'showname', 'label' => 'Show Name', 'preset' => $row['showname']));
+		$result = $form->addText(array('name' => 'company', 'label' => 'Show Company', 'preset' => $row['company']));
+		$result = $form->addText(array('name' => 'venue', 'label' => 'Show Venue', 'preset' => $row['venue']));
+		$result = $form->addDate(array('name' => 'dates', 'label' => 'Show Dates', 'preset' => $row['dates']));
+		$result = $form->addToggle(array('name' => 'closed', 'label' => 'Show Record Open', 'preset' => $row['closed'], 'options' => array(array(1,'Closed'),array(0,'Open'))));
 		$result = $form->addHidden('id', $id);
-		
-		return $form->output('Commit');
+		return array_merge($form->output('Commit'));
 	}
 
 	/**
@@ -205,10 +222,12 @@ class tdtrac_shows {
 	 * @return void
 	 */
 	private function save($exists = false) {
-		GLOBAL $db, $MYSQL_PREFIX, $MYSQL_DEBUG;
+		GLOBAL $db, $MYSQL_PREFIX, $TEST_MODE;
 		if ( !$exists ) {
 			$sqlstring  = "INSERT INTO `{$MYSQL_PREFIX}shows` ( showname, company, venue, dates )";
 			$sqlstring .= " VALUES ( '%s', '%s', '%s', '%s' )";
+			
+			if ( empty($_REQUEST['showname']) ) { return json_error('Show Name Required');	}
 			
 			$sql = sprintf($sqlstring,
 				mysql_real_escape_string($_REQUEST['showname']),
@@ -225,16 +244,16 @@ class tdtrac_shows {
 				mysql_real_escape_string($_REQUEST['company']),
 				mysql_real_escape_string($_REQUEST['venue']),
 				mysql_real_escape_string($_REQUEST['dates']),
-				(($_REQUEST['closed'] == 'y') ? 0 : 1),
+				intval($_REQUEST['closed']),
 				intval($_REQUEST['id'])
 			);
 		}
 	
 		$result = mysql_query($sql, $db);
 		if ( $result ) {
-			return "Show {$_REQUEST['showname']} Saved";
+			return array('success' => true, 'msg' => "Show `{$_REQUEST['showname']}` Saved");
 		} else {
-			return "Show Save :: Operation Failed". (($MYSQL_DEBUG) ? " (".mysql_error().")" : "");
+			return array('success' => false, 'msg' => "Show Save Failed".(($TEST_MODE)?mysql_error():""));
 		}
 	}
 
@@ -249,12 +268,26 @@ class tdtrac_shows {
 	 */
 	private function view() {
 		GLOBAL $db, $MYSQL_PREFIX, $TDTRAC_SITE, $SITE_SCRIPT;
-		$sql = "SELECT * FROM `{$MYSQL_PREFIX}shows` ORDER BY `created` DESC";
+		$sql = "SELECT * FROM `{$MYSQL_PREFIX}shows` ORDER BY `closed` ASC, `created` DESC";
 		$result = mysql_query($sql, $db);
-		$html = array();
+		$list = new tdlist('show_view', true);
+		$showsopen = true;
+		$list->setFormat("<h3><a data-showid='%d' href='#'>%s</a></h3><p><strong>Company:</strong> %s<br /><strong>Venue:</strong> %s<br /><strong>Dates:</strong> %s</p>");
+		
+		if ( $this->user->admin ) {
+			$list->setFormat("<h3><a href='/shows/edit/id:%d/'>%s</a></h3><p><strong>Company:</strong> %s<br /><strong>Venue:</strong> %s<br /><strong>Dates:</strong> %s</p>");
+			$list->addAction("sdel");
+		}
+		$list->addDivide('Open Shows','b');
 		while ( $row = mysql_fetch_array($result) ) {
+			if ( $showsopen && $row['closed'] == 1 ) {
+				$list->addDivide('Closed Shows','b');
+				$showsopen = false;
+			}
+			$list->addRow(array($row['showid'], $row['showname'], $row['company'], $row['venue'], $row['dates']), $row);
+			
 			$html[] = "<h3>{$row['showname']}</h3>";
-			if ( $this->user->admin ) {
+			/*if ( $this->user->admin ) {
 				$safename = preg_replace("/ /", "", $row['showname']);
 				$temp = array();
 				$SITE_SCRIPT[] = "var showdel{$safename} = true;";
@@ -272,7 +305,8 @@ class tdtrac_shows {
 				$temp[] = " [<a href=\"#\" class=\"sdel-{$safename}\" />Delete</a>]";
 				$temp[] = "</span>";
 				$html[] = join($temp);
-			}
+			}*/
+			//$list
 			$html[] = "  <ul class=\"datalist\">";
 			$html[] = "    <li><strong>Company</strong>: {$row['company']}</li>";
 			$html[] = "    <li><strong>Venue</strong>: {$row['venue']}</li>";
@@ -280,7 +314,7 @@ class tdtrac_shows {
 			$html[] = "    <li><strong>Show Record Open</strong>: " . (( $row['closed'] == 1 ) ? "NO" : "YES") . "</li>";
 			$html[] = "</ul>";
 		}
-		return $html;
+		return $list->output();
 	}
 	
 	/** 
