@@ -35,6 +35,21 @@ require_once("todo.php");
 /** Module: tdtrac_hours */
 require_once("hours.php");
 
+
+/**
+ * Merge default options and overrides
+ * 
+ * @param array Default Options
+ * @param array Overrides
+ * @return array Merged Options
+ */
+function merge_defaults($orig, $override) {
+	foreach ( $orig as $key=>$value ) {
+		if ( isset($override[$key]) ) { $orig[$key] = $override[$key]; }
+	}
+	return $orig;
+}
+
 /**
  * Throw a message to the user
  * 
@@ -50,6 +65,7 @@ function thrower($msg, $loc='') {
 	}
 	session_write_close();
 	header("Location: {$TDTRAC_SITE}{$loc}");
+	//echo "<script type=\"javascript/text\">$.mobile.changePage({$loc});></script>";
 }
 
 /** 
@@ -90,6 +106,10 @@ function db_list($sql, $columns) {
 	 if ( mysql_num_rows($result) < 1 ) { return 0; }
 	 $row = mysql_fetch_array($result);
 	 return $row[$col];
+}
+
+function json_error($text) {
+	return array('success' => false, 'msg' => $text);
 }
 
 function tdebug($text) {
