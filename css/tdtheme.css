@@ -1,0 +1,262 @@
+
+/*####################################################################################################################################
+
+  G
+
+####################################################################################################################################*/
+
+.ui-bar-g {
+  font-weight: bold;
+  border: 1px solid       #ccc; 
+  background:             #cbcbcb;
+  color:                  #666; 
+  text-shadow: 0 1px 0px  #fff;
+  background-image: -moz-linear-gradient(top, 
+                          #ddd  0%,
+                          #ccc  5%,
+                          #bbb  15%, 
+                          #ddd  95%, 
+                          #ccc  100%);
+  background-image: -webkit-gradient(linear, center top, center bottom,
+    color-stop(0,         #ddd),
+    color-stop(5%,        #ccc),
+    color-stop(15%,       #bbb),
+    color-stop(95%,       #ddd),
+    color-stop(1,         #ccc));
+  -ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorStr='#aaaaaa', EndColorStr='#e5e5e5')";
+}
+.ui-bar-g, 
+.ui-bar-g input, 
+.ui-bar-g select, 
+.ui-bar-g textarea, 
+.ui-bar-g button { 
+  font-family: Helvetica, Arial, sans-serif; 
+}
+.ui-bar-g .ui-link-inherit { 
+  color:                  #333;
+}
+.ui-bar-g .ui-link {
+  font-weight: bold;
+  color:                  #2489CE;
+}
+
+.ui-btn-up-g {
+  border: 1px solid       #c5c5c5;
+  background:             #ddd;
+  color:                  #666;
+  background-image: -moz-linear-gradient(top, 
+                          #d5d5d5,
+                          #dddddd);
+  background-image: -webkit-gradient(linear,left top,left bottom,
+    color-stop(0,         #d5d5d5),
+    color-stop(1,         #dddddd));
+  -ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorStr='#d5d5d5', EndColorStr='#dddddd')";
+}
+.ui-btn-up-g a.ui-link-inherit {
+  color:                  #666;
+}
+.ui-btn-hover-g {
+  border: 1px solid       #aaa;
+  background:             #c5c5c5;
+  color:                  #666;
+  background-image: -moz-linear-gradient(top, 
+                          #c5c5c5,
+                          #cccccc);
+  background-image: -webkit-gradient(linear,left top,left bottom,
+    color-stop(0,         #c5c5c5),
+    color-stop(1,         #cccccc));
+  -ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorStr='#c5c5c5', EndColorStr='#cccccc')";
+}
+.ui-btn-hover-g a.ui-link-inherit {
+  color:                  #666;
+}
+.ui-btn-gown-g {
+  border: 1px solid       #999;
+  background:             #b5b5b5;
+  color:                  #444;
+  background-image: -moz-linear-gradient(top, 
+                          #b5b5b5,
+                          #bbbbbb);
+  background-image: -webkit-gradient(linear,left top,left bottom,
+    color-stop(0,         #b5b5b5),
+    color-stop(1,         #bbbbbb));
+  -ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorStr='#b5b5b5', EndColorStr='#bbbbbb')";
+}
+.ui-btn-up-g a.ui-link {
+  color:                  #444;
+}
+.ui-btn-up-g,
+.ui-btn-hover-g,
+.ui-btn-gown-g {
+  font-family: Helvetica, Arial, sans-serif;
+  cursor: pointer;
+  font-weight: bold;
+  text-gecoration: none;
+  text-shadow: 0 1px 0px  #fff;
+}
+.ui-body-g,
+.ui-body-g input,
+.ui-body-g select, 
+.ui-body-g textarea, 
+.ui-body-g button { 
+  font-family: Helvetica, Arial, sans-serif; 
+}
+.ui-body-g .ui-link-inherit { 
+  color:                  #333333;
+}
+.ui-body-g { 
+  border: 1px solid       #aaa;
+  color:                  #666;
+  text-shadow: 0 1px 0px  #fff;
+  background:             #eee;
+  background-image: -moz-linear-gradient(top, 
+                          #ffffff 0%,
+                          #f5f5f5 15%,
+                          #eeeeee 100%);
+  background-image: -webkit-gradient(linear,left top,left bottom,
+    color-stop(0,         #ffffff),
+    color-stop(15%,       #f5f5f5),
+    color-stop(1,         #eeeeee));
+  -ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorStr='#f5f5f5', EndColorStr='#eeeeee')";
+}
+.ui-body-g .ui-link {
+  font-weight: bold;
+  color:                  #e98a15;
+}
+
+.ui-body-g .ui-link-inherit {
+  color:                  #333333; }
+.ui-body-g .ui-link {
+  font-weight: bold;
+  color:                  #e98a15;
+}
+
+
+/*####################################################################################################################################
+
+  F
+
+####################################################################################################################################*/
+
+.ui-bar-f {
+  font-weight: bold;
+  border: 1px solid       #999;
+  background:             #dedede;
+  color:                  #000;
+  text-shadow: 0 1px 0px  #fff;
+  background-image: -moz-linear-gradient(top, 
+                          #ffffff 0%,
+                          #cccccc 50%,
+                          #b5b5b5 50%,
+                          #eeeeee 100%);
+  background-image: -webkit-gradient(linear,left top,left bottom,
+    color-stop(0,         #ffffff),
+    color-stop(.5,        #cccccc),
+    color-stop(.5,        #b5b5b5),
+    color-stop(1,         #eeeeee));
+  -ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorStr='#ffffff',EndColorStr='#b5b5b5')";
+}
+.ui-bar-f,
+.ui-bar-f input, 
+.ui-bar-f select, 
+.ui-bar-f textarea, 
+.ui-bar-f button { 
+  font-family: Helvetica, Arial, sans-serif; 
+}
+.ui-bar-f .ui-link-inherit { 
+  color:                  #333; 
+}
+.ui-bar-f .ui-link { 
+  color:                  #2489CE; 
+  font-weight: bold; 
+}
+.ui-btn-up-f {
+  border: 1px solid       #999;
+  background:             #dfdfdf;
+  color:                  #333;
+  text-shadow: 0 1px 0px  #fff;
+  background-image: -moz-linear-gradient(top, 
+                          #f5f5f5 0%,
+                          #cccccc 50%,
+                          #b5b5b5 50%,
+                          #f5f5f5 100%);
+  background-image: -webkit-gradient(linear,left top,left bottom,
+    color-stop(0,         #f5f5f5),
+    color-stop(.5,        #cccccc),
+    color-stop(.5,        #b5b5b5),
+    color-stop(1,         #f5f5f5));
+  -ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorStr='#f5f5f5', EndColorStr='#b5b5b5')";
+}
+.ui-btn-up-f a.ui-link-inherit {
+  color:                  #333;
+}
+.ui-btn-hover-f { 
+  border: 1px solid       #777;
+  background:             #e5e5e5;
+  color:                  #333;
+  text-shadow: 0 1px 0px  #fff;
+  background-image: -moz-linear-gradient(top, 
+                          #ffffff 0%,
+                          #dddddd 50%,
+                          #cccccc 50%,
+                          #ffffff 100%);
+  background-image: -webkit-gradient(linear,left top,left bottom,
+    color-stop(0,         #ffffff),
+    color-stop(.5,        #dddddd),
+    color-stop(.5,        #cccccc),
+    color-stop(1,         #ffffff));
+  -ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorStr='#ffffff', EndColorStr='#cccccc')";
+}
+.ui-btn-hover-f a.ui-link-inherit {
+  color:                  #333;
+}
+.ui-btn-down-f { 
+  border: 1px solid       #888;
+  background:             #ccc;
+  color:                  #333;
+  background-image: -moz-linear-gradient(top, 
+                          #dddddd 0%,
+                          #cccccc 50%,
+                          #bbbbbb 50%,
+                          #dddddd 100%);
+  background-image: -webkit-gradient(linear,left top,left bottom,
+    color-stop(0,         #dddddd),
+    color-stop(.5,        #cccccc),
+    color-stop(.5,        #bbbbbb),
+    color-stop(1,         #dddddd));
+  -ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorStr='#dddddd', EndColorStr='#bbbbbb')";
+}
+.ui-btn-down-f a.ui-link-inherit {
+  color:                  #333;
+}
+.ui-btn-up-f, 
+.ui-btn-hover-f, 
+.ui-btn-down-f { 
+  font-family: Helvetica, Arial, sans-serif;
+  cursor: pointer;
+  font-weight: bold;
+  text-decoration: none;
+  text-shadow: 0 1px 0px  #fff;
+}
+.ui-body-f { 
+  font-weight: normal;
+  border: 1px solid       #aaa;
+  background:             #ccc;
+  color:                  #111;
+  text-shadow: 0 1px 0px  #fff;
+  background-image: url(images/texture_075.png);
+}
+.ui-body-f, 
+.ui-body-f input, 
+.ui-body-f select, 
+.ui-body-f textarea, 
+.ui-body-f button { 
+  font-family: Helvetica, Arial, sans-serif; 
+}
+.ui-body-f .ui-link-inherit {
+  color:                  #333333;
+}
+.ui-body-f .ui-link { 
+  font-weight: bold;
+  color:                  #e98a15;
+}

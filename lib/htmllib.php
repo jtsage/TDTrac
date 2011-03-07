@@ -60,6 +60,7 @@ function makeHeader($title = '') {
 	$html[] = '	<![endif]-->';
 	$html[] = '	<link rel="stylesheet" href="http://code.jquery.com/mobile/1.0a3/jquery.mobile-1.0a3.min.css" />';
 	$html[] = '	<link type="text/css" href="http://dev.jtsage.com/cdn/datebox/latest/jquery.mobile.datebox.css" rel="stylesheet" /> ';
+	$html[] = '	<link type="text/css" href="/css/tdtheme.css" rel="stylesheet" /> ';
 	$html[] = '	<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.min.js"></script>';
 	$html[] = '	<script type="text/javascript">';
 	$html[] = "		$(document).bind('mobileinit', function(){ $.mobile.page.prototype.options.degradeInputs.date = 'text'; });";
