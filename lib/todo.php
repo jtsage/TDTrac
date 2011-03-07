@@ -396,7 +396,11 @@ class tdtrac_todo {
 			else { $thiscond = perms_getidbyname($condition); }
 			
 			$list = new tdlist('todo_view');
-			$list->setFormat("<a class=\"todo-done\" data-done=\"%d\" data-recid=\"%d\" href=\"#\"></a><h3>%s</h3><p>".(($type=="user")?"<strong>Show:</strong> %s":"<strong>User:</strong> %s").(($this->user->can('edittodo'))?"<br /><strong>Actions: </strong>[<a href='/todo/edit/id:%d/' data-role='none'>Edit</a>]":"")."</p><span class=\"ui-li-count\">%s</span>");
+			$list->setFormat(
+				"<a class='todo-done' data-done='%d' data-recid='%d' href='#'></a><h3>%s</h3><p>"
+				.(($type=="user")?"<strong>Show:</strong> %s":"<strong>User:</strong> %s")
+				.(($this->user->can('edittodo'))?"<br /><strong>Actions: </strong>[-<a href='/todo/edit/id:%d/' data-role='none'>Edit</a>-]":"")
+				."</p><span class='ui-li-count'>%s</span>");
 			
 			if ( $type == 'user' ) {
 				$sql = "SELECT todo.*, showname, DATE_FORMAT(`due`, '%Y-%m-%d') as duedate, TIME_TO_SEC( TIMEDIFF(`due` , NOW())) AS remain FROM {$MYSQL_PREFIX}todo as todo, {$MYSQL_PREFIX}shows as shows WHERE shows.showid = todo.showid AND todo.assigned = '{$thiscond}' ORDER BY complete ASC, due DESC, added DESC";
