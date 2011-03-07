@@ -283,34 +283,6 @@ class tdtrac_shows {
 				$showsopen = false;
 			}
 			$list->addRow(array($row['showid'], $row['showname'], $row['company'], $row['venue'], $row['dates']), $row);
-			
-			$html[] = "<h3>{$row['showname']}</h3>";
-			/*if ( $this->user->admin ) {
-				$safename = preg_replace("/ /", "", $row['showname']);
-				$temp = array();
-				$SITE_SCRIPT[] = "var showdel{$safename} = true;";
-				$SITE_SCRIPT[] = "$(function() { $('.sdel-{$safename}').click( function() {";
-				$SITE_SCRIPT[] = "	if ( showdel{$safename} && confirm('Delete Show #{$row['showid']}?')) {";
-				$SITE_SCRIPT[] = "		$.getJSON(\"{$TDTRAC_SITE}shows/delete/json:1/id:{$row['showid']}/\", function(data) {";
-				$SITE_SCRIPT[] = "			if ( data.success === true ) { ";
-				$SITE_SCRIPT[] = "				$('#popper').html(\"Show #{$row['showid']} Deleted\");";
-				$SITE_SCRIPT[] = "			} else { $('#popper').html(\"Show #{$row['showid']} Delete :: Failed\"); }";
-				$SITE_SCRIPT[] = "			showdel{$safename} = false;";
-				$SITE_SCRIPT[] = "			$('#popperdiv').show('blind');";			
-				$SITE_SCRIPT[] = "	});} return false;";
-				$SITE_SCRIPT[] = "});});";
-				$temp[] = "<span class=\"overright\">[<a href=\"{$TDTRAC_SITE}shows/edit/id:{$row['showid']}/\">Edit</a>]";
-				$temp[] = " [<a href=\"#\" class=\"sdel-{$safename}\" />Delete</a>]";
-				$temp[] = "</span>";
-				$html[] = join($temp);
-			}*/
-			//$list
-			$html[] = "  <ul class=\"datalist\">";
-			$html[] = "    <li><strong>Company</strong>: {$row['company']}</li>";
-			$html[] = "    <li><strong>Venue</strong>: {$row['venue']}</li>";
-			$html[] = "    <li><strong>Dates</strong>: {$row['dates']}</li>";
-			$html[] = "    <li><strong>Show Record Open</strong>: " . (( $row['closed'] == 1 ) ? "NO" : "YES") . "</li>";
-			$html[] = "</ul>";
 		}
 		return $list->output();
 	}
