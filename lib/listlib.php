@@ -112,34 +112,12 @@ class tdlist {
 		$rethtml = "";
 		foreach ( $this->actionlist as $action ) {
 			switch ($action) {
-				case "bpend":
-					$rethtml .= $this->act_bpend($raw);
-					break;
-				case "breim":
-					$rethtml .= $this->act_breim($raw);
-					break;
-				case "rview":
-					$rethtml .= $this->act_rview($raw);
-					break;
-				case "bedit":
-					$rethtml .= $this->act_bedit($raw);
-					break;
-				case "bview":
-					$rethtml .= $this->act_bview($raw);
-					break;
 				case "bdel":
 					$rethtml .= $this->act_bdel($raw);
 					break;
-				case "pedit":
-					$rethtml .= $this->act_pedit($raw);
+				case "badd":
+					$rethtml .= $this->act_badd($raw);
 					break;
-				case "pdel":
-					$rethtml .= $this->act_pdel($raw);
-					break;
-				case "pmedit":
-					$rethtml .= $this->act_pmedit($raw);
-					break;
-					
 				case "sdel":
 					$rethtml .= $this->act_sdel($raw);
 					break;
@@ -152,6 +130,26 @@ class tdlist {
 			}
 		}
 		return $rethtml;
+	}
+	
+	/**
+	 * Action: Budget add item button
+	 * 
+	 * @param array Raw SQL Array
+	 * @return string Formatted HTML
+	 */
+	private function act_badd($raw) {
+		return "<a class='budg-add' href='/budget/add/show:{$raw['showid']}/'>Add Budget Item</a>";
+	}
+	
+	/**
+	 * Action: Budget delete item button
+	 * 
+	 * @param array Raw SQL Array
+	 * @return string Formatted HTML
+	 */
+	private function act_bdel($raw) {
+		return "<a class=\"budg-delete\" data-done=\"0\" data-recid=\"{$raw['showid']}\" href=\"#\">Delete Item</a>";
 	}
 	
 	/**

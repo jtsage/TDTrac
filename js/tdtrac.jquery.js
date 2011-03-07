@@ -33,6 +33,9 @@
 			case 'todo':
 				linkurl = "/todo/email/json:1/id:"+o.id+"/type:"+o.type+"/";
 				break;
+			case 'budget':
+				linkurl = "/budget/email/json:1/id:"+o.id+"/";
+				break;
 		}
 		
 		if ( linkurl !== '' ) {

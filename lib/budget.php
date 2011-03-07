@@ -60,7 +60,7 @@ class tdtrac_budget {
 	 * @return void
 	 */
 	public function output() {
-		if ( !$this->output_json ) { // HTML METHODS
+		if ( !$this->output_json ) { // HTML METHODS			
 			switch ( $this->action['action'] ) {
 				case "add":
 					$this->title .= " :: Add";
@@ -82,22 +82,14 @@ class tdtrac_budget {
 					} break;
 				case "view":
 					$this->title .= " :: View";
-					if ( $this->user->can("viewbudget") || ( ( $this->action['type'] == 'reimb' || $this->action['type'] == 'unpaid' || $this->action['type'] == 'paid' ) && $action['user'] == $this->user->id ) ) {
-						if ( $this->post ) {
-							$type = ( isset($_REQUEST['type']) && ( $_REQUEST['type'] == 'reimb' || $_REQUEST['type'] == 'unpaid' || $_REQUEST['type'] == 'paid' || $_REQUEST['type'] == 'pending') ) ? $_REQUEST['type'] : "show";
-							$id   = ( isset($_REQUEST['id']) && is_numeric($_REQUEST['id']) ) ? intval($_REQUEST['id']) : 1;
-							thrower(false, "budget/view/id:{$id}/type:{$type}/");
-						} else {
-							if ( !isset($this->action['id']) ) {
-								$this->html = $this->view_form();
-							} else {
-								$type = ( isset($this->action['type']) && ( $this->action['type'] == 'reimb' || $this->action['type'] == 'unpaid' || $this->action['type'] == 'paid' || $this->action['type'] == 'pending' ) ) ? $this->action['type'] : "show";
-								$id   = ( isset($this->action['id']) && is_numeric($this->action['id']) ) ? intval($this->action['id']) : 1;
-								$this->html = $this->view($id, $type);
-							}
-						}
+					if ( !$this->user->can('viewbudget') ) { 
+						$this->html = $this->view($this->user->id, 'reimb');
 					} else {
-						thrower('Access Denied :: You Cannot view budgets');
+						if ( !isset($this->action['id']) || !is_numeric($this->action['id']) ) { $this->html = error_page('Invalid Page Requested'); }
+						elseif ( !isset($this->action['type']) || !in_array($this->action['type'], array('reimb', 'show', 'pending')) ) { $this->html = error_page('Invalid Page Requested'); }
+						else {
+							$this->html = $this->view($this->action['id'], $this->action['type']);
+						}
 					}break;
 				case "search":
 					$this->title .= " :: Search Results";
@@ -152,8 +144,11 @@ class tdtrac_budget {
 						thrower('Access Denied :: You Cannot Manage Reciepts');
 					} break;
 				default:
-					$this->html = $this->index();
-					break;
+					if ( !$this->user->can('viewbudget') ) { 
+						$this->html = $this->view($this->user->id, 'reimb');
+					} else {
+						$this->html = $this->showlist();
+					} break;
 			}
 			makePage($this->html, $this->title);
 		} else { // JSON METHODS
@@ -189,6 +184,41 @@ class tdtrac_budget {
 		}
 	} // END OUTPUT FUNCTION
 	
+	
+	private function showlist() {
+		GLOBAL $db, $MYSQL_PREFIX;
+		$sql  = "SELECT s.showid, s.showname, SUM(price+tax) bud, SUM(h.worked * u.payrate) lab FROM `{$MYSQL_PREFIX}shows` s";
+		$sql .= " LEFT JOIN `{$MYSQL_PREFIX}budget` b ON s.showid = b.showid";
+		$sql .= " LEFT JOIN `{$MYSQL_PREFIX}hours` h ON s.showid = h.showid";
+		$sql .= " LEFT JOIN `{$MYSQL_PREFIX}users` u ON h.userid = u.userid";
+		$sql .= " WHERE s.closed = 0 GROUP BY s.showid ORDER BY s.created DESC";
+		$list = new tdlist('budget-showlist', true, 'add');
+		$list->addAction('badd');
+		$list->setFormat("<h3><a href='/budget/view/type:show/id:%d/'>%s</a></h3>"
+				."<p><strong>Budget Expense:</strong> $%s"
+				."<br /><strong>Labor Expense:</strong> $%s"
+				."</p><span class='ui-li-count'>$%s</span>");
+				
+		$list->addDivide('Show Reports', 'b');
+		$result = mysql_query($sql, $db);
+		while ( $row = mysql_fetch_array($result) ) {
+			$list->addRow(array(
+					$row['showid'],
+					$row['showname'],
+					number_format($row['bud'],2),
+					number_format($row['lab'],2),
+					number_format($row['bud'] + $row['lab'], 2)
+				), $row);
+		}
+		$list->addDivide('Other Reports', 'b');
+		$allp = '$' . number_format(get_single("SELECT SUM(price+tax) AS num FROM {$MYSQL_PREFIX}budget WHERE pending = 1"),2);
+		$allr = '$' . number_format(get_single("SELECT SUM(price+tax) AS num FROM {$MYSQL_PREFIX}budget WHERE needrepay = 1 AND gotrepay = 0"),2);
+		$your = '$' . number_format(get_single("SELECT SUM(price+tax) AS num FROM {$MYSQL_PREFIX}budget WHERE needrepay = 1 AND gotrepay = 0 AND payto = {$this->user->id}"),2);
+		$list->addRaw("<li data-theme='c'><h3><a href='/budget/view/type:reimb/id:0/'>All Pending Reimbursment</a></h3><span class='ui-li-count'>{$allr}</span></li>");
+		$list->addRaw("<li data-theme='c'><h3><a href='/budget/view/type:pending/id:0/'>All Pending Payment</a></h3><span class='ui-li-count'>{$allp}</span></li>");
+		$list->addRaw("<li data-theme='c'><h3><a href='/budget/view/type:reimb/id:{$this->user->id}/'>Your Reimbursments</a></h3><span class='ui-li-count'>{$your}</span></li>");
+		return $list->output();
+	}
 	/**
 	 * Remove a reciept from the database
 	 * 
@@ -640,7 +670,9 @@ class tdtrac_budget {
 	 * @return array Formatted HTML
 	 */
 	private function view($showid, $type) {
-		GLOBAL $db, $MYSQL_PREFIX, $TDTRAC_DAYRATE, $TDTRAC_PAYRATE, $TDTRAC_SITE, $SITE_SCRIPT;
+		GLOBAL $db, $MYSQL_PREFIX, $TDTRAC_DAYRATE, $TDTRAC_PAYRATE, $TDTRAC_SITE;
+		$list = new tdlist('budget-view', true);
+		
 		if ( $type == "show" ) {
 			$show_sql = "SELECT * FROM `{$MYSQL_PREFIX}shows` WHERE showid = '".intval($showid)."'";
 		} else {
@@ -649,98 +681,109 @@ class tdtrac_budget {
 		
 		switch($type) {
 			case "pending":
-				$rhtml[] = "<h3>Pending Payment Budget Items</h3><br /><br />";
+				$list->addDivide('Pending Payment Items', 'b');
 				$sqlwhere = " AND pending = 1";
 				break;
 			case "reimb":
-				$rhtml[] = "<h3>All Reimbursment Budget Items</h3><br /><br />";
 				$sqlwhere = " AND needrepay = 1";
-				if ( isset($this->action['user']) && is_numeric($this->action['user']) ) {
-					$sqlwhere .= " AND payto = {$this->action['user']}";
-				}
-				break;
-			case "paid":
-				$rhtml[] = "<h3>Reimbursment Paid Budget Items</h3><br /><br />";
-				$sqlwhere = " AND gotrepay = 1";
-				if ( isset($this->action['user']) && is_numeric($this->action['user']) ) {
-					$sqlwhere .= " AND payto = {$this->action['user']}";
-				}
-				break;
-			case "unpaid":
-				$rhtml[] = "<h3>Reimbursment UNPaid Budget Items</h3><br /><br />";
-				$sqlwhere = " AND needrepay = 1 AND gotrepay = 0";
-				if ( isset($this->action['user']) && is_numeric($this->action['user']) ) {
-					$sqlwhere .= " AND payto = {$this->action['user']}";
+				if ( $showid > 0 ) {
+					$list->addDivide('Your Reimbursment Items', 'b');
+					$sqlwhere .= " AND payto = {$showid}";
+				} else {
+					$list->addDivide('Pending Reimbursment Items', 'b');
+					$sqlwhere .= " AND gotrepay = 0";
 				}
 				break;
 			default:
-				$rhtml[] = "";
 				$sqlwhere = "";
 				break;
 			}
 	
+		if ( $this->user->can('editbudget') ) {
+			$list->setFormat("<h3><a title='Edit Item' href='/budget/edit/id:%d/'>%s</a></h3>"
+				."<p><strong>Vendor:</strong> %s"
+				."<br /><strong>Other Info:</strong> %s</p>"
+				."<span class='ui-li-count'>$%s</span>");
+		} else {
+			$list->setFormat("<h3><a data-bid='%d' href='#'>%s</a></h3>"
+				."<p><strong>Vendor:</strong> %s"
+				."<br /><strong>Other Info:</strong> %s</p>"
+				."<span class='ui-li-count'>$%s</span>");
+		}
+		if ( $this->user->can('editbudget') ) { $list->addAction('bdel'); }
+		
 		$show_res = mysql_query($show_sql, $db); echo mysql_num_rows($show_res);
 		while ( $row = mysql_fetch_array($show_res) ) {
-			$html = array();
-			$html[] = "<h3>{$row['showname']}</h3>";
-			
-			$html[] = "<ul class=\"datalist\"><li><strong>Company</strong>: {$row['company']}</li>";
-			$html[] = "<li><strong>Venue</strong>: {$row['venue']}</li>";
-			$html[] = "<li><strong>Dates</strong>: {$row['dates']}</li>";
-			if ( isset($this->action['user']) && is_numeric($this->action['user']) ) {
-				$html[] = "<li><strong>Owed to</strong>: " . $this->user->get_name($this->action['user']) . "</li>";
-			}
-			$html[] = "</ul>";
-			
 			$sql_exp = "SELECT * FROM {$MYSQL_PREFIX}budget WHERE showid = {$row['showid']}{$sqlwhere} ORDER BY category ASC, date ASC, vendor ASC";
-			$res_exp= mysql_query($sql_exp, $db); $intr = 0; $tot = 0; $tottax = 0; $emptyshow = 0;
-			if ( mysql_num_rows($res_exp) < 1 && $type <> "show" ) { $emptyshow = 1; }
-			if ( $type == "show" ) {
-				$html[] = "<h4>Materials Expenses</h4>";
-				$SITE_SCRIPT[] = "$(function() { $('.bud-email').click( function() {";
-				$SITE_SCRIPT[] = "  $('#popper').html(\"Please wait...\"); $('#popperdiv').show('blind');";
-				$SITE_SCRIPT[] = "	$.getJSON(\"{$TDTRAC_SITE}budget/email/json:1/id:{$showid}\", function(data) {";
-				$SITE_SCRIPT[] = "		if ( data.success === true ) { ";
-				$SITE_SCRIPT[] = "			$('#popper').html(\"Budget For {$row['showname']} :: Sent\");";
-				$SITE_SCRIPT[] = "		} else { $('#popper').html(\"E-Mail Send :: Failed\"); }";
-				$SITE_SCRIPT[] = "		$('#popperdiv').show('blind');";			
-				$SITE_SCRIPT[] = "	}); return false;";
-				$SITE_SCRIPT[] = "});});";
-				$html[] = "<span class=\"upright\">[<a class=\"bud-email\" href=\"#\">E-Mail to Self</a>]</span>";
-			}
-			$tabl = new tdtable("budget", 'datatable', true, "");
-			$tabl->addHeader(array('Date', 'Vendor', 'Category', 'Description', 'Price', 'Tax'));
-			$tabl->addSubtotal('Category');
-			$tabl->addCurrency('Price');
-			$tabl->addCurrency('Tax');
-			$tabl->addAction(array('bpend','breim','rview'));
-			if ( $this->user->can('editbudget') ) { $tabl->addAction(array('bedit', 'bdel')); }
-			while ( $exp = mysql_fetch_array($res_exp) ) {
-				$tabl->addRow(array($exp['date'], $exp['vendor'], $exp['category'], $exp['dscr'], $exp['price'], $exp['tax']), $exp);
-			}
-			if ( ! $emptyshow ) { $rhtml = array_merge($rhtml, $html, $tabl->output(false)); }
-			mysql_free_result($res_exp);
+			$res_exp= mysql_query($sql_exp, $db); 
 			
-			if ( $type == "show" ) {
-				$html = array();
-				$html[] = "<br /><br /><h4>Payroll Expenses</h4>";
+			$lastcat = ''; $subtot = 0; $total = 0;
+			if ( mysql_num_rows($res_exp) < 1 ) {
+				if ( $type == 'show' ) { $list->addDivide('No Budget Items Found', 'a'); }
+			} else {
+				$list->addRaw("<li data-theme='f'><h3>{$row['showname']}</h3></li>");
 				
-				$tabl = new tdtable("hours", "datatable", False);
-				$tabl->addHeader(array('Employee',(($TDTRAC_DAYRATE)?"Days":"Hours")." Worked",'Price'));
-				$tabl->addNumber((($TDTRAC_DAYRATE)?"Days":"Hours")." Worked");
-				$tabl->addCurrency('Price');
-				
-				$sql_pay = "SELECT SUM(worked) as days, payrate, CONCAT(first, ' ', last) as name FROM {$MYSQL_PREFIX}users u, {$MYSQL_PREFIX}hours h WHERE u.userid = h.userid AND h.showid = '".intval($showid)."' GROUP BY h.userid ORDER BY last ASC";
-				$res_pay = mysql_query($sql_pay, $db);
-				
-				while ( $pay = mysql_fetch_array($res_pay) ) {
-					$tabl->addRow(array($pay['name'], $pay['days'], $pay['days'] * $pay['payrate']), $pay);
+				while ( $item = mysql_fetch_array($res_exp) ) {
+					if ( $lastcat == '' ) { $lastcat = $item['category']; }
+					if ( $lastcat <> $item['category'] ) {
+						$list->addRaw("<li data-theme='g'><h3>{$lastcat}</h3><span class='ui-li-count'>$".number_format($subtot, 2)."</span></li>");
+						$subtot = 0;
+						$lastcat = $item['category'];
+					}
+					
+					$subtot = $subtot + $item['tax'] + $item['price'];
+					$total = $total + $item['tax'] + $item['price'];
+					
+					$extra = array();
+					if ( $item['tax'] > 0 ) { $extra[] = "Taxed ($".number_format($item['tax'],2).")"; }
+					if ( $item['pending'] ) { $extra[] = "<span style='color: red'>Pending Payment</span>"; }
+					if ( $item['needrepay'] ) {
+						if ( $item['gotrepay'] ) { 
+							$extra[] = "Reimbursed"; 
+						} else { 
+							if ( $item['payto'] > 0 ) { 
+								$extra[] = "<strong>" . $this->user->get_name($item['payto']) . " Needs Reimbursment</strong>";
+							} else {
+								$extra[] = "<strong>Needs Reimbursed</strong>";
+							}
+						}
+					}
+					if ( $item['imgid'] > 0 ) { $extra[] = "<a href='/rcpt.php?imgid={$item['imgid']}&amp;hires' target='_blank' data-role='none'>Has Receipt</a>"; }
+						
+					$list->addRow(array(
+							$item['id'],
+							$item['dscr'],
+							$item['vendor'],
+							join(', ', $extra),
+							number_format($item['tax'] + $item['price'], 2)
+						), $item);
 				}
-				$rhtml = array_merge($rhtml, $html, $tabl->output(false));
-				mysql_free_result($res_pay);
+				$list->addRaw("<li data-theme='g'><h3>{$lastcat}</h3><span class='ui-li-count'>$".number_format($subtot, 2)."</span></li>");
+				$list->addRaw("<li data-theme='a'><h3>Materials Total</h3><span class='ui-li-count'>$".number_format($total, 2)."</span></li>");
 			}
 		}
-		return $rhtml;
+						
+		
+		if ( $type == "show" ) {
+			$subtot = 0;
+			
+			$sql_pay = "SELECT SUM(worked * payrate) as price, CONCAT(first, ' ', last) as name FROM {$MYSQL_PREFIX}users u, {$MYSQL_PREFIX}hours h WHERE u.userid = h.userid AND h.showid = '".intval($showid)."' GROUP BY h.userid ORDER BY last ASC";
+			$res_pay = mysql_query($sql_pay, $db);
+			
+			while ( $pay = mysql_fetch_array($res_pay) ) {
+				$list->addRaw("<li data-theme='c'><h3>{$pay['name']}</h3><span class='ui-li-count'>$".number_format($pay['price'], 2)."</span></li>");
+				$total += $pay['price'];
+				$subtot += $pay['price'];
+			}
+			$list->addRaw("<li data-theme='g'><h3>Labor Expense</h3><span class='ui-li-count'>$".number_format($subtot, 2)."</span></li>");
+			$list->addRaw("<li data-theme='a'><h3>Total with Labor</h3><span class='ui-li-count'>$".number_format($total, 2)."</span></li>");
+		}
+		
+		if ( $type == "show" ) {
+			return array_merge($list->output(), array("<br /><br /><a class=\"ajax-email\" data-email='{\"action\": \"budget\", \"id\": \"{$showid}\"}' data-role=\"button\" data-theme=\"e\" href=\"#\">E-Mail this Report to Yourself</a>"));
+		} else {
+			return $list->output();
+		}
 	}
 
 	/**
