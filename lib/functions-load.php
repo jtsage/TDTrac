@@ -50,6 +50,15 @@ function merge_defaults($orig, $override) {
 	return $orig;
 }
 
+function error_page($text, $extra = '') {
+	$html[] = "<div data-role='collapsible' data-theme='a' class='ui-body ui-body-a'>";
+	$html[] = "<h3>{$text}</h3>";
+	if ( !empty($extra) ) {
+		$html[] = "<p>{$extra}</p>";
+	} $html[] = "</div>";
+	return $html;
+}
+
 /**
  * Throw a message to the user
  * 
