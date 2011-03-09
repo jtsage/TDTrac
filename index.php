@@ -134,22 +134,22 @@ if ( !$user->loggedin ) {
 				number_format(get_single("SELECT SUM(worked*payrate) AS num FROM {$MYSQL_PREFIX}hours h, {$MYSQL_PREFIX}users u WHERE h.userid = u.userid AND submitted = 0{$extrasql}"),2) :
 				number_format(get_single("SELECT SUM(worked*payrate) AS num FROM {$MYSQL_PREFIX}hours h, {$MYSQL_PREFIX}users u WHERE h.userid = u.userid AND submitted = 0 AND h.userid = {$user->id}"),2);
 			
-			$html[] = "	<li><a href=\"/mail/inbox/\">Message Inbox</a> <span class=\"ui-li-count\">{$mail_num}</span></li>";
-			$html[] = "	<li><a href=\"/todo/\">Todo Lists</a> <span class=\"ui-li-count\">{$todo_num}</span></li>";
-			$html[] = "	<li><a href=\"/hours/\">".(($user->isemp)?"Your ":"")."Payroll</a> <span class=\"ui-li-count\">\${$payr_num}</span></li>";
+			$html[] = "	<li><img src='/images/main-msg.png' /><a href=\"/mail/inbox/\">Message Inbox</a> <span class=\"ui-li-count\">{$mail_num}</span></li>";
+			$html[] = "	<li><img src='/images/main-todo.png' /><a href=\"/todo/\">Todo Lists</a> <span class=\"ui-li-count\">{$todo_num}</span></li>";
+			$html[] = "	<li><img src='/images/main-hours.png' /><a href=\"/hours/\">".(($user->isemp)?"Your ":"")."Payroll</a> <span class=\"ui-li-count\">\${$payr_num}</span></li>";
 			
 			if ( $user->can('viewbudget') ) {
 				$budg_num = number_format(get_single("SELECT SUM(price+tax) AS num FROM {$MYSQL_PREFIX}budget"),2);
-				$html[] = "	<li><a href=\"/budget/\">Budgets</a> <span class=\"ui-li-count\">\${$budg_num}</span></li>";
+				$html[] = "	<li><img src='/images/main-budget.png' /><a href=\"/budget/\">Budgets</a> <span class=\"ui-li-count\">\${$budg_num}</span></li>";
 			}
 			if ( $user->can('editshow') ) {
 				$show_num = get_single("SELECT COUNT(*) AS num FROM {$MYSQL_PREFIX}shows WHERE closed = 0");
-				$html[] = "	<li><a href=\"/shows/\">Show Management</a> <span class=\"ui-li-count\">{$show_num}</span></li>";
+				$html[] = "	<li><img src='/images/main-shows.png' /><a href=\"/shows/\">Show Management</a> <span class=\"ui-li-count\">{$show_num}</span></li>";
 			}
 			if ( $user->admin ) {
-				$html[] = "	<li><a href=\"/admin/\">Administration</a></li>";
+				$html[] = "	<li><img src='/images/main-admin.png' /><a href=\"/admin/\">Administration</a></li>";
 			}
-			$html[] = "	<li><a href=\"/user/logout/\">Logout</a></li>";
+			$html[] = "	<li><img src='/images/main-logout.png' /><a href=\"/user/logout/\">Logout</a></li>";
 
 			$html[] = "</ul>";
 			makePage($html, 'TD Tracking Made Easy');
