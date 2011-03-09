@@ -113,13 +113,13 @@ class tdtrac_mail {
 			return $list->output();
 		}
 		
-		$list->setFormat("<a href=\"#\"></a><h3>%s</h3><p><strong>Sent By:</strong> %s</p><p class=\"ui-li-aside\"><strong>%s</strong></p>");
+		$list->setFormat("<a href='#'></a><h3>%s</h3><p><strong>Sent By:</strong> %s</p><span class='ui-li-count'><strong>%s</strong></span>");
 		$list->addAction("mdel");
 		
 		while ( $row = mysql_fetch_array($result) ) {
 			$list->addRow(array($row['body'], $this->user->get_name($row['fromid']), $row['wtime']), $row);
 		}
-		return array_merge($list->output(), array("<br /><br /><a href=\"{$TDTRAC_SITE}mail/clear/\" data-role=\"button\" data-theme=\"e\">Clear Inbox</a>"));
+		return array_merge($list->output(), array("<br /><br /><a href='{$TDTRAC_SITE}mail/clear/' data-role='button' data-theme='f'>Clear Inbox</a>"));
 	}
 
 	/** 

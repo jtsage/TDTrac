@@ -93,15 +93,23 @@
 	
 	$('.msg-delete').live('click', function (e) { // BEGIN: Delete Message
 		var linkie = this;
-		if ( ! $(this).data('done') && confirm('Delete Message #'+$(this).data('recid')+'?')) {
-			$.getJSON("/mail/delete/json:1/id:"+$(linkie).data('recid')+"/", function(data) {
-				if ( data.success === true ) {
-					$(linkie).parent().find('h3').html('--Removed--');
-					infobox("Message #"+$(linkie).data('recid')+" Deleted");
-				} else {
-					infobox("Message #"+$(linkie).data('recid')+" Delete Failed!");
+		if ( ! $(this).data('done') ) {
+			$(this).simpledialog({
+				'mode': 'bool',
+				'prompt': 'Delete Message #'+$(linkie).data('recid')+'?',
+				'buttons': {
+					'Yes, Delete' : function () {
+						$.getJSON("/mail/delete/json:1/id:"+$(linkie).data('recid')+"/", function(data) {
+							if ( data.success === true ) {
+								$(linkie).parent().find('h3').html('--Removed--');
+								infobox("Message #"+$(linkie).data('recid')+" Deleted");
+							} else {
+								infobox("Message #"+$(linkie).data('recid')+" Delete Failed!");
+							}
+							$(linkie).data('done', 1);
+						}); },
+					'Cancel' : function () { return true; }
 				}
-				$(linkie).data('done', 1);
 			});
 		}
 		e.preventDefault();
@@ -122,5 +130,21 @@
 		}
 		e.preventDefault();
 	}); // END: Delete Show
+	
+	$('.budget-delete').live('click', function (e) { // BEGIN: Delete Budget Item
+		var linkie = this;
+		if ( ! $(this).data('done') && confirm('Delete Item #'+$(this).data('recid')+'?')) {
+			$.getJSON("/budget/delete/json:1/id:"+$(linkie).data('recid')+"/", function(data) {
+				if ( data.success === true ) {
+					$(linkie).parent().find('h3').html('--Removed--');
+					infobox("Item #"+$(linkie).data('recid')+" Deleted");
+				} else {
+					infobox("Item #"+$(linkie).data('recid')+" Delete Failed!");
+				}
+				$(linkie).data('done', 1);
+			});
+		}
+		e.preventDefault();
+	}); // END: Delete Budget Item
 	
 }) ( jQuery );
