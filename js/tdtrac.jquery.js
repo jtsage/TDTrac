@@ -52,46 +52,64 @@
 	}); // END: E-Mail Function
 	
 	$('.todo-done').live( 'click', function(e) {  // BEGIN: Mark Todo Done
+		e.preventDefault();
 		var linkie = this;
-		if ( ! $(this).data('done') && confirm('Mark Todo Item #'+$(this).data('recid')+' Done?')) {
-			$.getJSON("/todo/mark/json:1/id:"+$(linkie).data('recid')+"/", function(data) {
-				if ( data.success === true ) {
-					$(linkie).parent().find('span.ui-li-count').html('done');
-					var count = $(linkie).parentsUntil('#list_todo_view').parent().find('[data-role="list-divider"]').find('.ui-li-count');
-					count.text(count.text()-1);
-					infobox("Todo Item #"+$(linkie).data('recid')+" Marked Done");
-				} else {
-					infobox("Todo Item #"+$(linkie).data('recid')+" Mark Failed!");
+		if ( ! $(this).data('done') ) {
+			$(this).simpledialog({
+				'mode' : 'bool', 
+				'prompt' : 'Mark Todo Item #'+$(this).data('recid')+' Done?',
+				'buttons' : {
+					'Yes, Mark Done' : function () {
+						$.getJSON("/todo/mark/json:1/id:"+$(linkie).data('recid')+"/", function(data) {
+							if ( data.success === true ) {
+								$(linkie).parent().parent().parent().insertAfter('#todo-list-done');
+								$(linkie).parent().find('span.ui-li-count').html('done');
+								var count = $('#todo-list-header').find('.ui-li-count');
+								count.text(count.text()-1);
+								infobox("Todo Item #"+$(linkie).data('recid')+" Marked Done");
+							} else {
+								infobox("Todo Item #"+$(linkie).data('recid')+" Mark Failed!");
+							}
+							$(linkie).data('done', 1);
+						}); },
+					'Cancel': function () { return true; }
 				}
-				$(linkie).data('done', 1);
 			});
 		}
-		e.preventDefault();
 	}); // END: Mark Todo Done
 	
 	$('.todo-delete').live( 'click', function(e) {  // BEGIN: Mark Todo Delete
-		var linkie = this;
-		if ( ! $(this).data('done') && confirm('Delete Todo Item #'+$(this).data('recid')+'?')) {
-			$.getJSON("/todo/delete/json:1/id:"+$(linkie).data('recid')+"/", function(data) {
-				if ( data.success === true ) {
-					$(linkie).parent().find('h3').html('--Removed--');
-					$(linkie).parent().find('span.ui-li-count').html('deleted');
-					if ( ! $(linkie).parent().find('.todo-done').data('done') ) {
-						var count = $(linkie).parentsUntil('#list_todo_view').parent().find('[data-role="list-divider"]').find('.ui-li-count');
-						count.text(count.text()-1);
-					}
-					$(linkie).parent().find('.todo-done').data('done', 1);
-					infobox("Todo Item #"+$(linkie).data('recid')+" Deleted");
-				} else {
-					infobox("Todo Item #"+$(linkie).data('recid')+" Delete Failed!");
-				}
-				$(linkie).data('done', 1);
-			});
-		}
 		e.preventDefault();
+		var linkie = this;
+		if ( ! $(this).data('done') ) {
+			$(this).simpledialog({
+				'mode' : 'bool',
+				'prompt' : 'Delete Todo Item #'+$(this).data('recid')+'?',
+				'buttons' : {
+					'Yes, Delete' : function() {
+						$.getJSON("/todo/delete/json:1/id:"+$(linkie).data('recid')+"/", function(data) {
+							if ( data.success === true ) {
+								$(linkie).parent().find('h3').html('--Removed--');
+								$(linkie).parent().find('span.ui-li-count').html('deleted');
+								if ( ! $(linkie).parent().find('.todo-done').data('done') ) {
+									var count = $('#todo-list-header').find('.ui-li-count');
+									count.text(count.text()-1);
+								}
+								$(linkie).parent().find('.todo-done').data('done', 1);
+								infobox("Todo Item #"+$(linkie).data('recid')+" Deleted");
+							} else {
+								infobox("Todo Item #"+$(linkie).data('recid')+" Delete Failed!");
+							}
+							$(linkie).data('done', 1);
+						}); },
+					'Cancel' : function () { return true; }
+				}
+			}); 
+		}
 	}); // END: Mark Todo Delete
 	
 	$('.msg-delete').live('click', function (e) { // BEGIN: Delete Message
+		e.preventDefault();
 		var linkie = this;
 		if ( ! $(this).data('done') ) {
 			$(this).simpledialog({
@@ -112,23 +130,30 @@
 				}
 			});
 		}
-		e.preventDefault();
 	}); // END: Delete Message
 	
 	$('.show-delete').live('click', function (e) { // BEGIN: Delete Show
+		e.preventDefault();
 		var linkie = this;
-		if ( ! $(this).data('done') && confirm('Delete Show #'+$(this).data('recid')+'?')) {
-			$.getJSON("/shows/delete/json:1/id:"+$(linkie).data('recid')+"/", function(data) {
-				if ( data.success === true ) {
-					$(linkie).parent().find('h3').html('--Deleted--');
-					infobox("Show #"+$(linkie).data('recid')+" Deleted");
-				} else {
-					infobox("Show #"+$(linkie).data('recid')+" Delete Failed!");
+		if ( ! $(this).data('done') ) {
+			$(this).simpledialog( {
+				'mode' : 'bool',
+				'prompt' : 'Delete Show #'+$(this).data('recid')+'?',
+				'buttons' : {
+					'Yes, Delete' : function () {
+						$.getJSON("/shows/delete/json:1/id:"+$(linkie).data('recid')+"/", function(data) {
+							if ( data.success === true ) {
+								$(linkie).parent().find('h3').html('--Deleted--');
+								infobox("Show #"+$(linkie).data('recid')+" Deleted");
+							} else {
+								infobox("Show #"+$(linkie).data('recid')+" Delete Failed!");
+							}
+							$(linkie).data('done', 1);
+						}); },
+					'Cancel' : function () { return true; }
 				}
-				$(linkie).data('done', 1);
 			});
 		}
-		e.preventDefault();
 	}); // END: Delete Show
 	
 	$('.budget-delete').live('click', function (e) { // BEGIN: Delete Budget Item

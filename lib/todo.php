@@ -71,7 +71,7 @@ class tdtrac_todo {
 					if ( $this->user->can("addtodo") ) {
 						$this->html = $this->add_form();
 					} else {
-						thrower('Access Denied :: You cannot add new todo items', 'todo/');
+						$this->html = error_page('Access Denied :: You cannot add new todo items');
 					} break;
 				case "edit":
 					$this->title .= "::Edit";
@@ -79,10 +79,10 @@ class tdtrac_todo {
 						if ( isset($this->action['id']) && is_numeric($this->action['id']) ) {
 							$this->html = $this->edit_form(intval($this->action['id']));
 						} else {
-							thrower("Error :: Data Mismatch Detected", 'todo/');
+							$this->html = error_page("Error :: Data Mismatch Detected");
 						}
 					} else {
-						thrower('Access Denied :: You Cannot Edit Todo Items', 'todo/');
+						$this->html = error_page('Access Denied :: You Cannot Edit Todo Items');
 					} break;
 				default:
 					$this->title .= "::View";
@@ -207,23 +207,6 @@ class tdtrac_todo {
 		}
 	}
 	
-	/** 
-	 * Show available ToDo Functions
-	 * 
-	 * @global string TDTrac Root Link HREF
-	 * @return array Formatted HTML
-	 */
-	public function index() {
-		global $TDTRAC_SITE;
-		$html[] = "<div class=\"tasks\"><ul class=\"linklist\"><li><h3>ToDo Lists</h3><ul class=\"linklist\">";
-		$html[] = "  <li>Manage per-user and per-show task lists.</li>";
-		$html[] = ( $this->user->can('addtodo') ) ? "  <li><a href=\"{$TDTRAC_SITE}todo/add/\">Add ToDo Item</a></li>" : "";
-		$html[] = ( $this->user->can('viewtodo') ) ? "  <li><a href=\"{$TDTRAC_SITE}todo/view/\">View ToDo Items</a></li>" : "";
-		$html[] = "  <li><a href=\"{$TDTRAC_SITE}todo/view/id:{$this->user->id}/type:user/\">View Personal ToDo Items</a></li>";
-		$html[] = "</ul></li></ul></div>";
-		return $html;
-	}
-	
 	/**
 	 * Show Todo Add Form
 	 * 
@@ -244,7 +227,7 @@ class tdtrac_todo {
 			'options' => $this->priorities,
 			'selected' => 1
 		));
-		$result = $form->addDate(array('name' => 'date', 'label' => 'Due Date'));
+		$result = $form->addDate(array('name' => 'date', 'label' => 'Due Date', 'options' => '{"mode":"calbox", "useModal": true}'));
 		$result = $form->addDrop(array(
 			'name' => 'assign',
 			'label' => 'Assigned To',
@@ -282,7 +265,7 @@ class tdtrac_todo {
 			'selected' => $row['priority'],
 			'options' => $this->priorities
 		));
-		$result = $form->addDate(array('name' => 'date', 'label' => 'Due Date', 'preset' => $row['duedate']));
+		$result = $form->addDate(array('name' => 'date', 'label' => 'Due Date', 'preset' => $row['duedate'], 'options' => '{"mode":"calbox", "useModal": true}'));
 		$result = $form->addDrop(array(
 			'name' => 'assign',
 			'label' => 'Assigned To',
@@ -361,12 +344,12 @@ class tdtrac_todo {
 		if ( is_null($condition) ) {
 		
 			$list = new tdlist('todo_view_pick', false);
-			$list->setFormat("<h3><a href=\"%s\">%s</a></h3><span class=\"ui-li-count\">%d</span>");
+			$list->setFormat("<h3><a href='%s'>%s</a></h3><span class='ui-li-count'>%d</span>");
 			
 			$sql = "SELECT u.userid, CONCAT(first, ' ', last) as name, count(t.id) as num FROM {$MYSQL_PREFIX}users u LEFT JOIN {$MYSQL_PREFIX}todo t ON t.complete = 0 AND u.userid = t.assigned WHERE active = 1 ORDER BY last ASC";
 			$result = mysql_query($sql, $db);
 			
-			$list->addRaw("<li data-role=\"list-divider\">List By User<span class=\"ui-li-count\">".mysql_num_rows($result)."</span></li>");
+			$list->addRaw("<li data-role='list-divider'>List By User<span class='ui-li-count'>".mysql_num_rows($result)."</span></li>");
 			if ( mysql_num_rows($result) > 0 ) {
 				while ( $row = mysql_fetch_array($result) ) {
 					$list->addRow(array("/todo/view/type:user/id:{$row['userid']}/", $row['name'], $row['num']));
@@ -376,7 +359,7 @@ class tdtrac_todo {
 			$sql = "SELECT showname, s.showid, count(t.id) as num FROM {$MYSQL_PREFIX}shows s LEFT JOIN {$MYSQL_PREFIX}todo t ON t.complete = 0 AND s.showid = t.showid WHERE closed = 0 ORDER BY created DESC;";
 			$result = mysql_query($sql, $db);
 			
-			$list->addRaw("<li data-role=\"list-divider\">List By Show<span class=\"ui-li-count\">".mysql_num_rows($result)."</span></li>");
+			$list->addRaw("<li data-role='list-divider'>List By Show<span class='ui-li-count'>".mysql_num_rows($result)."</span></li>");
 			if ( mysql_num_rows($result) > 0 ) {
 				while ( $row = mysql_fetch_array($result) ) {
 					$list->addRow(array("/todo/view/type:show/id:{$row['showid']}/", $row['showname'], $row['num']));
@@ -386,8 +369,8 @@ class tdtrac_todo {
 			$odue_num = get_single("SELECT COUNT(*) as num FROM {$MYSQL_PREFIX}todo WHERE complete = 0 AND due < NOW()");
 			
 			$list->addDivide("Other Options", 'b');
-			$list->addRaw("<li><h3><a href=\"/todo/view/id:1/type:overdue/\">Overdue Items</a></h3><span class=\"ui-li-count\">{$odue_num}</span></li>");
-			$list->addRaw("<li><h3><a href=\"/todo/view/id:{$this->user->id}/type:user/\">Your Personal List</a></h3><span class=\"ui-li-count\">{$todo_num}</span></li>");
+			$list->addRaw("<li><h3><a href='/todo/view/id:1/type:overdue/'>Overdue Items</a></h3><span class='ui-li-count'>{$odue_num}</span></li>");
+			$list->addRaw("<li><h3><a href='/todo/view/id:{$this->user->id}/type:user/'>Your Personal List</a></h3><span class='ui-li-count'>{$todo_num}</span></li>");
 			
 			return $list->output();
 		}
@@ -405,26 +388,30 @@ class tdtrac_todo {
 			if ( $type == 'user' ) {
 				$sql = "SELECT todo.*, showname, DATE_FORMAT(`due`, '%Y-%m-%d') as duedate, TIME_TO_SEC( TIMEDIFF(`due` , NOW())) AS remain FROM {$MYSQL_PREFIX}todo as todo, {$MYSQL_PREFIX}shows as shows WHERE shows.showid = todo.showid AND todo.assigned = '{$thiscond}' ORDER BY complete ASC, due DESC, added DESC";
 				$num = get_single("SELECT COUNT(*) as num FROM {$MYSQL_PREFIX}todo WHERE complete = 0 AND assigned = {$thiscond}");
-				$list->addRow("<li data-role=\"list-divider\">".$this->user->get_name($thiscond)."'s Todo List <span class=\"ui-li-count\">{$num}</span></li>", null, null, true);
+				$list->addRow("<li data-theme='f' id='todo-list-header'><h3>".$this->user->get_name($thiscond)."'s Todo List</h3> <span class='ui-li-count'>{$num}</span></li>", null, null, true);
 			} elseif ( $type =='show' ) {
 				$showname = db_list("SELECT showname FROM {$MYSQL_PREFIX}shows WHERE showid = {$thiscond}", 'showname');
 				$sql = "SELECT todo.*, showname, DATE_FORMAT(`due`, '%Y-%m-%d') as duedate, TIME_TO_SEC( TIMEDIFF(`due` , NOW())) AS remain FROM {$MYSQL_PREFIX}todo as todo, {$MYSQL_PREFIX}shows as shows WHERE shows.showid = todo.showid AND todo.showid = '{$thiscond}' ORDER BY complete ASC, due DESC, added DESC";
 				$num = get_single("SELECT COUNT(*) as num FROM {$MYSQL_PREFIX}todo WHERE complete = 0 AND showid = {$thiscond}");
-				$list->addRow("<li data-role=\"list-divider\">{$showname[0]}'s Todo List <span class=\"ui-li-count\">{$num}</span></li>", null, null, true);
+				$list->addRow("<li data-theme='f' id='todo-list-header'><h3>{$showname[0]}'s Todo List</h3> <span class='ui-li-count'>{$num}</span></li>", null, null, true);
 			} elseif ( $type == 'overdue' ) {
 				$sql = "SELECT todo.*, showname, DATE_FORMAT(`due`, '%Y-%m-%d') as duedate, TIME_TO_SEC( TIMEDIFF(`due` , NOW())) AS remain FROM {$MYSQL_PREFIX}todo as todo, {$MYSQL_PREFIX}shows as shows WHERE shows.showid = todo.showid AND todo.due < CURRENT_TIMESTAMP AND todo.complete = 0 ORDER BY due DESC, added DESC";
 				$num = get_single("SELECT COUNT(*) as num FROM {$MYSQL_PREFIX}todo WHERE complete = 0 AND due < NOW()");
-				$list->addRow("<li data-role=\"list-divider\">Overdue Items Todo List <span class=\"ui-li-count\">{$num}</span></li>", null, null, true);
+				$list->addRow("<li data-theme='f' id='todo-list-header'><h3>Overdue Items Todo List</h3> <span class='ui-li-count'>{$num}</span></li>", null, null, true);
 			}
 			$result = mysql_query($sql, $db);
 			$priorities = $this->priorities;
 			
 			$list->addAction("tdel");
-			
+			$laststatus = -1;
 			if ( mysql_num_rows($result) < 1 ) {
 				$list->addRaw("<li><h3>No Todo Items Found</h3></li>");
 			} else {
 				while ( $row = mysql_fetch_array($result) ) {
+					if ( $laststatus < $row['complete'] ) {
+						$laststatus = $row['complete'];
+						$list->addRaw("<li data-theme='g'".(($laststatus == 1)?" id='todo-list-done'":"")."><h3>".(($laststatus == 0)?"Incomplete Items":"Completed Items")."</h3></li>");
+					}
 					$theme = (($row['remain'] < 0 && $row['complete'] == 0) ? 'e': 'c');
 					$assig = ( $type == 'user' ) ? $row['showname'] : (($row['assigned'] > 0) ? $this->user->get_name($row['assigned']) : "-unassigned-");
 					$statu = (($row['complete'] == 1 ) ? 'done' : "Due: {$row['duedate']}");
@@ -436,7 +423,7 @@ class tdtrac_todo {
 				}
 			}
 			
-			return array_merge($list->output(), array("<br /><br /><a class=\"ajax-email\" data-email='{\"action\": \"todo\", \"id\": \"{$thiscond}\", \"type\": \"{$type}\"}' data-role=\"button\" data-theme=\"e\" href=\"#\">E-Mail this Report to Yourself</a>"));
+			return array_merge($list->output(), array("<br /><br /><a class=\"ajax-email\" data-email='{\"action\": \"todo\", \"id\": \"{$thiscond}\", \"type\": \"{$type}\"}' data-role=\"button\" data-theme=\"f\" href=\"#\">E-Mail this Report to Yourself</a>"));
 		}
 	}
 

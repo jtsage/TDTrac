@@ -10,7 +10,7 @@
 ob_start(); session_start(); 
 
 ## PROGRAM DETAILS. DO NOT EDIT UNLESS YOU KNOW WHAT YOU ARE DOING
-$TDTRAC_VERSION = "2.0.1";
+$TDTRAC_VERSION = "3.0-alpha1";
 $TDTRAC_DBVER = "2.0.1";
 $TEST_MODE = false;
 $SITE_SCRIPT = array('');

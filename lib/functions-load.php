@@ -50,6 +50,13 @@ function merge_defaults($orig, $override) {
 	return $orig;
 }
 
+/**
+ * Generate an error page
+ * 
+ * @param string Error Message
+ * @param string Explanation, if any
+ * @return array Formatted HTML
+ */
 function error_page($text, $extra = '') {
 	$html[] = "<div data-role='collapsible' data-theme='a' class='ui-body ui-body-a'>";
 	$html[] = "<h3>{$text}</h3>";
@@ -117,14 +124,16 @@ function db_list($sql, $columns) {
 	 return $row[$col];
 }
 
+/**
+ * Generate a JSON error
+ * 
+ * @param string Error message
+ * @return array JSON entries
+ */
 function json_error($text) {
 	return array('success' => false, 'msg' => $text);
 }
 
-function tdebug($text) {
-	GLOBAL $SITE_SCRIPT;
-	$SITE_SCRIPT[] = "// ".$text;
-}
 /**
  * Return a SQL Query constant by name
  * 

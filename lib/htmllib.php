@@ -54,7 +54,7 @@ function makeHeader($title = '') {
 	$html[] = '<html lang="en">';
 	$html[] = '<head>';
 	$html[] = '	<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />';
-	$html[] = "	<title>TDTrac{$TDTRAC_CPNY}:v{$TDTRAC_VERSION} - {$title}</title>";
+	$html[] = "	<title>TDTrac{$TDTRAC_CPNY}:{$TDTRAC_VERSION} - {$title}</title>";
 	$html[] = '	<!--[if lt IE 9]>';
 	$html[] = '		<script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>';
 	$html[] = '	<![endif]-->';

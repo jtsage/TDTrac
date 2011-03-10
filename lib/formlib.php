@@ -109,7 +109,8 @@ class tdform {
 			'enabled'	=> True,
 			'id'		=> null,
 			'type'		=> 'date',
-			'role'		=> 'datebox'
+			'role'		=> 'datebox',
+			'options'	=> null
 			);
 		$options = merge_defaults($default, $passed);
 		return $this->addText($options);
@@ -171,7 +172,8 @@ class tdform {
 			'enabled'	=> True,
 			'id'		=> null,
 			'type'		=> 'text',
-			'role'		=> null
+			'role'		=> null,
+			'options'	=> null
 			);
 		$options = merge_defaults($default, $passed);
 
@@ -182,6 +184,7 @@ class tdform {
 		
 		$temp  = "  <div data-role='fieldcontain' title='{$options['title']}'><label for='{$options['id']}'>{$options['label']}</label><input ".(($options['role'] != null)?"data-role='{$options['role']}' ":"")."type='{$options['type']}' name='{$options['name']}' id='{$options['id']}' ";
 		if ( $options['preset'] != null )	{ $temp .= "value='{$options['preset']}' "; }
+		if ( $options['options'] != null ) 	{ $temp .= "data-options='{$options['options']}' "; }
 		if ( ! $options['enabled'] )		{ $temp .= "disabled='disabled' "; }
 		$temp .= "/></div>";
 		

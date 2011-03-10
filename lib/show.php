@@ -64,7 +64,7 @@ class tdtrac_shows {
 					if ( $this->user->can("addshow") ) {
 						$this->html = $this->add_form();
 					} else {
-						thrower('Access Denied :: You cannot add new shows', 'shows/');
+						$this->html = error_page('Access Denied :: You cannot add new shows');
 					} break;
 				case "edit":
 					$CANCEL = true;
@@ -73,10 +73,10 @@ class tdtrac_shows {
 						if ( isset($this->action['id']) && is_numeric($this->action['id']) ) {
 							$this->html = $this->edit_form(intval($this->action['id']));
 						} else {
-							thrower("Error :: Data Mismatch Detected", 'shows/');
+							$this->html = error_page("Error :: Data Mismatch Detected");
 						}
 					} else {
-						thrower('Access Denied :: You Cannot Edit Shows', 'shows/');
+						$this->html = error_page('Access Denied :: You Cannot Edit Shows');
 					} break;
 				default:
 					if ( $this->user->can('viewshow') ) {
@@ -84,7 +84,7 @@ class tdtrac_shows {
 						$this->title .= "::View";
 						$this->html = $this->view();
 					} else {
-						thrower("Access Denied :: You Cannot View Shows");
+						$this->html = error_page("Access Denied :: You Cannot View Shows");
 					} break;
 			}
 			makePage($this->html, $this->title);
@@ -145,7 +145,7 @@ class tdtrac_shows {
 		$result = $form->addText(array('name' => 'showname', 'label' => 'Show Name'));
 		$result = $form->addText(array('name' => 'company', 'label' => 'Show Company'));
 		$result = $form->addText(array('name' => 'venue', 'label' => 'Show Venue'));
-		$result = $form->addDate(array('name' => 'dates', 'label' => 'Show Opening'));
+		$result = $form->addDate(array('name' => 'dates', 'label' => 'Show Opening', 'options' => '{"mode":"calbox", "useModal": true}'));
 		
 		return $form->output('Add Show');
 	}
