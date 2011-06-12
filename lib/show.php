@@ -117,10 +117,16 @@ class tdtrac_shows {
 					if ( $TEST_MODE ) {
 						$this->json['success'] = true;
 					} else {
-						if ( isset($this->action['id']) && is_numeric($this->action['id']) && $this->user->admin ) {
-							$this->delete(intval($this->action['id']));
+						if ( $this->user->can("editshow") ) {
+							if ( isset($this->action['id']) && is_numeric($this->action['id']) && $this->user->admin ) {
+								$this->delete(intval($this->action['id']));
+							} else {
+								$this->json['success'] = false;
+								$this->json['msg'] = "Poorly formed request";
+							}
 						} else {
 							$this->json['success'] = false;
+							$this->json['msg'] = "Access Denied";
 						}
 					} break;
 				default:
@@ -268,18 +274,14 @@ class tdtrac_shows {
 		GLOBAL $db, $MYSQL_PREFIX, $TDTRAC_SITE, $SITE_SCRIPT;
 		$sql = "SELECT * FROM `{$MYSQL_PREFIX}shows` ORDER BY `closed` ASC, `created` DESC";
 		$result = mysql_query($sql, $db);
-		$list = new tdlist('show_view', true);
+		$list = new tdlist(array('id' => 'show_view', 'actions' => false));
 		$showsopen = true;
-		$list->setFormat("<h3><a data-showid='%d' href='#'>%s</a></h3><p><strong>Company:</strong> %s<br /><strong>Venue:</strong> %s<br /><strong>Dates:</strong> %s</p>");
 		
-		if ( $this->user->admin ) {
-			$list->setFormat("<h3><a href='/shows/edit/id:%d/'>%s</a></h3><p><strong>Company:</strong> %s<br /><strong>Venue:</strong> %s<br /><strong>Dates:</strong> %s</p>");
-			$list->addAction("sdel");
-		}
-		$list->addDivide('Open Shows','b');
+		$list->setFormat("<a data-recid='%d' data-admin='".(($this->user->admin)?1:0)."' class='show-menu' href='#'><h3>%s</h3><p><strong>Company:</strong> %s<br /><strong>Venue:</strong> %s<br /><strong>Dates:</strong> %s</p></a>");
+		$list->addDivide('Open Shows');
 		while ( $row = mysql_fetch_array($result) ) {
 			if ( $showsopen && $row['closed'] == 1 ) {
-				$list->addDivide('Closed Shows','b');
+				$list->addDivide('Closed Shows');
 				$showsopen = false;
 			}
 			$list->addRow(array($row['showid'], $row['showname'], $row['company'], $row['venue'], $row['dates']), $row);

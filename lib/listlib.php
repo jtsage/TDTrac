@@ -110,9 +110,6 @@ class tdlist {
 				case "badd":
 					$rethtml .= $this->act_badd($raw);
 					break;
-				case "sdel":
-					$rethtml .= $this->act_sdel($raw);
-					break;
 				case "mdel":
 					$rethtml .= $this->act_mdel($raw);
 					break;
@@ -142,16 +139,6 @@ class tdlist {
 	 */
 	private function act_bdel($raw) {
 		return "<a class=\"budg-delete\" data-done=\"0\" data-recid=\"{$raw['showid']}\" href=\"#\">Delete Item</a>";
-	}
-	
-	/**
-	 * Action: Show delete item button
-	 * 
-	 * @param array Raw SQL Array
-	 * @return string Formatted HTML
-	 */
-	private function act_sdel($raw) {
-		return "<a class=\"show-delete\" data-done=\"0\" data-recid=\"{$raw['showid']}\" href=\"#\">Delete Show</a>";
 	}
 	
 	/**

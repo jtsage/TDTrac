@@ -56,7 +56,6 @@
 	$('.todo-done').live( 'click', function(e) {  // BEGIN: Mark Todo Done
 		e.preventDefault();
 		var linkie = this;
-		var item = $(linkie).parent();
 		if ( ! $(this).data('done') ) {
 			$(this).simpledialog({
 				'mode' : 'bool', 
@@ -127,7 +126,7 @@
 			$(this).simpledialog({
 				'mode': 'bool',
 				'prompt': 'Delete Message #'+$(linkie).data('recid')+'?',
-				'buttons': {
+				'buttons': { 
 					'Yes, Delete' : function () {
 						$.getJSON("/mail/delete/json:1/id:"+$(linkie).data('recid')+"/", function(data) {
 							if ( data.success === true ) {
@@ -144,26 +143,34 @@
 		}
 	}); // END: Delete Message
 	
-	$('.show-delete').live('click', function (e) { // BEGIN: Delete Show
+	$('.show-menu').live('click', function (e) { // BEGIN: Delete Show
 		e.preventDefault();
 		var linkie = this;
 		if ( ! $(this).data('done') ) {
 			$(this).simpledialog( {
 				'mode' : 'bool',
-				'prompt' : 'Delete Show #'+$(this).data('recid')+'?',
-				'buttons' : {
-					'Yes, Delete' : function () {
-						$.getJSON("/shows/delete/json:1/id:"+$(linkie).data('recid')+"/", function(data) {
-							if ( data.success === true ) {
-								$(linkie).parent().find('h3').html('--Deleted--');
-								infobox("Show #"+$(linkie).data('recid')+" Deleted");
-							} else {
-								infobox("Show #"+$(linkie).data('recid')+" Delete Failed!");
-							}
-							$(linkie).data('done', 1);
-						}); },
+				'prompt' : 'Show #'+$(this).data('recid'),
+				'buttons' : (($(this).data('admin'))?{
+					'Edit' : {
+						'click' : function() { $.mobile.changePage('/shows/edit/id:'+$(linkie).data('recid')+'/'); },
+						'icon' : 'grid'
+					},
+					'Delete' : {
+						'click' :function () {
+							$.getJSON("/shows/delete/json:1/id:"+$(linkie).data('recid')+"/", function(data) {
+								if ( data.success === true ) {
+									$(linkie).find('h3').html('--Deleted--');
+									infobox("Show #"+$(linkie).data('recid')+" Deleted");
+								} else {
+									infobox("Show #"+$(linkie).data('recid')+" Delete Failed!");
+								}
+								$(linkie).data('done', 1);
+							});
+						},
+						'icon' : 'delete'
+					},
 					'Cancel' : function () { return true; }
-				}
+				}:{ 'Cancel' : function () { return true; } } )
 			});
 		}
 	}); // END: Delete Show
