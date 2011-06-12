@@ -156,7 +156,7 @@ if ( !$user->loggedin ) {
 			if ( $user->admin ) {
 				$html[] = "	<li><img src='/images/main-admin.png' /><a href=\"/admin/\">Administration</a></li>";
 			}
-			$html[] = "	<li><img src='/images/main-logout.png' /><a href=\"/user/logout/\">Logout</a></li>";
+			$html[] = "	<li data-icon='alert'><img src='/images/main-logout.png' /><a href=\"/user/logout/\">Logout</a></li>";
 
 			$html[] = "</ul>";
 			makePage($html, 'TD Tracking Made Easy');
