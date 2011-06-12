@@ -105,7 +105,7 @@ class tdtrac_mail {
 		$sql = "SELECT id, fromid, body, DATE_FORMAT(stamp, '%m-%d-%Y') as wtime FROM {$MYSQL_PREFIX}msg WHERE toid = {$this->user->id} ORDER BY stamp DESC";
 		$result = mysql_query($sql, $db);
 		
-		$list = new tdlist("mail", true, 'delete');
+		$list = new tdlist(array('id' => "mail", 'actions' => true, 'icon' => 'delete'));
 		
 		if ( mysql_num_rows($result) < 1) { 
 			$list->setFormat("<h3>%s</h3>");
