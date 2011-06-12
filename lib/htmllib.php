@@ -66,7 +66,7 @@ function makeHeader($title = '') {
 	$html[] = '	<script type="text/javascript">';
 	$html[] = "		$(document).bind('mobileinit', function(){ $.mobile.page.prototype.options.degradeInputs.date = 'text'; });";
 	$html[] = '	</script>';
-	$html[] = '	<script src="http://code.jquery.com/mobile/latest/jquery.mobile.min.js"></script>';
+	$html[] = '	<script src="http://code.jquery.com/mobile/latest/jquery.mobile.js"></script>';
 	$html[] = '	<script type="text/javascript" src="http://dev.jtsage.com/cdn/datebox/latest/jquery.mobile.datebox.min.js"></script>';
 	$html[] = '	<script type="text/javascript" src="http://dev.jtsage.com/cdn/simpledialog/latest/jquery.mobile.simpledialog.min.js"></script>';
 	$html[] = '	<script type="text/javascript" src="'.$TDTRAC_SITE.'js/tdtrac.jquery.js"></script>';

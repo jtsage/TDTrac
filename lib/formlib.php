@@ -110,7 +110,7 @@ class tdform {
 			'id'		=> null,
 			'type'		=> 'date',
 			'role'		=> 'datebox',
-			'options'	=> null
+			'options'	=> '{"pickPageButtonTheme":"c", "mode": "calbox", "useModal": true}'
 			);
 		$options = merge_defaults($default, $passed);
 		return $this->addText($options);
@@ -191,7 +191,53 @@ class tdform {
 		$this->html[] = $temp;
 		return true;
 	}
+	
+	/**
+	 * Add a TEXT input to the form
+	 * 
+	 * Options:
+	 * 	'id' => Label ID
+	 * 	'name' => Input Name
+	 * 	'label' => Label Text
+	 * 	'title' => Mouseover Text
+	 * 	'preset' => Preset Value
+	 * 	'enabled' => Field Enabled
+	 * 	'options' => Button Options, as an array
+	 * 
+	 * @param array Array of named options
+	 * @return bool True on success
+	 */
+	public function addHRadio($passed) {
+		$default = array(
+			'name' 		=> 'text',
+			'label'		=> 'Text Field',
+			'title'		=> null,
+			'preset'	=> null,
+			'enabled'	=> True,
+			'id'		=> null,
+			'options'	=> array(),
+			'hide'		=> False
+			);
+		$options = merge_defaults($default, $passed);
+		
+		if ( $options['id'] == null )		{ $options['id'] = $options['name']; }
+		if ( $options['title'] == null )	{ $options['title'] = $options['label']; }
+		
+		$this->members[] = array('radio', $options['name'], $options['label'], $options['title'], $options['options']);
 
+		$temp  = "<div data-role='fieldcontain'>";
+		$temp .= "<fieldset data-role='controlgroup' data-type='horizontal'>";
+		$temp .= "<legend>{$options['label']}</legend>"; 
+		$ident = "a";
+		foreach( $options['options'] as $option ) {
+			$temp .= "<input type='radio' name='{$options['name']}' id='{$options['name']}-{$ident}' value='{$option[0]}' ".(($options['preset'] == $option[0])?"checked='checked' ":"")."/>";
+			$temp .= "<label for='{$options['name']}-{$ident}'>{$option[1]}</label>";
+			$ident++;
+		}
+		$temp .= "</fieldset></div>";
+		$this->html[] = $temp;
+	}
+	
 	/**
 	 * Add a SELECT method to from
 	 * 
@@ -215,7 +261,7 @@ class tdform {
 			'title' => null,
 			'label' => 'Drop List',
 			'options' => null,
-			'selected' => False,
+			'selected' => 0,
 			'enabled' => True,
 			'allownew' => False,
 			'header' => True,
@@ -227,12 +273,12 @@ class tdform {
 		if ( $options['id'] == null )		{ $options['id'] = $options['name']; }
 		if ( $options['title'] == null ) { $options['title'] = $options['label']; }
 
-		$temp  = "  <div data-role='fieldcontain'><label for='{$options['id']}'>{$options['label']}</label><select name='{$options['name']}' id='{$options['id']}' ".(!$options['enabled'] ? " disabled='disabled'":"").">";
+		$temp  = "  <div data-role='fieldcontain'><label for='{$options['id']}'>{$options['label']}</label><select data-native-menu='false' name='{$options['name']}' id='{$options['id']}' ".(!$options['enabled'] ? " disabled='disabled'":"").">";
 		if ( $options['header'] ) {
 			$temp .= "<option data-placeholder='true'>Choose one...</option>";
 		}
 		if ( $options['add'] ) {
-			$temp .= "<option data-addoption='true' value='none'>Add New...</option>";
+			$temp .= "<option value='none' data-addoption='true'>Add New...</option>";
 		}
 		foreach ( $options['options'] as $option ) {
 			if ( is_array($option) ) {

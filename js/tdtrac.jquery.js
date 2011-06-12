@@ -90,7 +90,7 @@
 				'prompt' : 'Todo Item #'+$(this).data('recid'),
 				'buttons' : (($(this).data('edit'))?{
 					'Edit' : {
-						'click': function() { $.mobile.changePage("/todo/edit/id:"+$(linkie).data('recid')); },
+						'click': function() { $.mobile.changePage("/todo/edit/id:"+$(linkie).data('recid')+"/"); },
 						'icon': 'grid'
 					},
 					'Delete' : {
@@ -175,20 +175,49 @@
 		}
 	}); // END: Delete Show
 	
-	$('.budget-delete').live('click', function (e) { // BEGIN: Delete Budget Item
-		var linkie = this;
-		if ( ! $(this).data('done') && confirm('Delete Item #'+$(this).data('recid')+'?')) {
-			$.getJSON("/budget/delete/json:1/id:"+$(linkie).data('recid')+"/", function(data) {
-				if ( data.success === true ) {
-					$(linkie).parent().find('h3').html('--Removed--');
-					infobox("Item #"+$(linkie).data('recid')+" Deleted");
-				} else {
-					infobox("Item #"+$(linkie).data('recid')+" Delete Failed!");
-				}
-				$(linkie).data('done', 1);
-			});
-		}
+	$('.budg-menu').live('click', function (e) { // BEGIN: Delete Budget Item
 		e.preventDefault();
+		var linkie = this;
+		if ( ! $(this).data('done') ) {
+			$(this).simpledialog({
+				'mode' : 'bool',
+				'prompt' : 'Budget Item #'+$(this).data('recid'),
+				'buttons' : (($(this).data('edit'))?{
+					'View Detail' : {
+						'click': function() { $.mobile.changePage("/budget/item/id:"+$(linkie).data('recid')+"/"); },
+						'icon': 'grid'
+					},
+					'Edit' : {
+						'click': function() { $.mobile.changePage("/budget/edit/id:"+$(linkie).data('recid')+"/"); },
+						'icon': 'grid'
+					},
+					'Delete' : {
+						'click': function() {
+							$.getJSON("/budget/delete/json:1/id:"+$(linkie).data('recid')+"/", function(data) {
+								if ( data.success === true ) {
+									$(linkie).parent().find('h3').html('--Removed--');
+									$(linkie).parent().find('span.ui-li-count').html('deleted');
+									$(linkie).parent().find('.todo-done').data('done', 1);
+									infobox("Budget Item #"+$(linkie).data('recid')+" Deleted");
+								} else {
+									infobox("Budget Item #"+$(linkie).data('recid')+" Delete Failed!");
+								}
+								$(linkie).data('done', 1);
+							});
+						},
+						'icon': 'delete'
+					},
+					'Cancel' : function () { return true; }
+					
+				}:{
+					'View' : {
+						'click': function() { $.mobile.changePage("/budget/view/id:"+$(linkie).data('recid')+"/"); },
+						'icon': 'grid'
+					},
+					'Cancel' : function () { return true; }
+				})
+			}); 
+		}
 	}); // END: Delete Budget Item
 	
 	$('select').live('change', function(e) { // BEGIN : Add Dropdown Option
@@ -212,5 +241,15 @@
 			}
 		});
 	}); // END : Add Dropdown Option
+	
+	$('input[name=repay]').live('change', function(e) { // BEGIN : Change Repay
+		var self = this;
+		
+		if ( $(this).val() !== 'no' ) {
+			$('select[name=payto]').parent().parent().fadeIn();
+		} else {
+			$('select[name=payto]').parent().parent().fadeOut();
+		}
+	});
 	
 }) ( jQuery );

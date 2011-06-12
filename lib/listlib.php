@@ -51,6 +51,7 @@ class tdlist {
 	public function __construct($passed) {
 		$default = array( 'id' => 'td_list', 'actions' => false, 'icon' => 'delete', 'inset' => false );
 		$this->options = merge_defaults($default, $passed);
+		$this->options['id'] = preg_replace('/ /', '', $this->options['id']);
 	}
 	
 	/**
@@ -95,7 +96,7 @@ class tdlist {
 	
 	public function output() {
 		return array_merge(
-			array("<ul id='list_{$this->listname}' data-inset='{$this->options['inset']}' ".($this->options['actions']?"data-split-icon='{$this->options['icon']}' data-split-theme='d'":"")." data-role='listview'>"),
+			array("<ul id='list_{$this->options['id']}' ".($this->options['inset']?'data-inset="true" ':'').($this->options['actions']?"data-split-icon='{$this->options['icon']}' data-split-theme='d'":"")." data-role='listview'>"),
 			$this->items,
 			array("</ul>"));
 	}
