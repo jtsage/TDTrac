@@ -24,15 +24,11 @@ class tdlist {
 	/**
 	 * @var string Name of Form
 	 */
-	private $listname = "";
+	private $options = array();
 	/**
 	 * @var integer Current row index
 	 */
 	public $currentrow = 0;
-	/**
-	 * @var bool Use actions
-	 */
-	private $actions = true;
 	/**
 	 * @var integer Subtotal on this table element
 	 */
@@ -45,23 +41,16 @@ class tdlist {
 	 * @var string Where we come from, for message redirect
 	 */
 	private $formatsting = false;
-	/**
-	 * @var string Icon for single action
-	 */
-	private $iconname = 'gear';
 	
 	/**
 	 * Create a new table
 	 * 
-	 * @param string ID of the table
-	 * @param string Class type for the table
-	 * @param bool Use action type items
+	 * @param array Passed variables - id, actions, icon, inset
 	 * @return object
 	 */
-	public function __construct($id = 'td_list', $actions = true, $icon = 'delete') {
-		$this->listname = $id;
-		$this->actions = $actions;
-		$this->iconname = $icon;
+	public function __construct($passed) {
+		$default = array( 'id' => 'td_list', 'actions' => false, 'icon' => 'delete', 'inset' => false );
+		$this->options = merge_defaults($default, $passed);
 	}
 	
 	/**
@@ -84,26 +73,29 @@ class tdlist {
 		$this->formatstring = $format;
 	}
 	
-	public function addRow($row, $raw = false, $numbers = false, $noformat = false, $style = 'c') {
-		if ( $noformat ) {
-			$this->items[] = "\t".$row;
+	public function addRow($text, $raw=null, $passed=null) {
+		$default = array('numbers' => false, 'noformat' => false, 'theme' => 'c');
+		$argus = merge_defaults($default, $passed);
+		
+		if ( $argus['noformat'] ) {
+			$this->items[] = "\t".$text;
 		} else {
-			$this->items[] = "\t<li data-theme=\"{$style}\">" . vsprintf($this->formatstring, $row) . (($this->actions)?$this->do_actions($raw):"") ."</li>";
+			$this->items[] = "\t<li data-theme=\"{$argus['theme']}\">" . vsprintf($this->formatstring, $text) . (($this->options['actions'])?$this->do_actions($raw):"") ."</li>";
 		}
 		$this->currentrow++;
 	}
 	
-	public function addDivide($text, $theme='c') {
-		$this->addRow("<li data-role='list-divider' data-theme='{$theme}'>{$text}</li>", null, null, true);
+	public function addDivide($text, $count = false) {
+		$this->addRow("<li data-role='list-divider'>{$text}".(($count!=false)?"<span class='ui-li-count'>{$count}</span>":"")."</li>", null, array('noformat' => true));
 	}
 	
 	public function addRaw($row) {
-		$this->addRow($row, null, null, true);
+		$this->addRow($row, null, array('noformat' => true));
 	}
 	
 	public function output() {
 		return array_merge(
-			array("<ul id=\"list_{$this->listname}\" data-split-icon=\"{$this->iconname}\" data-split-theme=\"d\" data-role=\"listview\">"),
+			array("<ul id='list_{$this->listname}' data-inset='{$this->options['inset']}' ".($this->options['actions']?"data-split-icon='{$this->options['icon']}' data-split-theme='d'":"")." data-role='listview'>"),
 			$this->items,
 			array("</ul>"));
 	}
@@ -124,8 +116,8 @@ class tdlist {
 				case "mdel":
 					$rethtml .= $this->act_mdel($raw);
 					break;
-				case "tdel":
-					$rethtml .= $this->act_tdel($raw);
+				case "tdone":
+					$rethtml .= $this->act_tdone($raw);
 					break;
 			}
 		}
@@ -168,8 +160,8 @@ class tdlist {
 	 * @param array Raw SQL Array
 	 * @return string Formatted HTML
 	 */
-	private function act_tdel($raw) {
-		return "<a class=\"todo-delete\" data-done=\"0\" data-recid=\"{$raw['id']}\" href=\"#\">Delete Item</a>";
+	private function act_tdone($raw) {
+		return "<a class=\"todo-done\" data-done=\"{$raw['complete']}\" data-recid=\"{$raw['id']}\" href=\"#\">Mark Item Finished</a>";
 	}
 	
 	/**

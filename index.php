@@ -12,10 +12,11 @@ ob_start(); session_start();
 ## PROGRAM DETAILS. DO NOT EDIT UNLESS YOU KNOW WHAT YOU ARE DOING
 $TDTRAC_VERSION = "3.0-alpha1";
 $TDTRAC_DBVER = "2.0.1";
-$TEST_MODE = false;
+$TEST_MODE = true;
 $SITE_SCRIPT = array('');
 $CANCEL = false;
 $CLOSE = false;
+$EXTRA_NAV = false;
 $HEAD_LINK = array('');
 
 /** Site Confiuration File */
@@ -69,7 +70,7 @@ if ( !$user->loggedin ) {
 	}
 } else {
 	switch ($action['module']) {
-		case "user":
+		case "user":			
 			switch( $action['action'] ) {
 				case "logout":
 					$user->logout();
@@ -86,14 +87,17 @@ if ( !$user->loggedin ) {
 			}
 			break;
 		case "todo":
+			$EXTRA_NAV = true;
 			$todo = new tdtrac_todo($user, $action);
 			$todo->output();
 			break;
 		case "shows":
+			$EXTRA_NAV = true;
 			$shows = new tdtrac_shows($user, $action);
 			$shows->output();
 			break;
 		case "hours":
+			$EXTRA_NAV = true;
 			$hours = new tdtrac_hours($user, $action);
 			$hours->output();
 			break;
@@ -102,10 +106,12 @@ if ( !$user->loggedin ) {
 			$mail->output();
 			break;
 		case "admin":
+			$EXTRA_NAV = true;
 			$admin = new tdtrac_admin($user, $action);
 			$admin->output();
 			break;
 		case "budget":
+			$EXTRA_NAV = true;
 			$budget = new tdtrac_budget($user, $action);
 			$budget->output();
 			break;
@@ -117,11 +123,12 @@ if ( !$user->loggedin ) {
 				$hdivTitle = $helpnode[$action['action']][$action['oper']]['title'];
 				$hdivData = $helpnode[$action['action']][$action['oper']]['data'];
 			}
+			$html[] = "<h3>{$hdivTitle}</h3>";
 			foreach ( $hdivData as $line ) {
 				$html[] = "			<p>{$line}</p>";
 			}
 			$CLOSE = true;
-			makePage($html, "TDTrac Help");
+			makePage($html, "Help");
 			break;
 	
 		default: 

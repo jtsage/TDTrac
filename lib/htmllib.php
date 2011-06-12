@@ -27,7 +27,7 @@ function makePage($body = '', $title = '') {
 		$html[] = "\t\t\t{$fixme}";
 	}
 	$html = array_merge($html, makeFooter($title));
-	ob_clean(); //Hackish method to clear any extra lines / echos before html starts
+	//ob_clean(); //Hackish method to clear any extra lines / echos before html starts
 	foreach ($html as $line) {
 		echo $line . "\n";
 	}
@@ -47,7 +47,7 @@ function makePage($body = '', $title = '') {
  * @return array Formatted HTML
  */
 function makeHeader($title = '') {
-	GLOBAL $TDTRAC_VERSION, $TDTRAC_CPNY, $TDTRAC_SITE, $HEAD_LINK, $CANCEL, $CLOSE, $action;
+	GLOBAL $TDTRAC_VERSION, $TDTRAC_CPNY, $TDTRAC_SITE, $HEAD_LINK, $CANCEL, $CLOSE, $TEST_MODE, $action;
 
 	$html = array();
 	$html[] = '<!DOCTYPE html>';
@@ -58,17 +58,17 @@ function makeHeader($title = '') {
 	$html[] = '	<!--[if lt IE 9]>';
 	$html[] = '		<script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>';
 	$html[] = '	<![endif]-->';
-	$html[] = '	<link rel="stylesheet" href="http://code.jquery.com/mobile/1.0a3/jquery.mobile-1.0a3.min.css" />';
-	$html[] = '	<link type="text/css" href="http://dev.jtsage.com/cdn/datebox/latest/jquery.mobile.datebox.css" rel="stylesheet" /> ';
-	$html[] = '	<link type="text/css" href="http://dev.jtsage.com/cdn/simpledialog/latest/jquery.mobile.simpledialog.css" rel="stylesheet" /> ';
+	$html[] = '	<link href="http://code.jquery.com/mobile/latest/jquery.mobile.min.css" rel="stylesheet" type="text/css" />';
+	$html[] = '	<link type="text/css" href="http://dev.jtsage.com/cdn/datebox/latest/jquery.mobile.datebox.min.css" rel="stylesheet" /> ';
+	$html[] = '	<link type="text/css" href="http://dev.jtsage.com/cdn/simpledialog/latest/jquery.mobile.simpledialog.min.css" rel="stylesheet" /> ';
 	$html[] = '	<link type="text/css" href="/css/tdtheme.css" rel="stylesheet" /> ';
-	$html[] = '	<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.min.js"></script>';
+	$html[] = '	<script src="http://code.jquery.com/jquery-1.6.1.min.js"></script>';
 	$html[] = '	<script type="text/javascript">';
 	$html[] = "		$(document).bind('mobileinit', function(){ $.mobile.page.prototype.options.degradeInputs.date = 'text'; });";
 	$html[] = '	</script>';
-	$html[] = '	<script type="text/javascript" src="http://code.jquery.com/mobile/1.0a3/jquery.mobile-1.0a3.min.js"></script>';
-	$html[] = '	<script type="text/javascript" src="http://dev.jtsage.com/cdn/datebox/latest/jquery.mobile.datebox.js"></script>';
-	$html[] = '	<script type="text/javascript" src="http://dev.jtsage.com/cdn/simpledialog/latest/jquery.mobile.simpledialog.js"></script>';
+	$html[] = '	<script src="http://code.jquery.com/mobile/latest/jquery.mobile.min.js"></script>';
+	$html[] = '	<script type="text/javascript" src="http://dev.jtsage.com/cdn/datebox/latest/jquery.mobile.datebox.min.js"></script>';
+	$html[] = '	<script type="text/javascript" src="http://dev.jtsage.com/cdn/simpledialog/latest/jquery.mobile.simpledialog.min.js"></script>';
 	$html[] = '	<script type="text/javascript" src="'.$TDTRAC_SITE.'js/tdtrac.jquery.js"></script>';
 	$html[] = "</head>\n\n<body>";
 	$pageid = ( $action['module'] == 'help' ) ? "help-{$action['action']}-{$action['oper']}" : "{$action['module']}-{$action['action']}";
@@ -77,7 +77,7 @@ function makeHeader($title = '') {
 	$html[] = "		<div data-role=\"header\">";
 	if ( $CANCEL ) { $html[] = "			<a href='#' data-icon='delete' data-rel='back'>Cancel</a>";	}
 	if ( $CLOSE )  { $html[] = "			<a href='#' data-icon='arrow-d' data-rel='back'>Close</a>";	}
-	$html[] = "			<h1>TDTrac::{$title}</h1>";
+	$html[] = "			<h1>".($TEST_MODE?"TEST_MODE":"TDTrac")."::{$title}</h1>";
 	if ( count($HEAD_LINK) == 3 ) {
 		$html[] = "			<a href=\"{$HEAD_LINK[0]}\" data-icon=\"{$HEAD_LINK[1]}\" class=\"ui-btn-right\">{$HEAD_LINK[2]}</a>";
 	}
@@ -102,11 +102,14 @@ function makeHeader($title = '') {
  * @return array Formatted HTML
  */
 function makeFooter($title = '') {
-	global $SITE_BLOCK, $action;
+	global $SITE_BLOCK, $action, $EXTRA_NAV;
 	$html[] = "		</div>";
 	$html[] = "		<div data-role=\"footer\" data-theme=\"a\">";
 	$html[] = "			<div data-role=\"navbar\"><ul>";
 	$html[] = "				<li><a href=\"/\" data-direction='reverse' data-icon=\"home\">Home</a></li>";
+	if ( $EXTRA_NAV ) {
+		$html[] = "				<li><a href=\"/{$action['module']}\" data-direction='reverse' data-icon=\"home\">".ucwords($action['module'])." Home</a></li>";
+	}
 	$html[] = "				<li><a href=\"/help/{$action['module']}/oper:{$action['action']}/\" data-transition=\"slideup\" data-icon=\"info\">Help</a></li>";
 	$html[] = "				<li><a href=\"/user/logout/\" rel='external' data-transition=\"slidedown\" data-icon=\"alert\">Logout</a></li>";
 	$html[] = "			</ul></div>";

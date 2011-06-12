@@ -51,6 +51,19 @@ function merge_defaults($orig, $override) {
 }
 
 /**
+ * Show a variables contents in the javascript console 
+ * 
+ * @param mixed Variable to display
+ * @return string Inline formatted script
+ */
+function debug_js($variable) {
+	return "<script type='text/javascript'> var x = ".json_encode($variable)."; console.log(x);</script>"; 
+}
+
+function inline_script($script) {
+	return array("<script type='text/javascript'>".join($script)."</script>");
+}
+/**
  * Generate an error page
  * 
  * @param string Error Message

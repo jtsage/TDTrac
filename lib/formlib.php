@@ -219,6 +219,7 @@ class tdform {
 			'enabled' => True,
 			'allownew' => False,
 			'header' => True,
+			'add' => False,
 		);
 		$options = merge_defaults($default, $passed);
 		$this->members[] = array('dropdown', $option['name'], $option['label'], $option['title'], $option['options']);
@@ -229,6 +230,9 @@ class tdform {
 		$temp  = "  <div data-role='fieldcontain'><label for='{$options['id']}'>{$options['label']}</label><select name='{$options['name']}' id='{$options['id']}' ".(!$options['enabled'] ? " disabled='disabled'":"").">";
 		if ( $options['header'] ) {
 			$temp .= "<option data-placeholder='true'>Choose one...</option>";
+		}
+		if ( $options['add'] ) {
+			$temp .= "<option data-addoption='true' value='none'>Add New...</option>";
 		}
 		foreach ( $options['options'] as $option ) {
 			if ( is_array($option) ) {

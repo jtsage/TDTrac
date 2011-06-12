@@ -4,6 +4,8 @@
 		infobox('Please wait...');
 		var formdata = $(this).serialize();
 		var formurl = $(this).attr('action');
+		//console.log(formdata);
+		
 		$.post(formurl, formdata, function(dta) {
 			console.log(dta);
 			if ( dta.success === true ) {
@@ -54,6 +56,7 @@
 	$('.todo-done').live( 'click', function(e) {  // BEGIN: Mark Todo Done
 		e.preventDefault();
 		var linkie = this;
+		var item = $(linkie).parent();
 		if ( ! $(this).data('done') ) {
 			$(this).simpledialog({
 				'mode' : 'bool', 
@@ -62,7 +65,8 @@
 					'Yes, Mark Done' : function () {
 						$.getJSON("/todo/mark/json:1/id:"+$(linkie).data('recid')+"/", function(data) {
 							if ( data.success === true ) {
-								$(linkie).parent().parent().parent().insertAfter('#todo-list-done');
+								console.log($(linkie).parent().parent());
+								$(linkie).parent().insertAfter('#todo-list-done');
 								$(linkie).parent().find('span.ui-li-count').html('done');
 								var count = $('#todo-list-header').find('.ui-li-count');
 								count.text(count.text()-1);
@@ -78,32 +82,40 @@
 		}
 	}); // END: Mark Todo Done
 	
-	$('.todo-delete').live( 'click', function(e) {  // BEGIN: Mark Todo Delete
+	$('.todo-menu').live( 'click', function(e) {  // BEGIN: Todo Menu
 		e.preventDefault();
 		var linkie = this;
 		if ( ! $(this).data('done') ) {
 			$(this).simpledialog({
 				'mode' : 'bool',
-				'prompt' : 'Delete Todo Item #'+$(this).data('recid')+'?',
-				'buttons' : {
-					'Yes, Delete' : function() {
-						$.getJSON("/todo/delete/json:1/id:"+$(linkie).data('recid')+"/", function(data) {
-							if ( data.success === true ) {
-								$(linkie).parent().find('h3').html('--Removed--');
-								$(linkie).parent().find('span.ui-li-count').html('deleted');
-								if ( ! $(linkie).parent().find('.todo-done').data('done') ) {
-									var count = $('#todo-list-header').find('.ui-li-count');
-									count.text(count.text()-1);
+				'prompt' : 'Todo Item #'+$(this).data('recid'),
+				'buttons' : (($(this).data('edit'))?{
+					'Edit' : {
+						'click': function() { $.mobile.changePage("/todo/edit/id:"+$(linkie).data('recid')); },
+						'icon': 'grid'
+					},
+					'Delete' : {
+						'click': function() {
+							$.getJSON("/todo/delete/json:1/id:"+$(linkie).data('recid')+"/", function(data) {
+								if ( data.success === true ) {
+									$(linkie).parent().find('h3').html('--Removed--');
+									$(linkie).parent().find('span.ui-li-count').html('deleted');
+									if ( ! $(linkie).parent().find('.todo-done').data('done') ) {
+										var count = $('#todo-list-header').find('.ui-li-count');
+										count.text(count.text()-1);
+									}
+									$(linkie).parent().find('.todo-done').data('done', 1);
+									infobox("Todo Item #"+$(linkie).data('recid')+" Deleted");
+								} else {
+									infobox("Todo Item #"+$(linkie).data('recid')+" Delete Failed!");
 								}
-								$(linkie).parent().find('.todo-done').data('done', 1);
-								infobox("Todo Item #"+$(linkie).data('recid')+" Deleted");
-							} else {
-								infobox("Todo Item #"+$(linkie).data('recid')+" Delete Failed!");
-							}
-							$(linkie).data('done', 1);
-						}); },
+								$(linkie).data('done', 1);
+							});
+						},
+						'icon': 'delete'
+					},
 					'Cancel' : function () { return true; }
-				}
+				}:{'Cancel' : function () { return true; }})
 			}); 
 		}
 	}); // END: Mark Todo Delete
@@ -171,5 +183,27 @@
 		}
 		e.preventDefault();
 	}); // END: Delete Budget Item
+	
+	$('select').live('change', function(e) { // BEGIN : Add Dropdown Option
+		var self = this;
+
+		$(self+':selected:not([data-placeholder])').each(function(){
+			if ( $(this).attr('data-addoption') ) {
+				$(self).simpledialog({
+					'mode' : 'string',
+					'prompt' : 'Add New Option',
+					'useDialogForceFalse' : true,
+					'buttons' : {
+						'Yes, Add' : function () { 
+							thisopt = $(self).attr('data-string');
+							$('<option value="'+thisopt+'" selected="selected">'+thisopt+'</option>').appendTo($(self));
+							$(self).selectmenu('refresh', true);
+							return true; },
+						'Cancel' : function () { $(self).selectmenu('open'); }
+					}
+				});
+			}
+		});
+	}); // END : Add Dropdown Option
 	
 }) ( jQuery );

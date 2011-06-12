@@ -10,10 +10,10 @@
 $helpnode['error']['title'] = "Error";
 $helpnode['error']['data'][] = "This help item has not yet been written.  Sorry.";
 
-$helpnode['index']['title'] = "TDTrac Overview";
-$helpnode['index']['data'][] = "TDTrac is a web based show budget and payroll hours tracker, built by a TD, for other TD's, freelance designers, and anyone else who finds it useful. TDTrac is completely free, released as open source.  We also offer hosting plans for a nominal fee (no domain required!) so you don't need to pay for webspace elsewhere.";
-$helpnode['index']['data'][] = "TDTrac Features:";
-$helpnode['index']['data'][] = "<ul><li>Track as many show budgets as you wish</li>" .
+$helpnode['index']['index']['title'] = "TDTrac Overview";
+$helpnode['index']['index']['data'][] = "TDTrac is a web based show budget and payroll hours tracker, built by a TD, for other TD's, freelance designers, and anyone else who finds it useful. TDTrac is completely free, released as open source.  We also offer hosting plans for a nominal fee (no domain required!) so you don't need to pay for webspace elsewhere.";
+$helpnode['index']['index']['data'][] = "TDTrac Features:";
+$helpnode['index']['index']['data'][] = "<ul><li>Track as many show budgets as you wish</li>" .
 	"<li>Budgets can be organized by vendor, category, or even amount spent</li>" .
 	"<li>Track payment pending budget items - things ordered but not cleared through any account or credit card you use</li>" .
 	"<li>Track reimbursable budget items through the reciept of payment from your reimburser</li>" .
@@ -60,9 +60,9 @@ $helpnode['admin']['index']['data'][] = "<dl><dt>Add User</dt><dd>Add a user to 
 $helpnode['admin']['mail']['title'] = "TDTracMail Subject Code";
 $helpnode['admin']['mail']['data'][] = "This contains the easy interface to update the subject line code, and the to: address for the tdtracmail addon, a simple way to add reciepts to your tracking.  Simply send email to [the address you choose]@[your hostname] (please ask your administrator which host to use), and include the code in the subject line.  All reciepts are automaticly resized, and will await addition to the database by any user with the 'addbudget' permission.";
 
-$helpnode['mail']['index']['title'] = "Inbox View";
-$helpnode['mail']['index']['data'][] = "The Inbox view shows any system messages that have been sent to you.";
-$helpnode['mail']['index']['data'][] = "<dl><dt>Clear Messages Link</dt><dd>Clears all current inbox messages.  There is no 'mark as read', read messages are deleted</dd>" .
+$helpnode['mail']['inbox']['title'] = "Inbox View";
+$helpnode['mail']['inbox']['data'][] = "The Inbox view shows any system messages that have been sent to you.";
+$helpnode['mail']['inbox']['data'][] = "<dl><dt>Clear Messages Link</dt><dd>Clears all current inbox messages.  There is no 'mark as read', read messages are deleted</dd>" .
 	"<dt>Per Message Delete Link</dt><dd>Removes that message from inbox.  There is no 'mark as read', read messages are deleted</dd></dl>";
 
 $helpnode['mail']['view']['title'] = "Outbox View";
