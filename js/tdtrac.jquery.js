@@ -4,7 +4,7 @@
 		infobox('Please wait...');
 		var formdata = $(this).serialize();
 		var formurl = $(this).attr('action');
-		//console.log(formdata);
+		console.log(formdata);
 		
 		$.post(formurl, formdata, function(dta) {
 			console.log(dta);
@@ -143,7 +143,7 @@
 		}
 	}); // END: Delete Message
 	
-	$('.show-menu').live('click', function (e) { // BEGIN: Delete Show
+	$('.show-menu').live('click', function (e) { // BEGIN: Show Menu
 		e.preventDefault();
 		var linkie = this;
 		if ( ! $(this).data('done') ) {
@@ -175,7 +175,7 @@
 		}
 	}); // END: Delete Show
 	
-	$('.budg-menu').live('click', function (e) { // BEGIN: Delete Budget Item
+	$('.budg-menu').live('click', function (e) { // BEGIN: Budget Menu
 		e.preventDefault();
 		var linkie = this;
 		if ( ! $(this).data('done') ) {
@@ -220,6 +220,23 @@
 		}
 	}); // END: Delete Budget Item
 	
+	// BEGIN : Recpt Functions
+	$('.rcptrot').live('click', function (e) { 
+		var self = this;
+			date = new Date();
+		
+		$(self).removeClass('ui-btn-active');
+		infobox("Reciept Rotating...");
+		$.getJSON("/rcpt.php?imgid="+$(self).data('id')+"&rotate="+$(self).data('rot')+"&save", function(data) {
+			if ( data.success === true ) {
+				$('#rcptimg').attr('src', '/rcpt.php?imgid='+$(self).data('id')+'&rand='+parseInt(date.getTime()/1000));
+				infobox("Reciept Saved");
+			} else {
+				infobox("Reciept Save Failed :"+data.msg);
+			}
+		});
+	});
+	
 	$('select').live('change', function(e) { // BEGIN : Add Dropdown Option
 		var self = this;
 
@@ -242,14 +259,5 @@
 		});
 	}); // END : Add Dropdown Option
 	
-	$('input[name=repay]').live('change', function(e) { // BEGIN : Change Repay
-		var self = this;
-		
-		if ( $(this).val() !== 'no' ) {
-			$('select[name=payto]').parent().parent().fadeIn();
-		} else {
-			$('select[name=payto]').parent().parent().fadeOut();
-		}
-	});
 	
 }) ( jQuery );

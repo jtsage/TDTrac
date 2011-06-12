@@ -47,6 +47,22 @@ class tdform {
 	}
 	
 	/**
+	 * Add a section (collapsible div)
+	 * 
+	 * @param string Type, either open or closed
+	 * @param string Text for heading
+	 * @param bool Collapse or not (false = collapse)
+	 * @return bool Always true
+	 */
+	public function addSection($type = 'open', $text = '', $open = False) {
+		if ( $type == 'open' ) {
+			$this->html[] = " <div data-role='collapsible'".(!$open?" data-collapsed='true'":"")."><h3>{$text}</h3>";
+		} else {
+			$this->html[] = " </div>";
+		}
+		return true;
+	}
+	/**
 	 * Output the form to a single string
 	 * 
 	 * @param string Name of submit button
