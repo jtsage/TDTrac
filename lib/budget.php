@@ -190,7 +190,12 @@ class tdtrac_budget {
 					$this->json['success'] = false;
 					$this->json['msg'] = "Poorly formed request, unknown method";
 					break;
-			} echo json_encode($this->json);
+			}
+			if ( $TEST_MODE ) {
+				$this->json['action'] = $this->action;
+				$this->json['request'] = $_REQUEST;
+			}
+			echo json_encode($this->json);
 		}
 	} // END OUTPUT FUNCTION
 	

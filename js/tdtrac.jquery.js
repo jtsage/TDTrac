@@ -4,12 +4,12 @@
 		infobox('Please wait...');
 		var formdata = $(this).serialize();
 		var formurl = $(this).attr('action');
-		console.log(formdata);
+		//console.log(formdata);
 		
 		$.post(formurl, formdata, function(dta) {
-			console.log(dta);
+			//console.log(dta);
 			if ( dta.success === true ) {
-				$.mobile.changePage({ url: dta.location, type: 'post', data: {'infobox': dta.msg} },'slide', true);
+				$.mobile.changePage(dta.location, { type: 'post', data: {'infobox': dta.msg}, transition:'slide'});
 			} else {
 				infobox('<span style="color: red">'+dta.msg+'</span>');
 			}
@@ -64,7 +64,6 @@
 					'Yes, Mark Done' : function () {
 						$.getJSON("/todo/mark/json:1/id:"+$(linkie).data('recid')+"/", function(data) {
 							if ( data.success === true ) {
-								console.log($(linkie).parent().parent());
 								$(linkie).parent().insertAfter('#todo-list-done');
 								$(linkie).parent().find('span.ui-li-count').html('done');
 								var count = $('#todo-list-header').find('.ui-li-count');
@@ -236,6 +235,82 @@
 			}
 		});
 	});
+	
+	$('.group-add').live( 'click', function(e) { // BEGIN: Group Add
+		e.preventDefault();
+		var linkie = this;
+		$(this).simpledialog({
+			'mode': 'string',
+			'prompt': 'New Group Name?',
+			'buttons': {
+				'Add' : {
+					'click' : function() {
+						if ($(linkie).data('string') !== '') {
+							$.getJSON("/admin/group/json:1/newname:"+$(linkie).data('string')+"/", function(dta) {
+								if ( dta.success === true ) {
+									$.mobile.changePage(dta.location, { reloadPage: true, transition: 'pop', changeHash: 'false', type: 'post', data: {'infobox': dta.msg}});
+								} else {
+									infobox("Add Failed: "+dta.msg);
+								}
+							});
+						}
+					},
+					'icon' : 'plus'
+				},
+				'Cancel' : function () { return true; }
+			}
+		});
+	}); // END : Group Add
+	
+	$('.group-menu').live( 'click', function(e) {  // BEGIN: Group Menu
+		e.preventDefault();
+		var linkie = this;
+		$(this).simpledialog({
+			'mode' : ($(this).data('id') > 1 ) ? 'string' : 'bool',
+			'prompt' : 'Group #'+$(this).data('id'),
+			'buttons' : ($(this).data('id') > 1 ) ? 
+				{
+					'Rename' : {
+						'click': function() {
+							if ($(linkie).data('string') !== '') {
+								$.getJSON("/admin/group/json:1/oldname:"+$(linkie).data('id')+"/newname:"+$(linkie).data('string')+"/", function(dta) {
+									if ( dta.success === true ) {
+										$.mobile.changePage(dta.location, { reloadPage: true, transition: 'pop', changeHash: 'false', type: 'post', data: {'infobox': dta.msg}});
+									} else {
+										infobox("Rename Failed: "+dta.msg);
+									}
+								});
+							}
+						},
+						'icon': 'grid'
+					},
+					'Change Perms' : {
+						'click': function() { $.mobile.changePage("/admin/permsedit/id:"+$(linkie).data('id')+"/"); },
+						'icon': 'grid'
+					},
+					'Delete' : {
+						'click': function() {
+							$.getJSON("/admin/remgroup/json:1/oldname:"+$(linkie).data('id')+"/", function(dta) {
+								if ( dta.success === true ) {
+									$.mobile.changePage(dta.location, { reloadPage: true, transition: 'pop', changeHash: 'false', type: 'post', data: {'infobox': dta.msg}});
+								} else {
+									infobox("Delete Failed: "+dta.msg);
+								}
+							});
+						},
+						'icon': 'delete'
+					},
+					'Cancel' : function () { return true; }
+				} : {
+					'Change Perms' : {
+						'click': function() { $.mobile.changePage("/admin/permsedit/id:"+$(linkie).data('id')+"/"); },
+						'icon': 'grid'
+					},
+					'Cancel' : function () { return true; }
+				}
+		}); 
+	}); // END: Mark Todo Delete
+	
 	
 	$('select').live('change', function(e) { // BEGIN : Add Dropdown Option
 		var self = this;

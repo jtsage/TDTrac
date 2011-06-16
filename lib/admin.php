@@ -59,117 +59,143 @@ class tdtrac_admin {
 	 * @return void
 	 */
 	public function output() {
+		GLOBAL $TEST_MODE;
 		if ( !$this->output_json ) { // HTML METHODS
-			if ( !$this->user->admin ) { thrower('Access Denied :: You are not an administrator'); }
+			if ( !$this->user->admin ) { $this->html = error_page('Access Denied :: You are not an administrator'); }
 			switch ( $this->action['action'] ) {
 				case "users": // View Users
-					$this->title .= " :: View Users";
+					$this->title .= "::View Users";
 					$this->html = $this->user_view();
 					break;
 				case "useradd": // Add User
-					$this->title .= " :: Add User";
-					if ( $this->post ) {
-						thrower($this->user_save(false), 'admin/users/');
-					} else {
-						$this->html = $this->user_add_form();
-					} break;
+					$this->title .= "::Add User";
+					$this->html = $this->user_add_form();
+					break;
 				case "useredit": // Edit User
-					$this->title .= " :: Edit User";
-					if ( $this->post ) {
-						if ( isset($_REQUEST['id']) && is_numeric($_REQUEST['id']) ) {
-							thrower($this->user_save(true), "admin/users/");
-						} else {
-							thrower('Error :: Data Mismatch Detected', 'admin/users/');
-						}
+					$this->title .= "::Edit User";
+					if ( isset($this->action['id']) && is_numeric($this->action['id']) ) {
+						$this->html = $this->user_edit_form(intval($this->action['id']));
 					} else {
-						if ( isset($this->action['id']) && is_numeric($this->action['id']) ) {
-							$this->html = $this->user_edit_form(intval($this->action['id']));
-						} else {
-							thrower("Error :: Data Mismatch Detected", 'admin/users/');
-						}
+						$this->html = error_page('Error :: Data Mismatch Detected');
 					} break;
 				case "perms":
-					$this->title .= " :: View Permissions";
+					$this->title .= "::Permissions";
 					$this->html = $this->perms_view();
 					break;
 				case "permsedit":
-					$this->title .= " :: Edit Permissions";
-					if ( $this->post ) {
-						if ( isset($_REQUEST['id']) && is_numeric($_REQUEST['id']) ) {
-							thrower($this->perms_save(intval($_REQUEST['id'])), "admin/perms/");
-						} else {
-							thrower('Error :: Data Mismatch Detected', 'admin/perms/');
-						}
+					$this->title .= "::Edit Permissions";
+					if ( isset($this->action['id']) && is_numeric($this->action['id']) ) {
+						$this->html = $this->perms_edit_form(intval($this->action['id']));
 					} else {
-						if ( isset($this->action['id']) && is_numeric($this->action['id']) ) {
-							$this->html = $this->perms_edit_form(intval($this->action['id']));
-						} else {
-							thrower("Error :: Data Mismatch Detected", 'admin/perms/');
-						}
+						$this->html = error_page('Error :: Data Mismatch Detected');
 					} break;
 				case "mail":
-					$this->title .= " :: TDTracMail Configuration";
-					if ( $this->post ) {
-						if ( !empty($_REQUEST['code']) && !empty($_REQUEST['email']) ) {
-							thrower($this->mailcode_save(), "admin/");
-						} else {
-							thrower('Error :: Data Mismatch Detected', 'admin/');
-						}
-					} else {
-						$this->html = $this->mailcode_form();
-					} break;
+					$this->title .= "::TDTracMail Configuration";
+					$this->html = $this->mailcode_form();
+					break;
 				case "groups":
-					$this->title .= " :: Group Management";
-					if ( $this->post ) {
-						if ( !empty($_REQUEST['newname']) && is_numeric($_REQUEST['oldname']) ) {
-							if ( intval($_REQUEST['oldname']) == 1 ) {
-								thrower('Error :: Cannot Rename Admin Group', 'admin/groups/');
-							} else {
-								thrower($this->group_rename(), 'admin/groups/');
-							}
-						} elseif ( !empty($_REQUEST['newgroup']) ) {
-							thrower($this->group_add(), 'admin/groups/');
-						} else {
-							thrower('Error :: Data Mismatch Detected', 'admin/groups/');
-						}
-					} else {
-						$this->html = $this->group_forms();
-					} break;
+					$this->title .= "::Group Management";
+					$this->html = $this->groups();
+					break;
 				default:
 					$this->html = $this->index();
 					break;
 			}
 			makePage($this->html, $this->title);
 		} else {
-			switch($this->action['action']) {
-				case "payroll":
-					if ( isset($this->action['id']) && is_numeric($this->action['id']) && isset($this->action['value']) && is_numeric($this->action['value'])) {
-						$this->user_payroll(intval($this->action['id']));
-					} else {
+			if ( !$this->user->admin ) { 
+				$this->json['success'] = false; $this->json['msg'] = "Permission Denied"; 
+			} else {
+				switch($this->action['action']) {
+					case "saveuser":
+						if ( $this->action['new'] == 0 ) {
+							if ( isset($_REQUEST['id']) && is_numeric($_REQUEST['id']) ) {
+								$this->json = $this->saveuser(true);
+								$this->json['location'] = "/admin/users/";
+							} else {
+								$this->json['success'] = false;
+								$this->json['msg'] = "Poorly Formed Request";
+							}
+						} elseif ( $this->action['new'] == 1 ) {
+							$this->json = $this->saveuser(false);
+							$this->json['location'] = "/admin/users/";
+						} else {
+							$this->json['success'] = false;
+							$this->json['msg'] = "Poorly Formed Request";
+						} break;
+					case "remgroup":
+						if ( isset($this->action['oldname']) && is_numeric($this->action['oldname']) ) {
+							$this->json = $this->group_delete($this->action['oldname']);
+							$this->json['location'] = "/admin/groups/";
+						} else {
+							$this->json['success'] = false;
+							$this->json['msg'] = "Poorly Formed Request";
+						} break;
+					case "group":
+						if ( !empty($this->action['newname']) && is_numeric($this->action['oldname']) ) {
+							if ( $this->action['oldname'] ==  1 ) {
+								$this->json['success'] = false;
+								$this->json['msg'] = "Cannot rename admin group";
+							} else {
+								$this->json = $this->group_rename();
+								$this->json['location'] = "/admin/groups/";
+							}
+						} elseif ( !empty($this->action['newname']) ) {
+							$this->json = $this->group_add();
+							$this->json['location'] = "/admin/groups/";
+						} else {
+							$this->json['success'] = false;
+							$this->json['msg'] = "Poorly Formed Request";
+						} break;
+					case "permsave":
+						if ( isset($this->action['id']) && is_numeric($this->action['id']) ) {
+							$this->json = $this->perms_save(intval($this->action['id']));
+							$this->json['location'] = "/admin/groups/";
+						} else {
+							$this->json['success'] = false;
+							$this->json['msg'] = "Poorly Formed Request";
+						} break;
+					case "mailcode":
+						if ( !empty($this->action['code']) && !empty($this->action['email']) ) {
+							$this->json = $this->mailcode_save();
+						} else {
+							$this->json['success'] = false;
+							$this->json['msg'] = "Poorly Formed Request";
+						} break;
+					case "payroll":
+						if ( isset($this->action['id']) && is_numeric($this->action['id']) && isset($this->action['value']) && is_numeric($this->action['value'])) {
+							$this->user_payroll(intval($this->action['id']));
+						} else {
+							$this->json['success'] = false;
+						} break;
+					case "limithours":
+						if ( isset($this->action['id']) && is_numeric($this->action['id']) && isset($this->action['value']) && is_numeric($this->action['value'])) {
+							$this->user_limit(intval($this->action['id']));
+						} else {
+							$this->json['success'] = false;
+						} break;
+					case "notify":
+						if ( isset($this->action['id']) && is_numeric($this->action['id']) && isset($this->action['value']) && is_numeric($this->action['value'])) {
+							$this->user_notify(intval($this->action['id']));
+						} else {
+							$this->json['success'] = false;
+						} break;
+					case "active":
+						if ( isset($this->action['id']) && is_numeric($this->action['id']) && isset($this->action['value']) && is_numeric($this->action['value'])) {
+							$this->user_active(intval($this->action['id']));
+						} else {
+							$this->json['success'] = false;
+						} break;
+					default:
 						$this->json['success'] = false;
-					} break;
-				case "limithours":
-					if ( isset($this->action['id']) && is_numeric($this->action['id']) && isset($this->action['value']) && is_numeric($this->action['value'])) {
-						$this->user_limit(intval($this->action['id']));
-					} else {
-						$this->json['success'] = false;
-					} break;
-				case "notify":
-					if ( isset($this->action['id']) && is_numeric($this->action['id']) && isset($this->action['value']) && is_numeric($this->action['value'])) {
-						$this->user_notify(intval($this->action['id']));
-					} else {
-						$this->json['success'] = false;
-					} break;
-				case "active":
-					if ( isset($this->action['id']) && is_numeric($this->action['id']) && isset($this->action['value']) && is_numeric($this->action['value'])) {
-						$this->user_active(intval($this->action['id']));
-					} else {
-						$this->json['success'] = false;
-					} break;
-				default:
-					$this->json['success'] = false;
-					break;
-			} echo json_encode($this->json);
+						break;
+				}
+			}
+			if ( $TEST_MODE ) {
+				$this->json['action'] = $this->action;
+				$this->json['request'] = $_REQUEST;
+			}
+			echo json_encode($this->json);
 		} 
 	} // END OUTPUT FUNCTION
 	
@@ -256,16 +282,14 @@ class tdtrac_admin {
 	 * @return array Formatted HTML
 	 */
 	public function index() {
-		global $TDTRAC_SITE;
 		if ( !$this->user->admin ) { return array('',''); }
-		$html[] = "<div class=\"tasks\"><ul class=\"linklist\"><li><h3>Administrative Tasks</h3><ul class=\"linklist\">";
-		$html[] = "  <li>Manage users, groups and permissions.</li>";
-		$html[] = "  <li><a href=\"{$TDTRAC_SITE}admin/useradd/\">Add User</a></li>";
-		$html[] = "  <li><a href=\"{$TDTRAC_SITE}admin/users/\">View Users</a></li>";
-		$html[] = "  <li><a href=\"{$TDTRAC_SITE}admin/groups/\">Add / Edit Groups</a></li>"; 
-		$html[] = "  <li><a href=\"{$TDTRAC_SITE}admin/perms/\">View Permissions</a></li>";
-		$html[] = "  <li><a href=\"{$TDTRAC_SITE}admin/mail/\">Set TDTracMail Subject Code</a></li></ul></li></ul></div>";
-		return $html;
+		$list = new tdlist(array('id' => 'admin_index', 'inset' => true));
+		$list->setFormat("<a href='%s'><h3>%s</h3></a>");
+		$list->addRow(array('/admin/useradd/', 'Add User'));
+		$list->addRow(array('/admin/users/', 'View Users'));
+		$list->addRow(array('/admin/groups/', 'Groups Managment'));
+		$list->addRow(array('/admin/mail/', 'TDTracMail Config'));
+		return $list->output();
 	}
 
 	/**
@@ -611,8 +635,53 @@ class tdtrac_admin {
 	 * @global string Site Address for links
 	 * @return array HTML output
 	 */
-	private function group_forms() {
-		GLOBAL $db, $MYSQL_PREFIX, $TDTRAC_SITE;
+	private function groups() {
+		GLOBAL $db, $MYSQL_PREFIX, $TDTRAC_SITE, $HEAD_LINK;
+		$perm_sql = "SELECT groupname, permid FROM `{$MYSQL_PREFIX}groupnames` gn, `{$MYSQL_PREFIX}permissions` pm WHERE pm.groupid = gn.groupid AND pm.permcan = 1 ORDER BY groupname, permid";
+		$perm_res = mysql_query($perm_sql, $db);
+		while ( $row = mysql_fetch_array($perm_res) ) {
+			$disperm[$row['groupname']][$row['permid']] = true;
+		}
+		
+		$sql = "SELECT `groupname`, `groupid` FROM `{$MYSQL_PREFIX}groupnames` ORDER BY groupid";
+		$groups = db_list($sql, array('groupid', 'groupname'));
+		
+		
+		$list = new tdlist(array('id' => 'grouplist', 'inset' => true));
+		
+		$img = "<img src='/images/perm-%s.png' title='Add' /><img src='/images/perm-%s.png' title='Edit' /><img src='/images/perm-%s.png' title='View' />";
+		$perms  = "<pre><strong>Shows    : </strong>{$img}<br />";
+		$perms .= "<strong>Budget   : </strong>{$img}<br />";
+		$perms .= "<strong>Payroll  : </strong>{$img}<br />";
+		$perms .= "<strong>Todo     : </strong>{$img}<br />";
+		$perms .= "<strong>Memebers : </strong>%s</pre>";
+		
+		$list->setFormat("<img src='/images/main-admin.png' /><a class='group-menu' data-id='%d' href='#'><h3>%s</h3><p>{$perms}</p></a>");
+		
+		foreach ( $groups as $group ) {
+			$permtext = array();
+			$members  = array();
+			foreach ( $this->perms_avail as $cp ) {
+				if ( $disperm[$group[1]][$cp] ) { 
+					$permtext[] = 'ya';
+				} else {
+					$permtext[] = 'no';
+				}
+			}
+			$sql = "SELECT u.username FROM `{$MYSQL_PREFIX}users` u, `{$MYSQL_PREFIX}groupnames` gn, `{$MYSQL_PREFIX}usergroups` ug WHERE gn.groupname = '{$group[1]}' AND gn.groupid = ug.groupid AND ug.userid = u.userid ORDER BY username ASC";
+			$result = mysql_query($sql, $db);
+			if ( mysql_num_rows($result) < 1 ) { 
+				$members[] = "<em>N/A</em>";
+			} else {
+				while ( $mrow = mysql_fetch_array($result) ) {
+					$members[] = $mrow['username'];
+				}
+			}
+			$list->addRow(array_merge(array($group[0], $group[1]." (".$group[0].")"),$permtext,array(join(', ', $members))));
+		}
+		$list->addRaw("<li data-theme='c'><img src='/images/main-admin.png' /><a data-id='0' class='group-add' href='#'><h3>Add Group</h3></a></li>");
+		return $list->output();
+		
 		$form1 = new tdform("{$TDTRAC_SITE}admin/groups/", 'form1', 1, 'genform', 'Add Group');
 		$result = $form1->addText('newgroup', "Group Name");
 		$html = $form1->output("Add Group");
@@ -636,13 +705,38 @@ class tdtrac_admin {
 	private function group_add() {
 		GLOBAL $db, $MYSQL_PREFIX;
 		$sql = sprintf("INSERT INTO {$MYSQL_PREFIX}groupnames (groupname) VALUES ('%s')",
-			mysql_real_escape_string($_REQUEST['newgroup'])
+			mysql_real_escape_string($this->action['newname'])
 		);
 		$request = mysql_query($sql, $db);
 		if ( $request ) {
-			thrower("Group \"{$_REQUEST['newgroup']}\" Added");
+			return array('success' => true, 'msg' => "Group Added");
 		} else {
-			thrower("Group Add :: Operation Failed");
+			return array('success' => false, 'msg' => "Group Add Failed".(($TEST_MODE)?mysql_error():""));
+		}
+	}
+	
+	/**
+	 * Logic to remove a group
+	 * 
+	 * @param integer Group to delete
+	 * @global object Database Link
+	 * @global string MySQL Table Prefix
+	 * @return void
+	 */
+	private function group_delete($id) {
+		GLOBAL $db, $MYSQL_PREFIX;
+		$sql = sprintf("DELETE FROM `{$MYSQL_PREFIX}groupnames` WHERE groupid = %d",
+			intval($id)
+		);
+		if ( $id < 100 ) { 
+			return array('success' => false, 'msg' => "You Cannot remove the special groups (ID < 100)");
+		} else {
+			$request = mysql_query($sql, $db);
+			if ( $request ) {
+				return array('success' => true, 'msg' => "Group Removed");
+			} else {
+				return array('success' => false, 'msg' => "Group Remove Failed".(($TEST_MODE)?mysql_error():""));
+			}
 		}
 	}
 	
@@ -656,14 +750,14 @@ class tdtrac_admin {
 	private function group_rename() {
 		GLOBAL $db, $MYSQL_PREFIX;
 		$sql = sprintf("UPDATE `{$MYSQL_PREFIX}groupnames` SET groupname = '%s' WHERE groupid = %d",
-			mysql_real_escape_string($_REQUEST['newname']),
-			intval($_REQUEST['oldname'])
+			mysql_real_escape_string($this->action['newname']),
+			intval($this->action['oldname'])
 		);
 		$request = mysql_query($sql, $db);
 		if ( $request ) {
-			thrower("Group Renamed to \"{$_REQUEST['newname']}\"");
+			return array('success' => true, 'msg' => "Group Renamed");
 		} else {
-			thrower("Group Update :: Operation Failed");
+			return array('success' => false, 'msg' => "Group Rename Failed".(($TEST_MODE)?mysql_error():""));
 		}
 	}
 	
