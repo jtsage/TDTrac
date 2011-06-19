@@ -547,7 +547,6 @@ class tdtrac_admin {
 		$list->setFormat("<a href='#' class='user-menu' data-recid='%d'><h3>%s</h3><p>".join("<br />", $details)."</p><p class='ui-li-aside'>".join("<br />", $sidebar)."</p></a>");
 		
 		while ( $row = mysql_fetch_array($result) ) {
-			
 			$list->addRow(array(
 				$row['userid'],
 				$row['first'] . " " . $row['last'],
@@ -562,56 +561,8 @@ class tdtrac_admin {
 				(($row['limithours'])?"ya":"no"),
 				(($row['notify'])?"ya":"no")
 			));
-				
-				
-			$jqoptions['active']     = array("Active", "Inactive");
-			$jqoptions['payroll']    = array("On Payroll", "Off Payroll");
-			$jqoptions['notify']     = array("Notify on Hours", "No Notification");
-			$jqoptions['limithours'] = array("Add only own hours", "Add any hours");
-			
-			foreach ( $jqoptions as $rname => $opts ) {
-				$SITE_SCRIPT[] = "var u{$rname}{$row['userid']} = ".(($row[$rname])?"true":"false")."     ;";
-				$SITE_SCRIPT[] = "$(function() { $('#{$rname}-{$row['userid']}').click( function() {";
-				$SITE_SCRIPT[] = "	if ( u{$rname}{$row['userid']} && confirm('Mark User #{$row['userid']} {$opts[1]}?')) {";
-				$SITE_SCRIPT[] = "		$.getJSON(\"{$TDTRAC_SITE}admin/{$rname}/json:1/id:{$row['userid']}/value:0\", function(data) {";
-				$SITE_SCRIPT[] = "			if ( data.success === true ) { ";
-				$SITE_SCRIPT[] = "				$('#popper').html(\"User #{$row['userid']} Marked {$opts[1]}\"); u{$rname}{$row['userid']} = false;";
-				$SITE_SCRIPT[] = "			} else { $('#popper').html(\"User #{$row['userid']} Mark :: Failed\"); $('#{$rname}-{$row['userid']}').attr('checked', true);}";
-				$SITE_SCRIPT[] = "			$('#popperdiv').show('blind');";			
-				$SITE_SCRIPT[] = "	});} ";
-				$SITE_SCRIPT[] = "	if ( !u{$rname}{$row['userid']} && confirm('Mark User #{$row['userid']} {$opts[0]}?')) {";
-				$SITE_SCRIPT[] = "		$.getJSON(\"{$TDTRAC_SITE}admin/{$rname}/json:1/id:{$row['userid']}/value:1\", function(data) {";
-				$SITE_SCRIPT[] = "			if ( data.success === true ) { ";
-				$SITE_SCRIPT[] = "				$('#popper').html(\"User #{$row['userid']} Marked {$opts[0]}\"); u{$rname}{$row['userid']} = true;";
-				$SITE_SCRIPT[] = "			} else { $('#popper').html(\"User #{$row['userid']} Mark :: Failed\"); $('#{$rname}-{$row['userid']}').attr('checked', false);}";
-				$SITE_SCRIPT[] = "			$('#popperdiv').show('blind');";			
-				$SITE_SCRIPT[] = "	});} ";
-				$SITE_SCRIPT[] = "});});";
-			}
-			
-			$html[] = "<h3>User: {$row['first']} {$row['last']}</h3>";
-			$html[] = "<span class=\"overright\">[<a href=\"{$TDTRAC_SITE}admin/useredit/id:{$row['userid']}/\">Edit Detailed</a>]</span>";
-			
-			$html[] = "<table>";
-			$html[] = "  <tr><td style=\"width: 200px\">Internal UserID</td><td><strong>{$row['userid']}</strong> (Last Login: ".((!empty($row['lastlog']))?$row['lastlog']:"Never").")</td></tr>";
-			$html[] = "  <tr><td colspan=\"2\"><ul style=\"margin-left: 2em\">";
-			$html[] = "    <li class=\"small\">(Active: <input id=\"active-{$row['userid']}\" type=\"checkbox\"".(($row['active'])?" checked=\"checked\" ":"").">)</li>";
-			$html[] = "    <li class=\"small\">(On Payroll: <input id=\"payroll-{$row['userid']}\" type=\"checkbox\"".(($row['payroll'])?" checked=\"checked\" ":"").">)</li>";
-			$html[] = "    <li class=\"small\">(Add / View / Edit only Own Hours: <input id=\"limithours-{$row['userid']}\" type=\"checkbox\"".(($row['limithours'])?" checked=\"checked\" ":"").">)</li>";
-			$html[] = "    <li class=\"small\">(Notify when Employees add Payroll: <input id=\"notify-{$row['userid']}\" type=\"checkbox\"".(($row['notify'])?" checked=\"checked\" ":"").">)</li>";
-			$html[] = "  </ul></td></tr>";
-			$html[] = "  <tr><td>User Name</td><td><strong>{$row['username']}</strong></td></tr>";
-			$html[] = "  <tr><td>Group</td><td><strong>" . join(", ", $this->groups_by_user($row['userid'])) . "</strong></td></tr>";
-			if ( !is_null($row['phone']) && $row['phone'] <> "" && $row['phone'] <> 0 ) {
-				$html[] = "  <tr><td>Phone Number</td><td><strong>". format_phone($row['phone']) . "</strong></td></tr>";
-			}
-			if ( !is_null($row['email']) && $row['email'] <> "" ) {
-				$html[] = "  <tr><td>E-Mail Address</td><td><a href=\"mailto:{$row['email']}\"><strong>{$row['email']}</strong></a></td></tr>";
-			}
-			$html[] = "  <tr><td>Pay Rate</td><td>\$" . number_format($row['payrate'], 2) . "</td></tr>";
-			$html[] = "</table><br /><br />";
 		}
-		$html[] = "<p><strong>Please Note:</strong> You can adjust user flags from this page.</p>";
+		
 		return $list->output();
 	}
 
