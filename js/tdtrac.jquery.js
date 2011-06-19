@@ -1,23 +1,22 @@
 (function($) {
 	
-	$('form').live('submit', function(e) {
+	$('form').live('submit', function(e) { // FORM HANDLEING
 		infobox('Please wait...');
 		var formdata = $(this).serialize();
 		var formurl = $(this).attr('action');
-		//console.log(formdata);
 		
 		$.post(formurl, formdata, function(dta) {
-			//console.log(dta);
 			if ( dta.success === true ) {
-				$.mobile.changePage(dta.location, { type: 'post', data: {'infobox': dta.msg}, transition:'slide'});
+				$.mobile.changePage(dta.location, { reloadPage: true, type: 'post', data: {'infobox': dta.msg}, transition:'slide'});
 			} else {
 				infobox('<span style="color: red">'+dta.msg+'</span>');
 			}
 		}, 'json');
 		e.preventDefault();
-	});
+	}); // END FORM HANDLING
 			
 	function infobox(text) { // CONTROL INFOBOX CONTENT
+		$('.ui-page-active #infobox h2').stop(true);
 		$('.ui-page-active #infobox h2').fadeTo(300, .01, function() {
 			$(this).html(text).fadeTo(1000,1, function() {
 				$(this).delay(4000).delay(4000).fadeTo(300, .01, function() {
@@ -25,9 +24,10 @@
 				}); 
 			});
 		});
-	}
+	} // END INFOBOX CONTENT
 	
-	$('.ajax-email').live('click', function(e) { // BEGIN: E-Mail Function
+	$('.ajax-email').die('click');
+	$('.ajax-email').live('vclick', function(e) { // BEGIN: E-Mail Function
 		var linkurl = '',
 			o = $(this).data('email');
 
@@ -53,7 +53,7 @@
 		e.preventDefault();
 	}); // END: E-Mail Function
 	
-	$('.todo-done').live( 'click', function(e) {  // BEGIN: Mark Todo Done
+	$('.todo-done').live( 'vclick', function(e) {  // BEGIN: Mark Todo Done
 		e.preventDefault();
 		var linkie = this;
 		if ( ! $(this).data('done') ) {
@@ -80,7 +80,7 @@
 		}
 	}); // END: Mark Todo Done
 	
-	$('.todo-menu').live( 'click', function(e) {  // BEGIN: Todo Menu
+	$('.todo-menu').live( 'vclick', function(e) {  // BEGIN: Todo Menu
 		e.preventDefault();
 		var linkie = this;
 		if ( ! $(this).data('done') ) {
@@ -116,9 +116,9 @@
 				}:{'Cancel' : function () { return true; }})
 			}); 
 		}
-	}); // END: Mark Todo Delete
+	}); // END: Todo Menu
 	
-	$('.msg-delete').live('click', function (e) { // BEGIN: Delete Message
+	$('.msg-delete').live('vclick', function (e) { // BEGIN: Delete Message
 		e.preventDefault();
 		var linkie = this;
 		if ( ! $(this).data('done') ) {
@@ -142,7 +142,7 @@
 		}
 	}); // END: Delete Message
 	
-	$('.show-menu').live('click', function (e) { // BEGIN: Show Menu
+	$('.show-menu').live('vclick', function (e) { // BEGIN: Show Menu
 		e.preventDefault();
 		var linkie = this;
 		if ( ! $(this).data('done') ) {
@@ -172,9 +172,9 @@
 				}:{ 'Cancel' : function () { return true; } } )
 			});
 		}
-	}); // END: Delete Show
+	}); // END: Show Menu
 	
-	$('.budg-menu').live('click', function (e) { // BEGIN: Budget Menu
+	$('.budg-menu').live('vclick', function (e) { // BEGIN: Budget Menu
 		e.preventDefault();
 		var linkie = this;
 		if ( ! $(this).data('done') ) {
@@ -217,10 +217,10 @@
 				})
 			}); 
 		}
-	}); // END: Delete Budget Item
+	}); // END: Budget Menu
 	
 	// BEGIN : Recpt Functions
-	$('.rcptrot').live('click', function (e) { 
+	$('.rcptrot').live('vclick', function (e) { 
 		var self = this;
 			date = new Date();
 		
@@ -234,9 +234,9 @@
 				infobox("Reciept Save Failed :"+data.msg);
 			}
 		});
-	});
+	}); // END Rcpt Func
 	
-	$('.group-add').live( 'click', function(e) { // BEGIN: Group Add
+	$('.group-add').live( 'vclick', function(e) { // BEGIN: Group Add
 		e.preventDefault();
 		var linkie = this;
 		$(this).simpledialog({
@@ -262,7 +262,7 @@
 		});
 	}); // END : Group Add
 	
-	$('.group-menu').live( 'click', function(e) {  // BEGIN: Group Menu
+	$('.group-menu').live( 'vclick', function(e) {  // BEGIN: Group Menu
 		e.preventDefault();
 		var linkie = this;
 		$(this).simpledialog({
@@ -311,7 +311,7 @@
 		}); 
 	}); // END: Group Menu
 	
-	$('.user-menu').live( 'click', function(e) {  // BEGIN: User Menu
+	$('.user-menu').live( 'vclick', function(e) {  // BEGIN: User Menu
 		e.preventDefault();
 		var linkie = this;
 		$(this).simpledialog({
@@ -393,7 +393,7 @@
 				'Cancel' : function() { return true; }
 			}
 		});
-	});
+	}); // End User Menu
 	
 	
 	$('select').live('change', function(e) { // BEGIN : Add Dropdown Option

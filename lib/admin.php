@@ -59,15 +59,17 @@ class tdtrac_admin {
 	 * @return void
 	 */
 	public function output() {
-		GLOBAL $TEST_MODE, $CANCEL;
+		GLOBAL $TEST_MODE, $CANCEL, $HEAD_LINK;
 		if ( !$this->output_json ) { // HTML METHODS
 			if ( !$this->user->admin ) { $this->html = error_page('Access Denied :: You are not an administrator'); }
 			switch ( $this->action['action'] ) {
 				case "users": // View Users
+					$HEAD_LINK = array('/admin/useradd/', 'plus', 'Add User'); 
 					$this->title .= "::View Users";
 					$this->html = $this->user_view();
 					break;
 				case "useradd": // Add User
+					$CANCEL = true;
 					$this->title .= "::Add User";
 					$this->html = $this->user_add_form();
 					break;
@@ -91,6 +93,7 @@ class tdtrac_admin {
 						$this->html = error_page('Error :: Data Mismatch Detected');
 					} break;
 				case "mail":
+					$CANCEL = true;
 					$this->title .= "::TDTracMail Configuration";
 					$this->html = $this->mailcode_form();
 					break;
@@ -111,14 +114,14 @@ class tdtrac_admin {
 					case "saveuser":
 						if ( $this->action['new'] == 0 ) {
 							if ( isset($_REQUEST['id']) && is_numeric($_REQUEST['id']) ) {
-								$this->json = $this->saveuser(true);
+								$this->json = $this->user_save(true);
 								$this->json['location'] = "/admin/users/";
 							} else {
 								$this->json['success'] = false;
 								$this->json['msg'] = "Poorly Formed Request";
 							}
 						} elseif ( $this->action['new'] == 1 ) {
-							$this->json = $this->saveuser(false);
+							$this->json = $this->user_save(false);
 							$this->json['location'] = "/admin/users/";
 						} else {
 							$this->json['success'] = false;
@@ -157,8 +160,9 @@ class tdtrac_admin {
 							$this->json['msg'] = "Poorly Formed Request";
 						} break;
 					case "mailcode":
-						if ( !empty($this->action['code']) && !empty($this->action['email']) ) {
+						if ( !empty($_REQUEST['code']) && !empty($_REQUEST['email']) ) {
 							$this->json = $this->mailcode_save();
+							$this->json['location'] = "/admin/";
 						} else {
 							$this->json['success'] = false;
 							$this->json['msg'] = "Poorly Formed Request";
@@ -189,6 +193,7 @@ class tdtrac_admin {
 						} break;
 					default:
 						$this->json['success'] = false;
+						$this->json['msg'] = "undefined unit";
 						break;
 				}
 			}
@@ -381,7 +386,7 @@ class tdtrac_admin {
 	 * @return string Success / Failure Message
 	 */
 	private function perms_save($grpid) {
-		GLOBAL $db, $MYSQL_PREFIX;
+		GLOBAL $db, $MYSQL_PREFIX, $TEST_MODE;
 		if ( !is_numeric($grpid) ) { thrower("Oops :: Operation Failed"); }
 		$sql = "DELETE FROM `{$MYSQL_PREFIX}permissions` WHERE groupid = ".intval($grpid);
 		$result = mysql_query($sql, $db);
@@ -414,15 +419,20 @@ class tdtrac_admin {
 	 */
 	private function user_add_form() {
 		GLOBAL $db, $MYSQL_PREFIX, $TDTRAC_SITE;
-		$form = new tdform("{$TDTRAC_SITE}admin/useradd/", 'add-user-form', 1, 'genform', 'Add User');
+		$form = new tdform(array('action' => "{$TDTRAC_SITE}admin/saveuser/json:1/new:1/", 'id' => 'adduser'));
 		
-		$result = $form->addText('username', "User Name");
-		$result = $form->addText('password', "Password");
-		$result = $form->addText('first', "First Name");
-		$result = $form->addText('last', "Last Name");
-		$result = $form->addText('phone', "Phone");
-		$result = $form->addText('email', "E-Mail");
-		$result = $form->addDrop('groupid', "Group", null, db_list("SELECT groupname, groupid FROM {$MYSQL_PREFIX}groupnames ORDER BY groupid DESC;", array('groupid', 'groupname')), False);
+		$fesult = $form->addText(array('name' => 'username', 'label' => "User Name"));
+		$fesult = $form->addText(array('name' => 'password', 'label' => "Password"));
+		$fesult = $form->addText(array('name' => 'payrate', 'label' => "Pay Rate"));
+		$fesult = $form->addText(array('name' => 'first', 'label' => "First Name"));
+		$fesult = $form->addText(array('name' => 'last', 'label' => "Last Name"));
+		$fesult = $form->addText(array('name' => 'phone', 'label' => "Phone"));
+		$fesult = $form->addText(array('name' => 'email', 'label' => "E-Mail"));
+		$fesult = $form->addDrop(array(
+			'name' => 'groupid', 
+			'label' => "Group", 
+			'options' => db_list("SELECT groupname, groupid FROM {$MYSQL_PREFIX}groupnames ORDER BY groupid DESC;", array('groupid', 'groupname'))
+		));
 		
 		return $form->output('Add User');
 	}
@@ -441,16 +451,21 @@ class tdtrac_admin {
 		$sql = "SELECT u.*, groupid FROM `{$MYSQL_PREFIX}users` u, `{$MYSQL_PREFIX}usergroups` ug WHERE u.userid = ug.userid AND u.userid = ".intval($id)." LIMIT 1";
 		$result = mysql_query($sql, $db);
 		$row = mysql_fetch_array($result);
-		$form = new tdform("{$TDTRAC_SITE}admin/useredit/{$id}", 'edit-user-form', 1, 'genform', 'Edit User');
+		$form = new tdform(array('action' => "{$TDTRAC_SITE}admin/saveuser/json:1/new:0/", 'id' => 'edituser'));
 		
-		$fesult = $form->addText('username', "User Name", null, $row['username']);
-		$fesult = $form->addText('password', "Password", null, $row['password']);
-		$fesult = $form->addText('payrate', "Pay Rate", null, $row['payrate']);
-		$fesult = $form->addText('first', "First Name", null, $row['first']);
-		$fesult = $form->addText('last', "Last Name", null, $row['last']);
-		$fesult = $form->addText('phone', "Phone", null, $row['phone']);
-		$fesult = $form->addText('email', "E-Mail", null, $row['email']);
-		$fesult = $form->addDrop('groupid', "Group", null, db_list("SELECT groupname, groupid FROM {$MYSQL_PREFIX}groupnames ORDER BY groupid DESC;", array('groupid', 'groupname')), False, $row['groupid']);
+		$fesult = $form->addText(array('name' => 'username', 'label' => "User Name", 'preset' => $row['username']));
+		$fesult = $form->addText(array('name' => 'password', 'label' => "Password", 'preset' => $row['password']));
+		$fesult = $form->addText(array('name' => 'payrate', 'label' => "Pay Rate", 'preset' => $row['payrate']));
+		$fesult = $form->addText(array('name' => 'first', 'label' => "First Name", 'preset' => $row['first']));
+		$fesult = $form->addText(array('name' => 'last', 'label' => "Last Name", 'preset' => $row['last']));
+		$fesult = $form->addText(array('name' => 'phone', 'label' => "Phone", 'preset' => $row['phone']));
+		$fesult = $form->addText(array('name' => 'email', 'label' => "E-Mail", 'preset' => $row['email']));
+		$fesult = $form->addDrop(array(
+			'name' => 'groupid', 
+			'label' => "Group", 
+			'options' => db_list("SELECT groupname, groupid FROM {$MYSQL_PREFIX}groupnames ORDER BY groupid DESC;", array('groupid', 'groupname')),
+			'selected' => $row['groupid']
+		));
 		$fesult = $form->addHidden('id', $id);
 		
 		return $form->output('Save User');
@@ -466,7 +481,7 @@ class tdtrac_admin {
 	 * @return string Success or Failure
 	 */
 	private function user_save($exists = false) {
-		GLOBAL $db, $MYSQL_PREFIX, $TDTRAC_PAYRATE;
+		GLOBAL $db, $MYSQL_PREFIX, $TDTRAC_PAYRATE, $TEST_MODE;
 		
 		if ( !$exists ) {
 			$sqlstring  = "INSERT INTO `{$MYSQL_PREFIX}users` ( `username`, `first`, `last`, `password`, `phone`, `email`, `payrate` )";
@@ -499,7 +514,7 @@ class tdtrac_admin {
 		
 		$result = mysql_query($sql, $db);
 		
-		if ( !$result ) { return "User Save :: Failed to save user<br />".mysql_error(); }
+		if ( !$result ) { return array('success' => false, 'msg' => "User Save Failed".(($TEST_MODE)?mysql_error():"")); }
 		
 		if ( !$exists ) {
 			$sql2 = sprintf("INSERT INTO `{$MYSQL_PREFIX}usergroups` ( `userid`, `groupid` ) VALUES ( %d, %d )",
@@ -509,16 +524,16 @@ class tdtrac_admin {
 		} else {
 			$sql2  = sprintf("UPDATE `{$MYSQL_PREFIX}usergroups` SET groupid = %d WHERE userid = %d",
 				intval($_REQUEST['groupid']),
-				intval($id)
+				intval($_REQUEST['id'])
 			);
 		}
 			
 		$result = mysql_query($sql2, $db);
 		
-		if ( !$result ) {
-			return "User Save :: Failed to set group<br />".mysql_error();
+		if ( $result ) {
+			return array('success' => true, 'msg' => "User Saved");
 		} else {
-			return "User Saved :: ".$_REQUEST['username'];
+			return array('success' => false, 'msg' => "User Save Failed".(($TEST_MODE)?mysql_error():""));
 		}
 	}
 
@@ -642,7 +657,7 @@ class tdtrac_admin {
 	 * @return void
 	 */
 	private function group_add() {
-		GLOBAL $db, $MYSQL_PREFIX;
+		GLOBAL $db, $MYSQL_PREFIX, $TEST_MODE;
 		$sql = sprintf("INSERT INTO {$MYSQL_PREFIX}groupnames (groupname) VALUES ('%s')",
 			mysql_real_escape_string($this->action['newname'])
 		);
@@ -663,7 +678,7 @@ class tdtrac_admin {
 	 * @return void
 	 */
 	private function group_delete($id) {
-		GLOBAL $db, $MYSQL_PREFIX;
+		GLOBAL $db, $MYSQL_PREFIX, $TEST_MODE;
 		$sql = sprintf("DELETE FROM `{$MYSQL_PREFIX}groupnames` WHERE groupid = %d",
 			intval($id)
 		);
@@ -687,7 +702,7 @@ class tdtrac_admin {
 	 * @return void
 	 */
 	private function group_rename() {
-		GLOBAL $db, $MYSQL_PREFIX;
+		GLOBAL $db, $MYSQL_PREFIX, $TEST_MODE;
 		$sql = sprintf("UPDATE `{$MYSQL_PREFIX}groupnames` SET groupname = '%s' WHERE groupid = %d",
 			mysql_real_escape_string($this->action['newname']),
 			intval($this->action['oldname'])
@@ -708,14 +723,14 @@ class tdtrac_admin {
 	 * @return array HTML Output
 	 */
 	private function mailcode_form() {
-		GLOBAL $db, $MYSQL_PREFIX;
+		GLOBAL $db, $MYSQL_PREFIX, $TDTRAC_SITE;
 		$sql = "SELECT * FROM `tdtracmail` WHERE prefix = '{$MYSQL_PREFIX}'";
 		$result = mysql_query($sql, $db);
 		$line = mysql_fetch_array($result);
-		$form = new tdform("{$TDTRAC_SITE}admin/mail/", "form1", 1, 'genform', 'Set TDTracMail Code');
+		$form = new tdform(array('action' => "{$TDTRAC_SITE}admin/mailcode/json:1/", 'id' => 'mcode'));
 		
-		$fes = $form->addText("email", "E-Mail Address", null, $line['email']);
-		$fes = $form->addText("code", "Subject Code", null, $line['code']);
+		$fes = $form->addText(array('name'=>"email", 'label'=>"E-Mail Address", 'preset' => $line['email']));
+		$fes = $form->addText(array('name'=>"code", 'label'=>"Subject Code", 'preset' => $line['code']));
 		return $form->output('Set Code');
 	}
 	
@@ -727,14 +742,17 @@ class tdtrac_admin {
 	 * @return string Success or Failure
 	 */
 	function mailcode_save() {
-		GLOBAL $db, $MYSQL_PREFIX;
+		GLOBAL $db, $MYSQL_PREFIX, $TEST_MODE;
 		$sql = sprintf("UPDATE tdtracmail SET code = '%s', email = '%s' WHERE prefix = '{$MYSQL_PREFIX}'",
 			mysql_real_escape_string($_REQUEST['code']),
 			mysql_real_escape_string($_REQUEST['email'])
 		);
 		$result = mysql_query($sql, $db);
-		if ( !$result ) { return "Code Update Failed:<br />".mysql_error(); }
-		else { return "Code Updated"; }
+		if ( $result ) {
+			return array('success' => true, 'msg' => "Mail Code Saved");
+		} else {
+			return array('success' => false, 'msg' => "Mail Code Save Failed".(($TEST_MODE)?mysql_error():""));
+		}
 	}
 }
 
