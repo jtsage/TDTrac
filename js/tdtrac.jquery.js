@@ -309,7 +309,91 @@
 					'Cancel' : function () { return true; }
 				}
 		}); 
-	}); // END: Mark Todo Delete
+	}); // END: Group Menu
+	
+	$('.user-menu').live( 'click', function(e) {  // BEGIN: User Menu
+		e.preventDefault();
+		var linkie = this;
+		$(this).simpledialog({
+			'mode' : 'bool',
+			'prompt' : 'User #'+$(this).data('recid'),
+			'buttons' : {
+				'Edit' : {
+					'icon' : 'grid',
+					'click' : function() { $.mobile.changePage("/admin/useredit/id:"+$(linkie).data('recid')+"/"); }
+				},
+				'Toggle Active' : {
+					'icon' : 'check',
+					'click' : function() {
+						$.getJSON("/admin/toggle/json:1/switch:active/id:"+$(linkie).data('recid')+"/", function(dta) {
+								if ( dta.success === true ) {
+									infobox(dta.msg);
+									if ( dta.newval === 1 ) {
+										$(linkie).find('.u-act').attr('src', '/images/perm-ya.png');
+									} else {
+										$(linkie).find('.u-act').attr('src', '/images/perm-no.png');
+									}
+								} else {
+									infobox("Toggle Failed: "+dta.msg);
+								}
+							});
+					}
+				},
+				'Toggle On Payroll' : {
+					'icon' : 'check',
+					'click' : function() {
+						$.getJSON("/admin/toggle/json:1/switch:payroll/id:"+$(linkie).data('recid')+"/", function(dta) {
+								if ( dta.success === true ) {
+									infobox(dta.msg);
+									if ( dta.newval === 1 ) {
+										$(linkie).find('.u-pay').attr('src', '/images/perm-ya.png');
+									} else {
+										$(linkie).find('.u-pay').attr('src', '/images/perm-no.png');
+									}
+								} else {
+									infobox("Toggle Failed: "+dta.msg);
+								}
+							});
+					}
+				},
+				'Toggle Only Own Hours' : {
+					'icon' : 'check',
+					'click' : function() {
+						$.getJSON("/admin/toggle/json:1/switch:limit/id:"+$(linkie).data('recid')+"/", function(dta) {
+								if ( dta.success === true ) {
+									infobox(dta.msg);
+									if ( dta.newval === 1 ) {
+										$(linkie).find('.u-own').attr('src', '/images/perm-ya.png');
+									} else {
+										$(linkie).find('.u-own').attr('src', '/images/perm-no.png');
+									}
+								} else {
+									infobox("Toggle Failed: "+dta.msg);
+								}
+							});
+					}
+				},
+				'Toggle Notify' : {
+					'icon' : 'check',
+					'click' : function() {
+						$.getJSON("/admin/toggle/json:1/switch:notify/id:"+$(linkie).data('recid')+"/", function(dta) {
+								if ( dta.success === true ) {
+									infobox(dta.msg);
+									if ( dta.newval === 1 ) {
+										$(linkie).find('.u-not').attr('src', '/images/perm-ya.png');
+									} else {
+										$(linkie).find('.u-not').attr('src', '/images/perm-no.png');
+									}
+								} else {
+									infobox("Toggle Failed: "+dta.msg);
+								}
+							});
+					}
+				},
+				'Cancel' : function() { return true; }
+			}
+		});
+	});
 	
 	
 	$('select').live('change', function(e) { // BEGIN : Add Dropdown Option

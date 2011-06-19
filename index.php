@@ -132,8 +132,9 @@ if ( !$user->loggedin ) {
 			break;
 	
 		default: 
-			$html[] = "<ul data-role=\"listview\" data-inset=\"true\">";
-			
+			$list = new tdlist(array('id' => 'mainmenu', 'inset' => true));
+			$list->setFormat("<a href='%s'><img src='/images/main-%s.png' />%s <span class='ui-li-count'>%s</span></a>");
+		
 			$mail_num = get_single("SELECT COUNT(id) as num FROM `{$MYSQL_PREFIX}msg` WHERE toid = ".$user->id);
 			$todo_num = get_single("SELECT COUNT(*) as num FROM {$MYSQL_PREFIX}todo WHERE assigned = {$user->id} AND complete = 0");
 			
@@ -141,25 +142,22 @@ if ( !$user->loggedin ) {
 				number_format(get_single("SELECT SUM(worked*payrate) AS num FROM {$MYSQL_PREFIX}hours h, {$MYSQL_PREFIX}users u WHERE h.userid = u.userid AND submitted = 0{$extrasql}"),2) :
 				number_format(get_single("SELECT SUM(worked*payrate) AS num FROM {$MYSQL_PREFIX}hours h, {$MYSQL_PREFIX}users u WHERE h.userid = u.userid AND submitted = 0 AND h.userid = {$user->id}"),2);
 			
-			$html[] = "	<li><img src='/images/main-msg.png' /><a href=\"/mail/inbox/\">Message Inbox</a> <span class=\"ui-li-count\">{$mail_num}</span></li>";
-			$html[] = "	<li><img src='/images/main-todo.png' /><a href=\"/todo/\">Todo Lists</a> <span class=\"ui-li-count\">{$todo_num}</span></li>";
-			$html[] = "	<li><img src='/images/main-hours.png' /><a href=\"/hours/\">".(($user->isemp)?"Your ":"")."Payroll</a> <span class=\"ui-li-count\">\${$payr_num}</span></li>";
+			$list->addRow(array('/mail/inbox/', 'msg', 'Message Inbox', $mail_num));
+			$list->addRow(array('/todo/', 'todo', 'Todo Lists', $todo_num));
+			$list->addRow(array('/hours/', 'hours', (($user->isemp)?"Your ":"")."Payroll", $payr_num));
 			
 			if ( $user->can('viewbudget') ) {
-				$budg_num = number_format(get_single("SELECT SUM(price+tax) AS num FROM {$MYSQL_PREFIX}budget"),2);
-				$html[] = "	<li><img src='/images/main-budget.png' /><a href=\"/budget/\">Budgets</a> <span class=\"ui-li-count\">\${$budg_num}</span></li>";
+				$list->addRow(array('/budget/', 'budget', 'Budgets', number_format(get_single("SELECT SUM(price+tax) AS num FROM {$MYSQL_PREFIX}budget"),2)));
 			}
 			if ( $user->can('editshow') ) {
-				$show_num = get_single("SELECT COUNT(*) AS num FROM {$MYSQL_PREFIX}shows WHERE closed = 0");
-				$html[] = "	<li><img src='/images/main-shows.png' /><a href=\"/shows/\">Show Management</a> <span class=\"ui-li-count\">{$show_num}</span></li>";
+				$list->addRow(array('/shows/', 'shows', 'Show Managment', get_single("SELECT COUNT(*) AS num FROM {$MYSQL_PREFIX}shows WHERE closed = 0")));
 			}
 			if ( $user->admin ) {
-				$html[] = "	<li><img src='/images/main-admin.png' /><a href=\"/admin/\">Administration</a></li>";
+				$list->addRaw("<li><a href=\"/admin/\"><img src='/images/main-admin.png' />Administration</a></li>");
 			}
-			$html[] = "	<li data-icon='alert'><img src='/images/main-logout.png' /><a href=\"/user/logout/\">Logout</a></li>";
-
-			$html[] = "</ul>";
-			makePage($html, 'TD Tracking Made Easy');
+			$list->addRaw("	<li data-icon='alert'><a href=\"/user/logout/\"><img src='/images/main-logout.png' />Logout</a></li>");
+			
+			makePage($list->output(), 'TD Tracking Made Easy');
 			break;
 	}
 }

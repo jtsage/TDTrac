@@ -5,7 +5,7 @@
  * Contains all access control framework
  * Data hardened
  * @package tdtrac
- * @version 2.0.0
+ * @version 3.0.0
  * @author J.T.Sage <jtsage@gmail.com>
  */
 
@@ -15,7 +15,7 @@
  *  Allows configuration of users, groups and permissions
  * 
  * @package tdtrac
- * @version 2.0.0
+ * @version 3.0.0
  * @since 2.0.0
  * @author J.T.Sage <jtsage@gmail.com>
  */
@@ -31,7 +31,7 @@ class tdtrac_admin {
 	private $html = array();
 	
 	/** @var string Page Title */
-	private $title = "Shows";
+	private $title = "Admin";
 	
 	/** @var array JSON Data */
 	private $json = array();
@@ -59,7 +59,7 @@ class tdtrac_admin {
 	 * @return void
 	 */
 	public function output() {
-		GLOBAL $TEST_MODE;
+		GLOBAL $TEST_MODE, $CANCEL;
 		if ( !$this->output_json ) { // HTML METHODS
 			if ( !$this->user->admin ) { $this->html = error_page('Access Denied :: You are not an administrator'); }
 			switch ( $this->action['action'] ) {
@@ -83,6 +83,7 @@ class tdtrac_admin {
 					$this->html = $this->perms_view();
 					break;
 				case "permsedit":
+					$CANCEL = true;
 					$this->title .= "::Edit Permissions";
 					if ( isset($this->action['id']) && is_numeric($this->action['id']) ) {
 						$this->html = $this->perms_edit_form(intval($this->action['id']));
@@ -162,29 +163,29 @@ class tdtrac_admin {
 							$this->json['success'] = false;
 							$this->json['msg'] = "Poorly Formed Request";
 						} break;
-					case "payroll":
-						if ( isset($this->action['id']) && is_numeric($this->action['id']) && isset($this->action['value']) && is_numeric($this->action['value'])) {
-							$this->user_payroll(intval($this->action['id']));
-						} else {
+					case "toggle":
+						if ( !isset($this->action['switch']) || empty($this->action['switch']) || !isset($this->action['id']) || !is_numeric($this->action['id']) ) {
 							$this->json['success'] = false;
-						} break;
-					case "limithours":
-						if ( isset($this->action['id']) && is_numeric($this->action['id']) && isset($this->action['value']) && is_numeric($this->action['value'])) {
-							$this->user_limit(intval($this->action['id']));
+							$this->json['msg'] = "Poorly Formed Request";
 						} else {
-							$this->json['success'] = false;
-						} break;
-					case "notify":
-						if ( isset($this->action['id']) && is_numeric($this->action['id']) && isset($this->action['value']) && is_numeric($this->action['value'])) {
-							$this->user_notify(intval($this->action['id']));
-						} else {
-							$this->json['success'] = false;
-						} break;
-					case "active":
-						if ( isset($this->action['id']) && is_numeric($this->action['id']) && isset($this->action['value']) && is_numeric($this->action['value'])) {
-							$this->user_active(intval($this->action['id']));
-						} else {
-							$this->json['success'] = false;
+							switch($this->action['switch']) {
+								case "payroll":
+									$this->json = $this->user_payroll(intval($this->action['id']));
+									break;
+								case "limit":
+									$this->json = $this->user_limit(intval($this->action['id']));
+									break;
+								case "notify":
+									$this->json = $this->user_notify(intval($this->action['id']));
+									break;
+								case "active":
+									$this->json = $this->user_active(intval($this->action['id']));
+									break;
+								default:
+									$this->json['success'] = false;
+									$this->json['msg'] = 'Unknown switch';
+									break;
+							}
 						} break;
 					default:
 						$this->json['success'] = false;
@@ -209,12 +210,20 @@ class tdtrac_admin {
 	 */
 	 private function user_notify($id) {
 		GLOBAL $db, $MYSQL_PREFIX;
-		$sql  = "UPDATE {$MYSQL_PREFIX}users SET notify = ".intval($this->action['value'])." WHERE userid = '".intval($id)."'";
-		$result = mysql_query($sql, $db);
-		if ( $result ) {
-			$this->json['success'] = true;
+		$current = get_single("SELECT notify AS num FROM `{$MYSQL_PREFIX}users` WHERE userid = {$id}");
+		
+		if ( $current == 1 ) {
+			$sql  = "UPDATE {$MYSQL_PREFIX}users SET notify = 0 WHERE userid = '".intval($id)."'";
 		} else {
-			$this->json['success'] = false;
+			$sql  = "UPDATE {$MYSQL_PREFIX}users SET notify = 1 WHERE userid = '".intval($id)."'";
+		}
+		
+		$result = mysql_query($sql, $db);
+		
+		if ( $result ) {
+			return array('success' => true, 'msg' => "User #{$id} Marked ".(($current==1)?"Not Notified":"Notified"), 'newval' => (($current==1)?0:1) );
+		} else {
+			return array('success' => false, 'msg' => "Toggle Failed ".(($TEST_MODE)?mysql_error():""));
 		}
 	}
 	
@@ -228,12 +237,20 @@ class tdtrac_admin {
 	 */
 	 private function user_payroll($id) {
 		GLOBAL $db, $MYSQL_PREFIX;
-		$sql  = "UPDATE {$MYSQL_PREFIX}users SET payroll = ".intval($this->action['value'])." WHERE userid = '".intval($id)."'";
-		$result = mysql_query($sql, $db);
-		if ( $result ) {
-			$this->json['success'] = true;
+		$current = get_single("SELECT payroll AS num FROM `{$MYSQL_PREFIX}users` WHERE userid = {$id}");
+		
+		if ( $current == 1 ) {
+			$sql  = "UPDATE {$MYSQL_PREFIX}users SET payroll = 0 WHERE userid = '".intval($id)."'";
 		} else {
-			$this->json['success'] = false;
+			$sql  = "UPDATE {$MYSQL_PREFIX}users SET payroll = 1 WHERE userid = '".intval($id)."'";
+		}
+		
+		$result = mysql_query($sql, $db);
+		
+		if ( $result ) {
+			return array('success' => true, 'msg' => "User #{$id} Marked ".(($current==1)?"Off Payroll":"On Payroll"), 'newval' => (($current==1)?0:1) );
+		} else {
+			return array('success' => false, 'msg' => "Toggle Failed ".(($TEST_MODE)?mysql_error():""));
 		}
 	}
 	
@@ -247,12 +264,20 @@ class tdtrac_admin {
 	 */
 	 private function user_limit($id) {
 		GLOBAL $db, $MYSQL_PREFIX;
-		$sql  = "UPDATE {$MYSQL_PREFIX}users SET limithours = ".intval($this->action['value'])." WHERE userid = '".intval($id)."'";
-		$result = mysql_query($sql, $db);
-		if ( $result ) {
-			$this->json['success'] = true;
+		$current = get_single("SELECT limithours AS num FROM `{$MYSQL_PREFIX}users` WHERE userid = {$id}");
+		
+		if ( $current == 1 ) {
+			$sql  = "UPDATE {$MYSQL_PREFIX}users SET limithours = 0 WHERE userid = '".intval($id)."'";
 		} else {
-			$this->json['success'] = false;
+			$sql  = "UPDATE {$MYSQL_PREFIX}users SET limithours = 1 WHERE userid = '".intval($id)."'";
+		}
+		
+		$result = mysql_query($sql, $db);
+		
+		if ( $result ) {
+			return array('success' => true, 'msg' => "User #{$id} Marked ".(($current==1)?"Not Limitied":"Limited"), 'newval' => (($current==1)?0:1) );
+		} else {
+			return array('success' => false, 'msg' => "Toggle Failed ".(($TEST_MODE)?mysql_error():""));
 		}
 	}
 
@@ -266,12 +291,20 @@ class tdtrac_admin {
 	 */
 	 private function user_active($id) {
 		GLOBAL $db, $MYSQL_PREFIX;
-		$sql  = "UPDATE {$MYSQL_PREFIX}users SET active = ".intval($this->action['value'])." WHERE userid = '".intval($id)."'";
-		$result = mysql_query($sql, $db);
-		if ( $result ) {
-			$this->json['success'] = true;
+		$current = get_single("SELECT active AS num FROM `{$MYSQL_PREFIX}users` WHERE userid = {$id}");
+		
+		if ( $current == 1 ) {
+			$sql  = "UPDATE {$MYSQL_PREFIX}users SET active = 0 WHERE userid = '".intval($id)."'";
 		} else {
-			$this->json['success'] = false;
+			$sql  = "UPDATE {$MYSQL_PREFIX}users SET active = 1 WHERE userid = '".intval($id)."'";
+		}
+		
+		$result = mysql_query($sql, $db);
+		
+		if ( $result ) {
+			return array('success' => true, 'msg' => "User #{$id} Marked ".(($current==1)?"Inactive":"Active"), 'newval' => (($current==1)?0:1) );
+		} else {
+			return array('success' => false, 'msg' => "Toggle Failed ".(($TEST_MODE)?mysql_error():""));
 		}
 	}
 	
@@ -313,85 +346,6 @@ class tdtrac_admin {
 	}
 	
 	/**
-	 * View all permissions
-	 * 
-	 * @global object Database Link
-	 * @global array Name of all known permissions
-	 * @global string MySQL Table Prefix
-	 * @return array HTML output
-	 */
-	private function perms_view() {
-		GLOBAL $db, $TDTRAC_PERMS, $MYSQL_PREFIX;
-		
-		$perm_sql = "SELECT groupname, permid FROM `{$MYSQL_PREFIX}groupnames` gn, `{$MYSQL_PREFIX}permissions` pm WHERE pm.groupid = gn.groupid AND pm.permcan = 1 ORDER BY groupname, permid";
-		$perm_res = mysql_query($perm_sql, $db);
-		while ( $row = mysql_fetch_array($perm_res) ) {
-			$disperm[$row['groupname']][$row['permid']] = true;
-		}
-		
-		$grop_sql = "SELECT groupname as name, groupid as id FROM `{$MYSQL_PREFIX}groupnames` ORDER BY groupid";
-		$grop_res = mysql_query($grop_sql, $db);
-		
-		$html[] = "<h3>Permissions</h3>";
-		$html[] = "<div style=\"font-size: .75em;\"><div style=\"width: 46%; float: left; margin-left: 4%;\">".
-			"<dl><dt>Show</dt>".
-				"<dd>A :: Can Add New Shows / Jobs</dd>" .
-				"<dd>E :: Can Edit Shows / Jobs information</dd>" .
-				"<dd>V :: Can View Current and Past Shows / Jobs</dd>" .
-			"<dt>Budget</dt>".
-				"<dd>A :: Can Add Expenses</dd>" .
-				"<dd>E :: Can Edit or Delete Expenses Information</dd>" .
-				"<dd>V :: Can View budget details, including labor cost</dd></dl></div>";
-		$html[] = "<div style=\"width: 46%; float: left; margin-left: 4%;\">".
-			"<dl><dt>Hours</dt>".
-				"<dd>A :: Can Add Hours for employees on payroll.</dd>" .
-				"<dd>E :: Can Edit or Delete payroll items.</dd>" .
-				"<dd>V :: Can View Labor reports.</dd>" .
-			"<dt>Todo</dt>".
-				"<dd>A :: Can Add ToDo List Items</dd>".
-				"<dd>E :: Can Edit ToDo List Items</dd>".
-				"<dd>V :: Can View All Todo Lists</dd></dl></div></div>";
-		$html[] = "<div style=\"clear: both\"><br /></div>";
-		
-		
-		$tabl = new tdtable("perms", 'permtable', true);
-		$perm = array('A', 'E', 'V');
-		$tabl->addRaw('<tr><th colspan="2"></th><th colspan="3">Show</th><th colspan="3">Budget</th><th colspan="3">Hours</th><th colspan="3">Todo</th><th></th></tr>');
-		$tabl->addHeader(array_merge(array('Group', 'Members'), $perm, $perm, $perm, $perm));
-		$tabl->addAction(array('pmedit',));
-		
-		foreach ( $perm as $cph ) {
-			$tabl->setAlign($cph, 'center');
-		}
-		
-		while( $row = mysql_fetch_array($grop_res) ) {
-			$members  = array();
-			$setperms = array();
-			$sql = "SELECT u.username FROM `{$MYSQL_PREFIX}users` u, `{$MYSQL_PREFIX}groupnames` gn, `{$MYSQL_PREFIX}usergroups` ug WHERE gn.groupname = '{$row['name']}' AND gn.groupid = ug.groupid AND ug.userid = u.userid ORDER BY username ASC";
-			$result = mysql_query($sql, $db);
-			if ( mysql_num_rows($result) < 1 ) { 
-				$members[] = "<em>N/A</em>";
-			} else {
-				while ( $mrow = mysql_fetch_array($result) ) {
-					$members[] = $mrow['username'];
-				}
-			}
-			foreach ( $this->perms_avail as $cp ) {
-				if ( $disperm[$row['name']][$cp] ) { 
-					$setperms[] = "<img class=\"ticon\" src=\"/images/perm-ya.png\" title=\"{$row['name']}::{$cp}::True\" />";
-				} else {
-					$setperms[] = "<img class=\"ticon\" src=\"/images/perm-no.png\" title=\"{$row['name']}::{$cp}::False\" />";
-				}
-			}
-			
-			$rowarray = array_merge(array( $row['name'], join('<br />', $members) ), $setperms);
-			
-			$tabl->addRow($rowarray, $row);
-		}
-		return array_merge($html, $tabl->output(false));
-	}
-	
-	/**
 	 * Show permission edit form
 	 *
 	 * @param integer ID of group to edit 
@@ -403,9 +357,8 @@ class tdtrac_admin {
 	private function perms_edit_form($id) {
 		GLOBAL $db, $MYSQL_PREFIX, $TDTRAC_SITE;
 		
-		$form = new tdform("{$TDTRAC_SITE}admin/permsedit/{$id}", 'genform', 1, 'genform', "Edit :: ".$this->user->get_group($id));
+		$form = new tdform(array('action' => "{$TDTRAC_SITE}admin/permsave/json:1/id:{$id}/"));
 	
-		$fesult = $form->addInfo("T / F");
 		$fesult = $form->addHidden('id', $id);
 		$sql = "SELECT permid, permcan FROM {$MYSQL_PREFIX}permissions pm WHERE groupid = {$id}";
 		$result = mysql_query($sql, $db);
@@ -414,7 +367,7 @@ class tdtrac_admin {
 			$dbperm[$pname] = $pvalue;
 		}
 		foreach ( $this->perms_avail as $perm ) {
-			$fesult = $form->addRadio($perm, $perm, null, $dbperm[$perm]);
+			$fesult = $form->addToggle(array('name' => $perm, 'preset' => $dbperm[$perm], 'label' => $perm));
 		}	
 		return $form->output('Save');
 	}
@@ -438,9 +391,17 @@ class tdtrac_admin {
 				$perm,
 				(($_REQUEST[$perm]) ? "1" : "0")
 			);
-			mysql_query($sql, $db);
+			$result2 = mysql_query($sql, $db);
+			if (!$result2) {
+				return array('success' => false, 'msg' => "Permission Save Failed".(($TEST_MODE)?mysql_error():""));
+			}
 		}
-		return "Permissions for ".$this->user->get_group($grpid)." Updated";
+		
+		if ( $result ) {
+			return array('success' => true, 'msg' => "Permissions Saved");
+		} else {
+			return array('success' => false, 'msg' => "Permission Save Failed".(($TEST_MODE)?mysql_error():""));
+		}
 	}
 
 	/**
@@ -574,8 +535,35 @@ class tdtrac_admin {
 		GLOBAL $db, $MYSQL_PREFIX, $TDTRAC_SITE, $SITE_SCRIPT;
 		$sql = "SELECT *, DATE_FORMAT(lastlogin, '%b %D %h:%i %p') AS lastlog FROM `{$MYSQL_PREFIX}users` ORDER BY last ASC, first ASC";
 		$result = mysql_query($sql, $db); $html = "";
+		
+		$list = new tdlist(array('id' => 'user_list', 'inset' => true));
+		
+		foreach ( array('User Name', 'Group', 'Phone Number', 'E-Mail Address', 'Pay Rate', 'Last Login') as $thisdet ) {
+			$details[] = "<strong>{$thisdet}:</strong> %s";
+		}
+		foreach ( array('u-act' => 'Active', 'u-pay' => 'Payroll', 'u-own' => 'A/V/E Only Own Hours', 'u-not' => 'Notify on Payroll') as $thiscls => $thisdet ) {
+			$sidebar[] = "<strong>{$thisdet}:</strong> <img class='{$thiscls}' src='/images/perm-%s.png'>";
+		}
+		$list->setFormat("<a href='#' class='user-menu' data-recid='%d'><h3>%s</h3><p>".join("<br />", $details)."</p><p class='ui-li-aside'>".join("<br />", $sidebar)."</p></a>");
+		
 		while ( $row = mysql_fetch_array($result) ) {
 			
+			$list->addRow(array(
+				$row['userid'],
+				$row['first'] . " " . $row['last'],
+				$row['username'],
+				join(", ", $this->groups_by_user($row['userid'])),
+				(($row['phone']!='0')?format_phone($row['phone']):"N/A"),
+				(!empty($row['email'])?$row['email']:"N/A"),
+				"$".number_format($row['payrate'], 2),
+				((!empty($row['lastlog']))?$row['lastlog']:"Never"),
+				(($row['active'])?"ya":"no"),
+				(($row['payroll'])?"ya":"no"),
+				(($row['limithours'])?"ya":"no"),
+				(($row['notify'])?"ya":"no")
+			));
+				
+				
 			$jqoptions['active']     = array("Active", "Inactive");
 			$jqoptions['payroll']    = array("On Payroll", "Off Payroll");
 			$jqoptions['notify']     = array("Notify on Hours", "No Notification");
@@ -624,7 +612,7 @@ class tdtrac_admin {
 			$html[] = "</table><br /><br />";
 		}
 		$html[] = "<p><strong>Please Note:</strong> You can adjust user flags from this page.</p>";
-		return $html;
+		return $list->output();
 	}
 
 	/**
@@ -656,7 +644,7 @@ class tdtrac_admin {
 		$perms .= "<strong>Todo     : </strong>{$img}<br />";
 		$perms .= "<strong>Memebers : </strong>%s</pre>";
 		
-		$list->setFormat("<img src='/images/main-admin.png' /><a class='group-menu' data-id='%d' href='#'><h3>%s</h3><p>{$perms}</p></a>");
+		$list->setFormat("<a class='group-menu' data-id='%d' href='#'><h3>%s</h3><p>{$perms}</p></a>");
 		
 		foreach ( $groups as $group ) {
 			$permtext = array();
@@ -679,7 +667,7 @@ class tdtrac_admin {
 			}
 			$list->addRow(array_merge(array($group[0], $group[1]." (".$group[0].")"),$permtext,array(join(', ', $members))));
 		}
-		$list->addRaw("<li data-theme='c'><img src='/images/main-admin.png' /><a data-id='0' class='group-add' href='#'><h3>Add Group</h3></a></li>");
+		$list->addRaw("<li data-theme='c'><a data-id='0' class='group-add' href='#'><h3>Add Group</h3></a></li>");
 		return $list->output();
 		
 		$form1 = new tdform("{$TDTRAC_SITE}admin/groups/", 'form1', 1, 'genform', 'Add Group');
