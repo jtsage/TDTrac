@@ -5,7 +5,7 @@
  * Contains the todo list functions
  * Data hardened since 1.3.1
  * @package tdtrac
- * @version 2.0.0
+ * @version 3.0.0
  * @author J.T.Sage <jtsage@gmail.com>
  * @since 1.3.1
  */
@@ -15,7 +15,7 @@
  *  Allows per-user and per-show task lists
  * 
  * @package tdtrac
- * @version 2.0.0
+ * @version 3.0.0
  * @since 2.0.0
  * @author J.T.Sage <jtsage@gmail.com>
  */
@@ -471,30 +471,6 @@ class tdtrac_todo {
 			$this->json['success'] = false;
 		}
 	}
-}
-
-/**
- * Check for outstanding todo items
- * 
- * @global resource Database Link
- * @global string MySQL Table Prefix
- * @global object User Object
- * @global string Site address for links
- * @return string HTML output
- */
-function todo_check() {
-	GLOBAL $db, $MYSQL_PREFIX, $user, $TDTRAC_SITE;
-	$html = "<div class=\"infobox\"><span style=\"font-size: .7em\">";
-	$tosql = "SELECT COUNT(id) as num FROM {$MYSQL_PREFIX}todo WHERE assigned = '{$user->id}' AND complete = 0";
-	$result1 = mysql_query($tosql, $db);
-	if ( !mysql_error() && mysql_num_rows($result1) > 0 ) {
-		$row1 = mysql_fetch_array($result1);
-		mysql_free_result($result1);
-		$ret = 0;
-		if ( !is_null($row1['num']) && $row1['num'] > 0 ) { $html .= "You Have <strong>{$row1['num']}</strong> Incomplete Tasks Waiting (<a href=\"{$TDTRAC_SITE}todo/view/id:{$user->id}/type:user/\">[-View-]</a>)<br />"; $ret = 1; }
-		$html .= "</span></div>\n";
-	} else { $ret = 0; }
-	if ( $ret ) { return $html; } else { return ""; }
 }
 
 

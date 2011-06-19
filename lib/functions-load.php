@@ -13,7 +13,7 @@ require_once("dbaseconfig.php");
 
 /** Library: Forms */
 require_once("formlib.php");
-/** Library: Tables */
+/** Library: Tables */  //REM PRIOR TO 3.0
 require_once("tablelib.php");
 /** Library: HTML */
 require_once("htmllib.php");
@@ -60,9 +60,15 @@ function debug_js($variable) {
 	return "<script type='text/javascript'> var x = ".json_encode($variable)."; console.log(x);</script>"; 
 }
 
+/** Put a script inline
+ * 
+ * @param array Script Code
+ * @return array Wrapped script code
+ */
 function inline_script($script) {
 	return array("<script type='text/javascript'>".join($script)."</script>");
 }
+
 /**
  * Generate an error page
  * 
@@ -82,6 +88,7 @@ function error_page($text, $extra = '') {
 /**
  * Throw a message to the user
  * 
+ * @depreciated 3.0.0 Not compatable with jQM
  * @param string Message to send (or false)
  * @param string Location to navigate to
  * @global string Address to redirct to

@@ -6,7 +6,7 @@
  * Data hardened as of 1.3.1
  *  
  * @package tdtrac
- * @version 2.0.0
+ * @version 3.0.0
  * @author J.T.Sage <jtsage@gmail.com>
  * @since 0.0.9a
  */
@@ -16,7 +16,7 @@
  *  Allows per-show budget tracking
  * 
  * @package tdtrac
- * @version 2.0.0
+ * @version 3.0.0
  * @since 2.0.0
  * @author J.T.Sage <jtsage@gmail.com>
  */

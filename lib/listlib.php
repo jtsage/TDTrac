@@ -2,19 +2,19 @@
 /**
  * TDTrac List Library
  * 
- * Contains the table library
+ * Contains the list library
  * @package tdtrac
  * @version 3.0.0
  * @author J.T.Sage <jtsage@gmail.com>
  */
 
 /**
- * TDTable Class
+ * TDList Class
  * @package tdtrac
  */
 class tdlist {
 	/**
-	 * @var array Form Member storage
+	 * @var array List Member storage
 	 */
 	public $items = null;
 	/**
@@ -22,7 +22,7 @@ class tdlist {
 	 */
 	private $html = "";
 	/**
-	 * @var string Name of Form
+	 * @var array Various list options
 	 */
 	private $options = array();
 	/**
@@ -30,22 +30,24 @@ class tdlist {
 	 */
 	public $currentrow = 0;
 	/**
-	 * @var integer Subtotal on this table element
-	 */
-	private $totals = null;
-	/**
-	 * @var array Running Subtotal (array of doubles.  Total all currency values)
+	 * @var array Action list for view
 	 */
 	private $actionlist = null;
 	/**
-	 * @var string Where we come from, for message redirect
+	 * @var string Row output, sprintf format.
 	 */
 	private $formatsting = false;
 	
 	/**
-	 * Create a new table
+	 * Create a new list
 	 * 
-	 * @param array Passed variables - id, actions, icon, inset
+	 * Options:
+	 * 	'id'      => List ID
+	 * 	'actions' => Bool, use split list action
+	 *  'icon'    => Icon for split list action
+	 *  'inset'   => Inset mode
+	 * 
+	 * @param array Array of named options
 	 * @return object
 	 */
 	public function __construct($passed) {
@@ -57,7 +59,7 @@ class tdlist {
 	/**
 	 * Add an action to each table row
 	 * 
-	 * @param string Action name (or array of names)
+	 * @param mixed Action name / array of names
 	 * @return void
 	 */
 	public function addAction($name) {
@@ -70,10 +72,29 @@ class tdlist {
 		}
 	}
 	
+	/** 
+	 * Set the format of each list row
+	 * 
+	 * @param string vsprintf Format
+	 * @return null
+	 */
 	public function setFormat($format = "<p>%s</p>") {
 		$this->formatstring = $format;
 	}
 	
+	/**
+	 * Add a row to the list
+	 * 
+	 * Options:
+	 *  'noformat' => Bool, output row as-is, don't sprintf
+	 *  'theme'    => Theme for row
+	 *  'numbers'  => Presumably math related, does nothing right now.
+	 * 
+	 * @param array Array of values to fill in format
+	 * @param array Raw SQL array of data (for actions)
+	 * @param array Options array
+	 * @return null
+	 */
 	public function addRow($text, $raw=null, $passed=null) {
 		$default = array('numbers' => false, 'noformat' => false, 'theme' => 'c');
 		$argus = merge_defaults($default, $passed);
@@ -86,14 +107,32 @@ class tdlist {
 		$this->currentrow++;
 	}
 	
+	/**
+	 * Add a list divider
+	 * 
+	 * @param string Text for divider
+	 * @param string Text for count bubble, or false
+	 * @return null
+	 */
 	public function addDivide($text, $count = false) {
 		$this->addRow("<li data-role='list-divider'>{$text}".(($count!=false)?"<span class='ui-li-count'>{$count}</span>":"")."</li>", null, array('noformat' => true));
 	}
 	
+	/**
+	 * Output raw data as a row
+	 * 
+	 * @param string Text to add as a row
+	 * @return null
+	 */
 	public function addRaw($row) {
 		$this->addRow($row, null, array('noformat' => true));
 	}
 	
+	/**
+	 * Return the formatted list
+	 * 
+	 * @return array Formatted HTML
+	 */
 	public function output() {
 		return array_merge(
 			array("<ul id='list_{$this->options['id']}' ".($this->options['inset']?'data-inset="true" ':'').($this->options['actions']?"data-split-icon='{$this->options['icon']}' data-split-theme='d'":"")." data-role='listview'>"),
@@ -101,6 +140,12 @@ class tdlist {
 			array("</ul>"));
 	}
 	
+	/** 
+	 * Run actions
+	 * 
+	 * @param array Raw SQL array
+	 * @return string Formatted HTML
+	 */
 	private function do_actions($raw) {
 		$rethtml = "";
 		foreach ( $this->actionlist as $action ) {

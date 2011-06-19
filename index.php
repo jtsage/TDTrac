@@ -4,7 +4,7 @@
  * 
  * Contains main program logic.
  * @package tdtrac
- * @version 2.0.0
+ * @version 3.0.0
  * @author J.T.Sage <jtsage@gmail.com>
  */
 ob_start(); session_start(); 

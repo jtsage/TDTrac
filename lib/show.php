@@ -5,7 +5,7 @@
  * Contains all show related functions. 
  * Data hardened
  * @package tdtrac
- * @version 2.0.0
+ * @version 3.0.0
  * @author J.T.Sage <jtsage@gmail.com>
  */
  
@@ -14,7 +14,7 @@
  *  Allows configuration of shows
  * 
  * @package tdtrac
- * @version 2.0.0
+ * @version 3.0.0
  * @since 2.0.0
  * @author J.T.Sage <jtsage@gmail.com>
  */

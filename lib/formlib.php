@@ -4,7 +4,7 @@
  * 
  * Contains the form library
  * @package tdtrac
- * @version 2.0.0
+ * @version 3.0.0
  * @author J.T.Sage <jtsage@gmail.com>
  */
 
@@ -209,7 +209,7 @@ class tdform {
 	}
 	
 	/**
-	 * Add a TEXT input to the form
+	 * Add a HORIZONTAL RADIO input to the form
 	 * 
 	 * Options:
 	 * 	'id' => Label ID
@@ -231,8 +231,7 @@ class tdform {
 			'preset'	=> null,
 			'enabled'	=> True,
 			'id'		=> null,
-			'options'	=> array(),
-			'hide'		=> False
+			'options'	=> array()
 			);
 		$options = merge_defaults($default, $passed);
 		
@@ -433,27 +432,6 @@ class tdform {
 		return true;
 	}
 	
-	/**
-	 * Add a RADIO input to the form
-	 * 
-	 * @param string Name of input field
-	 * @param string Text to display before input
-	 * @param string Hover text for element
-	 * @param string Preset value of element
-	 * @param bool Element is enabled
-	 * @return bool True on success
-	 */
-	public function addRadio($name = 'radio', $text = null, $title = null, $preset = False, $enabled = True ) {
-		$this->members[] = array('radio', $name, $text, $title, $preset);
-		if ( $title == null ) { $title = $text; }
-		$temp  = "  <div data-role=\"fieldcontain\" title=\"{$title}\"><label for=\"{$name}\">{$text}</label>";
-		$temp .= "<input type=\"radio\" name=\"{$name}\" tabindex=\"{$this->tabindex}\" value=\"1\" ".($preset?"checked=\"checked\"":"")." />";
-		$this->tabindex++;
-		$temp .= "<input type=\"radio\" name=\"{$name}\" tabindex=\"{$this->tabindex}\" value=\"0\" ".($preset?"":"checked=\"checked\"")."/></div>";
-		$this->html[] = $temp;
-		$this->tabindex++;
-		return true;
-	}
 }
 
 ?>
