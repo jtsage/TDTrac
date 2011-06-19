@@ -69,7 +69,11 @@ function makeHeader($title = '') {
 	$html[] = '	<script src="http://code.jquery.com/mobile/latest/jquery.mobile.js"></script>';
 	$html[] = '	<script type="text/javascript" src="http://dev.jtsage.com/cdn/datebox/latest/jquery.mobile.datebox.min.js"></script>';
 	$html[] = '	<script type="text/javascript" src="http://dev.jtsage.com/cdn/simpledialog/latest/jquery.mobile.simpledialog.min.js"></script>';
-	$html[] = '	<script type="text/javascript" src="'.$TDTRAC_SITE.'js/tdtrac.jquery.js"></script>';
+	if ( $TEST_MODE ) {
+		$html[] = '	<script type="text/javascript" src="'.$TDTRAC_SITE.'js/tdtrac.jquery.js"></script>';
+	} else {
+		$html[] = '	<script type="text/javascript" src="'.$TDTRAC_SITE.'js/tdtrac.jquery.min.js"></script>';
+	}
 	$html[] = "</head>\n\n<body>";
 	$pageid = ( $action['module'] == 'help' ) ? "help-{$action['action']}-{$action['oper']}" : "{$action['module']}-{$action['action']}";
 	$html[] = "	<div data-role=\"page\" data-theme=\"a\" data-id=\"{$pageid}\">";
