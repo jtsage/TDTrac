@@ -13,8 +13,8 @@ require_once("dbaseconfig.php");
 
 /** Library: Forms */
 require_once("formlib.php");
-/** Library: Tables */  //REM PRIOR TO 3.0
-//require_once("tablelib.php");
+/** Library: Tables */  //REM PRIOR TO 3.0 - STILL USED IN EMAILS THOUGH!
+require_once("tablelib.php");
 /** Library: HTML */
 require_once("htmllib.php");
 /** Library: tdtrac_user */

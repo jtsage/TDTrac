@@ -24,17 +24,11 @@ class tdtrac_admin {
 	/** @var array Parsed query string */
 	private $action = array();
 	
-	/** @var bool Output format (TURE = json, FALSE = html) */
-	private $output_json = false;
-	
 	/** @var array Formatted HTML */
 	private $html = array();
 	
 	/** @var string Page Title */
 	private $title = "Admin";
-	
-	/** @var array JSON Data */
-	private $json = array();
 	
 	/** @var array Available Permissions */
 	private $perms_avail = array("addshow", "editshow", "viewshow", "addbudget", "editbudget", "viewbudget", "addhours", "edithours", "viewhours", "addtodo", "edittodo", "viewtodo");
@@ -60,8 +54,9 @@ class tdtrac_admin {
 	 */
 	public function output() {
 		GLOBAL $TEST_MODE, $CANCEL, $HEAD_LINK;
-		if ( !$this->output_json ) { // HTML METHODS
-			if ( !$this->user->admin ) { $this->html = error_page('Access Denied :: You are not an administrator'); }
+		if ( !$this->user->admin ) { 
+			$this->html = error_page('Access Denied :: You are not an administrator'); 
+		} else {
 			switch ( $this->action['action'] ) {
 				case "users": // View Users
 					$HEAD_LINK = array('/admin/useradd/', 'plus', 'Add User'); 
@@ -105,216 +100,13 @@ class tdtrac_admin {
 					$this->html = $this->index();
 					break;
 			}
-			makePage($this->html, $this->title);
-		} else {
-			if ( !$this->user->admin ) { 
-				$this->json['success'] = false; $this->json['msg'] = "Permission Denied"; 
-			} else {
-				switch($this->action['action']) {
-					case "saveuser":
-						if ( $this->action['new'] == 0 ) {
-							if ( isset($_REQUEST['id']) && is_numeric($_REQUEST['id']) ) {
-								$this->json = $this->user_save(true);
-								$this->json['location'] = "/admin/users/";
-							} else {
-								$this->json['success'] = false;
-								$this->json['msg'] = "Poorly Formed Request";
-							}
-						} elseif ( $this->action['new'] == 1 ) {
-							$this->json = $this->user_save(false);
-							$this->json['location'] = "/admin/users/";
-						} else {
-							$this->json['success'] = false;
-							$this->json['msg'] = "Poorly Formed Request";
-						} break;
-					case "remgroup":
-						if ( isset($this->action['oldname']) && is_numeric($this->action['oldname']) ) {
-							$this->json = $this->group_delete($this->action['oldname']);
-							$this->json['location'] = "/admin/groups/";
-						} else {
-							$this->json['success'] = false;
-							$this->json['msg'] = "Poorly Formed Request";
-						} break;
-					case "group":
-						if ( !empty($this->action['newname']) && is_numeric($this->action['oldname']) ) {
-							if ( $this->action['oldname'] ==  1 ) {
-								$this->json['success'] = false;
-								$this->json['msg'] = "Cannot rename admin group";
-							} else {
-								$this->json = $this->group_rename();
-								$this->json['location'] = "/admin/groups/";
-							}
-						} elseif ( !empty($this->action['newname']) ) {
-							$this->json = $this->group_add();
-							$this->json['location'] = "/admin/groups/";
-						} else {
-							$this->json['success'] = false;
-							$this->json['msg'] = "Poorly Formed Request";
-						} break;
-					case "permsave":
-						if ( isset($this->action['id']) && is_numeric($this->action['id']) ) {
-							$this->json = $this->perms_save(intval($this->action['id']));
-							$this->json['location'] = "/admin/groups/";
-						} else {
-							$this->json['success'] = false;
-							$this->json['msg'] = "Poorly Formed Request";
-						} break;
-					case "mailcode":
-						if ( !empty($_REQUEST['code']) && !empty($_REQUEST['email']) ) {
-							$this->json = $this->mailcode_save();
-							$this->json['location'] = "/admin/";
-						} else {
-							$this->json['success'] = false;
-							$this->json['msg'] = "Poorly Formed Request";
-						} break;
-					case "toggle":
-						if ( !isset($this->action['switch']) || empty($this->action['switch']) || !isset($this->action['id']) || !is_numeric($this->action['id']) ) {
-							$this->json['success'] = false;
-							$this->json['msg'] = "Poorly Formed Request";
-						} else {
-							switch($this->action['switch']) {
-								case "payroll":
-									$this->json = $this->user_payroll(intval($this->action['id']));
-									break;
-								case "limit":
-									$this->json = $this->user_limit(intval($this->action['id']));
-									break;
-								case "notify":
-									$this->json = $this->user_notify(intval($this->action['id']));
-									break;
-								case "active":
-									$this->json = $this->user_active(intval($this->action['id']));
-									break;
-								default:
-									$this->json['success'] = false;
-									$this->json['msg'] = 'Unknown switch';
-									break;
-							}
-						} break;
-					default:
-						$this->json['success'] = false;
-						$this->json['msg'] = "undefined unit";
-						break;
-				}
-			}
-			if ( $TEST_MODE ) {
-				$this->json['action'] = $this->action;
-				$this->json['request'] = $_REQUEST;
-			}
-			echo json_encode($this->json);
-		} 
+		}
+		makePage($this->html, $this->title);
 	} // END OUTPUT FUNCTION
 	
-	/**
-	 * Mark a user as notified of new hours (or not)
-	 * 
-	 * @param integer User ID
-	 * @global object DB Resource
-	 * @global string MySQL Prefix
-	 * @return void
-	 */
-	 private function user_notify($id) {
-		GLOBAL $db, $MYSQL_PREFIX;
-		$current = get_single("SELECT notify AS num FROM `{$MYSQL_PREFIX}users` WHERE userid = {$id}");
-		
-		if ( $current == 1 ) {
-			$sql  = "UPDATE {$MYSQL_PREFIX}users SET notify = 0 WHERE userid = '".intval($id)."'";
-		} else {
-			$sql  = "UPDATE {$MYSQL_PREFIX}users SET notify = 1 WHERE userid = '".intval($id)."'";
-		}
-		
-		$result = mysql_query($sql, $db);
-		
-		if ( $result ) {
-			return array('success' => true, 'msg' => "User #{$id} Marked ".(($current==1)?"Not Notified":"Notified"), 'newval' => (($current==1)?0:1) );
-		} else {
-			return array('success' => false, 'msg' => "Toggle Failed ".(($TEST_MODE)?mysql_error():""));
-		}
-	}
-	
-	/**
-	 * Mark a user on payroll (or not)
-	 * 
-	 * @param integer User ID
-	 * @global object DB Resource
-	 * @global string MySQL Prefix
-	 * @return void
-	 */
-	 private function user_payroll($id) {
-		GLOBAL $db, $MYSQL_PREFIX;
-		$current = get_single("SELECT payroll AS num FROM `{$MYSQL_PREFIX}users` WHERE userid = {$id}");
-		
-		if ( $current == 1 ) {
-			$sql  = "UPDATE {$MYSQL_PREFIX}users SET payroll = 0 WHERE userid = '".intval($id)."'";
-		} else {
-			$sql  = "UPDATE {$MYSQL_PREFIX}users SET payroll = 1 WHERE userid = '".intval($id)."'";
-		}
-		
-		$result = mysql_query($sql, $db);
-		
-		if ( $result ) {
-			return array('success' => true, 'msg' => "User #{$id} Marked ".(($current==1)?"Off Payroll":"On Payroll"), 'newval' => (($current==1)?0:1) );
-		} else {
-			return array('success' => false, 'msg' => "Toggle Failed ".(($TEST_MODE)?mysql_error():""));
-		}
-	}
-	
-	/**
-	 * Mark a user limited (or not)
-	 * 
-	 * @param integer User ID
-	 * @global object DB Resource
-	 * @global string MySQL Prefix
-	 * @return void
-	 */
-	 private function user_limit($id) {
-		GLOBAL $db, $MYSQL_PREFIX;
-		$current = get_single("SELECT limithours AS num FROM `{$MYSQL_PREFIX}users` WHERE userid = {$id}");
-		
-		if ( $current == 1 ) {
-			$sql  = "UPDATE {$MYSQL_PREFIX}users SET limithours = 0 WHERE userid = '".intval($id)."'";
-		} else {
-			$sql  = "UPDATE {$MYSQL_PREFIX}users SET limithours = 1 WHERE userid = '".intval($id)."'";
-		}
-		
-		$result = mysql_query($sql, $db);
-		
-		if ( $result ) {
-			return array('success' => true, 'msg' => "User #{$id} Marked ".(($current==1)?"Not Limitied":"Limited"), 'newval' => (($current==1)?0:1) );
-		} else {
-			return array('success' => false, 'msg' => "Toggle Failed ".(($TEST_MODE)?mysql_error():""));
-		}
-	}
-
-	/**
-	 * Mark a user active (or inactive)
-	 * 
-	 * @param integer User ID
-	 * @global object DB Resource
-	 * @global string MySQL Prefix
-	 * @return void
-	 */
-	 private function user_active($id) {
-		GLOBAL $db, $MYSQL_PREFIX;
-		$current = get_single("SELECT active AS num FROM `{$MYSQL_PREFIX}users` WHERE userid = {$id}");
-		
-		if ( $current == 1 ) {
-			$sql  = "UPDATE {$MYSQL_PREFIX}users SET active = 0 WHERE userid = '".intval($id)."'";
-		} else {
-			$sql  = "UPDATE {$MYSQL_PREFIX}users SET active = 1 WHERE userid = '".intval($id)."'";
-		}
-		
-		$result = mysql_query($sql, $db);
-		
-		if ( $result ) {
-			return array('success' => true, 'msg' => "User #{$id} Marked ".(($current==1)?"Inactive":"Active"), 'newval' => (($current==1)?0:1) );
-		} else {
-			return array('success' => false, 'msg' => "Toggle Failed ".(($TEST_MODE)?mysql_error():""));
-		}
-	}
 	
 	/** 
-	 * Show available ToDo Functions
+	 * Show available Admin Functions
 	 * 
 	 * @global string TDTrac Root Link HREF
 	 * @return array Formatted HTML
@@ -362,7 +154,7 @@ class tdtrac_admin {
 	private function perms_edit_form($id) {
 		GLOBAL $db, $MYSQL_PREFIX, $TDTRAC_SITE;
 		
-		$form = new tdform(array('action' => "{$TDTRAC_SITE}admin/permsave/json:1/id:{$id}/"));
+		$form = new tdform(array('action' => "{$TDTRAC_SITE}json/adm/base:admin/sub:saveperms/id:{$id}/"));
 	
 		$fesult = $form->addHidden('id', $id);
 		$sql = "SELECT permid, permcan FROM {$MYSQL_PREFIX}permissions pm WHERE groupid = {$id}";
@@ -378,38 +170,6 @@ class tdtrac_admin {
 	}
 
 	/**
-	 * Save permissions to database
-	 * 
-	 * @global object Database Link
-	 * @global string MySQL Table Prefix
-	 * @param integer Group ID to save
-	 * @return string Success / Failure Message
-	 */
-	private function perms_save($grpid) {
-		GLOBAL $db, $MYSQL_PREFIX, $TEST_MODE;
-		if ( !is_numeric($grpid) ) { thrower("Oops :: Operation Failed"); }
-		$sql = "DELETE FROM `{$MYSQL_PREFIX}permissions` WHERE groupid = ".intval($grpid);
-		$result = mysql_query($sql, $db);
-		foreach ( $this->perms_avail as $perm ) {
-			$sql = sprintf("INSERT INTO `{$MYSQL_PREFIX}permissions` (groupid, permid, permcan) VALUES (%d, '%s', %d)",
-				intval($grpid),
-				$perm,
-				(($_REQUEST[$perm]) ? "1" : "0")
-			);
-			$result2 = mysql_query($sql, $db);
-			if (!$result2) {
-				return array('success' => false, 'msg' => "Permission Save Failed".(($TEST_MODE)?mysql_error():""));
-			}
-		}
-		
-		if ( $result ) {
-			return array('success' => true, 'msg' => "Permissions Saved");
-		} else {
-			return array('success' => false, 'msg' => "Permission Save Failed".(($TEST_MODE)?mysql_error():""));
-		}
-	}
-
-	/**
 	 * Show add user form
 	 * 
 	 * @global object Database Link
@@ -419,15 +179,15 @@ class tdtrac_admin {
 	 */
 	private function user_add_form() {
 		GLOBAL $db, $MYSQL_PREFIX, $TDTRAC_SITE;
-		$form = new tdform(array('action' => "{$TDTRAC_SITE}admin/saveuser/json:1/new:1/", 'id' => 'adduser'));
+		$form = new tdform(array('action' => "{$TDTRAC_SITE}json/adm/base:admin/sub:saveuser/id:0/", 'id' => 'adduser'));
 		
-		$fesult = $form->addText(array('name' => 'username', 'label' => "User Name"));
-		$fesult = $form->addText(array('name' => 'password', 'label' => "Password"));
-		$fesult = $form->addText(array('name' => 'payrate', 'label' => "Pay Rate"));
-		$fesult = $form->addText(array('name' => 'first', 'label' => "First Name"));
-		$fesult = $form->addText(array('name' => 'last', 'label' => "Last Name"));
-		$fesult = $form->addText(array('name' => 'phone', 'label' => "Phone"));
-		$fesult = $form->addText(array('name' => 'email', 'label' => "E-Mail"));
+		$fesult = $form->addText(array('name' => 'username', 'label' => "User Name", 'placeholder' => 'User login ID'));
+		$fesult = $form->addText(array('name' => 'password', 'label' => "Password", 'placeholder' => 'Initial Password'));
+		$fesult = $form->addText(array('name' => 'payrate', 'label' => "Pay Rate", 'placeholder' => 'User\'s Payrate'));
+		$fesult = $form->addText(array('name' => 'first', 'label' => "First Name", 'placeholder' => 'First Name'));
+		$fesult = $form->addText(array('name' => 'last', 'label' => "Last Name", 'placeholder' => 'Surname'));
+		$fesult = $form->addText(array('name' => 'phone', 'label' => "Phone", 'require' => false, 'placeholder' => 'Phone Number'));
+		$fesult = $form->addText(array('name' => 'email', 'label' => "E-Mail", 'placeholder' => 'E-Mail Address'));
 		$fesult = $form->addDrop(array(
 			'name' => 'groupid', 
 			'label' => "Group", 
@@ -451,7 +211,7 @@ class tdtrac_admin {
 		$sql = "SELECT u.*, groupid FROM `{$MYSQL_PREFIX}users` u, `{$MYSQL_PREFIX}usergroups` ug WHERE u.userid = ug.userid AND u.userid = ".intval($id)." LIMIT 1";
 		$result = mysql_query($sql, $db);
 		$row = mysql_fetch_array($result);
-		$form = new tdform(array('action' => "{$TDTRAC_SITE}admin/saveuser/json:1/new:0/", 'id' => 'edituser'));
+		$form = new tdform(array('action' => "{$TDTRAC_SITE}json/adm/base:admin/sub:saveuser/id:{$id}/", 'id' => 'edituser'));
 		
 		$fesult = $form->addText(array('name' => 'username', 'label' => "User Name", 'preset' => $row['username']));
 		$fesult = $form->addText(array('name' => 'password', 'label' => "Password", 'preset' => $row['password']));
@@ -470,73 +230,7 @@ class tdtrac_admin {
 		
 		return $form->output('Save User');
 	}
-
-	/**
-	 * Logic to save user to database
-	 * 
-	 * @param bool True if editing, False for new
-	 * @global object Database Link
-	 * @global string MySQL Table Prefix
-	 * @global double Default Payrate
-	 * @return string Success or Failure
-	 */
-	private function user_save($exists = false) {
-		GLOBAL $db, $MYSQL_PREFIX, $TDTRAC_PAYRATE, $TEST_MODE;
-		
-		if ( !$exists ) {
-			$sqlstring  = "INSERT INTO `{$MYSQL_PREFIX}users` ( `username`, `first`, `last`, `password`, `phone`, `email`, `payrate` )";
-			$sqlstring .= " VALUES ( '%s', '%s', '%s', '%s', '%d', '%s', '%f' )";
-		
-			$sql = sprintf($sqlstring,
-				mysql_real_escape_string($_REQUEST['username']),
-				mysql_real_escape_string($_REQUEST['first']),
-				mysql_real_escape_string($_REQUEST['last']),
-				mysql_real_escape_string($_REQUEST['password']),
-				intval($_REQUEST['phone']),
-				mysql_real_escape_string($_REQUEST['email']),
-				$TDTRAC_PAYRATE
-			);
-		} else {
-			$sqlstring  = "UPDATE `{$MYSQL_PREFIX}users` SET `password` = '%s', `username` = '%s', `last` = '%s', `first` = '%s',";
-			$sqlstring .= " `phone` = '%d', `email` = '%s', `payrate` = '%f'  WHERE `userid` = %d LIMIT 1";
-		
-			$sql = sprintf($sqlstring,
-				mysql_real_escape_string($_REQUEST['password']),
-				mysql_real_escape_string($_REQUEST['username']),
-				mysql_real_escape_string($_REQUEST['last']),
-				mysql_real_escape_string($_REQUEST['first']),
-				intval($_REQUEST['phone']),
-				mysql_real_escape_string($_REQUEST['email']),
-				floatval($_REQUEST['payrate']),
-				intval($_REQUEST['id'])
-			);
-		}
-		
-		$result = mysql_query($sql, $db);
-		
-		if ( !$result ) { return array('success' => false, 'msg' => "User Save Failed".(($TEST_MODE)?mysql_error():"")); }
-		
-		if ( !$exists ) {
-			$sql2 = sprintf("INSERT INTO `{$MYSQL_PREFIX}usergroups` ( `userid`, `groupid` ) VALUES ( %d, %d )",
-				mysql_insert_id($db),
-				intval($_REQUEST['groupid'])
-			);
-		} else {
-			$sql2  = sprintf("UPDATE `{$MYSQL_PREFIX}usergroups` SET groupid = %d WHERE userid = %d",
-				intval($_REQUEST['groupid']),
-				intval($_REQUEST['id'])
-			);
-		}
-			
-		$result = mysql_query($sql2, $db);
-		
-		if ( $result ) {
-			return array('success' => true, 'msg' => "User Saved");
-		} else {
-			return array('success' => false, 'msg' => "User Save Failed".(($TEST_MODE)?mysql_error():""));
-		}
-	}
-
+	
 	/**
 	 * View all users
 	 * 
@@ -647,73 +341,6 @@ class tdtrac_admin {
 		$html = array_merge($html, $form2->output('Rename Group'));
 		return $html;
 	}
-
-
-	/**
-	 * Logic to add a group
-	 * 
-	 * @global object Database Link
-	 * @global string MySQL Table Prefix
-	 * @return void
-	 */
-	private function group_add() {
-		GLOBAL $db, $MYSQL_PREFIX, $TEST_MODE;
-		$sql = sprintf("INSERT INTO {$MYSQL_PREFIX}groupnames (groupname) VALUES ('%s')",
-			mysql_real_escape_string($this->action['newname'])
-		);
-		$request = mysql_query($sql, $db);
-		if ( $request ) {
-			return array('success' => true, 'msg' => "Group Added");
-		} else {
-			return array('success' => false, 'msg' => "Group Add Failed".(($TEST_MODE)?mysql_error():""));
-		}
-	}
-	
-	/**
-	 * Logic to remove a group
-	 * 
-	 * @param integer Group to delete
-	 * @global object Database Link
-	 * @global string MySQL Table Prefix
-	 * @return void
-	 */
-	private function group_delete($id) {
-		GLOBAL $db, $MYSQL_PREFIX, $TEST_MODE;
-		$sql = sprintf("DELETE FROM `{$MYSQL_PREFIX}groupnames` WHERE groupid = %d",
-			intval($id)
-		);
-		if ( $id < 100 ) { 
-			return array('success' => false, 'msg' => "You Cannot remove the special groups (ID < 100)");
-		} else {
-			$request = mysql_query($sql, $db);
-			if ( $request ) {
-				return array('success' => true, 'msg' => "Group Removed");
-			} else {
-				return array('success' => false, 'msg' => "Group Remove Failed".(($TEST_MODE)?mysql_error():""));
-			}
-		}
-	}
-	
-	/**
-	 * Logic to rename a group
-	 * 
-	 * @global object Database Link
-	 * @global string MySQL Table Prefix
-	 * @return void
-	 */
-	private function group_rename() {
-		GLOBAL $db, $MYSQL_PREFIX, $TEST_MODE;
-		$sql = sprintf("UPDATE `{$MYSQL_PREFIX}groupnames` SET groupname = '%s' WHERE groupid = %d",
-			mysql_real_escape_string($this->action['newname']),
-			intval($this->action['oldname'])
-		);
-		$request = mysql_query($sql, $db);
-		if ( $request ) {
-			return array('success' => true, 'msg' => "Group Renamed");
-		} else {
-			return array('success' => false, 'msg' => "Group Rename Failed".(($TEST_MODE)?mysql_error():""));
-		}
-	}
 	
 	/**
 	 * Form for changing the mail code (tdtracmail enabled installs)
@@ -727,32 +354,11 @@ class tdtrac_admin {
 		$sql = "SELECT * FROM `tdtracmail` WHERE prefix = '{$MYSQL_PREFIX}'";
 		$result = mysql_query($sql, $db);
 		$line = mysql_fetch_array($result);
-		$form = new tdform(array('action' => "{$TDTRAC_SITE}admin/mailcode/json:1/", 'id' => 'mcode'));
+		$form = new tdform(array('action' => "{$TDTRAC_SITE}json/adm/base:admin/sub:savemailcode/id:0/", 'id' => 'mcode'));
 		
 		$fes = $form->addText(array('name'=>"email", 'label'=>"E-Mail Address", 'preset' => $line['email']));
 		$fes = $form->addText(array('name'=>"code", 'label'=>"Subject Code", 'preset' => $line['code']));
 		return $form->output('Set Code');
 	}
-	
-	/**
-	 * Logic to save TDTracMail code
-	 * 
-	 * @global object Database Link
-	 * @global string MySQL Table Prefix
-	 * @return string Success or Failure
-	 */
-	function mailcode_save() {
-		GLOBAL $db, $MYSQL_PREFIX, $TEST_MODE;
-		$sql = sprintf("UPDATE tdtracmail SET code = '%s', email = '%s' WHERE prefix = '{$MYSQL_PREFIX}'",
-			mysql_real_escape_string($_REQUEST['code']),
-			mysql_real_escape_string($_REQUEST['email'])
-		);
-		$result = mysql_query($sql, $db);
-		if ( $result ) {
-			return array('success' => true, 'msg' => "Mail Code Saved");
-		} else {
-			return array('success' => false, 'msg' => "Mail Code Save Failed".(($TEST_MODE)?mysql_error():""));
-		}
-	}
-}
 
+}

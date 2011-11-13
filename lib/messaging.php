@@ -24,17 +24,11 @@ class tdtrac_mail {
 	/** @var array Parsed query string */
 	private $action = array();
 	
-	/** @var bool Output format (TURE = json, FALSE = html) */
-	private $output_json = false;
-	
 	/** @var array Formatted HTML */
 	private $html = array();
 	
 	/** @var string Page Title */
 	private $title = "Mail";
-	
-	/** @var array JSON Data */
-	private $json = array();
 	
 	/** 
 	 * Create a new instance of the TO-DO module
@@ -47,7 +41,6 @@ class tdtrac_mail {
 		$this->post = ($_SERVER['REQUEST_METHOD'] == "POST") ? true : false;
 		$this->user = $user;
 		$this->action = $action;
-		$this->output_json = $action['json'];
 	}
 	
 	/**
@@ -58,38 +51,17 @@ class tdtrac_mail {
 	 */
 	public function output() {
 		global $TEST_MODE;
-		if ( !$this->output_json ) { // HTML METHODS
-			switch ( $this->action['action'] ) {
-				case "inbox":
-					$this->title .= "::Inbox";
-					$this->html = $this->inbox();
-					break;
-				case "clear":
-					$this->clear();
-					break;
-				default:
-					$this->title .= "::Inbox";
-					$this->html = $this->inbox();
-					break;
-			}
-			makePage($this->html, $this->title);
-		} else { 
-			switch($this->action['action']) {
-				case "delete":
-					if ( $TEST_MODE ) {
-						$this->json['success'] = true;
-					} else {
-						if ( isset($this->action['id']) && is_numeric($this->action['id']) ) {
-							$this->delete(intval($this->action['id']));
-						} else {
-							$this->json['success'] = false;
-						}
-					} break;
-				default:
-					$this->json['success'] = false;
-					break;
-			} echo json_encode($this->json);
+		switch ( $this->action['action'] ) {
+			case "inbox":
+				$this->title .= "::Inbox";
+				$this->html = $this->inbox();
+				break;
+			default:
+				$this->title .= "::Inbox";
+				$this->html = $this->inbox();
+				break;
 		}
+		makePage($this->html, $this->title);
 	} // END OUTPUT FUNCTION
 
 	/** 
@@ -119,57 +91,7 @@ class tdtrac_mail {
 		while ( $row = mysql_fetch_array($result) ) {
 			$list->addRow(array($row['body'], $this->user->get_name($row['fromid']), $row['wtime']), $row);
 		}
-		return array_merge($list->output(), array("<br /><br /><a href='{$TDTRAC_SITE}mail/clear/' data-role='button' data-theme='f'>Clear Inbox</a>"));
-	}
-
-	/** 
-	 * Remove a message form the datebase
-	 * 
-	 * @global object Database Link
-	 * @global string MySQL Table Prefix
-	 * @param integer Message ID to remove
-	 * @return void
-	 */
-	private function delete($msgid) {
-		GLOBAL $db, $MYSQL_PREFIX;
-		
-		$sql = "SELECT toid FROM `{$MYSQL_PREFIX}msg` WHERE id = {$msgid}";
-		$result = mysql_query($sql, $db);
-		$row = mysql_fetch_array($result);
-		if ( $row['toid'] == $this->user->id || $this->user->admin ) { 
-			$dsql = "DELETE FROM `{$MYSQL_PREFIX}msg` WHERE id = {$msgid} LIMIT 1";
-			$result = mysql_query($dsql, $db);
-			if ( $result ) {
-				$this->json['success'] = true;
-			} else {
-				$this->json['success'] = false;
-			}
-		} else {
-			$this->json['success'] = false;
-		}
-	}
-
-	/** 
-	 * Clear inbox
-	 * 
-	 * @global object Database Link
-	 * @global string MySQL Table Prefix
-	 * @global bool App In Test Mode
-	 * @return void
-	 */
-	private function clear() {
-		GLOBAL $db, $MYSQL_PREFIX, $TEST_MODE;
-		if ( $TEST_MODE ) {
-			thrower("Inbox Cleared");
-		} else {
-			$sql = "DELETE FROM {$MYSQL_PREFIX}msg WHERE toid = {$this->user->id}";
-			$result = mysql_query($sql, $db);
-			if ( $result ) {
-				thrower("Inbox Cleared");
-			} else {
-				thrower("Inbox Clear :: Operation Failed");
-			}
-		}
+		return array_merge($list->output(), array("<br /><br /><a href='#' id='mailClear' data-role='button' data-theme='f'>Clear Inbox</a>"));
 	}
 	
 }

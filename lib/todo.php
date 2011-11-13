@@ -281,7 +281,7 @@ class tdtrac_todo {
 	 * @global string MySQL Prefix
 	 * @return void
 	 */
-	private function email() {
+	public function email() {
 		GLOBAL $db, $MYSQL_PREFIX;
 		$thiscond = $this->action['id'];
 		$type = $this->action['type'];

@@ -149,9 +149,9 @@ class tdtrac_user {
 	 */
 	public function password_form() {
 		GLOBAL $TDTRAC_SITE;
-		$form = new tdform("{$TDTRAC_SITE}user/forgot/", "loginform", 1, "loginform", 'Send Password Reminder');
+		$form = new tdform(array( 'action' => "{$TDTRAC_SITE}user/forgot/", 'id' => 'forgot-pass-form'));
 		
-		$result = $form->addText('tracemail', 'E-Mail Address');
+		$fesult = $form->addText(array('name' => 'tracemail', 'label' => 'E-Mail Address', 'placeholder' => 'Registered E-Mail Address'));
 		
 		return $form->output('Send Reminder');
 	}

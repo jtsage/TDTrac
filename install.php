@@ -174,4 +174,10 @@ switch ($page_title) {
 
 foreach ( makeFooter() as $line ) { echo "{$line}\n"; }
 
+function merge_defaults($orig, $override) {
+	foreach ( $orig as $key=>$value ) {
+		if ( isset($override[$key]) ) { $orig[$key] = $override[$key]; }
+	}
+	return $orig;
+}
 ?>

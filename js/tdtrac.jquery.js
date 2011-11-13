@@ -22,9 +22,13 @@ jQuery.extend(jQuery.mobile.simpledialog.prototype.options, {
 });
 	
 (function($) {
+	$('html').live('pageinit', function() {
+		testMode = ( $('[data-role=header]:first').find('h1').text().search('TEST_MODE') > -1 ) ? true : false;
+	});
+	
 	$('html').ajaxComplete(function(e,xhr,settings) {
 		/* DEBUG ALL JSON BASED AJAX */
-		if ( settings.url.search("json") > -1 ) {
+		if ( testMode === true && settings.url.search("json") > -1 ) {
 			console.log(xhr.responseText);
 		}
 	});
@@ -58,11 +62,11 @@ jQuery.extend(jQuery.mobile.simpledialog.prototype.options, {
 				data: formdata,
 				success: 
 					function(dta) {
-						$.mobile.hidePageLoadingMsg();
-						console.log(dta);
+						if ( testMode === true ) { console.log(dta); }
 						if ( dta.success === true ) {
 							$.mobile.changePage(dta.location, { reloadPage: true, type: 'post', data: {'infobox': dta.msg}, transition:'slide'});
 						} else {
+							$.mobile.hidePageLoadingMsg();
 							infobox(dta.msg,'Error');
 						}
 				},
@@ -73,30 +77,32 @@ jQuery.extend(jQuery.mobile.simpledialog.prototype.options, {
 			
 	
 	$('.ajax-email').die('click');
-	$('.ajax-email').live('vclick', function(e) { // BEGIN: E-Mail Function
+	$('.ajax-email').live('click', function(e) { // BEGIN: E-Mail Function
+		$.mobile.showPageLoadingMsg();
+		e.preventDefault();
+		
 		var linkurl = '',
 			o = $(this).data('email');
 
 		switch(o.action) {
 			case 'todo':
-				linkurl = "/todo/email/json:1/id:"+o.id+"/type:"+o.type+"/";
+				linkurl = "/json/email/base:todo/id:"+o.id+"/type:"+o.type+"/";
 				break;
 			case 'budget':
-				linkurl = "/budget/email/json:1/id:"+o.id+"/";
+				linkurl = "/json/email/base:budget/id:"+o.id+"/";
 				break;
 		}
 		
 		if ( linkurl !== '' ) {
-			infobox("Please Wait...");
 			$.getJSON(linkurl, function(data) {
+				$.mobile.hidePageLoadingMsg();
 				if ( data.success === true ) {
 					infobox("E-Mail Sent ("+o.action+")");
 				} else {
-					inforbox("E-Mail Send Failed!");
+					infobox("E-Mail Send Failed!");
 				}
 			});
 		}
-		e.preventDefault();
 	}); // END: E-Mail Function
 	
 	$('.todo-done').live( 'vclick', function(e) {  // BEGIN: Mark Todo Done
@@ -173,7 +179,7 @@ jQuery.extend(jQuery.mobile.simpledialog.prototype.options, {
 				'prompt': 'Delete Message #'+$(linkie).data('recid')+'?',
 				'buttons': { 
 					'Yes, Delete' : function () {
-						$.getJSON("/mail/delete/json:1/id:"+$(linkie).data('recid')+"/", function(data) {
+						$.getJSON("/json/delete/base:msg/id:"+$(linkie).data('recid')+"/", function(data) {
 							if ( data.success === true ) {
 								$(linkie).parent().find('h3').html('--Removed--');
 								infobox("Message #"+$(linkie).data('recid')+" Deleted");
@@ -187,6 +193,22 @@ jQuery.extend(jQuery.mobile.simpledialog.prototype.options, {
 			});
 		}
 	}); // END: Delete Message
+	
+	$('#mailClear').die('click');
+	$('#mailClear').live('click', function(e) { // BEGIN: Message Clear
+		$.mobile.showPageLoadingMsg();
+		e.preventDefault();
+		
+		$.getJSON("/json/clear/base:msg/id:0", function(dta) {
+			if ( dta.success === true ) {
+				$.mobile.changePage(dta.location, { reloadPage: true, type: 'post', data: {'infobox': dta.msg}, transition:'slide'});
+			} else {
+				$.mobile.hidePageLoadingMsg();
+				infobox(dta.msg,'Error');
+			}
+		});
+		
+	}); // END: Message Clear
 	
 	$('.show-menu').live('vclick', function (e) { // BEGIN: Show Menu
 		e.preventDefault();
@@ -202,7 +224,7 @@ jQuery.extend(jQuery.mobile.simpledialog.prototype.options, {
 					},
 					'Delete' : {
 						'click' :function () {
-							$.getJSON("/shows/delete/json:1/id:"+$(linkie).data('recid')+"/", function(data) {
+							$.getJSON("/json/delete/base:show/id:"+$(linkie).data('recid')+"/", function(data) {
 								if ( data.success === true ) {
 									$(linkie).find('h3').html('--Deleted--');
 									infobox("Show #"+$(linkie).data('recid')+" Deleted");
@@ -292,10 +314,12 @@ jQuery.extend(jQuery.mobile.simpledialog.prototype.options, {
 				'Add' : {
 					'click' : function() {
 						if ($(linkie).data('string') !== '') {
-							$.getJSON("/admin/group/json:1/newname:"+$(linkie).data('string')+"/", function(dta) {
+							$.mobile.showPageLoadingMsg();
+							$.getJSON("/json/adm/base:admin/sub:savegroup/id:0/newname:"+$(linkie).data('string')+"/", function(dta) {
 								if ( dta.success === true ) {
 									$.mobile.changePage(dta.location, { reloadPage: true, transition: 'pop', changeHash: 'false', type: 'post', data: {'infobox': dta.msg}});
 								} else {
+									$.mobile.hidePageLoadingMsg();
 									infobox("Add Failed: "+dta.msg);
 								}
 							});
@@ -319,10 +343,12 @@ jQuery.extend(jQuery.mobile.simpledialog.prototype.options, {
 					'Rename' : {
 						'click': function() {
 							if ($(linkie).data('string') !== '') {
-								$.getJSON("/admin/group/json:1/oldname:"+$(linkie).data('id')+"/newname:"+$(linkie).data('string')+"/", function(dta) {
+								$.mobile.showPageLoadingMsg();
+								$.getJSON("/json/adm/base:admin/sub:savegroup/id:"+$(linkie).data('id')+"/newname:"+$(linkie).data('string')+"/", function(dta) {
 									if ( dta.success === true ) {
 										$.mobile.changePage(dta.location, { reloadPage: true, transition: 'pop', changeHash: 'false', type: 'post', data: {'infobox': dta.msg}});
 									} else {
+										$.mobile.hidePageLoadingMsg();
 										infobox("Rename Failed: "+dta.msg);
 									}
 								});
@@ -336,10 +362,12 @@ jQuery.extend(jQuery.mobile.simpledialog.prototype.options, {
 					},
 					'Delete' : {
 						'click': function() {
-							$.getJSON("/admin/remgroup/json:1/oldname:"+$(linkie).data('id')+"/", function(dta) {
+							$.mobile.showPageLoadingMsg();
+							$.getJSON("/json/adm/base:admin/sub:deletegroup/id:"+$(linkie).data('id')+"/", function(dta) {
 								if ( dta.success === true ) {
 									$.mobile.changePage(dta.location, { reloadPage: true, transition: 'pop', changeHash: 'false', type: 'post', data: {'infobox': dta.msg}});
 								} else {
+									$.mobile.hidePageLoadingMsg();
 									infobox("Delete Failed: "+dta.msg);
 								}
 							});
@@ -371,7 +399,7 @@ jQuery.extend(jQuery.mobile.simpledialog.prototype.options, {
 				'Toggle Active' : {
 					'icon' : 'check',
 					'click' : function() {
-						$.getJSON("/admin/toggle/json:1/switch:active/id:"+$(linkie).data('recid')+"/", function(dta) {
+						$.getJSON("/json/adm/base:admin/sub:toggle/switch:active/id:"+$(linkie).data('recid')+"/", function(dta) {
 								if ( dta.success === true ) {
 									infobox(dta.msg);
 									if ( dta.newval === 1 ) {
@@ -388,7 +416,7 @@ jQuery.extend(jQuery.mobile.simpledialog.prototype.options, {
 				'Toggle On Payroll' : {
 					'icon' : 'check',
 					'click' : function() {
-						$.getJSON("/admin/toggle/json:1/switch:payroll/id:"+$(linkie).data('recid')+"/", function(dta) {
+						$.getJSON("/json/adm/base:admin/sub:toggle/switch:payroll/id:"+$(linkie).data('recid')+"/", function(dta) {
 								if ( dta.success === true ) {
 									infobox(dta.msg);
 									if ( dta.newval === 1 ) {
@@ -405,7 +433,7 @@ jQuery.extend(jQuery.mobile.simpledialog.prototype.options, {
 				'Toggle Only Own Hours' : {
 					'icon' : 'check',
 					'click' : function() {
-						$.getJSON("/admin/toggle/json:1/switch:limit/id:"+$(linkie).data('recid')+"/", function(dta) {
+						$.getJSON("/json/adm/base:admin/sub:toggle/switch:limithours/id:"+$(linkie).data('recid')+"/", function(dta) {
 								if ( dta.success === true ) {
 									infobox(dta.msg);
 									if ( dta.newval === 1 ) {
@@ -422,7 +450,7 @@ jQuery.extend(jQuery.mobile.simpledialog.prototype.options, {
 				'Toggle Notify' : {
 					'icon' : 'check',
 					'click' : function() {
-						$.getJSON("/admin/toggle/json:1/switch:notify/id:"+$(linkie).data('recid')+"/", function(dta) {
+						$.getJSON("/json/adm/base:admin/sub:toggle/switch:notify/id:"+$(linkie).data('recid')+"/", function(dta) {
 								if ( dta.success === true ) {
 									infobox(dta.msg);
 									if ( dta.newval === 1 ) {
