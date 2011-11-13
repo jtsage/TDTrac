@@ -133,7 +133,6 @@ class tdtrac_shows {
 					$this->json['success'] = false;
 					break;
 			}
-			//echo var_dump($this->json, true);
 			echo json_encode($this->json);
 		}
 	} // END OUTPUT FUNCTION

@@ -1,30 +1,76 @@
+function infobox(text, head) { // CONTROL INFOBOX CONTENT
+	var first = $('.ui-page-active').children('.ui-content'),
+		header = ( typeof(head) === 'undefined' ) ? 'Information' : head;
+			
+		first.simpledialog({
+			'mode': 'blank',
+			'prompt': 'Notice',
+			'useDialogForceFalse': true,
+			'cleanOnClose': true,
+			'fullHTML': 
+				'<ul data-role="listview" data-theme="c" data-dividertheme="a">'+
+					'<li data-role="list-divider"><h3>'+header+'</h3></li>'+
+					'<li>'+text+'</li></ul>'
+		});
+		
+		setTimeout("$('.ui-page-active').children('.ui-content').data('simpledialog').close();", 2000);
+	} // END INFOBOX CONTENT
+
+jQuery.extend(jQuery.mobile.simpledialog.prototype.options, {
+		cleanOnClose: true,
+		useDialogForceFalse: true
+});
+	
 (function($) {
+	$('html').ajaxComplete(function(e,xhr,settings) {
+		/* DEBUG ALL JSON BASED AJAX */
+		if ( settings.url.search("json") > -1 ) {
+			console.log(xhr.responseText);
+		}
+	});
 	
 	$('form').live('submit', function(e) { // FORM HANDLEING
-		infobox('Please wait...');
-		var formdata = $(this).serialize();
-		var formurl = $(this).attr('action');
-		
-		$.post(formurl, formdata, function(dta) {
-			if ( dta.success === true ) {
-				$.mobile.changePage(dta.location, { reloadPage: true, type: 'post', data: {'infobox': dta.msg}, transition:'slide'});
-			} else {
-				infobox('<span style="color: red">'+dta.msg+'</span>');
-			}
-		}, 'json');
+		$.mobile.showPageLoadingMsg();
 		e.preventDefault();
+		
+		var formdata = $(this).serialize(),
+			formurl = $(this).attr('action'),
+			ready = false,
+			needed = [];
+		
+		$('[data-require=1]').each(function () {
+			if ( $(this).val() == '' ) { 
+				needed.push( $('[for='+$(this).attr('id')+']').text() );
+			}
+		});
+		
+		if ( needed.length > 0 ) {
+			$.mobile.hidePageLoadingMsg();
+			infobox("These fields are required:<br />'"+needed.join("', '")+"'", 'Error');
+		} else {
+			ready = true;
+		}
+		
+		if ( ready ) {
+			$.ajax({
+				type: 'POST',
+				url: formurl,
+				data: formdata,
+				success: 
+					function(dta) {
+						$.mobile.hidePageLoadingMsg();
+						console.log(dta);
+						if ( dta.success === true ) {
+							$.mobile.changePage(dta.location, { reloadPage: true, type: 'post', data: {'infobox': dta.msg}, transition:'slide'});
+						} else {
+							infobox(dta.msg,'Error');
+						}
+				},
+				dataType: 'json'});
+		}
+		
 	}); // END FORM HANDLING
 			
-	function infobox(text) { // CONTROL INFOBOX CONTENT
-		$('.ui-page-active #infobox h2').stop(true);
-		$('.ui-page-active #infobox h2').fadeTo(300, .01, function() {
-			$(this).html(text).fadeTo(1000,1, function() {
-				$(this).delay(4000).delay(4000).fadeTo(300, .01, function() {
-					$(this).html('&nbsp;').fadeTo(1000,1); 
-				}); 
-			});
-		});
-	} // END INFOBOX CONTENT
 	
 	$('.ajax-email').die('click');
 	$('.ajax-email').live('vclick', function(e) { // BEGIN: E-Mail Function
@@ -62,7 +108,7 @@
 				'prompt' : 'Mark Todo Item #'+$(this).data('recid')+' Done?',
 				'buttons' : {
 					'Yes, Mark Done' : function () {
-						$.getJSON("/todo/mark/json:1/id:"+$(linkie).data('recid')+"/", function(data) {
+						$.getJSON("/json/mark/base:todo/json:1/id:"+$(linkie).data('recid')+"/", function(data) {
 							if ( data.success === true ) {
 								$(linkie).parent().insertAfter('#todo-list-done');
 								$(linkie).parent().find('span.ui-li-count').html('done');
@@ -94,7 +140,7 @@
 					},
 					'Delete' : {
 						'click': function() {
-							$.getJSON("/todo/delete/json:1/id:"+$(linkie).data('recid')+"/", function(data) {
+							$.getJSON("/json/delete/base:todo/id:"+$(linkie).data('recid')+"/", function(data) {
 								if ( data.success === true ) {
 									$(linkie).parent().find('h3').html('--Removed--');
 									$(linkie).parent().find('span.ui-li-count').html('deleted');

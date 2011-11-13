@@ -46,11 +46,12 @@ foreach ( $rawaction as $maybevar ) {
 		$action[$goodvar[0]] = $goodvar[1];
 	}
 }
-if ( !$action['json'] ) {
+if ( $action['module'] <> "json" ) {
 	$_SESSION['tdtrac']['two'] = $_SESSION['tdtrac']['one'];
 	$_SESSION['tdtrac']['one'] = $_SESSION['tdtrac']['this'];
-	$_SESSION['tdtrac']['this'] = "/" . $_REQUEST['action'];
+	$_SESSION['tdtrac']['this'] = "/{$_REQUEST['action']}";
 }
+
 
 if ( !$user->loggedin ) {
 	switch( $action['action'] ) {
@@ -70,6 +71,10 @@ if ( !$user->loggedin ) {
 	}
 } else {
 	switch ($action['module']) {
+		case "json":
+			$json = new tdtrac_json($user, $action);
+			$json->handler();
+			break;
 		case "user":			
 			switch( $action['action'] ) {
 				case "logout":

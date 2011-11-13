@@ -189,7 +189,9 @@ class tdform {
 			'id'		=> null,
 			'type'		=> 'text',
 			'role'		=> null,
-			'options'	=> null
+			'options'	=> null,
+			'require'	=> True,
+			'placeholder' => ''
 			);
 		$options = merge_defaults($default, $passed);
 
@@ -198,7 +200,7 @@ class tdform {
 		
 		$this->members[] = array($options['type'], $options['name'], $options['label'], $options['title'], $options['preset']);
 		
-		$temp  = "  <div data-role='fieldcontain' title='{$options['title']}'><label for='{$options['id']}'>{$options['label']}</label><input ".(($options['role'] != null)?"data-role='{$options['role']}' ":"")."type='{$options['type']}' name='{$options['name']}' id='{$options['id']}' ";
+		$temp  = "  <div data-role='fieldcontain' title='{$options['title']}'><label for='{$options['id']}'>{$options['label']}</label><input ".(($options['role'] != null)?"data-role='{$options['role']}' ":"")."type='{$options['type']}' data-theme='c' placeholder='{$options['placeholder']}' data-require='{$options['require']}' name='{$options['name']}' id='{$options['id']}' ";
 		if ( $options['preset'] != null )	{ $temp .= "value='{$options['preset']}' "; }
 		if ( $options['options'] != null ) 	{ $temp .= "data-options='{$options['options']}' "; }
 		if ( ! $options['enabled'] )		{ $temp .= "disabled='disabled' "; }
@@ -281,6 +283,7 @@ class tdform {
 			'allownew' => False,
 			'header' => True,
 			'add' => False,
+			'require' => true
 		);
 		$options = merge_defaults($default, $passed);
 		$this->members[] = array('dropdown', $option['name'], $option['label'], $option['title'], $option['options']);
@@ -288,9 +291,9 @@ class tdform {
 		if ( $options['id'] == null )		{ $options['id'] = $options['name']; }
 		if ( $options['title'] == null ) { $options['title'] = $options['label']; }
 
-		$temp  = "  <div data-role='fieldcontain'><label for='{$options['id']}'>{$options['label']}</label><select data-native-menu='false' name='{$options['name']}' id='{$options['id']}' ".(!$options['enabled'] ? " disabled='disabled'":"").">";
+		$temp  = "  <div data-role='fieldcontain'><label for='{$options['id']}'>{$options['label']}</label><select data-require='{$options['require']}' data-native-menu='false' name='{$options['name']}' id='{$options['id']}' ".(!$options['enabled'] ? " disabled='disabled'":"").">";
 		if ( $options['header'] ) {
-			$temp .= "<option data-placeholder='true'>Choose one...</option>";
+			$temp .= "<option data-placeholder='true' value=''>Choose one...</option>";
 		}
 		if ( $options['add'] ) {
 			$temp .= "<option value='none' data-addoption='true'>Add New...</option>";

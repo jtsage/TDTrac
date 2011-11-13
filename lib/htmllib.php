@@ -27,7 +27,7 @@ function makePage($body = '', $title = '') {
 		$html[] = "\t\t\t{$fixme}";
 	}
 	$html = array_merge($html, makeFooter($title));
-	//ob_clean(); //Hackish method to clear any extra lines / echos before html starts
+	ob_clean(); //Hackish method to clear any extra lines / echos before html starts
 	foreach ($html as $line) {
 		echo $line . "\n";
 	}
@@ -58,14 +58,11 @@ function makeHeader($title = '') {
 	$html[] = '	<!--[if lt IE 9]>';
 	$html[] = '		<script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>';
 	$html[] = '	<![endif]-->';
-	$html[] = '	<link href="http://code.jquery.com/mobile/latest/jquery.mobile.min.css" rel="stylesheet" type="text/css" />';
+	$html[] = '	<link href="http://code.jquery.com/mobile/latest/jquery.mobile.structure-1.0rc2.min.css" rel="stylesheet" type="text/css" />';
 	$html[] = '	<link type="text/css" href="http://dev.jtsage.com/cdn/datebox/latest/jquery.mobile.datebox.min.css" rel="stylesheet" /> ';
 	$html[] = '	<link type="text/css" href="http://dev.jtsage.com/cdn/simpledialog/latest/jquery.mobile.simpledialog.min.css" rel="stylesheet" /> ';
 	$html[] = '	<link type="text/css" href="/css/tdtheme.css" rel="stylesheet" /> ';
-	$html[] = '	<script src="http://code.jquery.com/jquery-1.6.1.min.js"></script>';
-	$html[] = '	<script type="text/javascript">';
-	$html[] = "		$(document).bind('mobileinit', function(){ $.mobile.page.prototype.options.degradeInputs.date = 'text'; });";
-	$html[] = '	</script>';
+	$html[] = '	<script src="http://code.jquery.com/jquery-1.7.min.js"></script>';
 	$html[] = '	<script src="http://code.jquery.com/mobile/latest/jquery.mobile.js"></script>';
 	$html[] = '	<script type="text/javascript" src="http://dev.jtsage.com/cdn/datebox/latest/jquery.mobile.datebox.min.js"></script>';
 	$html[] = '	<script type="text/javascript" src="http://dev.jtsage.com/cdn/simpledialog/latest/jquery.mobile.simpledialog.min.js"></script>';
@@ -74,6 +71,7 @@ function makeHeader($title = '') {
 	} else {
 		$html[] = '	<script type="text/javascript" src="'.$TDTRAC_SITE.'js/tdtrac.jquery.min.js"></script>';
 	}
+	if ( $TEST_MODE ) { $html[] = ' <!--'.var_export($_SESSION, true).'-->'; }
 	$html[] = "</head>\n\n<body>";
 	$pageid = ( $action['module'] == 'help' ) ? "help-{$action['action']}-{$action['oper']}" : "{$action['module']}-{$action['action']}";
 	$html[] = "	<div data-role=\"page\" data-theme=\"a\" data-id=\"{$pageid}\">";
@@ -85,13 +83,14 @@ function makeHeader($title = '') {
 	if ( count($HEAD_LINK) == 3 ) {
 		$html[] = "			<a href=\"{$HEAD_LINK[0]}\" data-icon=\"{$HEAD_LINK[1]}\" class=\"ui-btn-right\">{$HEAD_LINK[2]}</a>";
 	}
-	$html[] = "		</div><div id='infobox' data-backbtn='false' data-role='header' data-theme='d'><h2>".(($_SEVER['REQUEST_METHOD'] = "POST" && isset($_REQUEST['infobox']))?$_REQUEST['infobox']:"&nbsp;")."</h2></div>";
+	$html[] = "		</div>";
 	if ( $_SEVER['REQUEST_METHOD'] = "POST" && isset($_REQUEST['infobox']) ) {
-		$html[] = "		<script type='text/javascript'>setTimeout(\"$('.ui-page-active #infobox h2').fadeTo(300, .01, function() { $(this).html('&nbsp;').fadeTo(1000,1); });\", 9000);</script>";
+		$html[] = "		<script type='text/javascript'>setTimeout(\"infobox('{$_REQUEST['infobox']}');\", 1000);</script>";
 	}
 	unset($_SESSION['infodata']);
 	
 	$html[] = "		<div data-role=\"content\" data-theme=\"c\">";
+	if ( $TEST_MODE ) { $html[] = ' <!--'.var_export($_SESSION, true).'-->'; }
 	
 	return $html;
 }

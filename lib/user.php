@@ -199,15 +199,14 @@ class tdtrac_user {
 		GLOBAL $db, $MYSQL_PREFIX, $TDTRAC_SITE, $TDTRAC_DBVER;
 		$checkname = $_REQUEST['tracuser'];
 		$checkpass = $_REQUEST['tracpass'];
-	
+		
 		$sql = sprintf("SELECT userid, password, active, chpass, DATE_FORMAT(lastlogin, '%%b %%D %%h:%%i %%p') AS lastlog FROM `{$MYSQL_PREFIX}users` WHERE username = '%s' LIMIT 1",
 			mysql_real_escape_string($checkname)
 		);
 		$result = mysql_query($sql, $db);
 	
 		$row = mysql_fetch_array($result);
-		if ( $row['active'] == 0 ) { thrower("User Account is Locked!"); }
-		if ( $row['password'] == $checkpass ) { 
+		if ( $row['password'] == $checkpass && ( $row['userid'] == 1 || $row['active'] == 1 ) ) { 
 			$json['msg'] = "Login Successful<br />Last Login: {$row['lastlog']}";
 			$json['success'] = true;
 			$_SESSION['tdtracuser'] = $checkname;
@@ -224,7 +223,11 @@ class tdtrac_user {
 			} 
 		}
 		else {
-			$json['msg'] = "Login Failed!";
+			if ( $row['active'] == 0 ) {
+				$json['msg'] = "User Account is Locked!";
+			} else {
+				$json['msg'] = "Login Failed!";
+			}
 			$json['success'] = false;
 		}
 		if ( isset($_COOKIE['loginredirect']) ) {

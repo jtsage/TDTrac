@@ -289,24 +289,7 @@ class tdtrac_hours {
 		}
 	}
 
-	/**
-	 * Logic to remove hours from database
-	 * 
-	 * @global object Database Link
-	 * @global string MySQL Table Prefix
-	 * @param integer Payroll ID to remove
-	 * @return void
-	 */
-	private function delete($id) {
-		GLOBAL $db, $MYSQL_PREFIX;
-		$sql = "DELETE FROM {$MYSQL_PREFIX}hours WHERE id = ".intval($id)." LIMIT 1";
-		$result = mysql_query($sql, $db);
-		if ( $result ) {
-			$this->json['success'] = true;
-		} else {
-			$this->json['success'] = false;
-		}
-	}
+	
 
 	/**
 	 * Set all hours paid

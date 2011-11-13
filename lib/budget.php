@@ -540,24 +540,6 @@ class tdtrac_budget {
 		}
 	}
 	
-	/**
-	 * Logic to delete a budget item
-	 * 
-	 * @param integer Budget item to remove
-	 * @global object Database Connection
-	 * @global string MySQL Table Prefix
-	 * @return void
-	 */
-	private function delete($id) {
-		GLOBAL $db, $MYSQL_PREFIX;
-		$sql = "DELETE FROM `{$MYSQL_PREFIX}budget` WHERE id = '".intval($id)."'";
-		$result = mysql_query($sql, $db);
-			if ( $result ) {
-				$this->json['success'] = true;
-			} else {
-				$this->json['success'] = false;
-			}
-	}
 	
 	/**
 	 * Logic to display a category line (in full show view)
@@ -806,6 +788,5 @@ class tdtrac_budget {
 		}
 	}
 }
-
 
 ?>

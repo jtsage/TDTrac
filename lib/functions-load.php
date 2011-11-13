@@ -14,13 +14,16 @@ require_once("dbaseconfig.php");
 /** Library: Forms */
 require_once("formlib.php");
 /** Library: Tables */  //REM PRIOR TO 3.0
-require_once("tablelib.php");
+//require_once("tablelib.php");
 /** Library: HTML */
 require_once("htmllib.php");
 /** Library: tdtrac_user */
 require_once("user.php");
 /** Library: Lists */
 require_once("listlib.php");
+
+/** Meta-Module: all json functions */
+require_once("json.php");
 
 /** Module: tdtrac_mail */
 require_once("messaging.php");
