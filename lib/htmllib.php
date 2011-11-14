@@ -62,6 +62,7 @@ function makeHeader($title = '') {
 	$html[] = '	<link type="text/css" href="http://dev.jtsage.com/cdn/datebox/latest/jquery.mobile.datebox.min.css" rel="stylesheet" /> ';
 	$html[] = '	<link type="text/css" href="http://dev.jtsage.com/cdn/simpledialog/latest/jquery.mobile.simpledialog.min.css" rel="stylesheet" /> ';
 	$html[] = '	<link type="text/css" href="/css/tdtheme.css" rel="stylesheet" /> ';
+	$html[] = '	<link type="text/css" href="/css/tdtheme.mobile.css" rel="stylesheet" /> ';
 	$html[] = '	<script src="http://code.jquery.com/jquery-1.7.min.js"></script>';
 	$html[] = '	<script src="http://code.jquery.com/mobile/latest/jquery.mobile.js"></script>';
 	$html[] = '	<script type="text/javascript" src="http://dev.jtsage.com/cdn/datebox/latest/jquery.mobile.datebox.min.js"></script>';

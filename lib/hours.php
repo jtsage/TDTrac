@@ -52,7 +52,7 @@ class tdtrac_hours {
 	
 		switch ( $this->action['action'] ) {
 			case "add":
-				$this->title .= " :: Add";
+				$this->title .= "::Add";
 				if ( $this->user->can("addhours") || $this->user->isemp ) {
 					$this->html = $this->add_form();
 				} else {
@@ -62,7 +62,7 @@ class tdtrac_hours {
 				if ( $this->user->can('addhours') ) {
 					$HEAD_LINK = array('/hours/add/', 'plus', 'Add Hours'); 
 				}
-				$this->title .= " :: View";
+				$this->title .= "::View";
 				$type = (isset($this->action['type']))?$this->action['type']:'user';
 				$id = (isset($this->action['id']))?intval($this->action['id']):$this->user->id;
 					
@@ -70,17 +70,17 @@ class tdtrac_hours {
 					
 				switch ($type) {
 					case 'user':
-						$this->html = $this->view_show_user(intval($this->action['id']),'user');
+						$this->html = $this->view_user(intval($this->action['id']));
 						break;
 					case 'show':
-						$this->html = $this->view_show_user(intval($this->action['id']),'show');
+						$this->html = $this->view_show(intval($this->action['id']));
 						break;
 					case 'unpaid':
 						$this->html = $this->view_pending();
 						break;
 				} break;
 			case "edit":
-				$this->title .= " :: Edit";
+				$this->title .= "::Edit";
 				if ( $this->user->can("edithours") ) {
 					if ( isset($this->action['id']) && is_numeric($this->action['id']) ) {
 						$this->html = $this->edit_form(intval($this->action['id']));
@@ -89,6 +89,13 @@ class tdtrac_hours {
 					}
 				} else {
 					$this->html = error_page('Access Denied :: You cannot add new hour items');
+				} break;
+			case "remind":
+				$this->title .= "::Remind";
+				if ( $this->user->admin ) {
+					$this->html = $this->remind_form();
+				} else {
+					$this->html = error_page('Access Denied :: You cannot send reminders');
 				} break;
 			default:
 				if ( $this->user->can('addhours') ) {
@@ -191,7 +198,7 @@ class tdtrac_hours {
 		$usrs  = db_list(get_sql_const('emps'), array(userid, name));
 		
 		$list = new tdlist(array('id' => 'hours-index', 'actions' => false, 'icon' => 'add', 'inset' => true));
-		$list->setFormat("<a href='/hours/view/type:%s/id:%d/'><h3>%s</h3>"
+		$list->setFormat("<a href='/hours/view/type:%s/id:%d/%s'><h3>%s</h3>"
 				."<span class='ui-li-count'>$%s</span></a>");
 				
 		$list->addDivide('Operations');
@@ -209,6 +216,7 @@ class tdtrac_hours {
 			$list->addRow(array(
 					'unpaid',
 					0,
+					null,
 					'View Unpaid Hours',
 					number_format($total, 2)
 				), null);
@@ -221,6 +229,7 @@ class tdtrac_hours {
 				$list->addRow(array(
 					'show',
 					$show[0],
+					null,
 					$show[1],
 					number_format($total, 2)
 				), null);
@@ -233,6 +242,7 @@ class tdtrac_hours {
 				$list->addRow(array(
 					'user',
 					$usr[0],
+					'year:'.date('Y').'/month:'.date('n').'/',
 					$usr[1],
 					number_format($total, 2)
 				), null);
@@ -282,11 +292,11 @@ class tdtrac_hours {
 			}
 		}
 		
-		return $list->output();
+		return array_merge($list->output(), array("<br /><br /><a class=\"ajax-email\" data-email='{\"action\": \"hours\", \"id\": \"0\"}' data-role=\"button\" data-theme=\"f\" href=\"#\">E-Mail this Report to Yourself</a>"));
 	}
 	
 	/** 
-	 * Show Hours by Show or User
+	 * Show Hours by Show
 	 * 
 	 * @global object MySQL Database Resource
 	 * @global string MySQL Table Prefix
@@ -294,14 +304,10 @@ class tdtrac_hours {
 	 * @param string Type to display
 	 * @return array Formatted HTML
 	 */
-	public function view_show_user($id, $type) {
+	public function view_show($id) {
 		GLOBAL $db, $MYSQL_PREFIX;
 		
-		if ( $type == 'show' ) {
-			$sql = "SELECT h.*, (h.worked*u.payrate) as amount FROM `{$MYSQL_PREFIX}hours` h, `{$MYSQL_PREFIX}shows` s, `{$MYSQL_PREFIX}users` u WHERE h.showid = s.showid AND h.userid = u.userid AND h.showid = {$id} ORDER BY date DESC";
-		} else {
-			$sql = "SELECT h.*, showname, (h.worked*u.payrate) as amount FROM `{$MYSQL_PREFIX}hours` h, `{$MYSQL_PREFIX}shows` s, `{$MYSQL_PREFIX}users` u WHERE h.showid = s.showid AND h.userid = u.userid AND h.userid = {$id} ORDER BY date DESC";
-		}
+		$sql = "SELECT h.*, (h.worked*u.payrate) as amount FROM `{$MYSQL_PREFIX}hours` h, `{$MYSQL_PREFIX}shows` s, `{$MYSQL_PREFIX}users` u WHERE h.showid = s.showid AND h.userid = u.userid AND h.showid = {$id} ORDER BY date DESC";
 		$result = mysql_query($sql, $db);
 		
 		$list = new tdlist(array('id' => 'hours-view', 'actions' => true, 'icon' => 'check', 'inset' => true));
@@ -310,11 +316,7 @@ class tdtrac_hours {
 			."<h3>%s</h3><p>%s</p>"
 			."<span class='ui-li-count'>$%s</span></a>");
 		
-		if ( $type == 'show' ) {
-			$list->addDivide(get_single("SELECT showname as num FROM `{$MYSQL_PREFIX}shows` WHERE showid = {$id}"));
-		} else {
-			$list->addDivide($this->user->get_name($id));
-		}
+		$list->addDivide(get_single("SELECT showname as num FROM `{$MYSQL_PREFIX}shows` WHERE showid = {$id}"));
 		
 		if ( mysql_num_rows($result) < 1 ) {
 			$list->addRaw("<li data-theme='a'>No Hours Found</li>");
@@ -325,8 +327,8 @@ class tdtrac_hours {
 					$extra .= "&nbsp;&nbsp;<span class='pending'> (PENDING)</span>";
 				}
 				$list->addRow(array(
-					($type=='show')?$row['userid']:$row['showid'],
-					($type=='show')?$this->user->get_name($row['userid']):$row['showname'],
+					$row['userid'],
+					$this->user->get_name($row['userid']),
 					$extra,
 					number_format($row['amount'],2)
 				), $row, array('theme' => (($row['submitted'] == 1)?'c':'b')));
@@ -336,10 +338,77 @@ class tdtrac_hours {
 		return $list->output();
 	}
 	
+	/** 
+	 * Show Hours by Show
+	 * 
+	 * @global object MySQL Database Resource
+	 * @global string MySQL Table Prefix
+	 * @param integer Show or User ID
+	 * @param string Type to display
+	 * @return array Formatted HTML
+	 */
+	public function view_user($id) {
+		GLOBAL $db, $MYSQL_PREFIX, $TDTRAC_DAYRATE;
+		
+		if ( !isset($this->action['year']) ) { $this->action['year'] = date('Y'); }
+		if ( !isset($this->action['month']) ) { $this->action['month'] = date('n'); }
+		
+		$nextmonth = $this->action['month'] + 1;
+		$nextyear = (( $nextmonth > 12 ) ? $this->action['year']+1:$this->action['year']);
+		$nextmonth = (( $nextmonth > 12 ) ? 1:$nextmonth);
+		
+		$html = array();
+		
+		$sql = "SELECT h.*, showname, (h.worked*u.payrate) as amount "
+			. "FROM `{$MYSQL_PREFIX}hours` h, `{$MYSQL_PREFIX}shows` s, `{$MYSQL_PREFIX}users` u "
+			. "WHERE h.showid = s.showid AND h.userid = u.userid AND h.userid = {$id} "
+			. "AND date >= '{$this->action['year']}-".sprintf('%02d',$this->action['month'])."-01' "
+			. "AND date < '{$nextyear}-".sprintf('%02d',$nextmonth)."-01' "
+			. "ORDER BY date DESC";
+		
+		$result = mysql_query($sql);
+		$extrainfo = array();
+		$theseHighDates = array();
+		$theseHighDatesAlt = array();
+		
+		if ( mysql_num_rows($result) < 1 ) {
+			$theseHighDates = False;
+			$theseHighDatesAlt = False;
+		} else {
+			$html[] = "<div id='hours-data' style='display:none;'>";
+			while ( $row = mysql_fetch_array($result) ) {
+				$html[] = "  <div data-date='{$row['date']}' data-type='".(($TDTRAC_DAYRATE)?"Days":"Hours")."' data-submitted='{$row['submitted']}' data-show='{$row['showname']}' data-worked='{$row['worked']}' data-amount='".number_format($row['amount'],2)."'></div>";
+				if ( $row['submitted'] == 0 ) {
+					$theseHighDates[] = $row['date'];
+				} else {
+					$theseHighDatesAlt[] = $row['date'];
+				}
+			}
+			$html[] = "</div>";
+		}
+		
+		$html[] = "<div id='hours-user-show'>";
+		$dboxopt = array(
+			'useInline' => True,
+			'useInlineHideInput' => True,
+			'mode' => 'calbox',
+			'calHighToday' => false,
+			'calShowOnlyMonth' => false,
+			'calHighPicked' => false,
+			'highDates' => (empty($theseHighDates)?false:$theseHighDates),
+			'highDatesAlt' => (empty($theseHighDatesAlt)?false:$theseHighDatesAlt),
+			'pickPageOAHighButtonTheme' => 'b',
+			'pickPageOHighButtonTheme' => 'e',
+			'pickPageButtonTheme' => 'a',
+			'defaultPickerValue' => array($this->action['year'],($this->action['month']-1),1)
+		);
+		
+		$html[] = "<input type='date' data-role='datebox' id='hoursview' name='hoursview' data-options='".json_encode($dboxopt)."' />";
+		$html[] = "</div>";
+		
+		return $html;
+	}
 	
-
-
-
 	/**
 	 * Send hours via email
 	 * 
@@ -348,89 +417,67 @@ class tdtrac_hours {
 	 * @global bool Use dayrate or hourly rate
 	 * @return void
 	 */
-	private function email() {
+	public function email() {
 		GLOBAL $db, $MYSQL_PREFIX, $TDTRAC_DAYRATE;
-		if ( $this->user->isemp && ! ( $this->action['type'] == 'user' && $this->action['id'] == $this->user->id ) ) {
+		if ( ! $this->user->admin ) {
 			return false;
-		}
-		
-		$sql  = "SELECT CONCAT(first, ' ', last) as name, u.userid, worked, date, showname, submitted, h.id as hid FROM {$MYSQL_PREFIX}users u, {$MYSQL_PREFIX}shows s, {$MYSQL_PREFIX}hours h WHERE ";
-		$sql .= "u.userid = h.userid AND s.showid = h.showid";
-		$sql .= ($this->action['type'] == 'user' || ( $this->action['type'] == 'unpaid' && $this->action['id'] <> 0 ) ) ? " AND u.userid = '".intval($this->action['id'])."'" : "";
-		if ( $this->action['type'] <> 'unpaid' ) {
-			$sql .= (isset($this->action['sdate'])) ? " AND h.date >= '".make_sql_date($this->action['sdate'])."'" : "";
-			$sql .= (isset($this->action['edate'])) ? " AND h.date <= '".make_sql_date($this->action['edate'])."'" : "";
 		} else {
-			$sql .= " AND h.submitted = 0";
-		}
-		$sql .= " ORDER BY last ASC, date DESC";
-		
-		$uid    = ( isset($this->action['id']) && is_numeric($this->action['id']) ) ? intval($this->action['id']) : "";
-		$sdate = ( isset($this->action['sdate']) ) ? $this->action['sdate'] : 0;
-		$edate = ( isset($this->action['edate']) ) ? $this->action['edate'] : 0;
+			$sql  = "SELECT CONCAT(first, ' ', last) as name, u.userid, worked, date, showname, submitted, h.id as hid FROM {$MYSQL_PREFIX}users u, {$MYSQL_PREFIX}shows s, {$MYSQL_PREFIX}hours h WHERE ";
+			$sql .= "u.userid = h.userid AND s.showid = h.showid AND h.submitted = 0 ORDER BY last ASC, date DESC";
 			
-		$result = mysql_query($sql, $db);
-		while ( $row = mysql_fetch_array($result) ) {
-			$dbarray[$row['name']][] = $row;
-		}
-		$body = "";
-	
-		$subject = "TDTrac Hours Worked ::";
-		$subject .= ( $this->action['type'] == 'user' ) ? " ".$this->user->get_name($uid) : "";
-		$subject .= ($sdate <> 0 ) ? " [Start Date: {$sdate}]" : "";
-		$subject .= ($edate <> 0 ) ? " [Ending Date: {$edate}]" : "";
-		$subject .= ( $this->action['id'] == 0 && $this->action['type'] == 'unpaid' ) ? " All Unpaid Hours" : "";
-	
-		$headers  = 'MIME-Version: 1.0' . "\r\n";
-		$headers .= 'Content-type: text/html; charset=iso-8859-1' . "\r\n";
-	
-		foreach ( $dbarray as $key => $data ) {
-			$body .= "<h2>Hours Worked For {$key}</h2><p>\n";
-			$body .= ($sdate <> 0 ) ? "Start Date: {$sdate}\n" : "";
-			$body .= ($sdate <> 0 && $edate <> 0 ) ? "<br />" : "";
-			$body .= ($edate <> 0 ) ? "Ending Date: {$edate}" : "";
-			$body .= "</p>\n";
-
-			$tabl = new tdtable("hours-{$ident}", 'datatable', false);
-			$tabl->addHeader(array('Date', 'Show', (($TDTRAC_DAYRATE)?"Days":"Hours")." Worked", 'Paid'));
-			$tabl->addNumber((($TDTRAC_DAYRATE)?"Days":"Hours")." Worked");
-			$tabl->setAlign('Paid', "center");
-			
-			foreach ( $data as $num => $line ) {
-				$tabl->addRow(array($line['date'], $line['showname'], $line['worked'], (($line['submitted'] == 1) ? "YES" : "NO")), $line);
+			$result = mysql_query($sql, $db);
+			while ( $row = mysql_fetch_array($result) ) {
+				$dbarray[$row['name']][] = $row;
 			}
-			$body .= $tabl->output(true);
-		}
-		
-		$result = mail($this->user->email, $subject, $body, $headers);
-		if ( $result ) {
-			$this->json['success'] = true;
-		} else {
-			$this->json['success'] = false;
+			
+			$body = "";
+			
+			$subject = "TDTrac Hours Worked :: Unpaid Hours";
+			$headers  = 'MIME-Version: 1.0' . "\r\n";
+			$headers .= 'Content-type: text/html; charset=iso-8859-1' . "\r\n";
+			
+			foreach ( $dbarray as $key => $data ) {
+				$body .= "<h2>Hours Worked For {$key}</h2>\n";
+				
+				$tabl = new tdtable("hours-{$ident}", 'datatable', false);
+				$tabl->addHeader(array('Date', 'Show', (($TDTRAC_DAYRATE)?"Days":"Hours")." Worked"));
+				$tabl->addNumber((($TDTRAC_DAYRATE)?"Days":"Hours")." Worked");
+				
+				foreach ( $data as $num => $line ) {
+					$tabl->addRow(array($line['date'], $line['showname'], $line['worked']), $line);
+				}
+				
+				$body .= $tabl->output(true);
+			}
+			
+			return mail($this->user->email, $subject, $body, $headers);
 		}
 	}
 	
 	/**
 	 * Show hours reminder email options form
 	 * 
-	 * @global object Database Link
 	 * @global string MySQL Table Prefix
 	 * @global string Site address for links
 	 * @return array HTML output
 	 */
 	private function remind_form() {
-		GLOBAL $db, $MYSQL_PREFIX, $TDTRAC_SITE;
+		GLOBAL $MYSQL_PREFIX, $TDTRAC_SITE;
 		$sql = "SELECT CONCAT(first, ' ', last) as name, userid FROM {$MYSQL_PREFIX}users WHERE payroll = 1 AND active = 1 ORDER BY last DESC";
-		$result = mysql_query($sql, $db);
-		$form = new tdform("{$TDTRAC_SITE}hours/remind/", 'form2', 1, 'genform', 'Send Payroll Reminder');
 		
-		$fesult = $form->addDate('duedate', 'Hours Due Date');
-		$fesult = $form->addDate('sdate', 'Start Date');
-		$fesult = $form->addDate('edate', 'End Date');
-		$fesult = $form->addInfo('<strong>Employees to remind:</strong>');
-		while ( $row = mysql_fetch_array($result) ) {
-			$fesult = $form->addCheck('toremind[]', $row['name'], null, False, True, $row['userid']);
-		}
+		$form = new tdform(array( 'action' => "{$TDTRAC_SITE}json/email/base:hours/type:remind/id:0/", 'id' => 'hours-remind-form'));
+		
+		$fesult = $form->addDate(array('name' => 'duedate', 'label' => 'Hours Due Date', 'placeholder' => 'Hours Due Date'));
+		$fesult = $form->addDate(array('name' => 'sdate', 'label' => 'Start Date', 'placeholder' => 'Start of Pay Period'));
+		$fesult = $form->addDate(array('name' => 'edate', 'label' => 'End Date', 'placeholder' => 'End of Pay Period'));
+		
+		$listofnames = db_list($sql, array('userid', 'name'));
+		
+		$fesult = $form->addMultiCheck(array(
+			'name' => 'toremind',
+			'label' => 'Employees to remind',
+			'value' => $listofnames
+		));
 		
 		return $form->output('Send Reminders');
 	}
@@ -443,17 +490,17 @@ class tdtrac_hours {
 	 * @global string Site address for links
 	 * @return string HTML output
 	 */
-	private function remind_send() {
+	public function remind_send() {
 		GLOBAL $db, $MYSQL_PREFIX, $TDTRAC_SITE;
 		foreach ( $_REQUEST['toremind'] as $remid ) {
-			$results[] = $this->remind_email(
+			$this->remind_email(
 				intval($remid), 
 				mysql_real_escape_string($_REQUEST['duedate']),
 				mysql_real_escape_string($_REQUEST['sdate']),
 				mysql_real_escape_string($_REQUEST['edate'])
 			);
 		}
-		return "Sent Reminders<br />" . join('<br />', $results);
+		return true;
 	}
 	
 	/**
@@ -474,22 +521,16 @@ class tdtrac_hours {
 		$resul1 = mysql_query($sql1, $db);
 		$row1 = mysql_fetch_array($resul1);
 		$sendto = $row1['email'];
-	
+		
 		$subject = "TDTrac Hours Are Due: {$duedate}";	
-	
+		
 		$headers  = 'MIME-Version: 1.0' . "\r\n";
 		$headers .= 'Content-type: text/html; charset=iso-8859-1' . "\r\n";
-	
+		
 		$body  = "<p>This e-mail is being sent to you to remind you that hours for the payperiod of {$sdate} true {$edate} are due on {$duedate}.  Please take a moment to log into the system and update or double check your hours.<br />";
 		$body .= "<br />As a reminder, your <strong>username:</strong> {$row1['username']} and <strong>password:</strong> {$row1['password']} for <a href=\"{$TDTRAC_SITE}\">{$TDTRAC_SITE}</a></p>";
-	
-		$result = mail($sendto, $subject, $body, $headers);
-		$retty = $row1['name'];
-		if ( $result ) {
-			return $retty . " :: OK";
-		} else {
-			return $retty . " :: FAIL";
-		}
+		
+		mail($sendto, $subject, $body, $headers);
 	}
 }
 ?>

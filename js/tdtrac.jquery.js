@@ -26,6 +26,66 @@ jQuery.extend(jQuery.mobile.simpledialog.prototype.options, {
 		testMode = ( $('[data-role=header]:first').find('h1').text().search('TEST_MODE') > -1 ) ? true : false;
 	});
 	
+	$('#hoursview').live('datebox', function(e,p) {
+		if ( p.method === 'offset' && p.type === 'm' ) {
+			$.mobile.showPageLoadingMsg();
+			var xxx = window.location.pathname,
+				umonth = xxx.match(/month:(\d+)/),
+				uyear = xxx.match(/year:(\d+)/),
+				id = xxx.match(/id:(\d+)/),
+				newurl = '/hours/view/user/id:'+id[1];
+			
+			month = parseInt(umonth[1], 10);
+			year = parseInt(uyear[1], 10);
+			
+			if ( p.amount < 0 ) {
+				if ( (month - 1) < 1 ) {
+					month = 12; year = year - 1;
+				} else {
+					month = month - 1;
+				}
+			} else {
+				if ( (month + 1) > 12 ) {
+					month = 1; year = year + 1;
+				} else {
+					month = month + 1;
+				}
+			}
+			
+			$.mobile.changePage(newurl+'/year:'+year+'/month:'+month+'/', { reloadPage: true});
+		} else if ( p.method === 'set' ) {
+			var info = $('.ui-page-active #hours-data').find('[data-date='+p.value+']'),
+				first = $('.ui-page-active').children('.ui-content'),
+				lines = '';
+			
+			if ( info.length > 0 ) {
+				thisDate = $(info[0]).attr('data-date');
+				thisType = $(info[0]).attr('data-type');
+				
+				for ( x=0; x<info.length; x++ ) {
+					lines = lines + '<li data-theme="' + (($(info[x]).attr('data-submitted') == 0)?'c':'e') + '">'
+							+ '<strong>' + $(info[x]).attr('data-show') + ':</strong> '
+							+ $(info[x]).attr('data-worked')
+							+ '<p class="ui-li-count">$' + $(info[x]).attr('data-amount') + '</p></li>';
+				}
+				
+				first.simpledialog({
+					'mode': 'blank',
+					'prompt': 'Notice',
+					'forceInput': false,
+					'useDialogForceFalse': true,
+					'cleanOnClose': true,
+					'width': '300px',	
+					'fullHTML': 
+						'<ul data-role="listview" data-theme="c" data-dividertheme="a">'+
+							'<li data-role="list-divider">'+thisType+' Worked For :: '+thisDate+'</li>'+
+							lines+'</ul>'
+					});
+			}
+		}
+		
+	});
+	
 	$('html').ajaxComplete(function(e,xhr,settings) {
 		/* DEBUG ALL JSON BASED AJAX */
 		if ( testMode === true && settings.url.search("json") > -1 ) {
@@ -89,6 +149,9 @@ jQuery.extend(jQuery.mobile.simpledialog.prototype.options, {
 				break;
 			case 'budget':
 				linkurl = "/json/email/base:budget/id:"+o.id+"/";
+				break;
+			case 'hours':
+				linkurl = "/json/email/base:hours/type:unpaid/id:0/";
 				break;
 		}
 		

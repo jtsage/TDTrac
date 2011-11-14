@@ -409,6 +409,45 @@ class tdform {
 	 * @param array Options
 	 * @return bool True on success
 	 */
+	public function addMultiCheck($passed) {
+		$default = array(
+			'id' => null,
+			'name' => 'check',
+			'label' => 'Checkmark Input',
+			'text' => 'Yes',
+			'preset' => False,
+			'title' => null,
+			'enabled' => True,
+			'value' => 'y'
+		);
+		
+		$options = merge_defaults($default, $passed);
+		
+		if ( $options['id'] == null )		{ $options['id'] = $options['name']; }
+		if ( $options['title'] == null )	{ $options['title'] = $options['label']; }
+		
+		$this->members[] = array('checkbox', $options['name'], $options['label'], $options['title'], $options['preset']);
+		
+		$this->html[] = "  <div data-role='fieldcontain'><fieldset data-role='controlgroup'><legend>{$options['label']}</legend>";
+		$int = 0;
+		foreach ( $options['value'] as $each ) {
+			$int++;
+			$thisid = $options['id'] . "-{$int}";
+			$this->html[] = "    <input type='checkbox' name='{$options['name']}[]' id='{$thisid}' class='custom' value='{$each[0]}' ".(!$options['enabled']?"disabled='disabled' ":"")." />";
+			$this->html[] = "    <label for='{$thisid}'>{$each[1]}</label>";
+		}
+		$this->html[] = "  </fieldset></div>";
+		return true;
+	}
+	
+	
+	
+	/**
+	 * Add a CHECKBOX input to the form
+	 * 
+	 * @param array Options
+	 * @return bool True on success
+	 */
 	public function addToggle($passed) {
 		$default = array(
 			'id' => null,

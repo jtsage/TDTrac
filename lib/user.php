@@ -219,7 +219,7 @@ class tdtrac_user {
 				if ( mysql_num_rows($res2) < 1 ) { $json['msg'] .= "<br><strong>WARNING:</strong> Database not up-to-date, please run upgrade"; }
 			}
 	    		if ( $row['chpass'] <> 0 ) { 
-				$json['msg'] .= "Login Successful, Please Change Your Password!";
+				$json['msg'] .= "<br />Login Successful, Please Change Your Password!";
 			} 
 		}
 		else {

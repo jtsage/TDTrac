@@ -115,16 +115,22 @@ class tdtrac_json {
 								$mod = new tdtrac_todo($this->user, $this->action);
 								$this->json['success'] = $mod->email();
 								break;
-							case "hours":
-								$mod = new tdtrac_hours($this->user, $this->action);
-								$this->json['success'] = $mod->email();
-								break;
 							case "budget":
 								$mod = new tdtrac_budget($this->user, $this->action);
 								$this->json['success'] = $mod->email($this->action['id']);
 								break;
+							case "hours":
+								$mod = new tdtrac_hours($this->user, $this->action);
+								if ( $this->action['type'] == 'remind' ) {
+									$this->json['location'] = '/hours/';
+									$this->json['success'] = $mod->remind_send();
+								} elseif ( $this->action['type'] == 'unpaid' ) {
+									$this->json['success'] = $mod->email();
+								} else {
+									$this->json['msg'] = "Report not found";
+								} break;
 							default:
-								$this->json['msg'] = "Invalid Action";
+								$this->json['msg'] = "Report not found";
 								break;
 						}
 						if ( $this->json['success'] == true ) { 
