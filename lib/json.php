@@ -99,6 +99,8 @@ class tdtrac_json {
 				case "mark":
 					if ( $this->user->can("edittodo") && $this->action['base'] == 'todo' ) {
 						$this->do_sql("UPDATE `{$MYSQL_PREFIX}todo` SET complete = 1 WHERE id = ".intval($this->action['id'])." LIMIT 1");
+					} elseif ( $this->user->can("edithours") && $this->action['base'] == 'hours' ) {
+						$this->do_sql("UPDATE `{$MYSQL_PREFIX}hours` SET submitted = 1 WHERE id = ".intval($this->action['id'])." LIMIT 1");
 					} else {
 						$this->json['success'] = false;
 						$this->json['msg'] = "Permission Denied!";
@@ -132,21 +134,36 @@ class tdtrac_json {
 						}
 					} break;
 				case "save":
+					$done = false;
 					if ( $this->action['id'] == 0 && $this->user->can("add{$this->action['base']}") ) {
+						$done = true;
 						$this->do_sql($this->get_insert_sql($this->action['base']), true);
+						if ( $this->action['base'] == 'hours' ) {
+							$this->send_hours_add();
+						}
 					}
 					if ( $this->action['id'] > 0 && $this->user->can("edit{$this->action['base']}") ) {
 						$this->do_sql($this->get_update_sql($this->action['base']), false);
-					} 
+					}
+					if ( $this->action['id'] == 0 && $this->user->isemp && $this->action['base'] == 'hours' && !$done ) {
+						$this->do_sql($this->get_insert_sql('hours'), true);
+						$this->send_hours_add();
+					}
 					if ( isset($_SESSION['tdtrac']['one']) ) {
 						$this->json['location'] = $_SESSION['tdtrac']['one'];
 					} else {
 						$this->json['location'] = "/{$this->action['base']}/";
 					} break;
 				case "clear":
-					$this->do_sql("DELETE FROM {$MYSQL_PREFIX}msg WHERE toid = {$this->user->id}");
-					$this->json['location'] = "/";
-					break;
+					switch ( $this->action['base'] ) {
+						case 'msg':
+							$this->do_sql("DELETE FROM `{$MYSQL_PREFIX}msg` WHERE toid = {$this->user->id}");
+							$this->json['location'] = "/";
+							break;
+						case 'hours':
+							$this->do_sql("UPDATE `{$MYSQL_PREFIX}hours` SET submitted = 1 WHERE userid = ".intval($this->action['id']));
+							break;
+					} break;
 				case "adm":
 					if ( ! $this->user->admin || ! isset($this->action['sub']) ) {
 						$this->json['msg'] = "Permission Denied";
@@ -232,7 +249,7 @@ class tdtrac_json {
 					$result = mysql_query($eachsql, $db);
 				} 
 			} else {
-					$result = mysql_query($sql, $db);
+				$result = mysql_query($sql, $db);
 			}
 			
 			if ( $result ) {
@@ -246,9 +263,15 @@ class tdtrac_json {
 		}
 	}
 	
-	
+	/**
+	 * Logic to generate INSERT queries
+	 * 
+	 * @global string MySQL Table Prefix
+	 * @params string Type of SQL Query
+	 * @return mixed One of more SQL Queries
+	 */
 	private function get_insert_sql($type) {
-		GLOBAL $MYSQL_PREFIX;
+		GLOBAL $MYSQL_PREFIX, $TDTRAC_PAYRATE;
 		
 		$sql = "NOT FOUND";
 		
@@ -317,10 +340,27 @@ class tdtrac_json {
 				if ( $rcptid > 0 ) {
 					$sql[] = "UPDATE {$MYSQL_PREFIX}rcpts SET handled = '1' WHERE imgid = '{$rcptid}'";
 				} break;
+			case "hours":
+				$sqlstring  = "INSERT INTO `{$MYSQL_PREFIX}hours` ( `userid`, `showid`, `date`, `worked` )";
+				$sqlstring .= " VALUES ( %d, %d, '%s', '%f' )";
+				
+				$sql = sprintf($sqlstring,
+					intval($_REQUEST['userid']),
+					intval($_REQUEST['showid']),
+					make_date($_REQUEST['date']),
+					floatval($_REQUEST['worked'])
+				); break;
 		}
 		return $sql;
 	}
 	
+	/**
+	 * Logic to generate UPDATE queries
+	 * 
+	 * @global string MySQL Table Prefix
+	 * @params string Type of SQL Query
+	 * @return mixed One of more SQL Queries
+	 */
 	private function get_update_sql($type) {
 		GLOBAL $MYSQL_PREFIX;
 		
@@ -411,8 +451,60 @@ class tdtrac_json {
 					intval($_REQUEST['payto']),
 					intval($_REQUEST['id'])
 				); break;
+			case "hours":
+				$sqlstring  = "UPDATE `{$MYSQL_PREFIX}hours` SET `showid` = %d, `date` = '%s', `worked` = '%f',";
+				$sqlstring .= " submitted = %d WHERE id = %d";
+				
+				$sql = sprintf($sqlstring,
+					intval($_REQUEST['showid']),
+					make_date($_REQUEST['date']),
+					floatval($_REQUEST['worked']),
+					intval($_REQUEST['submitted']),
+					intval($_REQUEST['id'])
+				); break;
 		}
 		return $sql;
 	}
+	
+	/**
+	 * Logic to send payroll msg reports
+	 * 
+	 * @global string MySQL Table Prefix
+	 * @return void
+	 */
+	private function send_hours_add() {
+		GLOBAL $MYSQL_PREFIX;
+		
+		$sql = array();
+		
+		$mailmessage = sprintf("%s Added Payroll: %f for %s (%s)",
+			$this->user->name,
+			number_format(floatval($_REQUEST['worked']),2),
+			mysql_real_escape_string($_REQUEST['date']),
+			$this->user->get_name(intval($_REQUEST['userid']))
+		);
+		
+		$mail_sql_str  = "INSERT INTO `{$MYSQL_PREFIX}msg` ( toid, fromid, body ) VALUES ( %d, %d, '%s' )";
+				
+		if ( $this->user->id == intval($_REQUEST['userid']) ) { // ADDING FOR SELF, NOTIFY WHERE `notify`
+			if ( $this->user->isemp ) { // BUT ONLY FOR LIMITED ACCOUNTS
+				$users_to_notify_sql = "SELECT userid FROM `{$MYSQL_PREFIX}users` WHERE notify = 1";
+				$users_to_notify_res = mysql_query($users_to_notify_sql, $db);
+				while ( $row = mysql_fetch_array($users_to_notify_res) ) {
+					$sql[] = sprintf($mail_sql_str,	$row['userid'], $this->user->id, $mailmessage );
+				}
+			}
+		} else { // ADDING FOR OTHERS, NOTIFY RECIPIENT ONLY
+			$sql[] = sprintf($mail_sql_str,
+				intval($_REQUEST['userid']),
+				$this->user->id,
+				$mailmessage );
+		}
+		
+		if ( !empty($sql) ) {
+			$this->do_sql($sql, true);
+		}
+	}
+	
 }
 ?>

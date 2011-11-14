@@ -9,7 +9,7 @@ function infobox(text, head) { // CONTROL INFOBOX CONTENT
 			'cleanOnClose': true,
 			'fullHTML': 
 				'<ul data-role="listview" data-theme="c" data-dividertheme="a">'+
-					'<li data-role="list-divider"><h3>'+header+'</h3></li>'+
+					'<li data-role="list-divider">'+header+'</li>'+
 					'<li>'+text+'</li></ul>'
 		});
 		
@@ -74,7 +74,6 @@ jQuery.extend(jQuery.mobile.simpledialog.prototype.options, {
 		}
 		
 	}); // END FORM HANDLING
-			
 	
 	$('.ajax-email').die('click');
 	$('.ajax-email').live('click', function(e) { // BEGIN: E-Mail Function
@@ -169,6 +168,57 @@ jQuery.extend(jQuery.mobile.simpledialog.prototype.options, {
 			}); 
 		}
 	}); // END: Todo Menu
+	
+	$('.hours-clear').live('vclick', function (e) { // BEGIN: Clear Hours
+		e.preventDefault();
+		var linkie = this;
+		if ( ! $(this).data('done') ) {
+			$(this).simpledialog({
+				'mode': 'bool',
+				'prompt': 'Clear Hours For User #'+$(linkie).data('recid')+'?',
+				'buttons': { 
+					'Yes, Clear' : function () {
+						$.getJSON("/json/clear/base:hours/id:"+$(linkie).data('recid')+"/", function(data) {
+							if ( data.success === true ) {
+								$(linkie).parent().find('p:first').html('--Submitted--');
+								$(linkie).parent().find('span.ui-li-count').html('-0-');
+								infobox("Hours Cleared");
+							} else {
+								infobox("Hours Clear Failed!");
+							}
+							$(linkie).data('done', 1);
+						}); },
+					'Cancel' : function () { return true; }
+				}
+			});
+		}
+	}); // END: Clear Hours
+	
+	$('.hours-mark').live('vclick', function (e) { // BEGIN: Mark Hours
+		e.preventDefault();
+		var linkie = this;
+		if ( ! $(this).data('done') ) {
+			$(this).simpledialog({
+				'mode': 'bool',
+				'prompt': 'Mark Hours Finished?',
+				'buttons': { 
+					'Yes, Clear' : function () {
+						$.getJSON("/json/mark/base:hours/id:"+$(linkie).data('recid')+"/", function(data) {
+							if ( data.success === true ) {
+								$(linkie).parent().find('.ui-btn-up-b').removeClass('ui-btn-up-b').addClass('ui-btn-up-c');
+								$(linkie).parent().removeClass('ui-btn-up-b').addClass('ui-btn-up-c');
+								$(linkie).parent().find('.pending').html('');
+								infobox("Hours Marked");
+							} else {
+								infobox("Hours Mark Failed!");
+							}
+							$(linkie).data('done', 1);
+						}); },
+					'Cancel' : function () { return true; }
+				}
+			});
+		}
+	}); // END: Mark Hours
 	
 	$('.msg-delete').live('vclick', function (e) { // BEGIN: Delete Message
 		e.preventDefault();
@@ -468,7 +518,6 @@ jQuery.extend(jQuery.mobile.simpledialog.prototype.options, {
 			}
 		});
 	}); // End User Menu
-	
 	
 	$('select').live('change', function(e) { // BEGIN : Add Dropdown Option
 		var self = this;

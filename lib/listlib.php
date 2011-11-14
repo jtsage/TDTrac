@@ -150,9 +150,6 @@ class tdlist {
 		$rethtml = "";
 		foreach ( $this->actionlist as $action ) {
 			switch ($action) {
-				case "bdel":
-					$rethtml .= $this->act_bdel($raw);
-					break;
 				case "badd":
 					$rethtml .= $this->act_badd($raw);
 					break;
@@ -161,6 +158,12 @@ class tdlist {
 					break;
 				case "tdone":
 					$rethtml .= $this->act_tdone($raw);
+					break;
+				case "hclear":
+					$rethtml .= $this->act_hclear($raw);
+					break;
+				case "hmark":
+					$rethtml .= $this->act_hmark($raw);
 					break;
 			}
 		}
@@ -178,13 +181,23 @@ class tdlist {
 	}
 	
 	/**
-	 * Action: Budget delete item button
+	 * Action: Hours Clear User button
 	 * 
 	 * @param array Raw SQL Array
 	 * @return string Formatted HTML
 	 */
-	private function act_bdel($raw) {
-		return "<a class=\"budg-delete\" data-done=\"0\" data-recid=\"{$raw['showid']}\" href=\"#\">Delete Item</a>";
+	private function act_hclear($raw) {
+		return "<a class=\"hours-clear\" data-done=\"0\" data-recid=\"{$raw['userid']}\" href=\"#\">Mark Hours Submitted</a>";
+	}
+	
+	/**
+	 * Action: Hours Mark Done User button
+	 * 
+	 * @param array Raw SQL Array
+	 * @return string Formatted HTML
+	 */
+	private function act_hmark($raw) {
+		return "<a class=\"hours-mark\" data-done=\"0\" data-recid=\"{$raw['id']}\" href=\"#\">Mark Hours Submitted</a>";
 	}
 	
 	/**

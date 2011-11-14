@@ -5,7 +5,7 @@
  * Contains all payroll related functions. 
  * Data hardened
  * @package tdtrac
- * @version 2.0.0
+ * @version 3.0.0
  * @author J.T.Sage <jtsage@gmail.com>
  */
 
@@ -14,7 +14,7 @@
  *  Allows configuration of shows
  * 
  * @package tdtrac
- * @version 2.0.0
+ * @version 3.0.0
  * @since 2.0.0
  * @author J.T.Sage <jtsage@gmail.com>
  */
@@ -23,17 +23,11 @@ class tdtrac_hours {
 	/** @var array Parsed query string */
 	private $action = array();
 	
-	/** @var bool Output format (TURE = json, FALSE = html) */
-	private $output_json = false;
-	
 	/** @var array Formatted HTML */
 	private $html = array();
 	
 	/** @var string Page Title */
 	private $title = "Payroll";
-	
-	/** @var array JSON Data */
-	private $json = array();
 	
 	/** 
 	 * Create a new instance of the TO-DO module
@@ -46,7 +40,6 @@ class tdtrac_hours {
 		$this->post = ($_SERVER['REQUEST_METHOD'] == "POST") ? true : false;
 		$this->user = $user;
 		$this->action = $action;
-		$this->output_json = $action['json'];
 	}
 	
 	/**
@@ -55,116 +48,57 @@ class tdtrac_hours {
 	 * @return void
 	 */
 	public function output() {
-		if ( !$this->output_json ) { // HTML METHODS
-			switch ( $this->action['action'] ) {
-				case "add":
-					$this->title .= " :: Add";
-					if ( $this->user->can("addhours") ) {
-						if ( $this->post ) {
-							thrower($this->save(false), 'hours/add/');
-						} else {
-							$this->html = $this->add_form();
-						}
+		global $HEAD_LINK, $CANCEL;
+	
+		switch ( $this->action['action'] ) {
+			case "add":
+				$this->title .= " :: Add";
+				if ( $this->user->can("addhours") || $this->user->isemp ) {
+					$this->html = $this->add_form();
+				} else {
+					$this->html = error_page('Access Denied :: You cannot add new hour items');
+				} break;
+			case "view":
+				if ( $this->user->can('addhours') ) {
+					$HEAD_LINK = array('/hours/add/', 'plus', 'Add Hours'); 
+				}
+				$this->title .= " :: View";
+				$type = (isset($this->action['type']))?$this->action['type']:'user';
+				$id = (isset($this->action['id']))?intval($this->action['id']):$this->user->id;
+					
+				if ( $this->user->isemp ) { $type = 'user'; $id = $this->user->id; }
+					
+				switch ($type) {
+					case 'user':
+						$this->html = $this->view_show_user(intval($this->action['id']),'user');
+						break;
+					case 'show':
+						$this->html = $this->view_show_user(intval($this->action['id']),'show');
+						break;
+					case 'unpaid':
+						$this->html = $this->view_pending();
+						break;
+				} break;
+			case "edit":
+				$this->title .= " :: Edit";
+				if ( $this->user->can("edithours") ) {
+					if ( isset($this->action['id']) && is_numeric($this->action['id']) ) {
+						$this->html = $this->edit_form(intval($this->action['id']));
 					} else {
-						thrower('Access Denied :: You cannot add payroll items', 'hours/');
-					} break;
-				case "view":
-					if ( $this->user->can('viewhours') ) {
-						$this->title .= " :: View";
-						if ( $this->post ) {
-							$type  = ( isset($_REQUEST['type']) && ( $_REQUEST['type'] == 'unpaid' || $_REQUEST['type'] == 'user' || $_REQUEST['type'] == 'date' )) ? "type:{$_REQUEST['type']}/" : "";
-							$id    = ( isset($_REQUEST['id']) && is_numeric($_REQUEST['id']) ) ? "id:".intval($_REQUEST['id'])."/" : "";
-							$sdate = ( isset($_REQUEST['sdate']) && $_REQUEST['sdate'] <> "" ) ? "sdate:{$_REQUEST['sdate']}/" : "";
-							$edate = ( isset($_REQUEST['edate']) && $_REQUEST['edate'] <> "" ) ? "edate:{$_REQUEST['edate']}/" : "";
-							thrower(false, "hours/view/{$type}{$id}{$sdate}{$edate}");
-						} else {
-							if ( !isset($this->action['type']) ) {
-								$this->html = $this->view_form();
-							} else {
-								switch($this->action['type']) {
-									case "user":
-									case "date":
-										$this->html = $this->view();
-										break;
-									case "unpaid":
-										if ( $this->user->admin ) {
-											$this->html = $this->view();
-										} else {
-											thrower('Access Denied :: You Cannot View Unpaid Hours', 'hours/');
-										} break;
-									default:
-										$this->html = $this->view_form();
-										break;
-								}
-							}
-						}
-					} else {
-						thrower("Access Denied :: You Cannot View Hours");
-					} break;
-				case "edit":
-					$this->title .= " :: Edit";
-					if ( $this->user->can("edithours") ) {
-						if ( $this->post ) {
-							if ( isset($_REQUEST['id']) && is_numeric($_REQUEST['id']) ) {
-								thrower($this->save(true), "hours/edit/id:".intval($_REQUEST['id'])."/");
-							} else {
-								thrower('Error :: Data Mismatch Detected', 'hours/');
-							}
-						} else {
-							if ( isset($this->action['id']) && is_numeric($this->action['id']) ) {
-								$this->html = $this->edit_form(intval($this->action['id']));
-							} else {
-								thrower("Error :: Data Mismatch Detected", 'hours/');
-							}
-						}
-					} else {
-						thrower('Access Denied :: You Cannot Edit Payroll Items', 'hours/');
-					} break;
-				case "remind":
-					$this->title .= " :: Send Reminders";
-					if ( $this->user->admin ) {
-						if ( $this->post ) {
-							if ( !empty($_REQUEST['duedate']) && !empty($_REQUEST['sdate']) && !empty($_REQUEST['edate']) ) {
-								thrower($this->remind_send(), 'hours/');
-							} else {
-								thrower('Error :: Data Mismatch Detected', 'hours/');
-							}
-						} else {
-							$this->html = $this->remind_form();
-						}
-					} else {
-						thrower('Access Denied :: You Cannot Send Payroll Reminders', 'hours/');
-					} break;
-				default:
-					$this->html = $this->index();
-					break;
-			}
-			makePage($this->html, $this->title);
-		} else { 
-			switch($this->action['action']) {
-				case "email":
-					if ( $this->user->can('edithours') ) {
-						$this->email();
-					} else {
-						$this->json['success'] = false;
-					} break;
-				case "clear":
-					if ( isset($this->action['id']) && is_numeric($this->action['id']) && $this->user->admin ) {
-						$this->clear(intval($this->action['id']));
-					} else {
-						$this->json['success'] = false;
-					} break;
-				case "delete":
-					if ( isset($this->action['id']) && is_numeric($this->action['id']) && $this->user->can('edithours') ) {
-						$this->delete(intval($this->action['id']));
-					} else {
-						$this->json['success'] = false;
-					} break;
-				default:
-					$this->json['success'] = false;
-					break;
-			} echo json_encode($this->json);
+						$this->html = error_page('Access Denied :: Data Mismatch');
+					}
+				} else {
+					$this->html = error_page('Access Denied :: You cannot add new hour items');
+				} break;
+			default:
+				if ( $this->user->can('addhours') ) {
+					$HEAD_LINK = array('/hours/add/', 'plus', 'Add Hours'); 
+				}
+				$this->html = $this->index();
+				break;
 		}
+		makePage($this->html, $this->title);
+		
 	} // END OUTPUT FUNCTION
 	
 	/**
@@ -176,17 +110,24 @@ class tdtrac_hours {
 	 */
 	private function add_form () {
 		GLOBAL $TDTRAC_DAYRATE, $TDTRAC_SITE;
-		$form = new tdform("{$TDTRAC_SITE}hours/add/", "hours-add-form", 1, 'genform', 'Add Payroll Record');
+		$form = new tdform(array( 'action' => "{$TDTRAC_SITE}json/save/base:hours/id:0/", 'id' => 'hours-add-form'));
 		
-		if ( isset($this->action['own']) && $this->action['own'] && $this->user->onpayroll ) {
-			$result = $form->addDrop('userid', 'Employee', null, db_list(get_sql_const('emps'), array('userid', 'name')), False, $this->user->id);
-		} else {
-			$result = $form->addDrop('userid', 'Employee', null, db_list(get_sql_const('emps'), array('userid', 'name')), False);
-		}
-		$result = $form->addDrop('showid', 'Show', null, db_list(get_sql_const('showid'), array('showid', 'showname')), False);
-		$result = $form->addDate('date', 'Date');
-		$result = $form->addText('worked', (($TDTRAC_DAYRATE)?"Days":"Hours")." Worked");
-		$result = $form->addHidden('new-hours', true);
+		$fesult = $form->addDrop(array(
+			'name' => 'userid',
+			'label' => 'Employee',
+			'selected' => ( isset($this->action['own']) && $this->action['own'] && $this->user->onpayroll ) ? $this->user->id : '',
+			'options' => db_list(get_sql_const('emps'), array('userid', 'name'))
+		));
+			
+		$fesult = $form->addDrop(array(
+			'name' => 'showid',
+			'label' => 'Show',
+			'selected' => ((isset($this->action['show']) && is_numeric($this->action['show']))?$this->action['show']:0),
+			'options' => db_list(get_sql_const('showid'), array(showid, showname))
+		));
+		
+		$fesult = $form->addDate(array('name' => 'date', 'label' => 'Date', 'placeholder' => 'Date worked'));
+		$fesult = $form->addText(array('name' => 'worked', 'label' => (($TDTRAC_DAYRATE)?"Days":"Hours")." Worked", 'placeholder' => 'Amount Worked'));
 		
 		return $form->output('Add Hours');
 	}
@@ -206,110 +147,37 @@ class tdtrac_hours {
 		$sql .= "SELECT h.*, CONCAT(first, ' ', last) as name FROM {$MYSQL_PREFIX}hours h, {$MYSQL_PREFIX}users u WHERE h.userid = u.userid AND h.id = " . intval($hid) . " LIMIT 1";
 		$result = mysql_query($sql, $db);
 		$recd = mysql_fetch_array($result);
-		$form = new tdform("{$TDTRAC_SITE}hours/edit/id:{$hid}/", "edit-hours-form", 1, 'genform', 'Edit Payroll Record');
 		
-		$fesult = $form->addDrop('userid', 'Employee', null, array(array($recd['userid'], $recd['name'])), False);
-		$fesult = $form->addDrop('showid', 'Show', null, db_list(get_sql_const('showid'), array('showid', 'showname')), False, $recd['showid']);
-		$fesult = $form->addDate('date', 'Date', null, $recd['date']);
-		$fesult = $form->addText('worked', (($TDTRAC_DAYRATE)?"Days":"Hours")." Worked", null, $recd['worked']);
-		$fesult = $form->addCheck('submitted', 'Hours Paid Out', null, $recd['submitted']);
+		$form = new tdform(array( 'action' => "{$TDTRAC_SITE}json/save/base:hours/id:0/", 'id' => 'hours-add-form'));
+		
+		$fesult = $form->addDrop(array(
+			'name' => 'userid',
+			'label' => 'Employee',
+			'selected' => $recd['userid'],
+			'options' => array(array($recd['userid'], $recd['name']))
+		));
+			
+		$fesult = $form->addDrop(array(
+			'name' => 'showid',
+			'label' => 'Show',
+			'selected' => $recd['showid'],
+			'options' => db_list(get_sql_const('showid'), array(showid, showname))
+		));
+		
+		$fesult = $form->addDate(array('name' => 'date', 'label' => 'Date', 'placeholder' => 'Date worked', 'preset' => $recd['date']));
+		$fesult = $form->addText(array('name' => 'worked', 'label' => (($TDTRAC_DAYRATE)?"Days":"Hours")." Worked", 'placeholder' => 'Amount Worked', 'preset' => $recd['worked']));
+		
+		$fesult = $form->addToggle(array(
+			'name' => 'submitted',
+			'label' => 'Hours Paid Out',
+			'options' => array(array(1,'Paid'),array(0,'Pending')),
+			'preset' => $recd['submitted']
+		));
 		$fesult = $form->addHidden('id', $hid);
 		
 		return $form->output('Edit Hours');
 	}
-
 	
-	
-	/**
-	 * Logic to save payroll record to database
-	 * 
-	 * @global object Database Link
-	 * @global string MySQL Table Prefix
-	 * @global bool MySQL Debug
-	 * @param bool False for new record, true for overwrite
-	 * @return void
-	 */
-	private function save($exists = false) {
-		GLOBAL $db, $MYSQL_PREFIX, $MYSQL_DEBUG;
-		if ( !$exists ) {
-			$sqlstring  = "INSERT INTO `{$MYSQL_PREFIX}hours` ( `userid`, `showid`, `date`, `worked` )";
-			$sqlstring .= " VALUES ( %d, %d, '%s', '%f' )";
-	
-			$sql = sprintf($sqlstring,
-				intval($_REQUEST['userid']),
-				intval($_REQUEST['showid']),
-				make_date($_REQUEST['date']),
-				floatval($_REQUEST['worked'])
-			);
-		} else {
-			$sqlstring  = "UPDATE `{$MYSQL_PREFIX}hours` SET `showid` = %d, `date` = '%s', `worked` = '%f',";
-			$sqlstring .= " submitted = %d WHERE id = %d";
-		
-			$sql = sprintf($sqlstring,
-				intval($_REQUEST['showid']),
-				make_date($_REQUEST['date']),
-				floatval($_REQUEST['worked']),
-				(($_REQUEST['submitted'] == "y") ? "1" : "0"),
-				intval($_REQUEST['id'])
-			);
-		}
-		
-		$result = mysql_query($sql, $db);
-		
-		if ( $result ) {
-			if ( !$exists ) { // IF NEW HOURS, DO MESSAGING
-				$mailmessage = sprintf("%s Added Payroll: %f for %s (%s)",
-					$this->user->name,
-					floatval($_REQUEST['worked']),
-					mysql_real_escape_string($_REQUEST['date']),
-					$this->user->get_name(intval($_REQUEST['userid']))
-				);
-				$mail_sql_str  = "INSERT INTO `{$MYSQL_PREFIX}msg` ( toid, fromid, body ) VALUES ( %d, %d, '%s' )";
-				
-				if ( $this->user->id == intval($_REQUEST['userid']) ) { // ADDING FOR SELF, NOTIFY WHERE `notify`
-					if ( $this->user->isemp ) { // BUT ONLY FOR LIMITED ACCOUNTS
-						$users_to_notify_sql = "SELECT userid FROM `{$MYSQL_PREFIX}users` WHERE notify = 1";
-						$users_to_notify_res = mysql_query($users_to_notify_sql, $db);
-						while ( $row = mysql_fetch_array($users_to_notify_res) ) {
-							$mail_sql  = sprintf($mail_sql_str,	$row['userid'], $this->user->id, $mailmessage );
-							$mail_res  = mysql_query($mail_sql, $db);
-						}
-					}
-				} else { // ADDING FOR OTHERS, NOTIFY RECIPIENT ONLY
-					$mail_sql = sprintf($mail_sql_str,
-						intval($_REQUEST['userid']),
-						$this->user->id,
-						$mailmessage );
-					$mail_res = mysql_query($mail_sql, $db);
-				}
-			}
-			return "Payroll Item Saved";
-		} else {
-			return "Payroll Item Save :: Failed" . (($MYSQL_DEBUG) ? " (".mysql_error().")" : "");
-		}
-	}
-
-	
-
-	/**
-	 * Set all hours paid
-	 * 
-	 * @global object Database Link
-	 * @global string MySQL Table Prefix
-	 * @param integer User ID
-	 * @return void
-	 */
-	private function clear($userid) {
-		GLOBAL $db, $MYSQL_PREFIX;
-		$sql = "UPDATE {$MYSQL_PREFIX}hours SET submitted = 1 WHERE userid = ".intval($userid);
-		$result = mysql_query($sql, $db);
-		if ( $result ) {
-			$this->json['success'] = true;
-		} else {
-			$this->json['success'] = false;
-		}
-	}
-
 	/** 
 	 * Show available Payroll Functions
 	 * 
@@ -317,152 +185,158 @@ class tdtrac_hours {
 	 * @return array Formatted HTML
 	 */
 	public function index() {
-		global $TDTRAC_SITE;
-		$html[] = "<div class=\"tasks\"><ul class=\"linklist\"><li><h3>Payroll Tracking</h3><ul class=\"linklist\">";
-		$html[] = "<li>Manage payroll records for each employee</li>";
-		$html[] = ( $this->user->onpayroll ) 		? "  <li><a href=\"{$TDTRAC_SITE}hours/add/own:1/\">Add Hours For Yourself</a></li>" : "";
-		$html[] = ( $this->user->can('addhours') && !$this->user->isemp ) 	? "  <li><a href=\"{$TDTRAC_SITE}hours/add/\">Add Hours Worked</a></li>" : ""; // SUPPESS THIS ON ONLY ADD OWN.
-		$html[] = ( $this->user->can('viewhours') ) ? "  <li><a href=\"{$TDTRAC_SITE}hours/view/\">View Hours Worked</a></li>" : "";
-		$html[] = ( $this->user->admin ) 			? "  <li><a href=\"{$TDTRAC_SITE}hours/view/type:unpaid/\">View Hours Worked (unpaid)</a></li>" : "";
-		$html[] = ( $this->user->admin ) 			? "  <li><a href=\"{$TDTRAC_SITE}hours/remind/\">Send Payroll Due Reminder To Employees</a></li>" : "";
-		$html[] = "</ul></li></ul></div>";
-		return $html;
-	}
-	
-	/**
-	 * Show pick form for hours view.
-	 * 
-	 * @global object Database Link
-	 * @global string MySQL Table Prefix
-	 * @global string Site address for links
-	 * @return array HTML Output
-	 */
-	private function view_form() {
-		GLOBAL $db, $MYSQL_PREFIX, $TDTRAC_SITE;
-		$form1 = new tdform("{$TDTRAC_SITE}hours/view/", "view-hours-user-form", 1, 'genform', 'View By Employee');
-		$fesult = $form1->addDrop('id', 'Employee', null, db_list(get_sql_const('emps'), array('userid', 'name')), False);
-		$fesult = $form1->addDate('sdate', 'Start Date', null, null, True, 'sdate1');
-		$fesult = $form1->addDate('edate', 'End Date', null, null, True, 'edate1');
-		$fesult = $form1->addHidden('type', 'user');
-		$html = $form1->output('View Hours', 'Leave Dates Blank to See All');
+		global $MYSQL_PREFIX;
 		
-		if ( $this->user->isemp ) { return $html; }
+		$shows = db_list(get_sql_const('showid'), array(showid, showname));
+		$usrs  = db_list(get_sql_const('emps'), array(userid, name));
 		
-		$form2 = new tdform("{$TDTRAC_SITE}hours/view/", "view-hours-date-form", $form1->getlasttab(), "genform2", 'View Dated Report');
-		$fesult = $form2->addDate('sdate', 'Start Date', null, null, True, 'sdate2');
-		$fesult = $form2->addDate('edate', 'End Date', null, null, True, 'edate2');
-		$fesult = $form2->addHidden('type', 'date');
-		$html = array_merge($html, $form2->output('View Hours', 'Leave Dates Blank to See All'));
-	
-		if ( !$this->user->admin ) { return $html; }
+		$list = new tdlist(array('id' => 'hours-index', 'actions' => false, 'icon' => 'add', 'inset' => true));
+		$list->setFormat("<a href='/hours/view/type:%s/id:%d/'><h3>%s</h3>"
+				."<span class='ui-li-count'>$%s</span></a>");
+				
+		$list->addDivide('Operations');
 		
-		$form3 = new tdform("{$TDTRAC_SITE}hours/view/", "view-hours-unpaid-form", $form2->getlasttab(), "genform3", "View Unpaid Hours");
-		$fesult = $form3->addHidden('type', 'unpaid');
-		return array_merge($html, $form3->output('View Hours'));
-	}
-	
-	/**
-	 * Show payroll report
-	 * 
-	 * @global object Database Link
-	 * @global string MySQL Table Prefix
-	 * @global bool Use daily or hourly wages
-	 * @global string Site address for links
-	 * @global array JavaScript
-	 * @return array HTML Output
-	 */
-	private function view() {
-		GLOBAL $db, $MYSQL_PREFIX, $TDTRAC_DAYRATE, $TDTRAC_SITE, $SITE_SCRIPT;
-		if ( $this->user->isemp && ! ( $this->action['type'] == 'user' && $this->action['id'] == $this->user->id ) ) {
-			thrower("Access Denied :: You do not have access to the view", 'hours/');
+		if ( $this->user->isemp ) { $list->addRaw("<li><a href='/hours/add/own:1/'><h3>Add Your Hours</h3></a></li>"); }
+		
+		$list->addRaw("<!--".var_export($usrs, true)."-->");
+		if ( $this->user->can('addhours') && !$this->user->isemp ) {
+			$list->addRaw("<li><a href='/hours/add/'><h3>Add Hours</h3></a></li>");
+		}
+		if ( $this->user->admin ) {
+			$list->addRaw("<li><a href='/hours/remind/'><h3>Send Payroll Reminders</h3></a></li>");
+			$list->addDivide('Special Reports');
+			$total = get_single("SELECT SUM(h.worked*u.payrate) num FROM `{$MYSQL_PREFIX}hours` h, `{$MYSQL_PREFIX}users` u, `{$MYSQL_PREFIX}shows` s WHERE h.userid = u.userid AND s.showid = h.showid AND closed = 0 AND submitted = 0");
+			$list->addRow(array(
+					'unpaid',
+					0,
+					'View Unpaid Hours',
+					number_format($total, 2)
+				), null);
 		}
 		
-		$sql  = "SELECT CONCAT(first, ' ', last) as name, u.userid, worked, date, showname, submitted, h.id as hid FROM {$MYSQL_PREFIX}users u, {$MYSQL_PREFIX}shows s, {$MYSQL_PREFIX}hours h WHERE ";
-		$sql .= "u.userid = h.userid AND s.showid = h.showid";
-		$sql .= ($this->action['type'] == 'user') ? " AND u.userid = '".intval($this->action['id'])."'" : "";
-		if ( $this->action['type'] <> 'unpaid' ) {
-			$sql .= (isset($this->action['sdate'])) ? " AND h.date >= '".make_sql_date($this->action['sdate'])."'" : "";
-			$sql .= (isset($this->action['edate'])) ? " AND h.date <= '".make_sql_date($this->action['edate'])."'" : "";
+		if ( $this->user->can('viewhours') ) {
+			$list->addDivide('View Hours By Show');
+			foreach ( $shows as $show ) {
+				$total = get_single("SELECT SUM(h.worked*u.payrate) num FROM `{$MYSQL_PREFIX}hours` h, `{$MYSQL_PREFIX}users` u WHERE h.userid = u.userid AND showid = {$show[0]}");
+				$list->addRow(array(
+					'show',
+					$show[0],
+					$show[1],
+					number_format($total, 2)
+				), null);
+			}
+		}
+		$list->addDivide('View Hours By Employee');
+		foreach ( $usrs as $usr ) {
+			if ( $this->user->can('viewhours') || $this->user->id == $usr[0] ) {
+				$total = get_single("SELECT SUM(h.worked*u.payrate) num FROM `{$MYSQL_PREFIX}hours` h, `{$MYSQL_PREFIX}users` u WHERE h.userid = u.userid AND u.userid = {$usr[0]}");
+				$list->addRow(array(
+					'user',
+					$usr[0],
+					$usr[1],
+					number_format($total, 2)
+				), null);
+			}
+		}
+		
+		
+		return $list->output();
+	}
+	
+	/** 
+	 * Show pending Hours
+	 * 
+	 * @global object MySQL Database Resource
+	 * @global string MySQL Table Prefix
+	 * @return array Formatted HTML
+	 */
+	public function view_pending() {
+		GLOBAL $db, $MYSQL_PREFIX;
+		
+		$sql = "SELECT userid, sum(worked) as total FROM `{$MYSQL_PREFIX}hours` WHERE submitted = 0 GROUP BY userid ORDER BY userid";
+		$result = mysql_query($sql, $db);
+		
+		$list = new tdlist(array('id' => 'hours-index', 'actions' => true, 'icon' => 'check', 'inset' => true));
+		$list->addAction('hclear');
+		$list->setFormat("<a href='/hours/view/type:user/id:%d/'><h3>%s</h3><p>%s</p>"
+				."<span class='ui-li-count'>%s</span></a>");
+				
+		$list->addDivide('Unpaid Hours');
+		
+		if ( mysql_num_rows($result) < 1 ) {
+			$list->addRaw("<li data-theme='a'>No Unpaid Hours Found</li>");
 		} else {
-			$sql .= " AND h.submitted = 0";
+			while ( $row = mysql_fetch_array($result) ) {
+				$hoursowed = array();
+				$sql2 = "SELECT date,worked FROM `{$MYSQL_PREFIX}hours` WHERE submitted = 0 AND userid = {$row['userid']}";
+				$result2 = mysql_query($sql2, $db);
+				while ( $row2 = mysql_fetch_array($result2) ) {
+					$hoursowed[] = "<strong>{$row2['date']} :</strong> {$row2['worked']}";
+				}
+				$list->addRow(array(
+					$row['userid'],
+					$this->user->get_name($row['userid']),
+					join('<br />', $hoursowed),
+					$row['total']
+				), $row);
+			}
 		}
-		$sql .= " ORDER BY last ASC, date DESC";
 		
-		$type  = ( isset($this->action['type']) && ( $this->action['type'] == 'unpaid' || $this->action['type'] == 'user' || $this->action['type'] == 'date' )) ? "type:{$this->action['type']}/" : "";
-		$id    = ( isset($this->action['id']) && is_numeric($this->action['id']) ) ? "id:".intval($this->action['id'])."/" : "";
-		$sdate = ( isset($this->action['sdate']) ) ? "sdate:".make_sql_date($this->action['sdate'])."/" : "";
-		$edate = ( isset($this->action['edate']) ) ? "edate:".make_sql_date($this->action['edate'])."/" : "";
+		return $list->output();
+	}
+	
+	/** 
+	 * Show Hours by Show or User
+	 * 
+	 * @global object MySQL Database Resource
+	 * @global string MySQL Table Prefix
+	 * @param integer Show or User ID
+	 * @param string Type to display
+	 * @return array Formatted HTML
+	 */
+	public function view_show_user($id, $type) {
+		GLOBAL $db, $MYSQL_PREFIX;
 		
-		$maillink = "{$TDTRAC_SITE}hours/email/json:1/{$type}{$id}{$sdate}{$edate}";
-		
-		if ( $this->action['type'] == 'unpaid' ) {
-			$html[] = "<h3>All Unpaid Hours</h3>";
-			$html[] = "<span class=\"upright\">[<a class=\"ALL-email\" href=\"#\">E-Mail All to Self</a>]</span>";
-			$html[] = "<br /><br /><br />";
-			$SITE_SCRIPT[] = "$(function() { $('.ALL-email').click( function() {";
-			$SITE_SCRIPT[] = "  $('#popper').html(\"Please wait...\"); $('#popperdiv').show('blind');";
-			$SITE_SCRIPT[] = "	$.getJSON(\"{$TDTRAC_SITE}hours/email/json:1/type:unpaid/id:0/\", function(data) {";
-			$SITE_SCRIPT[] = "		if ( data.success === true ) { ";
-			$SITE_SCRIPT[] = "			$('#popper').html(\"All Unpaid Hours :: Sent\");";
-			$SITE_SCRIPT[] = "		} else { $('#popper').html(\"E-Mail Send :: Failed\"); }";
-			$SITE_SCRIPT[] = "		$('#popperdiv').show('blind');";			
-			$SITE_SCRIPT[] = "	}); return false;";
-			$SITE_SCRIPT[] = "});});";
+		if ( $type == 'show' ) {
+			$sql = "SELECT h.*, (h.worked*u.payrate) as amount FROM `{$MYSQL_PREFIX}hours` h, `{$MYSQL_PREFIX}shows` s, `{$MYSQL_PREFIX}users` u WHERE h.showid = s.showid AND h.userid = u.userid AND h.showid = {$id} ORDER BY date DESC";
+		} else {
+			$sql = "SELECT h.*, showname, (h.worked*u.payrate) as amount FROM `{$MYSQL_PREFIX}hours` h, `{$MYSQL_PREFIX}shows` s, `{$MYSQL_PREFIX}users` u WHERE h.showid = s.showid AND h.userid = u.userid AND h.userid = {$id} ORDER BY date DESC";
 		}
 		$result = mysql_query($sql, $db);
-		if ( mysql_num_rows($result) < 1 ) { return array("<h3>Empty Data Set</h3>", "<p>There are no payroll items matching your terms.</p>"); }
-		while ( $row = mysql_fetch_array($result) ) {
-			$dbarray[$row['name']][] = $row;
+		
+		$list = new tdlist(array('id' => 'hours-view', 'actions' => true, 'icon' => 'check', 'inset' => true));
+		$list->addAction('hmark');
+		$list->setFormat("<a href='/hours/view/type:".(($type=='show')?'user':'show')."/id:%d/'>"
+			."<h3>%s</h3><p>%s</p>"
+			."<span class='ui-li-count'>$%s</span></a>");
+		
+		if ( $type == 'show' ) {
+			$list->addDivide(get_single("SELECT showname as num FROM `{$MYSQL_PREFIX}shows` WHERE showid = {$id}"));
+		} else {
+			$list->addDivide($this->user->get_name($id));
 		}
-		foreach ( $dbarray as $key => $data ) {
-			$html[] = "<h3>Hours Worked For: {$key}</h3>";
-			$ident = preg_replace("/ /", "", $key);
-			if ( $this->action['type'] == 'unpaid' ) { $maillink = "{$TDTRAC_SITE}hours/email/json:1/type:unpaid/id:{$data[0]['userid']}"; }
-			$SITE_SCRIPT[] = "$(function() { $('.{$ident}-email').click( function() {";
-			$SITE_SCRIPT[] = "  $('#popper').html(\"Please wait...\"); $('#popperdiv').show('blind');";
-			$SITE_SCRIPT[] = "	$.getJSON(\"{$maillink}\", function(data) {";
-			$SITE_SCRIPT[] = "		if ( data.success === true ) { ";
-			$SITE_SCRIPT[] = "			$('#popper').html(\"Hours For {$key} :: Sent\");";
-			$SITE_SCRIPT[] = "		} else { $('#popper').html(\"E-Mail Send :: Failed\"); }";
-			$SITE_SCRIPT[] = "		$('#popperdiv').show('blind');";			
-			$SITE_SCRIPT[] = "	}); return false;";
-			$SITE_SCRIPT[] = "});});";
-			$tmphtml = "<span class=\"upright\">[<a class=\"{$ident}-email\" href=\"#\">E-Mail to Self</a>]";
-			if ( $this->action['type'] == 'unpaid') {
-				$SITE_SCRIPT[] = "var hclear{$ident} = true;";
-				$SITE_SCRIPT[] = "$(function() { $('.{$ident}-clear').click( function() {";
-				$SITE_SCRIPT[] = "	if ( hclear{$ident} && confirm('Mark All Paid for {$key}?')) {";
-				$SITE_SCRIPT[] = "		$.getJSON(\"{$TDTRAC_SITE}hours/clear/json:1/id:{$data[0]['userid']}\", function(data) {";
-				$SITE_SCRIPT[] = "			if ( data.success === true ) { ";
-				$SITE_SCRIPT[] = "				$('#hours-{$ident}').find('td').css('background-color', '#778177');";
-				$SITE_SCRIPT[] = "				$('.{$ident}-clear').html('PAID');";
-				$SITE_SCRIPT[] = "				$('#popper').html(\"All hours for {$key} marked PAID\");";
-				$SITE_SCRIPT[] = "			} else { $('#popper').html(\"Hours Mark :: Failed\"); }";
-				$SITE_SCRIPT[] = "			hclear{$ident} = false;";
-				$SITE_SCRIPT[] = "			$('#popperdiv').show('blind');";			
-				$SITE_SCRIPT[] = "	});} return false;";
-				$SITE_SCRIPT[] = "});});";
-				$tmphtml .= " [<a class=\"{$ident}-clear\" href=\"#\">Set All Paid</a>]";
+		
+		if ( mysql_num_rows($result) < 1 ) {
+			$list->addRaw("<li data-theme='a'>No Hours Found</li>");
+		} else {
+			while ( $row = mysql_fetch_array($result) ) {
+				$extra = "<strong>{$row['date']} :</strong> {$row['worked']}";
+				if ( $row['submitted'] == 0 ) {
+					$extra .= "&nbsp;&nbsp;<span class='pending'> (PENDING)</span>";
+				}
+				$list->addRow(array(
+					($type=='show')?$row['userid']:$row['showid'],
+					($type=='show')?$this->user->get_name($row['userid']):$row['showname'],
+					$extra,
+					number_format($row['amount'],2)
+				), $row, array('theme' => (($row['submitted'] == 1)?'c':'b')));
 			}
-			
-			$html[] = $tmphtml . "</span>";
-			$html[] = "<ul class=\"datalist\">";
-			$html[] = ($sdate <> "" ) ? "<li>Start Date: {$this->action['sdate']}</li>" : "";
-			$html[] = ($edate <> "" ) ? "<li>Ending Date: {$this->action['edate']}</li>" : "";
-			$html[] = "</ul>";
-			$tabl = new tdtable("hours-{$ident}", 'datatable', $this->user->can('edithours'));
-			$tabl->addHeader(array('Date', 'Show', (($TDTRAC_DAYRATE)?"Days":"Hours")." Worked", 'Paid'));
-			$tabl->addNumber((($TDTRAC_DAYRATE)?"Days":"Hours")." Worked");
-			$tabl->setAlign('Paid', "center");
-			if ( $this->user->can('edithours') ) { $tabl->addAction(array('pedit', 'pdel')); }
-			
-			foreach ( $data as $num => $line ) {
-				$tabl->addRow(array($line['date'], $line['showname'], $line['worked'], (($line['submitted'] == 1) ? "YES" : "NO")), $line);
-			}
-			$html = array_merge($html, $tabl->output(false));
 		}
-		return $html;
+		
+		return $list->output();
 	}
+	
+	
 
 
 

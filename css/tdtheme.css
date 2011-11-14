@@ -17,6 +17,11 @@ table {
     font-weight: normal;
 }
 
+span.pending {
+    color: #C3593C;
+    font-weight: bold;
+}
+
 
 
 
