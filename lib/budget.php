@@ -25,20 +25,11 @@ class tdtrac_budget {
 	/** @var array Parsed query string */
 	private $action = array();
 	
-	/** @var bool Output format (TURE = json, FALSE = html) */
-	private $output_json = false;
-	
 	/** @var array Formatted HTML */
 	private $html = array();
 	
 	/** @var string Page Title */
 	private $title = "Budget";
-	
-	/** @var array JSON Data */
-	private $json = array();
-	
-	/** @var array List of priorities */
-	private $priorities = array(array(0, 'Low'), array(1, 'Normal'), array(2, 'High'), array(3, 'Critical'));
 	
 	/** 
 	 * Create a new instance of the TO-DO module
@@ -51,7 +42,6 @@ class tdtrac_budget {
 		$this->post = ($_SERVER['REQUEST_METHOD'] == "POST") ? true : false;
 		$this->user = $user;
 		$this->action = $action;
-		$this->output_json = $action['json'];
 	}
 	
 	/**
@@ -60,143 +50,86 @@ class tdtrac_budget {
 	 * @return void
 	 */
 	public function output() {
-		global $HEAD_LINK, $CANCEL, $TEST_MODE;
-		if ( !$this->output_json ) { // HTML METHODS			
-			switch ( $this->action['action'] ) {
-				case "add":
-					$CANCEL = true;
-					$this->title .= "::Add";
-					if ( $this->user->can("addbudget") ) {
-						if ( !isset($this->action['rcpt']) || !is_numeric($this->action['rcpt']) ) {
-							$this->html = $this->add_form();
-						} else {
-							$this->html = $this->add_form(intval($this->action['rcpt']));
-						}
+		global $HEAD_LINK, $CANCEL, $TEST_MODE;		
+		switch ( $this->action['action'] ) {
+			case "add":
+				$CANCEL = true;
+				$this->title .= "::Add";
+				if ( $this->user->can("addbudget") ) {
+					if ( !isset($this->action['rcpt']) || !is_numeric($this->action['rcpt']) ) {
+						$this->html = $this->add_form();
 					} else {
-						$this->html = error_page('Access Denied :: You cannot add new budget items');
-					} break;
-				case "item":
-					$this->title .= "::Item";
-					if ( $this->user->can("viewbudget") ) {
-						if ( !isset($this->action['id']) || !is_numeric($this->action['id']) ) {
-							$this->html = error_page('Invalid Page Requested');
-						} else {
-							$this->html = $this->view_item($this->action['id']);
-						}
+						$this->html = $this->add_form(intval($this->action['rcpt']));
+					}
+				} else {
+					$this->html = error_page('Access Denied :: You cannot add new budget items');
+				} break;
+			case "item":
+				$this->title .= "::Item";
+				if ( $this->user->can("viewbudget") ) {
+					if ( !isset($this->action['id']) || !is_numeric($this->action['id']) ) {
+						$this->html = error_page('Invalid Page Requested');
 					} else {
-						$this->html = error_page('Access Denied :: You cannot view detailed budget items');
-					} break;
-				case "view":
-					$this->title .= "::View";
-					if ( !$this->user->can('viewbudget') ) { 
-						$this->html = $this->view($this->user->id, 'reimb');
+						$this->html = $this->view_item($this->action['id']);
+					}
+				} else {
+					$this->html = error_page('Access Denied :: You cannot view detailed budget items');
+				} break;
+			case "view":
+				$this->title .= "::View";
+				if ( !$this->user->can('viewbudget') ) { 
+					$this->html = $this->view($this->user->id, 'reimb');
+				} else {
+					if ( !isset($this->action['id']) || !is_numeric($this->action['id']) ) {
+						$this->html = error_page('Invalid Page Requested');
 					} else {
-						if ( !isset($this->action['id']) || !is_numeric($this->action['id']) ) {
-							$this->html = error_page('Invalid Page Requested');
-						} else {
-							if ( $this->action['type'] == 'show' ) {
-								if ( $this->user->can('addbudget') ) {
-									$HEAD_LINK = array("/budget/add/show:{$this->action['id']}/", 'plus', 'Add Item'); 
-								}
-								if ( !isset($this->action['cat']) ) {
-									$this->html = $this->view_show($this->action['id']);
-								} else {
-									$this->html = $this->view_cat($this->action['id'], $this->action['cat']);
-								}
+						if ( $this->action['type'] == 'show' ) {
+							if ( $this->user->can('addbudget') ) {
+								$HEAD_LINK = array("/budget/add/show:{$this->action['id']}/", 'plus', 'Add Item'); 
+							}
+							if ( !isset($this->action['cat']) ) {
+								$this->html = $this->view_show($this->action['id']);
 							} else {
-								$this->html = error_page('Not Implemented Yet');
+								$this->html = $this->view_cat($this->action['id'], $this->action['cat']);
 							}
-						}
-					} break;
-				case "edit":
-					$CANCEL = true;
-					$this->title .= "::Edit";
-					if ( $this->user->can("editbudget") ) {
-						if ( isset($this->action['id']) && is_numeric($this->action['id']) ) {
-							$this->html = $this->edit_form(intval($this->action['id']));
+						} elseif ( $this->action['type'] == 'pending' ) {
+							$this->html = $this->view_pending();
+						} elseif ( $this->action['type'] == 'reimb' ) {
+							$this->html = $this->view_reimb($this->action['id']);
 						} else {
-							$this->html = error_page("Error :: Data Mismatch Detected");
+							$this->html = error_page('Not Implemented Yet');
 						}
+					}
+				} break;
+			case "edit":
+				$CANCEL = true;
+				$this->title .= "::Edit";
+				if ( $this->user->can("editbudget") ) {
+					if ( isset($this->action['id']) && is_numeric($this->action['id']) ) {
+						$this->html = $this->edit_form(intval($this->action['id']));
 					} else {
-						$this->html = error_page('Access Denied :: You cannot add new budget items');
-					} break;
-				case "rcpt":
-					if ( $this->user->can("addbudget") ) {
-						$this->html = $this->reciept_list();
-					} else {
-						$this->html = error_page('Access Denied :: You cannot add new budget items');
-					} break;
-				default:
-					if ( !$this->user->can('viewbudget') ) { 
-						$this->html = $this->view($this->user->id, 'reimb');
-					} else {
-						if ( $this->user->can('addbudget') ) {
-							$HEAD_LINK = array("/budget/add/", 'plus', 'Add Item'); 
-						}
-						$this->html = $this->showlist();
-					} break;
-			}
-			makePage($this->html, $this->title);
-		} else { // JSON METHODS
-			switch($this->action['action']) {
-				case "save":
-					if ( $this->action['new'] == 0 ) {
-						if ( $this->user->can("editbudget") ) {
-							if ( isset($_REQUEST['id']) && is_numeric($_REQUEST['id']) ) {
-								$this->json = $this->save(true);
-								if ( isset($_SESSION['tdpage']['one']) ) {
-									$this->json['location'] = $_SESSION['tdpage']['one'];
-								} else {
-									$this->json['location'] = "/budget/";
-								}
-							}
-						} else {
-							$this->json['success'] = false;
-							$this->json['msg'] = "Access Denied";
-						}
-					} elseif ( $this->action['new'] == 1 ) {
-						if ( $this->user->can("addbudget") ) {
-							$this->json = $this->save(false);
-							if ( isset($_SESSION['tdpage']['one']) ) {
-								$this->json['location'] = $_SESSION['tdpage']['one'];
-							} else {
-								$this->json['location'] = "/budget/";
-							}
-						} else {
-							$this->json['success'] = false;
-							$this->json['msg'] = "Access Denied";
-						}
-					} else {
-						$this->json['success'] = false;
-						$this->json['msg'] = "Poorly Formed Request";
-					} break;
-				case "email":
-					if ( isset($this->action['id']) && is_numeric($this->action['id']) && $this->user->can('viewbudget') ) {
-						$this->email(intval($this->action['id']));
-					} else {
-						$this->json['success'] = false;
-					} break;
-				case "delete":
-					if ( $TEST_MODE ) {
-						$this->json['success'] = true;
-					} else {
-						if ( isset($this->action['id']) && is_numeric($this->action['id']) && $this->user->can('editbudget') ) {
-							$this->delete(intval($this->action['id']));
-						} else {
-							$this->json['success'] = false;
-						}
-					} break;
-				default:
-					$this->json['success'] = false;
-					$this->json['msg'] = "Poorly formed request, unknown method";
-					break;
-			}
-			if ( $TEST_MODE ) {
-				$this->json['action'] = $this->action;
-				$this->json['request'] = $_REQUEST;
-			}
-			echo json_encode($this->json);
+						$this->html = error_page("Error :: Data Mismatch Detected");
+					}
+				} else {
+					$this->html = error_page('Access Denied :: You cannot add new budget items');
+				} break;
+			case "rcpt":
+				if ( $this->user->can("addbudget") ) {
+					$this->html = $this->reciept_list();
+				} else {
+					$this->html = error_page('Access Denied :: You cannot add new budget items');
+				} break;
+			default:
+				if ( !$this->user->can('viewbudget') ) { 
+					$this->html = $this->view($this->user->id, 'reimb');
+				} else {
+					if ( $this->user->can('addbudget') ) {
+						$HEAD_LINK = array("/budget/add/", 'plus', 'Add Item'); 
+					}
+					$this->html = $this->showlist();
+				} break;
 		}
+		makePage($this->html, $this->title);
 	} // END OUTPUT FUNCTION
 	
 	/**
@@ -210,7 +143,7 @@ class tdtrac_budget {
 		GLOBAL $db, $MYSQL_PREFIX;
 		$sql = "SELECT showid, showname FROM `{$MYSQL_PREFIX}shows` WHERE closed = 0 ORDER BY created DESC";
 		
-		$list = new tdlist(array('id' => 'budget-showlist', 'actions' => true, 'icon' => 'add'));
+		$list = new tdlist(array('id' => 'budget-showlist', 'actions' => true, 'icon' => 'add', 'inset' => true));
 		$list->addAction('badd');
 		$list->setFormat("<a href='/budget/view/type:show/id:%d/'><h3>%s</h3>"
 				."<p><strong>Budget Expense:</strong> $%s"
@@ -287,56 +220,6 @@ class tdtrac_budget {
 	}
 	
 	/**
-	 * Show form to associate reciept with current budget record
-	 * 
-	 * @param integer Reciept ID
-	 * @global object Datebase Link
-	 * @global string MySQL Table Prefix
-	 * @return array HTML Output
-	 */
-	private function list_form($rcpt = 0) {
-		GLOBAL $db, $MYSQL_PREFIX;
-		$sql = "SELECT budget.*, showname FROM `{$MYSQL_PREFIX}budget` as budget, `{$MYSQL_PREFIX}shows` as shows WHERE budget.showid = shows.showid AND budget.imgid = 0 AND shows.closed = 0 ORDER BY budget.date DESC, budget.id DESC";
-		$result = mysql_query($sql, $db);
-		while ( $row = mysql_fetch_array($result) ) {
-			$picklist[] = array($row['id'], "{$row['showname']} - {$row['date']} - {$row['vendor']} - \${$row['price']}");
-		}
-		
-		$form = new tdform("{$TDTRAC_SITE}budget/reciept/", "forma", 80, "genform2", 'Add To Budget Item');
-		$result = $form->addDrop('budid', 'Item', 'Item to associate with', $picklist, False);
-		$result = $form->addHidden('imgid', intval($rcpt));
-		return $form->output('Associate');
-	}
-	
-	public function reimb() {
-		global $TDTRAC_SITE, $MYSQL_PREFIX, $db;
-		$html[] = "<div class=\"tasks\"><ul class=\"linklist\"><li><h3>Reimbursment Tracking</h3><ul class=\"linklist\">";
-		$html[] = "  <li>View Reimbursment Items owed to each user.</li>";
-		$sql = "SELECT CONCAT(user.first, ' ', user.last) as name, user.userid id, count(b.payto) cnt, sum(b.price + b.tax) amount FROM `{$MYSQL_PREFIX}users` user, `{$MYSQL_PREFIX}budget` b WHERE b.payto = user.userid AND b.needrepay = 1 AND b.gotrepay = 0 GROUP BY b.payto ORDER BY b.payto";
-		$result = mysql_query($sql, $db);
-		if ( mysql_num_rows($result) < 1 ) {
-			$html[] = "  <li>No Users owed reimbursments</li>";
-			$html[] = "</ul></li></ul></div>";
-		} else {
-			$html[] = "</ul></li></ul></div>";
-			$tabl = new tdtable('reimb', 'datatable', false);
-			$tresult = $tabl->addHeader(array('User', 'Count', 'Amount'));
-			$tresult = $tabl->setAlign('Count', 'right');
-			$tresult = $tabl->setAlign('Amount', 'right');
-			while ( $row = mysql_fetch_array($result) ) {
-				$tresult = $tabl->addRow(array(
-					"<a href=\"{$TDTRAC_SITE}budget/view/id:0/type:unpaid/user:{$row['id']}/\">{$row['name']}</a>",
-					$row['cnt'],
-					'$'.number_format($row['amount'],2)
-				));
-			}
-			$html = array_merge($html, $tabl->output(false));
-		}
-		
-		return $html;
-	}
-		
-	/**
 	 * Form to add a new budget item
 	 * 
 	 * @param integer Reciept Number if applicable
@@ -347,7 +230,7 @@ class tdtrac_budget {
 	 */
 	private function add_form($rcpt = 0) {
 		GLOBAL $db, $MYSQL_PREFIX, $TDTRAC_SITE;
-		$form = new tdform(array( 'action' => "{$TDTRAC_SITE}budget/save/json:1/new:1/", 'id' => 'budget-add-form'));
+		$form = new tdform(array( 'action' => "{$TDTRAC_SITE}json/save/base:budget/id:0/", 'id' => 'budget-add-form'));
 		$html = array();
 		
 		if ( $rcpt > 0 ) {
@@ -374,11 +257,11 @@ class tdtrac_budget {
 			'selected' => '',
 			'options' => db_list(get_sql_const('vendor'), 'vendor')
 		));
-		$fesult = $form->addDate(array('name' => 'date', 'label' => 'Date'));
-		$fesult = $form->addText(array('name' => 'dscr', 'label' => 'Description'));
-		$fesult = $form->addMoney(array('name' => 'price', 'label' => 'Price'));
+		$fesult = $form->addDate(array('name' => 'date', 'label' => 'Date', 'placeholder' => 'Date of transaction'));
+		$fesult = $form->addText(array('name' => 'dscr', 'label' => 'Description', 'placeholder' => 'Description of Purchase'));
+		$fesult = $form->addMoney(array('name' => 'price', 'label' => 'Price', 'placeholder' => 'Amount, minus Tax'));
 		$fesult = $form->addSection('open', 'Extra Options');
-		$fesult = $form->addMoney(array('name' => 'tax', 'label' => 'Tax'));
+		$fesult = $form->addMoney(array('name' => 'tax', 'label' => 'Tax', 'placeholder' => 'Tax, if any', 'require' => false));
 		$fesult = $form->addToggle(array(
 			'name' => 'pending',
 			'label' => 'Pending Payment',
@@ -420,7 +303,7 @@ class tdtrac_budget {
 		$result = mysql_query($sql, $db);
 		$row = mysql_fetch_array($result);
 		
-		$form = new tdform(array('action' => "{$TDTRAC_SITE}todo/save/json:1/new:0/id:{$id}/", 'id' => 'todo-edit-form'));
+		$form = new tdform(array('action' => "{$TDTRAC_SITE}json/save/base:budget/id:{$id}/", 'id' => 'todo-edit-form'));
 		
 		$fesult = $form->addDrop(array(
 			'name' => 'showid',
@@ -475,71 +358,6 @@ class tdtrac_budget {
 		return array_merge($html, $form->output('Update Expense'));
 	}
 	
-	/**
-	 * Logic to save a budget item
-	 * 
-	 * @param bool False on new record, true on overwrite
-	 * @global object Database Connection
-	 * @global string MySQL Table Prefix
-	 * @return string Success / Failure message
-	 */
-	private function save($exists = false) {
-		GLOBAL $db, $MYSQL_PREFIX;
-	
-		if ( !$exists ) {
-			$rcptid = ( $_REQUEST['rcptid'] > 0 && is_numeric($_REQUEST['rcptid'])) ? $_REQUEST['rcptid'] : 0;
-			$sqlstring  = "INSERT INTO `{$MYSQL_PREFIX}budget` ";
-			$sqlstring .= "( showid, price, tax, imgid, vendor, category, dscr, date, pending, needrepay, gotrepay, payto )";
-			$sqlstring .= " VALUES ( '%d','%f','%f','%d','%s','%s','%s','%s','%d','%d','%d', '%d' )";
-		
-			$sql = sprintf($sqlstring,
-				intval($_REQUEST['showid']),
-				floatval($_REQUEST['price']),
-				(($_REQUEST['tax'] > 0 && is_numeric($_REQUEST['tax'])) ? $_REQUEST['tax'] : 0 ),
-				intval($rcptid),
-				mysql_real_escape_string($_REQUEST['vendor']),
-				mysql_real_escape_string($_REQUEST['category']),
-				mysql_real_escape_string($_REQUEST['dscr']),
-				make_date($_REQUEST['date']),
-				(($_REQUEST['pending'] == "y") ? "1" : "0"),
-				(($_REQUEST['repay'] == "yes" || $_REQUEST['repay'] == 'paid' ) ? "1" : "0"),
-				(($_REQUEST['repay'] == "paid") ? "1" : "0"),
-				intval($_REQUEST['payto'])
-			);
-			
-			if ( $rcptid > 0 ) {
-				$sql2 = "UPDATE {$MYSQL_PREFIX}rcpts SET handled = '1' WHERE imgid = '{$rcptid}'";
-				$result2 = mysql_query($sql2, $db);
-			}
-		} else {
-			$sqlstring  = "UPDATE `{$MYSQL_PREFIX}budget` SET showid = '%d', price = '%f', tax = '%f' , vendor = '%s', ";
-			$sqlstring .= "category = '%s', dscr = '%s' , date = '%s', pending = '%d', needrepay = '%d', gotrepay = '%d', payto = '%d'";
-			$sqlstring .= " WHERE id = %d";
-			
-			$sql = sprintf($sqlstring,
-				intval($_REQUEST['showid']),
-				floatval($_REQUEST['price']),
-				floatval($_REQUEST['tax']),
-				mysql_real_escape_string($_REQUEST['vendor']),
-				mysql_real_escape_string($_REQUEST['category']),
-				mysql_real_escape_string($_REQUEST['dscr']),
-				make_date($_REQUEST['date']),
-				(($_REQUEST['pending'] == "y") ? "1" : "0"),
-				(($_REQUEST['repay'] == "yes" || $_REQUEST['repay'] == 'paid' ) ? "1" : "0"),
-				(($_REQUEST['repay'] == "paid") ? "1" : "0"),
-				intval($_REQUEST['payto']),
-				intval($_REQUEST['id'])
-			);
-		}
-		
-		$result = mysql_query($sql, $db);
-		if ( $result ) {
-			return array('success' => true, 'msg' => "Todo Item Saved");
-		} else {
-			return array('success' => false, 'msg' => "Todo Save Failed".(($TEST_MODE)?mysql_error():""));
-		}
-	}
-	
 	
 	/**
 	 * Logic to display a category line (in full show view)
@@ -555,7 +373,7 @@ class tdtrac_budget {
 		$html[] = "</tbody></table>";
 		if ( $link ) { array_unshift($html, "<a href='/budget/view/type:show/id:{$showid}/cat:{$cat}/'>"); }
 		$list = new tdlist(array('id' => "b-view-{$cat}", 'inset' => true));
-		$list->addRaw("<li data-theme='c'><h3>{$cat}</h3><span class='ui-li-count'>$".number_format($price, 2)."</span></li>");
+		$list->addRaw("<li data-role='list-divider'>{$cat}<span class='ui-li-count'>$".number_format($price, 2)."</span></li>");
 		$list->addRaw("<li data-theme='c'>".join($html).(($link)?"</a>":"")."</li>");
 		return $list->output();
 	}
@@ -740,7 +558,125 @@ class tdtrac_budget {
 		array_unshift($html, "<h3>{$showname} ($".number_format($total, 2).")</h3>");
 		return array_merge($html, array("<br /><br /><a class=\"ajax-email\" data-email='{\"action\": \"budget\", \"id\": \"{$showid}\"}' data-role=\"button\" data-theme=\"f\" href=\"#\">E-Mail this Report to Yourself</a>"));
 	}
-
+	
+	/* 
+	 * View a pending payment items
+	 * 
+	 * @global resouce Datebase Resource
+	 * @global string MySQL Table Prefix
+	 * @return array Formatted HTML
+	 */
+	private function view_pending() {
+		GLOBAL $db, $MYSQL_PREFIX;
+		$sql = "SELECT b.*, showname FROM `{$MYSQL_PREFIX}budget` b, `{$MYSQL_PREFIX}shows` s WHERE s.showid = b.showid AND b.pending = 1";
+		$result = mysql_query($sql, $db);
+		
+		$list = new tdlist(array('id' => 'cat-view', 'inset' => true));
+		    
+		$list->setFormat("<a href='#' class='budg-menu' data-done='0' data-recid='%d' data-edit='".($this->user->can('editbudget')?'true':'false')."'><h3>%s</h3>"
+			."<p><strong>Show:</strong> %s"
+			."<p><strong>Category :: Vendor:</strong> %s :: %s"
+			."<br /><strong>Other Info:</strong> %s</p>"
+			."<span class='ui-li-count'>$%s</span></a>");
+		
+		if ( mysql_num_rows($result) == 0 ) {
+			$list->addRaw("<li data-theme='a'>No Items Found</li>");
+		}
+		
+		while ( $item = mysql_fetch_array($result) ) {
+			$extra = array();
+			if ( $item['tax'] > 0 ) { $extra[] = "Taxed ($".number_format($item['tax'],2).")"; }
+			if ( $item['pending'] ) { $extra[] = "<span style='color: red'>Pending Payment</span>"; }
+			if ( $item['needrepay'] ) {
+				if ( $item['gotrepay'] ) { 
+					$extra[] = "Reimbursed"; 
+				} else { 
+					if ( $item['payto'] > 0 ) { 
+						$extra[] = "<strong>" . $this->user->get_name($item['payto']) . " Needs Reimbursment</strong>";
+					} else {
+						$extra[] = "<strong>Needs Reimbursed</strong>";
+					}
+				}
+			}
+			if ( $item['imgid'] > 0 ) { $extra[] = "Has Receipt"; }
+				
+			$list->addRow(array(
+					$item['id'],
+					$item['dscr'],
+					$item['showname'],
+					$item['category'],
+					$item['vendor'],
+					join(', ', $extra),
+					number_format($item['tax'] + $item['price'], 2)
+				), $item);
+		}
+		
+		return array_merge(array("<h3>All Pending Payment</h3>"), $list->output());
+	}
+	
+	/* 
+	 * View a reimbusment pending items
+	 * 
+	 * @param integer User ID
+	 * @global resouce Datebase Resource
+	 * @global string MySQL Table Prefix
+	 * @return array Formatted HTML
+	 */
+	private function view_reimb($id) {
+		GLOBAL $db, $MYSQL_PREFIX;
+		if ( $id == 0 ) {
+			$sql = "SELECT b.*, showname FROM `{$MYSQL_PREFIX}budget` b, `{$MYSQL_PREFIX}shows` s WHERE s.showid = b.showid AND b.needrepay = 1 AND b.gotrepay = 0";
+			$extratitle = "ALL";
+		} else {
+			$sql = "SELECT b.*, showname FROM `{$MYSQL_PREFIX}budget` b, `{$MYSQL_PREFIX}shows` s WHERE s.showid = b.showid AND b.needrepay = 1 AND b.gotrepay = 0 AND b.payto = ".intval($id);
+			$extratitle = $this->user->get_name($id);
+		}
+		$result = mysql_query($sql, $db);
+		
+		$list = new tdlist(array('id' => 'cat-view', 'inset' => true));
+		    
+		$list->setFormat("<a href='#' class='budg-menu' data-done='0' data-recid='%d' data-edit='".($this->user->can('editbudget')?'true':'false')."'><h3>%s</h3>"
+			."<p><strong>Show:</strong> %s"
+			."<p><strong>Category :: Vendor:</strong> %s :: %s"
+			."<br /><strong>Other Info:</strong> %s</p>"
+			."<span class='ui-li-count'>$%s</span></a>");
+		
+		if ( mysql_num_rows($result) == 0 ) {
+			$list->addRaw("<li data-theme='a'>No Items Found</li>");
+		}
+		
+        while ( $item = mysql_fetch_array($result) ) {
+			$extra = array();
+			if ( $item['tax'] > 0 ) { $extra[] = "Taxed ($".number_format($item['tax'],2).")"; }
+			if ( $item['pending'] ) { $extra[] = "<span style='color: red'>Pending Payment</span>"; }
+			if ( $item['needrepay'] ) {
+				if ( $item['gotrepay'] ) { 
+					$extra[] = "Reimbursed"; 
+				} else { 
+					if ( $item['payto'] > 0 ) { 
+						$extra[] = "<strong>" . $this->user->get_name($item['payto']) . " Needs Reimbursment</strong>";
+					} else {
+						$extra[] = "<strong>Needs Reimbursed</strong>";
+					}
+				}
+			}
+			if ( $item['imgid'] > 0 ) { $extra[] = "Has Receipt"; }
+				
+			$list->addRow(array(
+					$item['id'],
+					$item['dscr'],
+					$item['showname'],
+					$item['category'],
+					$item['vendor'],
+					join(', ', $extra),
+					number_format($item['tax'] + $item['price'], 2)
+				), $item);
+		}
+		
+		
+		return array_merge(array("<h3>Reimbursment Items - {$extratitle}</h3>"), $list->output());
+	}
+	
 	/**
 	 * Send budget via email
 	 * 
@@ -749,7 +685,7 @@ class tdtrac_budget {
 	 * @global string MySQL Table Prefix
 	 * @return void
 	 */
-	private function email($showid) {
+	public function email($showid) {
 		GLOBAL $db, $MYSQL_PREFIX;
 		$sql = "SELECT * FROM {$MYSQL_PREFIX}shows WHERE showid = {$showid}";
 		$result = mysql_query($sql, $db); 
@@ -780,12 +716,7 @@ class tdtrac_budget {
 		}
 		$body .= $tabl->output(true);
 	
-		$result = mail($this->user->email, $subject, $body, $headers);
-		if ( $result ) {
-			$this->json['success'] = true;
-		} else {
-			$this->json['success'] = false;
-		}
+		return mail($this->user->email, $subject, $body, $headers);
 	}
 }
 

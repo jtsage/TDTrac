@@ -42,7 +42,7 @@ jQuery.extend(jQuery.mobile.simpledialog.prototype.options, {
 			ready = false,
 			needed = [];
 		
-		$('[data-require=1]').each(function () {
+		$('.ui-page-active [data-require=1]').each(function () {
 			if ( $(this).val() == '' ) { 
 				needed.push( $('[for='+$(this).attr('id')+']').text() );
 			}
@@ -260,7 +260,7 @@ jQuery.extend(jQuery.mobile.simpledialog.prototype.options, {
 					},
 					'Delete' : {
 						'click': function() {
-							$.getJSON("/budget/delete/json:1/id:"+$(linkie).data('recid')+"/", function(data) {
+							$.getJSON("/json/delete/base:budget/id:"+$(linkie).data('recid')+"/", function(data) {
 								if ( data.success === true ) {
 									$(linkie).parent().find('h3').html('--Removed--');
 									$(linkie).parent().find('span.ui-li-count').html('deleted');

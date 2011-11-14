@@ -119,7 +119,7 @@ class tdtrac_json {
 								break;
 							case "budget":
 								$mod = new tdtrac_budget($this->user, $this->action);
-								$this->json['success'] = $mod->email();
+								$this->json['success'] = $mod->email($this->action['id']);
 								break;
 							default:
 								$this->json['msg'] = "Invalid Action";
@@ -292,6 +292,31 @@ class tdtrac_json {
 					mysql_real_escape_string($_REQUEST['email']),
 					$TDTRAC_PAYRATE
 				); break;
+			case "budget":
+				$sql = array();
+				$rcptid = ( $_REQUEST['rcptid'] > 0 && is_numeric($_REQUEST['rcptid'])) ? $_REQUEST['rcptid'] : 0;
+				$sqlstring  = "INSERT INTO `{$MYSQL_PREFIX}budget` ";
+				$sqlstring .= "( showid, price, tax, imgid, vendor, category, dscr, date, pending, needrepay, gotrepay, payto )";
+				$sqlstring .= " VALUES ( '%d','%f','%f','%d','%s','%s','%s','%s','%d','%d','%d', '%d' )";
+			
+				$sql = sprintf($sqlstring,
+					intval($_REQUEST['showid']),
+					floatval($_REQUEST['price']),
+					(($_REQUEST['tax'] > 0 && is_numeric($_REQUEST['tax'])) ? $_REQUEST['tax'] : 0 ),
+					intval($rcptid),
+					mysql_real_escape_string($_REQUEST['vendor']),
+					mysql_real_escape_string($_REQUEST['category']),
+					mysql_real_escape_string($_REQUEST['dscr']),
+					make_date($_REQUEST['date']),
+					intval($_REQUEST['pending']),
+					(($_REQUEST['repay'] == "yes" || $_REQUEST['repay'] == 'paid' ) ? "1" : "0"),
+					(($_REQUEST['repay'] == "paid") ? "1" : "0"),
+					intval($_REQUEST['payto'])
+				);
+				
+				if ( $rcptid > 0 ) {
+					$sql[] = "UPDATE {$MYSQL_PREFIX}rcpts SET handled = '1' WHERE imgid = '{$rcptid}'";
+				} break;
 		}
 		return $sql;
 	}
@@ -365,6 +390,25 @@ class tdtrac_json {
 				
 				$sql[] = sprintf("UPDATE `{$MYSQL_PREFIX}usergroups` SET groupid = %d WHERE userid = %d",
 					intval($_REQUEST['groupid']),
+					intval($_REQUEST['id'])
+				); break;
+			case "budget":
+				$sqlstring  = "UPDATE `{$MYSQL_PREFIX}budget` SET showid = '%d', price = '%f', tax = '%f' , vendor = '%s', ";
+				$sqlstring .= "category = '%s', dscr = '%s' , date = '%s', pending = '%d', needrepay = '%d', gotrepay = '%d', payto = '%d'";
+				$sqlstring .= " WHERE id = %d";
+				
+				$sql = sprintf($sqlstring,
+					intval($_REQUEST['showid']),
+					floatval($_REQUEST['price']),
+					floatval($_REQUEST['tax']),
+					mysql_real_escape_string($_REQUEST['vendor']),
+					mysql_real_escape_string($_REQUEST['category']),
+					mysql_real_escape_string($_REQUEST['dscr']),
+					make_date($_REQUEST['date']),
+					intval($_REQUEST['pending']),
+					(($_REQUEST['repay'] == "yes" || $_REQUEST['repay'] == 'paid' ) ? "1" : "0"),
+					(($_REQUEST['repay'] == "paid") ? "1" : "0"),
+					intval($_REQUEST['payto']),
 					intval($_REQUEST['id'])
 				); break;
 		}

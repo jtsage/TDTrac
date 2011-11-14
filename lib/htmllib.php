@@ -71,7 +71,6 @@ function makeHeader($title = '') {
 	} else {
 		$html[] = '	<script type="text/javascript" src="'.$TDTRAC_SITE.'js/tdtrac.jquery.min.js"></script>';
 	}
-	if ( $TEST_MODE ) { $html[] = ' <!--'.var_export($_SESSION, true).'-->'; }
 	$html[] = "</head>\n\n<body>";
 	$pageid = ( $action['module'] == 'help' ) ? "help-{$action['action']}-{$action['oper']}" : "{$action['module']}-{$action['action']}";
 	$html[] = "	<div data-role=\"page\" data-theme=\"a\" data-id=\"{$pageid}\">";
@@ -90,7 +89,8 @@ function makeHeader($title = '') {
 	unset($_SESSION['infodata']);
 	
 	$html[] = "		<div data-role=\"content\" data-theme=\"c\">";
-	if ( $TEST_MODE ) { $html[] = ' <!--'.var_export($_SESSION, true).'-->'; }
+	if ( $TEST_MODE ) { $html[] = ' <!-- SESSION: '.var_export($_SESSION, true).'-->'; }
+	if ( $TEST_MODE ) { $html[] = ' <!-- REQUEST: '.var_export($_REQUEST, true).'-->'; }
 	
 	return $html;
 }
