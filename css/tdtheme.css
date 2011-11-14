@@ -9,6 +9,13 @@ table {
 	display: block;
 }
 
+.tdtrac-index .ui-bar {
+    text-align: center;
+}
+
+.tdtrac-index p {
+    font-weight: normal;
+}
 
 
 

@@ -137,6 +137,9 @@ if ( !$user->loggedin ) {
 			break;
 	
 		default: 
+			$index_items = array();
+			$html = array();
+			
 			$list = new tdlist(array('id' => 'mainmenu', 'inset' => true));
 			$list->setFormat("<a href='%s'><img src='/images/main-%s.png' />%s <span class='ui-li-count'>%s</span></a>");
 		
@@ -147,22 +150,34 @@ if ( !$user->loggedin ) {
 				number_format(get_single("SELECT SUM(worked*payrate) AS num FROM {$MYSQL_PREFIX}hours h, {$MYSQL_PREFIX}users u WHERE h.userid = u.userid AND submitted = 0{$extrasql}"),2) :
 				number_format(get_single("SELECT SUM(worked*payrate) AS num FROM {$MYSQL_PREFIX}hours h, {$MYSQL_PREFIX}users u WHERE h.userid = u.userid AND submitted = 0 AND h.userid = {$user->id}"),2);
 			
-			$list->addRow(array('/mail/inbox/', 'msg', 'Message Inbox', $mail_num));
-			$list->addRow(array('/todo/', 'todo', 'Todo Lists', $todo_num));
-			$list->addRow(array('/hours/', 'hours', (($user->isemp)?"Your ":"")."Payroll", $payr_num));
+			$index_items[] = array('/mail/inbox/', 'msg', 'Message Inbox', "Unread: {$mail_num}");
+			$index_items[] = array('/todo/', 'todo', 'Todo Lists', "Incomplete: {$todo_num}");
+			$index_items[] = array('/hours/', 'hours', (($user->isemp)?"Your ":"")."Payroll", "Pending: \${$payr_num}");
 			
 			if ( $user->can('viewbudget') ) {
-				$list->addRow(array('/budget/', 'budget', 'Budgets', number_format(get_single("SELECT SUM(price+tax) AS num FROM {$MYSQL_PREFIX}budget"),2)));
+				$index_items[] = array('/budget/', 'budget', 'Budgets', "Pending: \$".number_format(get_single("SELECT SUM(price+tax) AS num FROM {$MYSQL_PREFIX}budget"),2));
 			}
 			if ( $user->can('editshow') ) {
-				$list->addRow(array('/shows/', 'shows', 'Show Managment', get_single("SELECT COUNT(*) AS num FROM {$MYSQL_PREFIX}shows WHERE closed = 0")));
+				$index_items[] = array('/shows/', 'shows', 'Show Managment', "Open: ".get_single("SELECT COUNT(*) AS num FROM {$MYSQL_PREFIX}shows WHERE closed = 0"));
 			}
 			if ( $user->admin ) {
-				$list->addRaw("<li><a href=\"/admin/\"><img src='/images/main-admin.png' />Administration</a></li>");
+				$index_items[] = array('/admin/', 'admin', 'Administration', '&nbsp;');
 			}
-			$list->addRaw("	<li data-icon='alert'><a href=\"/user/logout/\"><img src='/images/main-logout.png' />Logout</a></li>");
 			
-			makePage($list->output(), 'TD Tracking Made Easy');
+			$col = 1;
+			$parts = array('', 'a','b','c');
+			$html[] = "<div data-theme='b' class='ui-grid-b tdtrac-index'>";
+			foreach ( $index_items as $item ) {
+				$html[] = "<div class='ui-block-{$parts[$col]}'><div class='ui-bar ui-bar-c'>"
+					."<a href='{$item[0]}'><img src='/images/main-{$item[1]}.png' />"
+					."<br /><h2>{$item[2]}</h2>"
+					."<p>{$item[3]}</p>"
+					."</a></div></div>";
+				$col++; if ( $col == 4 ) { $col = 1; }
+			}
+			$html[] = "</div>";
+			
+			makePage($html, 'TD Tracking Made Easy');
 			break;
 	}
 }
