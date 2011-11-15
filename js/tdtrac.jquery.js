@@ -33,7 +33,8 @@ jQuery.extend(jQuery.mobile.simpledialog.prototype.options, {
 				umonth = xxx.match(/month:(\d+)/),
 				uyear = xxx.match(/year:(\d+)/),
 				id = xxx.match(/id:(\d+)/),
-				newurl = '/hours/view/user/id:'+id[1];
+				which = xxx.match(/type:(\w+)\//),
+				newurl = '/hours/view/type:'+which[1]+'/id:'+id[1];
 			
 			month = parseInt(umonth[1], 10);
 			year = parseInt(uyear[1], 10);
@@ -52,7 +53,7 @@ jQuery.extend(jQuery.mobile.simpledialog.prototype.options, {
 				}
 			}
 			
-			$.mobile.changePage(newurl+'/year:'+year+'/month:'+month+'/', { reloadPage: true});
+			$.mobile.changePage(newurl+'/year:'+year+'/month:'+month+'/', { reloadPage: true, transition: 'none'});
 		} else if ( p.method === 'set' ) {
 			var info = $('.ui-page-active #hours-data').find('[data-date='+p.value+']'),
 				first = $('.ui-page-active').children('.ui-content'),
@@ -63,10 +64,11 @@ jQuery.extend(jQuery.mobile.simpledialog.prototype.options, {
 				thisType = $(info[0]).attr('data-type');
 				
 				for ( x=0; x<info.length; x++ ) {
-					lines = lines + '<li data-theme="' + (($(info[x]).attr('data-submitted') == 0)?'c':'e') + '">'
-							+ '<strong>' + $(info[x]).attr('data-show') + ':</strong> '
+					lines = lines + '<li data-theme="' + (($(info[x]).attr('data-submitted') == 0)?'e':'c') + '">'
+							+ '<a href="#"><strong>' + $(info[x]).attr('data-show') + ':</strong> '
 							+ $(info[x]).attr('data-worked')
-							+ '<p class="ui-li-count">$' + $(info[x]).attr('data-amount') + '</p></li>';
+							+ '<p class="ui-li-count">$' + $(info[x]).attr('data-amount') + '</p></a>'
+							+ '<a href="/hours/edit/id:' + $(info[x]).attr('data-recid') + '/">Edit</a></li>';
 				}
 				
 				first.simpledialog({
@@ -77,9 +79,9 @@ jQuery.extend(jQuery.mobile.simpledialog.prototype.options, {
 					'cleanOnClose': true,
 					'width': '300px',	
 					'fullHTML': 
-						'<ul data-role="listview" data-theme="c" data-dividertheme="a">'+
+						'<div style="width:350px"><ul data-split-icon="grid" data-role="listview" data-theme="c" data-dividertheme="a">'+
 							'<li data-role="list-divider">'+thisType+' Worked For :: '+thisDate+'</li>'+
-							lines+'</ul>'
+							lines+'</ul></div>'
 					});
 			}
 		}
@@ -166,6 +168,30 @@ jQuery.extend(jQuery.mobile.simpledialog.prototype.options, {
 			});
 		}
 	}); // END: E-Mail Function
+	
+	$('#hours-delete').live( 'vclick', function(e) {  // BEGIN: Delete Hours
+		e.preventDefault();
+		var linkie = this,
+			xxx = window.location.pathname,
+			id = xxx.match(/id:(\d+)/),
+			first = $('.ui-page-active').children('.ui-content');
+			
+		first.simpledialog({
+			'mode' : 'bool', 
+			'prompt' : 'Delete Hours Item #'+id[1]+'?',
+			'buttons' : {
+				'Yes, Delete' : function () {
+					$.getJSON("/json/delete/base:hours/id:"+id[1]+"/", function(dta) {
+						if ( dta.success === true ) {
+							$.mobile.changePage(dta.location, { reloadPage: true, type: 'post', data: {'infobox': 'Hours Item Deleted'}, transition:'slide'});
+						} else {
+							infobox("Hours Delete Failed!");
+						}
+					}); },
+				'Cancel': function () { return true; }
+			}
+		});
+	}); // END: Delete Hours
 	
 	$('.todo-done').live( 'vclick', function(e) {  // BEGIN: Mark Todo Done
 		e.preventDefault();

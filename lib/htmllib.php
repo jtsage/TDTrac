@@ -58,26 +58,26 @@ function makeHeader($title = '') {
 	$html[] = '	<!--[if lt IE 9]>';
 	$html[] = '		<script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>';
 	$html[] = '	<![endif]-->';
-	$html[] = '	<link href="http://code.jquery.com/mobile/latest/jquery.mobile.structure-1.0rc2.min.css" rel="stylesheet" type="text/css" />';
+	$html[] = '	<link type="text/css" href="http://code.jquery.com/mobile/1.0rc3/jquery.mobile.structure-1.0rc3.min.css" rel="stylesheet" />';
 	$html[] = '	<link type="text/css" href="http://dev.jtsage.com/cdn/datebox/latest/jquery.mobile.datebox.min.css" rel="stylesheet" /> ';
 	$html[] = '	<link type="text/css" href="http://dev.jtsage.com/cdn/simpledialog/latest/jquery.mobile.simpledialog.min.css" rel="stylesheet" /> ';
-	$html[] = '	<link type="text/css" href="/css/tdtheme.css" rel="stylesheet" /> ';
-	$html[] = '	<link type="text/css" href="/css/tdtheme.mobile.css" rel="stylesheet" /> ';
-	$html[] = '	<script src="http://code.jquery.com/jquery-1.7.min.js"></script>';
-	$html[] = '	<script src="http://code.jquery.com/mobile/latest/jquery.mobile.js"></script>';
+	$html[] = '	<link type="text/css" href="'.$TDTRAC_SITE.'css/tdtheme.css" rel="stylesheet" /> ';
+	$html[] = '	<link type="text/css" href="'.$TDTRAC_SITE.'css/tdtheme.mobile.css" rel="stylesheet" /> ';
+	$html[] = '	<script type="text/javascript" src="http://code.jquery.com/jquery-1.7.min.js"></script>';
+	$html[] = '	<script type="text/javascript" src="http://code.jquery.com/mobile/1.0rc3/jquery.mobile-1.0rc3.js"></script>';
 	$html[] = '	<script type="text/javascript" src="http://dev.jtsage.com/cdn/datebox/latest/jquery.mobile.datebox.min.js"></script>';
 	$html[] = '	<script type="text/javascript" src="http://dev.jtsage.com/cdn/simpledialog/latest/jquery.mobile.simpledialog.min.js"></script>';
-	$html[] = '	<script type="text/javascript" src="/js/tdtrac.jquery.js"></script>';
+	$html[] = '	<script type="text/javascript" src="'.$TDTRAC_SITE.'js/tdtrac.jquery.js"></script>';
 	$html[] = "</head>\n\n<body>";
 	$pageid = ( $action['module'] == 'help' ) ? "help-{$action['action']}-{$action['oper']}" : "{$action['module']}-{$action['action']}";
-	$html[] = "	<div data-role=\"page\" data-theme=\"a\" data-id=\"{$pageid}\">";
+	$html[] = "	<div data-role=\"page\" data-theme=\"c\" data-id=\"{$pageid}\">";
 	
 	$html[] = "		<div data-role=\"header\">";
 	if ( $CANCEL ) { $html[] = "			<a href='#' data-icon='delete' data-rel='back'>Cancel</a>";	}
 	if ( $CLOSE )  { $html[] = "			<a href='#' data-icon='arrow-d' data-rel='back'>Close</a>";	}
 	$html[] = "			<h1>".($TEST_MODE?"TEST_MODE":"TDTrac")."::{$title}</h1>";
-	if ( count($HEAD_LINK) == 3 ) {
-		$html[] = "			<a href=\"{$HEAD_LINK[0]}\" data-icon=\"{$HEAD_LINK[1]}\" class=\"ui-btn-right\">{$HEAD_LINK[2]}</a>";
+	if ( count($HEAD_LINK) == 3 || count($HEAD_LINK) == 4 ) {
+		$html[] = "			<a href=\"{$HEAD_LINK[0]}\" data-icon=\"{$HEAD_LINK[1]}\" class=\"ui-btn-right\"".((isset($HEAD_LINK[3]))?" id=\"{$HEAD_LINK[3]}\"":"").">{$HEAD_LINK[2]}</a>";
 	}
 	$html[] = "		</div>";
 	if ( $_SEVER['REQUEST_METHOD'] = "POST" && isset($_REQUEST['infobox']) ) {
@@ -85,7 +85,7 @@ function makeHeader($title = '') {
 	}
 	unset($_SESSION['infodata']);
 	
-	$html[] = "		<div data-role=\"content\" data-theme=\"c\">";
+	$html[] = "		<div data-role=\"content\">";
 	if ( $TEST_MODE ) { $html[] = ' <!-- SESSION: '.var_export($_SESSION, true).'-->'; }
 	if ( $TEST_MODE ) { $html[] = ' <!-- REQUEST: '.var_export($_REQUEST, true).'-->'; }
 	

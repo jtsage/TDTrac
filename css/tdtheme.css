@@ -24,7 +24,7 @@ span.pending {
 
 @media all and (min-width: 660px){
 	#hours-user-show .ui-datebox-container { width: 80% !important;}
-	#hours-user-show .ui-datebox-griddate { width: 14% !important; font-size: 24px; line-height: 50px; height: 50px;}
+	#hours-user-show .ui-datebox-griddate { width: 13% !important; font-size: 24px; line-height: 50px; height: 50px;}
 	#hours-user-show .ui-datebox-gridrow { margin-bottom: 10px; }
 	#hours-user-show .ui-datebox-gridheader h4 { font-size: 1.5em; }
 }

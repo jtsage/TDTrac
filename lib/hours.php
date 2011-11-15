@@ -52,6 +52,7 @@ class tdtrac_hours {
 	
 		switch ( $this->action['action'] ) {
 			case "add":
+				$CANCEL = true;
 				$this->title .= "::Add";
 				if ( $this->user->can("addhours") || $this->user->isemp ) {
 					$this->html = $this->add_form();
@@ -70,19 +71,21 @@ class tdtrac_hours {
 					
 				switch ($type) {
 					case 'user':
-						$this->html = $this->view_user(intval($this->action['id']));
+						$this->html = $this->view_standard(intval($this->action['id']), 'user');
 						break;
 					case 'show':
-						$this->html = $this->view_show(intval($this->action['id']));
+						$this->html = $this->view_standard(intval($this->action['id']), 'show');
 						break;
 					case 'unpaid':
 						$this->html = $this->view_pending();
 						break;
 				} break;
 			case "edit":
+				$CANCEL = true;
 				$this->title .= "::Edit";
 				if ( $this->user->can("edithours") ) {
 					if ( isset($this->action['id']) && is_numeric($this->action['id']) ) {
+						$HEAD_LINK = array('#', 'minus', 'Delete Hours', 'hours-delete'); 
 						$this->html = $this->edit_form(intval($this->action['id']));
 					} else {
 						$this->html = error_page('Access Denied :: Data Mismatch');
@@ -91,6 +94,7 @@ class tdtrac_hours {
 					$this->html = error_page('Access Denied :: You cannot add new hour items');
 				} break;
 			case "remind":
+				$CANCEL = true;
 				$this->title .= "::Remind";
 				if ( $this->user->admin ) {
 					$this->html = $this->remind_form();
@@ -155,7 +159,7 @@ class tdtrac_hours {
 		$result = mysql_query($sql, $db);
 		$recd = mysql_fetch_array($result);
 		
-		$form = new tdform(array( 'action' => "{$TDTRAC_SITE}json/save/base:hours/id:0/", 'id' => 'hours-add-form'));
+		$form = new tdform(array( 'action' => "{$TDTRAC_SITE}json/save/base:hours/id:{$hid}/", 'id' => 'hours-add-form'));
 		
 		$fesult = $form->addDrop(array(
 			'name' => 'userid',
@@ -229,7 +233,7 @@ class tdtrac_hours {
 				$list->addRow(array(
 					'show',
 					$show[0],
-					null,
+					'year:'.date('Y').'/month:'.date('n').'/',
 					$show[1],
 					number_format($total, 2)
 				), null);
@@ -296,7 +300,7 @@ class tdtrac_hours {
 	}
 	
 	/** 
-	 * Show Hours by Show
+	 * Show Hours by Show or User
 	 * 
 	 * @global object MySQL Database Resource
 	 * @global string MySQL Table Prefix
@@ -304,50 +308,7 @@ class tdtrac_hours {
 	 * @param string Type to display
 	 * @return array Formatted HTML
 	 */
-	public function view_show($id) {
-		GLOBAL $db, $MYSQL_PREFIX;
-		
-		$sql = "SELECT h.*, (h.worked*u.payrate) as amount FROM `{$MYSQL_PREFIX}hours` h, `{$MYSQL_PREFIX}shows` s, `{$MYSQL_PREFIX}users` u WHERE h.showid = s.showid AND h.userid = u.userid AND h.showid = {$id} ORDER BY date DESC";
-		$result = mysql_query($sql, $db);
-		
-		$list = new tdlist(array('id' => 'hours-view', 'actions' => true, 'icon' => 'check', 'inset' => true));
-		$list->addAction('hmark');
-		$list->setFormat("<a href='/hours/view/type:".(($type=='show')?'user':'show')."/id:%d/'>"
-			."<h3>%s</h3><p>%s</p>"
-			."<span class='ui-li-count'>$%s</span></a>");
-		
-		$list->addDivide(get_single("SELECT showname as num FROM `{$MYSQL_PREFIX}shows` WHERE showid = {$id}"));
-		
-		if ( mysql_num_rows($result) < 1 ) {
-			$list->addRaw("<li data-theme='a'>No Hours Found</li>");
-		} else {
-			while ( $row = mysql_fetch_array($result) ) {
-				$extra = "<strong>{$row['date']} :</strong> {$row['worked']}";
-				if ( $row['submitted'] == 0 ) {
-					$extra .= "&nbsp;&nbsp;<span class='pending'> (PENDING)</span>";
-				}
-				$list->addRow(array(
-					$row['userid'],
-					$this->user->get_name($row['userid']),
-					$extra,
-					number_format($row['amount'],2)
-				), $row, array('theme' => (($row['submitted'] == 1)?'c':'b')));
-			}
-		}
-		
-		return $list->output();
-	}
-	
-	/** 
-	 * Show Hours by Show
-	 * 
-	 * @global object MySQL Database Resource
-	 * @global string MySQL Table Prefix
-	 * @param integer Show or User ID
-	 * @param string Type to display
-	 * @return array Formatted HTML
-	 */
-	public function view_user($id) {
+	public function view_standard($id, $type='user') {
 		GLOBAL $db, $MYSQL_PREFIX, $TDTRAC_DAYRATE;
 		
 		if ( !isset($this->action['year']) ) { $this->action['year'] = date('Y'); }
@@ -359,9 +320,13 @@ class tdtrac_hours {
 		
 		$html = array();
 		
-		$sql = "SELECT h.*, showname, (h.worked*u.payrate) as amount "
+		$thename = ( $type=='user' ) ? $this->user->get_name($id) : get_single("SELECT showname as num FROM `{$MYSQL_PREFIX}shows` WHERE showid = {$id}");
+		$html[] = "<div class='ui-bar ui-bar-a'><h3>Hours For: {$thename}</h3></div>";
+		
+		$sql = "SELECT h.*, showname, (h.worked*u.payrate) as amount, CONCAT(u.first, ' ', u.last) as name "
 			. "FROM `{$MYSQL_PREFIX}hours` h, `{$MYSQL_PREFIX}shows` s, `{$MYSQL_PREFIX}users` u "
-			. "WHERE h.showid = s.showid AND h.userid = u.userid AND h.userid = {$id} "
+			. "WHERE h.showid = s.showid AND h.userid = u.userid "
+			. (($type=='user')?"AND h.userid = {$id} ":"AND s.showid = {$id} ")
 			. "AND date >= '{$this->action['year']}-".sprintf('%02d',$this->action['month'])."-01' "
 			. "AND date < '{$nextyear}-".sprintf('%02d',$nextmonth)."-01' "
 			. "ORDER BY date DESC";
@@ -377,7 +342,7 @@ class tdtrac_hours {
 		} else {
 			$html[] = "<div id='hours-data' style='display:none;'>";
 			while ( $row = mysql_fetch_array($result) ) {
-				$html[] = "  <div data-date='{$row['date']}' data-type='".(($TDTRAC_DAYRATE)?"Days":"Hours")."' data-submitted='{$row['submitted']}' data-show='{$row['showname']}' data-worked='{$row['worked']}' data-amount='".number_format($row['amount'],2)."'></div>";
+				$html[] = "  <div data-recid='{$row['id']}' data-date='{$row['date']}' data-type='".(($TDTRAC_DAYRATE)?"Days":"Hours")."' data-submitted='{$row['submitted']}' data-show=\"".(($type=='user')?$row['showname']:$row['name'])."\" data-worked='{$row['worked']}' data-amount='".number_format($row['amount'],2)."'></div>";
 				if ( $row['submitted'] == 0 ) {
 					$theseHighDates[] = $row['date'];
 				} else {

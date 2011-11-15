@@ -70,7 +70,11 @@ class tdtrac_json {
 								break;
 							case "hours":
 								$this->do_sql("DELETE FROM `{$MYSQL_PREFIX}hours` WHERE id = ".intval($this->action['id'])." LIMIT 1");
-								break;
+								if ( isset($_SESSION['tdtrac']['one']) ) {
+									$this->json['location'] = $_SESSION['tdtrac']['one'];
+								} else {
+									$this->json['location'] = "/{$this->action['base']}/";
+								} break;
 							case "budget":
 								$this->do_sql("DELETE FROM `{$MYSQL_PREFIX}budget` WHERE id = ".intval($this->action['id'])." LIMIT 1");
 								break;
