@@ -54,7 +54,7 @@ class tdtrac_json {
 		if ( !isset($this->action['base']) || !isset($this->action['action']) || ! is_numeric($this->action['id']) ) {
 			$this->json['success'] = false;
 			$this->json['msg'] = "Poorly Formed Request";
-		} elseif ( ! in_array($this->action['base'], array('todo','show','hours','budget','msg','admin')) ) {
+		} elseif ( ( ! in_array($this->action['base'], array('todo','show','hours','budget','msg','admin')) ) && $this->action['action'] != 'help' ) {
 			$this->json['success'] = false;
 			$this->json['msg'] = "Bad Base Module Name";
 		} else {
@@ -226,6 +226,19 @@ class tdtrac_json {
 									$this->json['msg'] = "Invalid Switch";
 								} break;
 							}
+					} break;
+				case "help":
+					/** Library: Help Text */
+					require_once("helpnodes.php");
+					$this->json['success'] = true;
+					if ( ! isset($helpnode[$this->action['base']][$this->action['sub']]) ) {
+						$this->json['helptitle'] = $helpnode['error']['title'];
+						$this->json['helpbody'] = $helpnode['error']['data'];
+						$this->json['msg'] = "Help Not Found";
+					} else {
+						$this->json['helptitle'] = $helpnode[$this->action['base']][$this->action['sub']]['title'];
+						$this->json['helpbody'] = $helpnode[$this->action['base']][$this->action['sub']]['data'];
+						$this->json['msg'] = "Help Found";
 					} break;
 				default:
 					$this->json['success'] = false;

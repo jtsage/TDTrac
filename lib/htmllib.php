@@ -8,8 +8,6 @@
  * @since 1.4.0
  * @author J.T.Sage <jtsage@gmail.com>
  */
-/** Library: Help Text */
-require_once("helpnodes.php");
 
 /**
  * Master makePage Function
@@ -18,7 +16,7 @@ require_once("helpnodes.php");
  * @param string Page Title
  * @return void
  */
-function makePage($body = '', $title = '') {
+function makePage($body = '', $title = '', $loggedin = true) {
 	if (!is_array($body) ) {
 		$body = preg_split("/\n/", $body);
 	}
@@ -26,7 +24,7 @@ function makePage($body = '', $title = '') {
 	foreach( $body as $fixme ) {
 		$html[] = "\t\t\t{$fixme}";
 	}
-	$html = array_merge($html, makeFooter($title));
+	$html = array_merge($html, makeFooter($title, $loggedin));
 	//ob_clean(); //Hackish method to clear any extra lines / echos before html starts
 	foreach ($html as $line) {
 		echo $line . "\n";
@@ -101,18 +99,20 @@ function makeHeader($title = '') {
  * @global array Help Text
  * @return array Formatted HTML
  */
-function makeFooter($title = '') {
+function makeFooter($title = '', $loggedin) {
 	global $SITE_BLOCK, $action, $EXTRA_NAV;
 	$html[] = "		</div>";
 	$html[] = "		<div data-role=\"footer\" data-theme=\"a\">";
-	$html[] = "			<div data-role=\"navbar\"><ul>";
-	$html[] = "				<li><a href=\"/\" data-direction='reverse' data-icon=\"home\">Home</a></li>";
-	if ( $EXTRA_NAV ) {
-		$html[] = "				<li><a href=\"/{$action['module']}\" data-direction='reverse' data-icon=\"home\">".ucwords($action['module'])." Home</a></li>";
+	if ( $loggedin ) {
+		$html[] = "			<div data-role=\"navbar\"><ul>";
+		$html[] = "				<li><a href=\"/\" data-direction='reverse' data-icon=\"home\">Home</a></li>";
+		if ( $EXTRA_NAV ) {
+			$html[] = "				<li><a href=\"/{$action['module']}\" data-direction='reverse' data-icon=\"home\">".ucwords($action['module'])." Home</a></li>";
+		}
+		$html[] = "				<li><a class='help-link' href=\"#\" data-base=\"{$action['module']}\" data-sub=\"{$action['action']}\" data-icon=\"info\">Help</a></li>";
+		$html[] = "				<li><a href=\"/user/logout/\" rel='external' data-transition=\"slidedown\" data-icon=\"alert\">Logout</a></li>";
+		$html[] = "			</ul></div>";
 	}
-	$html[] = "				<li><a href=\"/help/{$action['module']}/oper:{$action['action']}/\" data-transition=\"slideup\" data-icon=\"info\">Help</a></li>";
-	$html[] = "				<li><a href=\"/user/logout/\" rel='external' data-transition=\"slidedown\" data-icon=\"alert\">Logout</a></li>";
-	$html[] = "			</ul></div>";
 	$html[] = "			<h3>&copy; 2008-".date('Y')." JTSage. All rights reserved. <a href=\"http://tdtrac.com/\" title=\"TDTrac Homepage\">TDTrac Homepage</a></h3>";
 	$html[] = "		</div>\n\t</div>";
 	$html[] = "\n</body>\n</html>";

@@ -320,7 +320,7 @@ class tdtrac_user {
 function email_pwsend() {
 	GLOBAL $db, $MYSQL_PREFIX;
 	if ( !($_REQUEST["tracemail"]) || $_REQUEST["tracemail"] == "" ) { 
-		thrower("E-Mail Address Invalid");
+		echo(json_encode(array('msg'=>"E-Mail Address Invalid", 'success'=>true, 'location'=>'/')));
 	} else {
 		$sql = "SELECT username, password FROM {$MYSQL_PREFIX}users WHERE email = '".mysql_real_escape_string($_REQUEST["tracemail"])."'";
 		$result = mysql_query($sql, $db);
@@ -339,6 +339,6 @@ function email_pwsend() {
 			mail($sendto, $subject, $body, $headers);
 		}
 	}
-	thrower("Password Reminder Sent!");
+	echo(json_encode(array('msg'=>"Password Reminder Sent", 'success'=>true, 'location'=>'/')));
 }
 ?>

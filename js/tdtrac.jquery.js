@@ -7,13 +7,14 @@ function infobox(text, head) { // CONTROL INFOBOX CONTENT
 			'prompt': 'Notice',
 			'useDialogForceFalse': true,
 			'cleanOnClose': true,
+			'forceInput': false,
 			'fullHTML': 
 				'<ul data-role="listview" data-theme="c" data-dividertheme="a">'+
 					'<li data-role="list-divider">'+header+'</li>'+
 					'<li>'+text+'</li></ul>'
 		});
 		
-		setTimeout("$('.ui-page-active').children('.ui-content').data('simpledialog').close();", 2000);
+		setTimeout("$('.ui-page-active').children('.ui-content').data('simpledialog').close();", 3000);
 	} // END INFOBOX CONTENT
 
 jQuery.extend(jQuery.mobile.simpledialog.prototype.options, {
@@ -22,11 +23,46 @@ jQuery.extend(jQuery.mobile.simpledialog.prototype.options, {
 });
 	
 (function($) {
-	$('html').live('pageinit', function() {
+	$('html').live('pageinit', function() { // BEGIN: Running in test mode?
 		testMode = ( $('[data-role=header]:first').find('h1').text().search('TEST_MODE') > -1 ) ? true : false;
-	});
+	}); // END: Check test Mode
 	
-	$('#hoursview').live('datebox', function(e,p) {
+	$('.help-link').live('click', function(e,p) { // BEGIN: Show Help Text
+		var self = $(this),
+			base = $(this).attr('data-base'),
+			subact = $(this).attr('data-sub'),
+			first = $('.ui-page-active').children('.ui-content'),
+			body = '';
+			
+		$.getJSON('/json/help/base:'+base+'/sub:'+subact+'/id:0/', function(data) {
+			self.removeClass('ui-btn-active');
+			if ( data.success === true ) {
+				for ( x=0; x<data.helpbody.length; x++ ) {
+					if ( data.helpbody[x][1] === null ) {
+						body += '<li>'+data.helpbody[x][0]+'</li>';
+					} else {
+						body +=  '<li><p><strong>'+data.helpbody[x][0]+'</strong>: '+data.helpbody[x][1]+'</p></li>';
+					} 
+				}
+				first.simpledialog({
+					'mode': 'blank',
+					'prompt': 'Notice',
+					'forceInput': false,
+					'useDialogForceFalse': true,
+					'cleanOnClose': true,
+					'width': '300px',	
+					'fullHTML': 
+						'<div style="width:370px"><ul data-split-icon="grid" data-role="listview" data-theme="c" data-dividertheme="a">'+
+							'<li data-role="list-divider">'+data.helptitle+'</li>'+
+							body+'</ul></div>'
+				});
+			} else {
+				infobox("Help failed to load");
+			}
+		});
+	}); // END: Show Help Text
+	
+	$('#hoursview').live('datebox', function(e,p) { // BEGIN: Hours calender view handler
 		if ( p.method === 'offset' && p.type === 'm' ) {
 			$.mobile.showPageLoadingMsg();
 			var xxx = window.location.pathname,
@@ -85,15 +121,14 @@ jQuery.extend(jQuery.mobile.simpledialog.prototype.options, {
 					});
 			}
 		}
-		
-	});
+	}); // END: Hours calender view handler
 	
-	$('html').ajaxComplete(function(e,xhr,settings) {
+	$('html').ajaxComplete(function(e,xhr,settings) { // BEGIN: Test Mode Ajax Debug
 		/* DEBUG ALL JSON BASED AJAX */
 		if ( testMode === true && settings.url.search("json") > -1 ) {
 			console.log(xhr.responseText);
 		}
-	});
+	}); // END: Test Mode Ajax Debug
 	
 	$('form').live('submit', function(e) { // FORM HANDLEING
 		$.mobile.showPageLoadingMsg();
