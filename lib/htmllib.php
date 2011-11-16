@@ -64,7 +64,8 @@ function makeHeader($title = '') {
 	$html[] = '<html lang="en">';
 	$html[] = '<head>';
 	$html[] = '	<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />';
-	$html[] = ' <meta name="viewport" content="width=device-width, initial-scale=1">';
+	$html[] = ' <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">';
+	$html[] = ' <meta name="apple-mobile-web-app-capable" content="yes">';
 	$html[] = "	<title>TDTrac{$TDTRAC_CPNY}:{$TDTRAC_VERSION} - {$title}</title>";
 	$html[] = '	<!--[if lt IE 9]>';
 	$html[] = '		<script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>';
@@ -126,7 +127,7 @@ function makeFooter($title = '', $loggedin) {
 		$html[] = "				<li><a href=\"/user/logout/\" rel='external' data-transition=\"slidedown\" data-icon=\"alert\">Logout</a></li>";
 		$html[] = "			</ul></div>";
 	}
-	$html[] = "			<h3>&copy; 2008-".date('Y')." JTSage. All rights reserved. <a href=\"http://tdtrac.com/\" title=\"TDTrac Homepage\">TDTrac Homepage</a></h3>";
+	$html[] = "			<h3>&copy; 2008-".date('Y')." J.T.Sage</h3>"; // All rights reserved. <a href=\"http://tdtrac.com/\" title=\"TDTrac Homepage\">TDTrac Homepage</a></h3>";
 	$html[] = "		</div>\n\t</div>";
 	$html[] = "\n</body>\n</html>";
 	return $html;

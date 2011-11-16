@@ -51,7 +51,14 @@ div.content-secondary {
 	#hours-user-show .ui-datebox-gridrow { margin-bottom: 10px; }
 	#hours-user-show .ui-datebox-gridheader h4 { font-size: 1.5em; }
 }
-
+@media all and (max-width: 500px){
+    .main-index-img h2 {
+        white-space: normal;
+    }
+    .main-index-img img { 
+        width: 70px;
+    }
+}
 @media all and (min-width: 800px){
     div.content-secondary {
         display: inline-block;
