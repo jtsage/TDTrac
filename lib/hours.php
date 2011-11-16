@@ -108,7 +108,7 @@ class tdtrac_hours {
 				$this->html = $this->index();
 				break;
 		}
-		makePage($this->html, $this->title);
+		makePage($this->html, $this->title, $this->sidebar());
 		
 	} // END OUTPUT FUNCTION
 	
@@ -321,7 +321,7 @@ class tdtrac_hours {
 		$html = array();
 		
 		$thename = ( $type=='user' ) ? $this->user->get_name($id) : get_single("SELECT showname as num FROM `{$MYSQL_PREFIX}shows` WHERE showid = {$id}");
-		$html[] = "<div class='ui-bar ui-bar-a'><h3>Hours For: {$thename}</h3></div>";
+		$html[] = "<h3>Hours For: {$thename}</h3>";
 		
 		$sql = "SELECT h.*, showname, (h.worked*u.payrate) as amount, CONCAT(u.first, ' ', u.last) as name "
 			. "FROM `{$MYSQL_PREFIX}hours` h, `{$MYSQL_PREFIX}shows` s, `{$MYSQL_PREFIX}users` u "
@@ -496,6 +496,36 @@ class tdtrac_hours {
 		$body .= "<br />As a reminder, your <strong>username:</strong> {$row1['username']} and <strong>password:</strong> {$row1['password']} for <a href=\"{$TDTRAC_SITE}\">{$TDTRAC_SITE}</a></p>";
 		
 		mail($sendto, $subject, $body, $headers);
+	}
+	
+	/**
+	 * View sidebar of hours
+	 * 
+	 * @global string MySQL Table Prefix
+	 * @return array HTML Output
+	 */
+	private function sidebar() {
+		GLOBAL $MYSQL_PREFIX, $TDTRAC_DAYRATE, $TDTRAC_SITE;
+	
+		$htype = (($TDTRAC_DAYRATE)?"days":"hours");
+		$hours_open = number_format(get_single("SELECT SUM(h.worked*u.payrate) as num FROM `{$MYSQL_PREFIX}hours` h, `{$MYSQL_PREFIX}shows` s, `{$MYSQL_PREFIX}users` u WHERE h.showid = s.showid AND h.userid = u.userid AND s.closed = 0"),0);
+		$hours_unpaidn = number_format(get_single("SELECT SUM(h.worked) as num FROM `{$MYSQL_PREFIX}hours` h, `{$MYSQL_PREFIX}shows` s WHERE h.showid = s.showid AND h.submitted = 0 AND s.closed = 0"),0);
+		$hours_unpaidm = number_format(get_single("SELECT SUM(h.worked*u.payrate) as num FROM `{$MYSQL_PREFIX}hours` h, `{$MYSQL_PREFIX}shows` s, `{$MYSQL_PREFIX}users` u WHERE h.showid = s.showid AND h.userid = u.userid AND h.submitted = 0 AND s.closed = 0"),0);
+		$hours_total = number_format(get_single("SELECT SUM(h.worked*u.payrate) as num FROM `{$MYSQL_PREFIX}hours` h, `{$MYSQL_PREFIX}shows` s, `{$MYSQL_PREFIX}users` u WHERE h.showid = s.showid AND h.userid = u.userid"),0);
+		
+		$list = new tdlist(array('id' => 'todo_sidebar', 'actions' => false, 'inset' => true));
+		$showsopen = true;
+		
+		$html = array('<h4 class="intro">Manage Payroll Records</h4>');
+		
+		$list->setFormat("%s");
+		$list->addRow("<h3>Open Shows</h3><p>Payroll total for open shows</p><p class='ui-li-count'>\${$hours_open}</p></h3>");
+		$list->addRow("<h3>Unpaid {$htype}</h3><p>Unpaid {$htype}</p><p class='ui-li-count'>{$hours_unpaidn}</p></h3>");
+		$list->addRow("<h3>Unpaid Amount</h3><p>Total unpaid amount</p><p class='ui-li-count'>\${$hours_unpaidm}</p></h3>");
+		$list->addRow("<h3>Total Payroll</h3><p>Total payroll amount</p><p class='ui-li-count'>\${$hours_total}</p></h3>");
+		$list->addRaw("<li data-icon='plus'><a href='{$TDTRAC_SITE}hours/add/'><h3>Add Item</h3></a></li>");
+		
+		return array_merge($html,$list->output());
 	}
 }
 ?>

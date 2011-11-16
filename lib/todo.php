@@ -94,7 +94,7 @@ class tdtrac_todo {
 					}
 				} break;
 		}
-		makePage($this->html, $this->title);
+		makePage($this->html, $this->title, $this->sidebar());
 	} // END OUTPUT FUNCTION
 	
 	/**
@@ -312,6 +312,39 @@ class tdtrac_todo {
 		$html = array_merge($html, $tabl->output(false));
 		
 		return mail($this->user->email, $subject, join($html), $headers);
+	}
+	
+	/**
+	 * View sidebar of shows
+	 * 
+	 * @global string MySQL Table Prefix
+	 * @return array HTML Output
+	 */
+	private function sidebar() {
+		GLOBAL $MYSQL_PREFIX, $TDTRAC_SITE;
+	
+		$todo_open = get_single("SELECT COUNT(id) as num FROM `{$MYSQL_PREFIX}todo` WHERE complete = 0");
+		$todo_totl = get_single("SELECT COUNT(id) as num FROM `{$MYSQL_PREFIX}todo` WHERE 1");
+		$todo_over = get_single("SELECT COUNT(id) as num FROM `{$MYSQL_PREFIX}todo` WHERE complete = 0 AND due < CURRENT_TIMESTAMP");
+		$todo_your = get_single("SELECT COUNT(id) as num FROM `{$MYSQL_PREFIX}todo` WHERE complete = 0 AND assigned = {$this->user->id}");
+		
+		$list = new tdlist(array('id' => 'todo_sidebar', 'actions' => false, 'inset' => true));
+		$showsopen = true;
+		
+		$html = array('<h4 class="intro">Manage Todo Lists and Items</h4>');
+		
+		$list->setFormat("%s");
+		$list->addRow("<h3>Your Items</h3><p>Your outstanding items</p><p class='ui-li-count'>{$todo_your}</p></h3>");
+		
+		if ( $this->user->can('viewtodo') ) {
+			$list->addRow("<h3>Overdue Items</h3><p>Total overdue items</p><p class='ui-li-count'>{$todo_over}</p></h3>");
+			$list->addRow("<h3>Incomplete Items</h3><p>Total outstanding items</p><p class='ui-li-count'>{$todo_open}</p></h3>");
+			$list->addRow("<h3>Total Items</h3><p>Total of all items</p><p class='ui-li-count'>{$todo_totl}</p></h3>");
+		}
+		$list->addRaw("<li data-icon='plus'><a href='{$TDTRAC_SITE}todo/add/'><h3>Add Item</h3></a></li>");
+		
+		
+		return array_merge($html,$list->output());
 	}
 }
 

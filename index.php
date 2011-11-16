@@ -62,11 +62,11 @@ if ( !$user->loggedin ) {
 			if ( $_SERVER['REQUEST_METHOD'] == "POST" ) {
 				email_pwsend();
 			} else {
-				makePage($user->password_form(), 'Forgotten Password', false);
+				makePage($user->password_form(), 'Forgotten Password');
 			} break;
 		default:
 			if ( !isset($_SESSION['infodata']) ) { $_SESSION['infodata'] = "Please Login"; }
-			makePage($user->login_form(), 'Please Login', false);
+			makePage($user->login_form(), 'Please Login');
 			break;
 	}
 } else {

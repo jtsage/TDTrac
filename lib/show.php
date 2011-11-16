@@ -80,7 +80,7 @@ class tdtrac_shows {
 					$this->html = error_page("Access Denied :: You Cannot View Shows");
 				} break;
 		}
-		makePage($this->html, $this->title);
+		makePage($this->html, $this->title, $this->sidebar());
 	} // END OUTPUT FUNCTION
 
 	/**
@@ -159,6 +159,32 @@ class tdtrac_shows {
 			$list->addRow(array($row['showid'], $row['showname'], $row['company'], $row['venue'], $row['dates']), $row);
 		}
 		return $list->output();
+	}
+	
+	/**
+	 * View sidebar of shows
+	 * 
+	 * @global string MySQL Table Prefix
+	 * @return array HTML Output
+	 */
+	private function sidebar() {
+		GLOBAL $MYSQL_PREFIX, $TDTRAC_SITE;
+		
+		$shows_open = get_single("SELECT COUNT(showid) as num FROM `{$MYSQL_PREFIX}shows` WHERE closed = 0");
+		$shows_clsd = get_single("SELECT COUNT(showid) as num FROM `{$MYSQL_PREFIX}shows` WHERE closed = 1");
+		
+		$list = new tdlist(array('id' => 'show_sidebar', 'actions' => false, 'inset' => true));
+		$showsopen = true;
+		
+		$html = array('<h4 class="intro">Manage Shows and Jobs</h4>');
+		
+		$list->setFormat("%s");
+		$list->addRow("<h3>Open Shows</h3><p>Shows available for new items</p><p class='ui-li-count'>{$shows_open}</p></h3>");
+		$list->addRow("<h3>Closed Shows</h3><p>Shows from the past</p><p class='ui-li-count'>{$shows_clsd}</p></h3>");
+		$list->addRaw("<li data-icon='plus'><a href='{$TDTRAC_SITE}shows/add/'><h3>Add Show</h3></a></li>");
+		
+		
+		return array_merge($html,$list->output());
 	}
 }
 

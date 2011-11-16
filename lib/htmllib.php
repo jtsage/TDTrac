@@ -16,15 +16,27 @@
  * @param string Page Title
  * @return void
  */
-function makePage($body = '', $title = '', $loggedin = true) {
+function makePage($body = '', $title = '', $sidebar = '') {
+	GLOBAL $user;
 	if (!is_array($body) ) {
 		$body = preg_split("/\n/", $body);
 	}
 	$html = makeHeader($title);
+	if ( !empty($sidebar) ) {
+		$html[] = "\t\t    <div class='content-secondary'>\n";
+		$html[] = "\t\t\t<div class='tdtractitle'>TD<span class='red'>Trac</span></div>\n";
+		foreach ( $sidebar as $fixme ) {
+			$html[] = "\t\t\t{$fixme}";
+		}
+		$html[] = "\t\t    </div><div class='content-primary'>\n";
+	}
 	foreach( $body as $fixme ) {
 		$html[] = "\t\t\t{$fixme}";
 	}
-	$html = array_merge($html, makeFooter($title, $loggedin));
+	if ( !empty($sidebar) ) {
+		$html[] = "\t\t    </div>\n";
+	}
+	$html = array_merge($html, makeFooter($title, $user->loggedin));
 	//ob_clean(); //Hackish method to clear any extra lines / echos before html starts
 	foreach ($html as $line) {
 		echo $line . "\n";
@@ -52,6 +64,7 @@ function makeHeader($title = '') {
 	$html[] = '<html lang="en">';
 	$html[] = '<head>';
 	$html[] = '	<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />';
+	$html[] = ' <meta name="viewport" content="width=device-width, initial-scale=1">';
 	$html[] = "	<title>TDTrac{$TDTRAC_CPNY}:{$TDTRAC_VERSION} - {$title}</title>";
 	$html[] = '	<!--[if lt IE 9]>';
 	$html[] = '		<script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>';

@@ -129,7 +129,7 @@ class tdtrac_budget {
 					$this->html = $this->showlist();
 				} break;
 		}
-		makePage($this->html, $this->title);
+		makePage($this->html, $this->title, $this->sidebar());
 	} // END OUTPUT FUNCTION
 	
 	/**
@@ -717,6 +717,36 @@ class tdtrac_budget {
 		$body .= $tabl->output(true);
 	
 		return mail($this->user->email, $subject, $body, $headers);
+	}
+	
+	/**
+	 * View sidebar of budget
+	 * 
+	 * @global string MySQL Table Prefix
+	 * @return array HTML Output
+	 */
+	private function sidebar() {
+		GLOBAL $MYSQL_PREFIX, $TDTRAC_SITE;
+	
+		$budg_open = number_format(get_single("SELECT SUM(price) as num FROM `{$MYSQL_PREFIX}budget` b, `{$MYSQL_PREFIX}shows` s WHERE b.showid = s.showid AND s.closed = 0"),0);
+		$budg_all  = number_format(get_single("SELECT SUM(price) as num FROM `{$MYSQL_PREFIX}budget` WHERE 1"),0);
+		$budg_pend = number_format(get_single("SELECT SUM(price) as num FROM `{$MYSQL_PREFIX}budget` WHERE pending = 1"),0);
+		$budg_reim = number_format(get_single("SELECT SUM(price) as num FROM `{$MYSQL_PREFIX}budget` WHERE needrepay = 1 AND gotrepay = 0"),0);
+		
+		$list = new tdlist(array('id' => 'todo_sidebar', 'actions' => false, 'inset' => true));
+		$showsopen = true;
+		
+		$html = array('<h4 class="intro">Manage Show Budgets</h4>');
+		
+		$list->setFormat("%s");
+		$list->addRow("<h3>Open Shows</h3><p>Expenses for open shows</p><p class='ui-li-count'>\${$budg_open}</p></h3>");
+		$list->addRow("<h3>All Shows</h3><p>Expenses for all shows</p><p class='ui-li-count'>\${$budg_all}</p></h3>");
+		$list->addRow("<h3>Pending Items</h3><p>Expenses pending payment</p><p class='ui-li-count'>\${$budg_pend}</p></h3>");
+		$list->addRow("<h3>Reimbursable</h3><p>Pending reimbursmentsp</p><p class='ui-li-count'>\${$budg_reim}</p></h3>");
+		$list->addRaw("<li data-icon='plus'><a href='{$TDTRAC_SITE}budget/add/'><h3>Add Item</h3></a></li>");
+		
+		
+		return array_merge($html,$list->output());
 	}
 }
 

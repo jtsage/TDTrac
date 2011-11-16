@@ -54,25 +54,6 @@ function merge_defaults($orig, $override) {
 }
 
 /**
- * Show a variables contents in the javascript console 
- * 
- * @param mixed Variable to display
- * @return string Inline formatted script
- */
-function debug_js($variable) {
-	return "<script type='text/javascript'> var x = ".json_encode($variable)."; console.log(x);</script>"; 
-}
-
-/** Put a script inline
- * 
- * @param array Script Code
- * @return array Wrapped script code
- */
-function inline_script($script) {
-	return array("<script type='text/javascript'>".join($script)."</script>");
-}
-
-/**
  * Generate an error page
  * 
  * @param string Error Message
@@ -142,7 +123,7 @@ function db_list($sql, $columns) {
  function get_single($sql, $col='num') {
 	 GLOBAL $db;
 	 $result = mysql_query($sql, $db);
-	 if ( mysql_num_rows($result) < 1 ) { return 0; }
+	 if ( !$result || mysql_num_rows($result) < 1 ) { return 0; }
 	 $row = mysql_fetch_array($result);
 	 return $row[$col];
 }
