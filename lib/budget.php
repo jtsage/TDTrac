@@ -702,19 +702,22 @@ class tdtrac_budget {
 		$headers .= 'Content-type: text/html; charset=iso-8859-1' . "\r\n";
 	
 		$body .= "<h2>Materials Expenses</h2>\n";
+		$body .= "<table><tr><th>Date</th><th>Vendor</th><th>Category</th><th>Description</th><th>Price</th><th>Tax</th></tr>";
+		
 		$sql = "SELECT * FROM {$MYSQL_PREFIX}budget WHERE showid = {$showid} ORDER BY category ASC, date ASC, vendor ASC";
-
 		$result = mysql_query($sql, $db); 
-
-		$tabl = new tdtable("budget", 'datatable', false, "");
-		$tabl->addHeader(array('Date', 'Vendor', 'Category', 'Description', 'Price', 'Tax'));
-		$tabl->addSubtotal('Category');
-		$tabl->addCurrency('Price');
-		$tabl->addCurrency('Tax');
+		
 		while ( $exp = mysql_fetch_array($result) ) {
-			$tabl->addRow(array($exp['date'], $exp['vendor'], $exp['category'], $exp['dscr'], $exp['price'], $exp['tax']), $exp);
+			$body .= sprintf("<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>",
+				$exp['date'],
+				$exp['vendor'],
+				$exp['category'],
+				$exp['dscr'],
+				number_format($exp['price'],2),
+				number_format($exp['tax'],2)
+			);
 		}
-		$body .= $tabl->output(true);
+		$body .= "</table>";
 	
 		return mail($this->user->email, $subject, $body, $headers);
 	}

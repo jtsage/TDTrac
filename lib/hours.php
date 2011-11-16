@@ -404,15 +404,17 @@ class tdtrac_hours {
 			foreach ( $dbarray as $key => $data ) {
 				$body .= "<h2>Hours Worked For {$key}</h2>\n";
 				
-				$tabl = new tdtable("hours-{$ident}", 'datatable', false);
-				$tabl->addHeader(array('Date', 'Show', (($TDTRAC_DAYRATE)?"Days":"Hours")." Worked"));
-				$tabl->addNumber((($TDTRAC_DAYRATE)?"Days":"Hours")." Worked");
+				$body .= "<table><tr><th>Date</th><th>Show</th><th>".(($TDTRAC_DAYRATE)?"Days":"Hours")." Worked</th></tr>";
 				
 				foreach ( $data as $num => $line ) {
-					$tabl->addRow(array($line['date'], $line['showname'], $line['worked']), $line);
+					$body .= sprintf("<tr><td>%s</td><td>%s</td><td>%s</td></tr>",
+						$line['date'],
+						$line['showname'],
+						number_format($line['worked'],2)
+					);
 				}
 				
-				$body .= $tabl->output(true);
+				$body .= "</table>";
 			}
 			
 			return mail($this->user->email, $subject, $body, $headers);

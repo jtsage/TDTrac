@@ -304,12 +304,18 @@ class tdtrac_todo {
 		$result = mysql_query($sql, $db);
 		$priorities = $this->priorities;
 		$html[] = "<br /><br />";
-		$tabl = new tdtable("todo", 'datatable', false);
-		$tabl->addHeader(array('Status', 'Due', 'Priority', 'Assigned To', 'Description'));
+		$html[] = "<table><tr><th>Status</th><th>Due</th><th>Priority</th><th>Assigned To</th><th>Description</th></tr>";
+		
 		while ( $row = mysql_fetch_array($result) ) {
-			$tabl->addRow(array((($row['complete'])?"DONE":""), $row['duedate'], $priorities[$row['priority']][1], (($row['assigned'] > 0) ? $this->user->get_name($row['assigned']) : "-unassigned-"), $row['dscr']), $row, (($row['complete']=='1') ? "tododone" : (($row['remain'] < 0 ) ? "tododue": null))  );
+			$html[] = sprintf("<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>",
+				(($row['complete'])?"DONE":""),
+				$row['duedate'],
+				$priorities[$row['priority']][1],
+				(($row['assigned'] > 0) ? $this->user->get_name($row['assigned']) : "-unassigned-"),
+				$row['dscr']
+			);
 		}
-		$html = array_merge($html, $tabl->output(false));
+		$html[] = "</table>";
 		
 		return mail($this->user->email, $subject, join($html), $headers);
 	}

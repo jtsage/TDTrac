@@ -1,6 +1,5 @@
 Medium Sized Projects:
 	Make sure all links reference {$TDTRAC_SITE} - assumes root dir install right now
-	Remove all tablelib aspects, and tablelib
 
 Small Sized Projects:
 	Change password link / form
