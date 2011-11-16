@@ -79,16 +79,19 @@ if ( !$user->loggedin ) {
 			switch( $action['action'] ) {
 				case "logout":
 					$user->logout();
-					thrower("User Logged Out", '');
+					makePage(error_page('You Have Been Logged Out'), 'Logged Out');
+					break;
 				case "password":
-					if ( $user->username == "guest" ) { thrower("You Cannot Change Your Password"); }
+					if ( $user->username == "guest" ) { 
+						makePage(error_page('You Cannot Change Guest Password'), 'Error');
+					}
 					if ( $_SERVER['REQUEST_METHOD'] == "POST" ) {
 						$user->changepass();
 					} else {
 						makePage($user->changepass_form(), 'Change Password');
 					} break;
 				default:
-					thrower(false, ''); 
+					makePage(error_page('Unknown Page'), 'Unknown Page');
 			}
 			break;
 		case "todo":

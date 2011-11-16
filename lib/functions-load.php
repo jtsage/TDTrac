@@ -69,25 +69,6 @@ function error_page($text, $extra = '') {
 	return $html;
 }
 
-/**
- * Throw a message to the user
- * 
- * @depreciated 3.0.0 Not compatable with jQM
- * @param string Message to send (or false)
- * @param string Location to navigate to
- * @global string Address to redirct to
- * @return void
- */
-function thrower($msg, $loc='') {
-	GLOBAL $TDTRAC_SITE;
-	if ( $msg !== false ) {
-		$_SESSION['infodata'] = $msg;
-	}
-	session_write_close();
-	header("Location: {$TDTRAC_SITE}{$loc}");
-	//echo "<script type=\"javascript/text\">$.mobile.changePage({$loc});></script>";
-}
-
 /** 
  * Return a sql query as a one or two dimensional list
  * 
