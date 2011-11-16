@@ -220,6 +220,7 @@ class tdtrac_json {
 									$this->json['msg'] = "No switch found";
 								} elseif ( in_array($this->action['switch'], array('limithours','notify','payroll','active') ) ) {
 									$current = get_single("SELECT {$this->action['switch']} AS num FROM `{$MYSQL_PREFIX}users` WHERE userid = ".intval($this->action['id']));
+									$this->json['newval'] = (($current==1)?0:1);
 									$this->do_sql("UPDATE {$MYSQL_PREFIX}users SET {$this->action['switch']} = ".(($current==1)?0:1)." WHERE userid = ".intval($this->action['id'])." LIMIT 1", true);
 									break;
 								} else {

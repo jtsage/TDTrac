@@ -114,7 +114,7 @@ function makeHeader($title = '') {
  * @return array Formatted HTML
  */
 function makeFooter($title = '', $loggedin) {
-	global $SITE_BLOCK, $action, $EXTRA_NAV, $TDTRAC_SITE;
+	global $action, $EXTRA_NAV, $TDTRAC_SITE;
 	$html[] = "		</div>";
 	$html[] = "		<div data-role=\"footer\" data-theme=\"a\">";
 	if ( $loggedin ) {
