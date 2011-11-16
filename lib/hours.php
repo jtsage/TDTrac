@@ -309,7 +309,7 @@ class tdtrac_hours {
 	 * @return array Formatted HTML
 	 */
 	public function view_standard($id, $type='user') {
-		GLOBAL $db, $MYSQL_PREFIX, $TDTRAC_DAYRATE;
+		GLOBAL $db, $MYSQL_PREFIX, $TDTRAC_DAYRATE, $TDTRAC_SITE;
 		
 		if ( !isset($this->action['year']) ) { $this->action['year'] = date('Y'); }
 		if ( !isset($this->action['month']) ) { $this->action['month'] = date('n'); }
@@ -330,6 +330,21 @@ class tdtrac_hours {
 			. "AND date >= '{$this->action['year']}-".sprintf('%02d',$this->action['month'])."-01' "
 			. "AND date < '{$nextyear}-".sprintf('%02d',$nextmonth)."-01' "
 			. "ORDER BY date DESC";
+			
+		$sqlnext = "SELECT date as num "
+			. "FROM `{$MYSQL_PREFIX}hours` h WHERE "
+			. (($type=='user')?"h.userid = {$id} ":"h.showid = {$id} ")
+			. "AND date >= '{$nextyear}-".sprintf('%02d',$nextmonth)."-01' "
+			. "ORDER BY date ASC LIMIT 1";
+			
+		$sqlprev = "SELECT date as num "
+			. "FROM `{$MYSQL_PREFIX}hours` h WHERE "
+			. (($type=='user')?"h.userid = {$id} ":"h.showid = {$id} ")
+			. "AND date < '{$this->action['year']}-".sprintf('%02d',$this->action['month'])."-01' "
+			. "ORDER BY date DESC LIMIT 1";
+			
+		$nextdate = get_single($sqlnext);
+		$prevdate = get_single($sqlprev);
 		
 		$result = mysql_query($sql);
 		$extrainfo = array();
@@ -371,6 +386,13 @@ class tdtrac_hours {
 		$html[] = "<input type='date' data-role='datebox' id='hoursview' name='hoursview' data-options='".json_encode($dboxopt)."' />";
 		$html[] = "</div>";
 		
+		$nextlink = ($nextdate==0)?'#':$TDTRAC_SITE . 'hours/view/type:show/id:' . $id . '/year:' . date('Y', strtotime($nextdate)) . '/month:' . date('n', strtotime($nextdate)) . '/';
+		$prevlink = ($prevdate==0)?'#':$TDTRAC_SITE . 'hours/view/type:show/id:' . $id . '/year:' . date('Y', strtotime($prevdate)) . '/month:' . date('n', strtotime($prevdate)) . '/';
+		
+		$html[] = '<div data-role="controlgroup" data-type="horizontal" style="text-align: center">';
+		$html[] = '	<a href="'.$prevlink.'" rel="external" data-role="button" data-theme="'.(($prevdate==0)?'f':'d').'" data-icon="arrow-l">Previous Hours</a>';
+		$html[] = '	<a href="'.$nextlink.'" rel="external" data-role="button" data-theme="'.(($nextdate==0)?'f':'d').'"data-icon="arrow-r">Next Hours</a>';
+		$html[] = '</div>';
 		return $html;
 	}
 	
