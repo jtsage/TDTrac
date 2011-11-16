@@ -85,7 +85,7 @@ class tdtrac_budget {
 					} else {
 						if ( $this->action['type'] == 'show' ) {
 							if ( $this->user->can('addbudget') ) {
-								$HEAD_LINK = array("/budget/add/show:{$this->action['id']}/", 'plus', 'Add Item'); 
+								$HEAD_LINK = array("budget/add/show:{$this->action['id']}/", 'plus', 'Add Item'); 
 							}
 							if ( !isset($this->action['cat']) ) {
 								$this->html = $this->view_show($this->action['id']);
@@ -124,7 +124,7 @@ class tdtrac_budget {
 					$this->html = $this->view($this->user->id, 'reimb');
 				} else {
 					if ( $this->user->can('addbudget') ) {
-						$HEAD_LINK = array("/budget/add/", 'plus', 'Add Item'); 
+						$HEAD_LINK = array("budget/add/", 'plus', 'Add Item'); 
 					}
 					$this->html = $this->showlist();
 				} break;
@@ -140,12 +140,12 @@ class tdtrac_budget {
 	 * @return array Formatted HTML
 	 */
 	private function showlist() {
-		GLOBAL $db, $MYSQL_PREFIX;
+		GLOBAL $db, $MYSQL_PREFIX, $TDTRAC_SITE;
 		$sql = "SELECT showid, showname FROM `{$MYSQL_PREFIX}shows` WHERE closed = 0 ORDER BY created DESC";
 		
 		$list = new tdlist(array('id' => 'budget-showlist', 'actions' => true, 'icon' => 'add', 'inset' => true));
 		$list->addAction('badd');
-		$list->setFormat("<a href='/budget/view/type:show/id:%d/'><h3>%s</h3>"
+		$list->setFormat("<a href='{$TDTRAC_SITE}budget/view/type:show/id:%d/'><h3>%s</h3>"
 				."<p><strong>Budget Expense:</strong> $%s"
 				."<br /><strong>Labor Expense:</strong> $%s"
 				."</p><span class='ui-li-count'>$%s</span></a>");
@@ -168,10 +168,10 @@ class tdtrac_budget {
 		$allr = '$' . number_format(get_single("SELECT SUM(price+tax) AS num FROM {$MYSQL_PREFIX}budget WHERE needrepay = 1 AND gotrepay = 0"),2);
 		$your = '$' . number_format(get_single("SELECT SUM(price+tax) AS num FROM {$MYSQL_PREFIX}budget WHERE needrepay = 1 AND gotrepay = 0 AND payto = {$this->user->id}"),2);
 		$rrpt = get_single("SELECT COUNT(imgid) as num FROM `{$MYSQL_PREFIX}rcpts` WHERE handled = 0");
-		$list->addRaw("<li data-theme='c'><a href='/budget/rcpt/'><h3>All Pending Reciepts</h3><span class='ui-li-count'>{$rrpt}</span></a></li>");
-		$list->addRaw("<li data-theme='c'><a href='/budget/view/type:reimb/id:0/'><h3>All Pending Reimbursment</h3><span class='ui-li-count'>{$allr}</span></a></li>");
-		$list->addRaw("<li data-theme='c'><a href='/budget/view/type:pending/id:0/'><h3>All Pending Payment</h3><span class='ui-li-count'>{$allp}</span></a></li>");
-		$list->addRaw("<li data-theme='c'><a href='/budget/view/type:reimb/id:{$this->user->id}/'><h3>Your Reimbursments</h3><span class='ui-li-count'>{$your}</span></a></li>");
+		$list->addRaw("<li data-theme='c'><a href='{$TDTRAC_SITE}budget/rcpt/'><h3>All Pending Reciepts</h3><span class='ui-li-count'>{$rrpt}</span></a></li>");
+		$list->addRaw("<li data-theme='c'><a href='{$TDTRAC_SITE}budget/view/type:reimb/id:0/'><h3>All Pending Reimbursment</h3><span class='ui-li-count'>{$allr}</span></a></li>");
+		$list->addRaw("<li data-theme='c'><a href='{$TDTRAC_SITE}budget/view/type:pending/id:0/'><h3>All Pending Payment</h3><span class='ui-li-count'>{$allp}</span></a></li>");
+		$list->addRaw("<li data-theme='c'><a href='{$TDTRAC_SITE}budget/view/type:reimb/id:{$this->user->id}/'><h3>Your Reimbursments</h3><span class='ui-li-count'>{$your}</span></a></li>");
 		return $list->output();
 	}
 	
@@ -185,8 +185,9 @@ class tdtrac_budget {
 	 * @return array HTML Formatted information
 	 */
 	private function reciept_view($num) {
+		GLOBAL $TDTRAC_SITE;
 		$html[] = "<div id='rcptbox'>";
-		$html[] = "<a href='/rcpt.php?imgid={$num}&amp;hires' target='_blank'><img id='rcptimg' src='/rcpt.php?imgid={$num}' /></a>";
+		$html[] = "<a href='{$TDTRAC_SITE}rcpt.php?imgid={$num}&amp;hires' target='_blank'><img id='rcptimg' src='/rcpt.php?imgid={$num}' /></a>";
 		$html[] = "</div><div data-role='navbar'><ul>";
 		$html[] = "<li><a data-id='{$num}' data-rot='270' data-icon='back' data-iconpos='top' class='rcptrot' href='#'>Rotate -90&deg;</a></li>";
 		$html[] = "<li><a data-id='{$num}' data-rot='90' data-icon='forward' data-iconpos='top' class='rcptrot' href='#'>Rotate 90&deg;</a></li>";
@@ -202,7 +203,7 @@ class tdtrac_budget {
 	 * @return array HTML Output
 	 */
 	private function reciept_list() {
-		GLOBAL $db, $MYSQL_PREFIX;
+		GLOBAL $db, $MYSQL_PREFIX, $TDTRAC_SITE;
 		$sql = "SELECT added, imgid FROM `{$MYSQL_PREFIX}rcpts` WHERE handled = 0";
 		$result = mysql_query($sql, $db);
 		
@@ -210,7 +211,7 @@ class tdtrac_budget {
 			return error_page("No unhandled receipts");
 		} else {
 			$list = new tdlist(array('id' => 'rcpt_list', 'inset' => true));
-			$list->setFormat("<a href='/budget/add/rcpt:%d/'><img src='/rcpt.php?imgid=%d' /><h3>Recieved: %s</h3></a>");
+			$list->setFormat("<a href='{$TDTRAC_SITE}budget/add/rcpt:%d/'><img src='{$TDTRAC_SITE}rcpt.php?imgid=%d' /><h3>Recieved: %s</h3></a>");
 			
 			while ( $row = mysql_fetch_array($result) ) {
 				$list->addRow(array($row['imgid'], $row['imgid'], $row['added']));
@@ -370,8 +371,9 @@ class tdtrac_budget {
 	 * @return array Formatted HTML
 	 */
 	private function make_row($cat, $price, $html, $showid, $link = true) {
+		GLOBAL $TDTRAC_SITE;
 		$html[] = "</tbody></table>";
-		if ( $link ) { array_unshift($html, "<a href='/budget/view/type:show/id:{$showid}/cat:{$cat}/'>"); }
+		if ( $link ) { array_unshift($html, "<a href='{$TDTRAC_SITE}budget/view/type:show/id:{$showid}/cat:{$cat}/'>"); }
 		$list = new tdlist(array('id' => "b-view-{$cat}", 'inset' => true));
 		$list->addRaw("<li data-role='list-divider'>{$cat}<span class='ui-li-count'>$".number_format($price, 2)."</span></li>");
 		$list->addRaw("<li data-theme='c'>".join($html).(($link)?"</a>":"")."</li>");
@@ -388,7 +390,7 @@ class tdtrac_budget {
 	 * @return array Formatted HTML
 	 */
 	private function view_item($id) {
-		GLOBAL $db, $MYSQL_PREFIX, $HEAD_LINK;
+		GLOBAL $db, $MYSQL_PREFIX, $HEAD_LINK, $TDTRAC_SITE;
 		$sql = "SELECT * FROM `{$MYSQL_PREFIX}budget` WHERE id = '".intval($id)."' LIMIT 1";
 		$result = mysql_query($sql, $db);
 		$list = new tdlist(array('id' => 'b-view-item', 'inset' => 'true'));
@@ -399,7 +401,7 @@ class tdtrac_budget {
 			return error_page('Budget Item Not Found!');
 		} else {
 			if ( $this->user->can('editbudget') ) {
-				$HEAD_LINK = array('/budget/edit/id:'.$id.'/', 'grid', 'Edit Item'); 
+				$HEAD_LINK = array('budget/edit/id:'.$id.'/', 'grid', 'Edit Item'); 
 			}
 			$row = mysql_fetch_array($result);
 			$list->addRow(array(get_single("SELECT showname as num FROM `{$MYSQL_PREFIX}shows` WHERE showid = {$row['showid']}"), 'Show'));
@@ -425,7 +427,7 @@ class tdtrac_budget {
 				$list->addRow(array($temp, 'NOTICE'));
 			}
 			if ( $row['imgid'] > 0 ) {
-				$temp = "<div id='rcptbox'><a href='/rcpt.php?imgid={$row['imgid']}&amp;hires' target='_blank'><img src='/rcpt.php?imgid={$row['imgid']}' /></a></div>";
+				$temp = "<div id='rcptbox'><a href='{$TDTRAC_SITE}rcpt.php?imgid={$row['imgid']}&amp;hires' target='_blank'><img src='{$TDTRAC_SITE}rcpt.php?imgid={$row['imgid']}' /></a></div>";
 			} else { $temp = ''; }
 			
 			return array_merge(array("<h2>{$row['dscr']}</h2>", $temp), $list->output());

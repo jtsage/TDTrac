@@ -61,7 +61,7 @@ class tdtrac_hours {
 				} break;
 			case "view":
 				if ( $this->user->can('addhours') ) {
-					$HEAD_LINK = array('/hours/add/', 'plus', 'Add Hours'); 
+					$HEAD_LINK = array('hours/add/', 'plus', 'Add Hours'); 
 				}
 				$this->title .= "::View";
 				$type = (isset($this->action['type']))?$this->action['type']:'user';
@@ -103,7 +103,7 @@ class tdtrac_hours {
 				} break;
 			default:
 				if ( $this->user->can('addhours') ) {
-					$HEAD_LINK = array('/hours/add/', 'plus', 'Add Hours'); 
+					$HEAD_LINK = array('hours/add/', 'plus', 'Add Hours'); 
 				}
 				$this->html = $this->index();
 				break;
@@ -196,25 +196,25 @@ class tdtrac_hours {
 	 * @return array Formatted HTML
 	 */
 	public function index() {
-		global $MYSQL_PREFIX;
+		global $MYSQL_PREFIX, $TDTRAC_SITE;
 		
 		$shows = db_list(get_sql_const('showid'), array(showid, showname));
 		$usrs  = db_list(get_sql_const('emps'), array(userid, name));
 		
 		$list = new tdlist(array('id' => 'hours-index', 'actions' => false, 'icon' => 'add', 'inset' => true));
-		$list->setFormat("<a href='/hours/view/type:%s/id:%d/%s'><h3>%s</h3>"
+		$list->setFormat("<a href='{$TDTRAC_SITE}hours/view/type:%s/id:%d/%s'><h3>%s</h3>"
 				."<span class='ui-li-count'>$%s</span></a>");
 				
 		$list->addDivide('Operations');
 		
-		if ( $this->user->isemp ) { $list->addRaw("<li><a href='/hours/add/own:1/'><h3>Add Your Hours</h3></a></li>"); }
+		if ( $this->user->isemp ) { $list->addRaw("<li><a href='{$TDTRAC_SITE}hours/add/own:1/'><h3>Add Your Hours</h3></a></li>"); }
 		
 		$list->addRaw("<!--".var_export($usrs, true)."-->");
 		if ( $this->user->can('addhours') && !$this->user->isemp ) {
-			$list->addRaw("<li><a href='/hours/add/'><h3>Add Hours</h3></a></li>");
+			$list->addRaw("<li><a href='{$TDTRAC_SITE}hours/add/'><h3>Add Hours</h3></a></li>");
 		}
 		if ( $this->user->admin ) {
-			$list->addRaw("<li><a href='/hours/remind/'><h3>Send Payroll Reminders</h3></a></li>");
+			$list->addRaw("<li><a href='{$TDTRAC_SITE}hours/remind/'><h3>Send Payroll Reminders</h3></a></li>");
 			$list->addDivide('Special Reports');
 			$total = get_single("SELECT SUM(h.worked*u.payrate) num FROM `{$MYSQL_PREFIX}hours` h, `{$MYSQL_PREFIX}users` u, `{$MYSQL_PREFIX}shows` s WHERE h.userid = u.userid AND s.showid = h.showid AND closed = 0 AND submitted = 0");
 			$list->addRow(array(
@@ -265,14 +265,14 @@ class tdtrac_hours {
 	 * @return array Formatted HTML
 	 */
 	public function view_pending() {
-		GLOBAL $db, $MYSQL_PREFIX;
+		GLOBAL $db, $MYSQL_PREFIX, $TDTRAC_SITE;
 		
 		$sql = "SELECT userid, sum(worked) as total FROM `{$MYSQL_PREFIX}hours` WHERE submitted = 0 GROUP BY userid ORDER BY userid";
 		$result = mysql_query($sql, $db);
 		
 		$list = new tdlist(array('id' => 'hours-index', 'actions' => true, 'icon' => 'check', 'inset' => true));
 		$list->addAction('hclear');
-		$list->setFormat("<a href='/hours/view/type:user/id:%d/'><h3>%s</h3><p>%s</p>"
+		$list->setFormat("<a href='{$TDTRAC_SITE}hours/view/type:user/id:%d/'><h3>%s</h3><p>%s</p>"
 				."<span class='ui-li-count'>%s</span></a>");
 				
 		$list->addDivide('Unpaid Hours');

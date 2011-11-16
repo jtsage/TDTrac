@@ -59,7 +59,7 @@ class tdtrac_admin {
 		} else {
 			switch ( $this->action['action'] ) {
 				case "users": // View Users
-					$HEAD_LINK = array('/admin/useradd/', 'plus', 'Add User'); 
+					$HEAD_LINK = array('admin/useradd/', 'plus', 'Add User'); 
 					$this->title .= "::View Users";
 					$this->html = $this->user_view();
 					break;
@@ -112,13 +112,14 @@ class tdtrac_admin {
 	 * @return array Formatted HTML
 	 */
 	public function index() {
+		GLOBAL $TDTRAC_SITE;
 		if ( !$this->user->admin ) { return array('',''); }
 		$list = new tdlist(array('id' => 'admin_index', 'inset' => true));
-		$list->setFormat("<a href='%s'><h3>%s</h3></a>");
-		$list->addRow(array('/admin/useradd/', 'Add User'));
-		$list->addRow(array('/admin/users/', 'View Users'));
-		$list->addRow(array('/admin/groups/', 'Groups Managment'));
-		$list->addRow(array('/admin/mail/', 'TDTracMail Config'));
+		$list->setFormat("<a href='{$TDTRAC_SITE}%s'><h3>%s</h3></a>");
+		$list->addRow(array('admin/useradd/', 'Add User'));
+		$list->addRow(array('admin/users/', 'View Users'));
+		$list->addRow(array('admin/groups/', 'Groups Managment'));
+		$list->addRow(array('admin/mail/', 'TDTracMail Config'));
 		return $list->output();
 	}
 

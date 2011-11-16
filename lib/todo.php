@@ -80,7 +80,7 @@ class tdtrac_todo {
 			default:
 				$this->title .= "::View";
 				if ( $this->user->can('addtodo') ) {
-					$HEAD_LINK = array('/todo/add/', 'plus', 'Add Item'); 
+					$HEAD_LINK = array('todo/add/', 'plus', 'Add Item'); 
 				}
 				if ( !$this->user->can("viewtodo") ) {
 					$this->html = $this->view($this->user->id, 'user');
@@ -189,7 +189,7 @@ class tdtrac_todo {
 		if ( is_null($condition) ) {
 		
 			$list = new tdlist(array('id' => 'todo_view_pick', 'inset' => true));
-			$list->setFormat("<a href='%s'><h3>%s</h3><span class='ui-li-count'>%d</span></a>");
+			$list->setFormat("<a href='{$TDTRAC_SITE}%s'><h3>%s</h3><span class='ui-li-count'>%d</span></a>");
 			
 			$sql = "SELECT u.userid, CONCAT(first, ' ', last) as name, count(t.id) as num FROM {$MYSQL_PREFIX}users u LEFT JOIN {$MYSQL_PREFIX}todo t ON t.complete = 0 AND u.userid = t.assigned WHERE active = 1 ORDER BY last ASC";
 			$result = mysql_query($sql, $db);
@@ -197,7 +197,7 @@ class tdtrac_todo {
 			$list->addDivide("List By User",mysql_num_rows($result)." Users");
 			if ( mysql_num_rows($result) > 0 ) {
 				while ( $row = mysql_fetch_array($result) ) {
-					$list->addRow(array("/todo/view/type:user/id:{$row['userid']}/", $row['name'], $row['num']));
+					$list->addRow(array("todo/view/type:user/id:{$row['userid']}/", $row['name'], $row['num']));
 				}
 			}
 			
@@ -210,15 +210,15 @@ class tdtrac_todo {
 			if ( mysql_num_rows($result) > 0 ) {
 				while ( $row = mysql_fetch_array($result) ) {
 					$the_num = get_single("SELECT COUNT(*) as num FROM {$MYSQL_PREFIX}todo WHERE complete = 0 and showid={$row['showid']}");
-					$list->addRow(array("/todo/view/type:show/id:{$row['showid']}/", $row['showname'], $the_num));
+					$list->addRow(array("todo/view/type:show/id:{$row['showid']}/", $row['showname'], $the_num));
 				}
 			}
 			$todo_num = get_single("SELECT COUNT(*) as num FROM {$MYSQL_PREFIX}todo WHERE assigned = {$this->user->id} AND complete = 0");
 			$odue_num = get_single("SELECT COUNT(*) as num FROM {$MYSQL_PREFIX}todo WHERE complete = 0 AND due < NOW()");
 			
 			$list->addDivide("Other Options");
-			$list->addRow(array('/todo/view/id:1/type:overdue/', 'Overdue Items', $odue_num));
-			$list->addRow(array("/todo/view/id:{$this->user->id}/type:user/", 'Your Personal List', $todo_num));
+			$list->addRow(array('todo/view/id:1/type:overdue/', 'Overdue Items', $odue_num));
+			$list->addRow(array("todo/view/id:{$this->user->id}/type:user/", 'Your Personal List', $todo_num));
 			
 			return $list->output();
 		}

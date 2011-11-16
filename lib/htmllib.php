@@ -89,7 +89,7 @@ function makeHeader($title = '') {
 	if ( $CLOSE )  { $html[] = "			<a href='#' data-icon='arrow-d' data-rel='back'>Close</a>";	}
 	$html[] = "			<h1>".($TEST_MODE?"TEST_MODE":"TDTrac")."::{$title}</h1>";
 	if ( count($HEAD_LINK) == 3 || count($HEAD_LINK) == 4 ) {
-		$html[] = "			<a href=\"{$HEAD_LINK[0]}\" data-icon=\"{$HEAD_LINK[1]}\" class=\"ui-btn-right\"".((isset($HEAD_LINK[3]))?" id=\"{$HEAD_LINK[3]}\"":"").">{$HEAD_LINK[2]}</a>";
+		$html[] = "			<a href=\"{$TDTRAC_SITE}{$HEAD_LINK[0]}\" data-icon=\"{$HEAD_LINK[1]}\" class=\"ui-btn-right\"".((isset($HEAD_LINK[3]))?" id=\"{$HEAD_LINK[3]}\"":"").">{$HEAD_LINK[2]}</a>";
 	}
 	$html[] = "		</div>";
 	if ( $_SEVER['REQUEST_METHOD'] = "POST" && isset($_REQUEST['infobox']) ) {
@@ -114,17 +114,17 @@ function makeHeader($title = '') {
  * @return array Formatted HTML
  */
 function makeFooter($title = '', $loggedin) {
-	global $SITE_BLOCK, $action, $EXTRA_NAV;
+	global $SITE_BLOCK, $action, $EXTRA_NAV, $TDTRAC_SITE;
 	$html[] = "		</div>";
 	$html[] = "		<div data-role=\"footer\" data-theme=\"a\">";
 	if ( $loggedin ) {
 		$html[] = "			<div data-role=\"navbar\"><ul>";
-		$html[] = "				<li><a href=\"/\" data-direction='reverse' data-icon=\"home\">Home</a></li>";
+		$html[] = "				<li><a href=\"{$TDTRAC_SITE}\" data-direction='reverse' data-icon=\"home\">Home</a></li>";
 		if ( $EXTRA_NAV ) {
-			$html[] = "				<li><a href=\"/{$action['module']}\" data-direction='reverse' data-icon=\"home\">".ucwords($action['module'])." Home</a></li>";
+			$html[] = "				<li><a href=\"{$TDTRAC_SITE}{$action['module']}\" data-direction='reverse' data-icon=\"home\">".ucwords($action['module'])." Home</a></li>";
 		}
 		$html[] = "				<li><a class='help-link' href=\"#\" data-base=\"{$action['module']}\" data-sub=\"{$action['action']}\" data-icon=\"info\">Help</a></li>";
-		$html[] = "				<li><a href=\"/user/logout/\" rel='external' data-transition=\"slidedown\" data-icon=\"alert\">Logout</a></li>";
+		$html[] = "				<li><a href=\"{$TDTRAC_SITE}user/logout/\" rel='external' data-transition=\"slidedown\" data-icon=\"alert\">Logout</a></li>";
 		$html[] = "			</ul></div>";
 	}
 	$html[] = "			<h3>&copy; 2008-".date('Y')." J.T.Sage</h3>"; // All rights reserved. <a href=\"http://tdtrac.com/\" title=\"TDTrac Homepage\">TDTrac Homepage</a></h3>";

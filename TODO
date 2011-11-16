@@ -1,5 +1,4 @@
-Medium Sized Projects:
-	Make sure all links reference {$TDTRAC_SITE} - assumes root dir install right now
-
+Large project:
+	jquery file assumes root directory.  dunno how to fix yet.
 Small Sized Projects:
 	Change password link / form

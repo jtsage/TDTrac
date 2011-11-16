@@ -73,7 +73,7 @@ class tdtrac_shows {
 				} break;
 			default:
 				if ( $this->user->can('viewshow') ) {
-					$HEAD_LINK = array('/shows/add/', 'plus', 'Add Show'); 
+					$HEAD_LINK = array('shows/add/', 'plus', 'Add Show'); 
 					$this->title .= "::View";
 					$this->html = $this->view();
 				} else {
