@@ -133,12 +133,12 @@ class tdtrac_user {
 	public function login_form() {
 		GLOBAL $TDTRAC_SITE;
 		setcookie("loginredirect", $_REQUEST['action'], time()+600, "/");
-		$form = new tdform("{$TDTRAC_SITE}user/login/", "loginform", 1, "loginform", 'Login');
+		$form = new tdform(array('action' => "{$TDTRAC_SITE}user/login/", 'id' => "loginform"));
 	
-		$result = $form->addText('tracuser', 'User Name');
-		$result = $form->addPass('tracpass', 'Password');
+		$result = $form->addText(array('name' => 'tracuser', 'label' => 'User Name'));
+		$result = $form->addPass(array('name' => 'tracpass', 'label' => 'Password'));
 	
-		return $form->output('Login', "[-<a href=\"{$TDTRAC_SITE}user/forgot/\">Forgot Password?</a>-] ");
+		return array_merge($form->output('Login'), array("<a data-role=\"button\" data-theme=\"c\" href=\"{$TDTRAC_SITE}user/forgot/\">Forgot Password?</a>"));
 	}
 	
 	/** 
@@ -149,9 +149,9 @@ class tdtrac_user {
 	 */
 	public function password_form() {
 		GLOBAL $TDTRAC_SITE;
-		$form = new tdform("{$TDTRAC_SITE}user/forgot/", "loginform", 1, "loginform", 'Send Password Reminder');
+		$form = new tdform(array( 'action' => "{$TDTRAC_SITE}user/forgot/", 'id' => 'forgot-pass-form'));
 		
-		$result = $form->addText('tracemail', 'E-Mail Address');
+		$fesult = $form->addText(array('name' => 'tracemail', 'label' => 'E-Mail Address', 'placeholder' => 'Registered E-Mail Address'));
 		
 		return $form->output('Send Reminder');
 	}
@@ -199,17 +199,16 @@ class tdtrac_user {
 		GLOBAL $db, $MYSQL_PREFIX, $TDTRAC_SITE, $TDTRAC_DBVER;
 		$checkname = $_REQUEST['tracuser'];
 		$checkpass = $_REQUEST['tracpass'];
-	
+		
 		$sql = sprintf("SELECT userid, password, active, chpass, DATE_FORMAT(lastlogin, '%%b %%D %%h:%%i %%p') AS lastlog FROM `{$MYSQL_PREFIX}users` WHERE username = '%s' LIMIT 1",
 			mysql_real_escape_string($checkname)
 		);
 		$result = mysql_query($sql, $db);
 	
 		$row = mysql_fetch_array($result);
-		if ( $row['active'] == 0 ) { thrower("User Account is Locked!"); }
-		if ( $row['password'] == $checkpass ) { 
-			$infodata  = "Login Successful";
-			$infodata .= "<br />Last Login: {$row['lastlog']}";
+		if ( $row['password'] == $checkpass && ( $row['userid'] == 1 || $row['active'] == 1 ) ) { 
+			$json['msg'] = "Login Successful<br />Last Login: {$row['lastlog']}";
+			$json['success'] = true;
 			$_SESSION['tdtracuser'] = $checkname;
 			$_SESSION['tdtracpass'] = md5("havesomesalt".$checkpass);
 			$setlastloginsql = "UPDATE {$MYSQL_PREFIX}users SET lastlogin = CURRENT_TIMESTAMP WHERE userid = {$row['userid']}";
@@ -217,20 +216,26 @@ class tdtrac_user {
 			if ( $row['userid'] == 1 ) { //CHECK UPGRADE STATUS ON ADMIN LOGIN (USER #1)
 				$sql2 = "SELECT value FROM {$MYSQL_PREFIX}tdtrac WHERE name = 'version' AND value = '{$TDTRAC_DBVER}'";
 				$res2 = mysql_query($sql2, $db);
-				if ( mysql_num_rows($res2) < 1 ) { $infodata .= "<br><strong>WARNING:</strong> Database not up-to-date, please run upgrade"; }
+				if ( mysql_num_rows($res2) < 1 ) { $json['msg'] .= "<br><strong>WARNING:</strong> Database not up-to-date, please run upgrade"; }
 			}
 	    		if ( $row['chpass'] <> 0 ) { 
-				$infodata = "Login Successful, Please Change Your Password!"; header("Location: {$TDTRAC_SITE}user/password/"); ob_flush();
+				$json['msg'] .= "<br />Login Successful, Please Change Your Password!";
 			} 
 		}
 		else {
-			$infodata = "Login Failed!";
+			if ( $row['active'] == 0 ) {
+				$json['msg'] = "User Account is Locked!";
+			} else {
+				$json['msg'] = "Login Failed!";
+			}
+			$json['success'] = false;
 		}
 		if ( isset($_COOKIE['loginredirect']) ) {
-			thrower($infodata, $_COOKIE['loginredirect']);
+			$json['location'] = $_COOKIE['loginredirect'];
 		} else {
-			thrower($infodata);
+			$json['location'] = "/";
 		}
+		return json_encode($json);
 	}
 
 	/**
@@ -241,9 +246,9 @@ class tdtrac_user {
 	 */
 	public function changepass_form() {
 		GLOBAL $TDTRAC_SITE;
-		$form = new tdform("{$TDTRAC_SITE}user/password/", 'genform', 1, 'genform', 'Change Password');
-		$result = $form->addPass('newpass1', "New Password");
-		$result = $form->addPass('newpass2', "Verify Password");
+		$form = new tdform(array('action' => "{$TDTRAC_SITE}user/password/"));
+		$result = $form->addPass(array('name' => 'newpass1', 'label' => 'New Password', 'placeholder' => 'Enter New Password'));
+		$result = $form->addPass(array('name' => 'newpass2', 'label' => 'Verify Password', 'placeholder' => 'Verify New Password'));
 		return $form->output('Change Password');
 	}
 	
@@ -257,17 +262,21 @@ class tdtrac_user {
 	 */
 	public function changepass() {
 		GLOBAL $db, $MYSQL_PREFIX;
+		$json = array('success' => false, 'msg' => "Unknown Error");
 		if ( $_REQUEST['newpass1'] == $_REQUEST['newpass2'] ) {
-			if ( strlen($_REQUEST['newpass1']) < 4 ) { thrower("Password must be at least 5 characters"); }
-			if ( strlen($_REQUEST['newpass1']) > 15 ) { thrower("Password may not exceed 15 characters"); }
+			if ( strlen($_REQUEST['newpass1']) < 4 ) { $json = array('success' => false, 'msg' => "Password must be at least 5 characters"); }
+			if ( strlen($_REQUEST['newpass1']) > 15 ) { $json = array('success' => false, 'msg' => "Password may not exceed 15 characters"); }
 			$sql = sprintf("UPDATE `{$MYSQL_PREFIX}users` SET `chpass` = 0 , `password` = '%s' WHERE `userid` = %d LIMIT 1",
 				mysql_real_escape_string($_REQUEST['newpass1']),
 				$this->id
 			);
 			$result = mysql_query($sql, $db);
-			if ( $result ) { thrower("Password Changed - Please Re-Login"); }
-			else { thrower("Password Change Failed"); }
-		} else { thrower("Password Mismatch - Not Changed"); }
+			if ( $result ) { $json = array('success' => true, 'msg' => "Password Changed"); }
+			else { $json = array('success' => false, 'msg' => "Password Change Failed"); }
+		} else { $json = array('success' => false, 'msg' => "Password Change Mismatch"); }
+		
+		$json['location'] = '/';
+		echo json_encode($json);
 	}
 	
 	/**
@@ -315,7 +324,7 @@ class tdtrac_user {
 function email_pwsend() {
 	GLOBAL $db, $MYSQL_PREFIX;
 	if ( !($_REQUEST["tracemail"]) || $_REQUEST["tracemail"] == "" ) { 
-		thrower("E-Mail Address Invalid");
+		echo(json_encode(array('msg'=>"E-Mail Address Invalid", 'success'=>true, 'location'=>'/')));
 	} else {
 		$sql = "SELECT username, password FROM {$MYSQL_PREFIX}users WHERE email = '".mysql_real_escape_string($_REQUEST["tracemail"])."'";
 		$result = mysql_query($sql, $db);
@@ -334,6 +343,6 @@ function email_pwsend() {
 			mail($sendto, $subject, $body, $headers);
 		}
 	}
-	thrower("Password Reminder Sent!");
+	echo(json_encode(array('msg'=>"Password Reminder Sent", 'success'=>true, 'location'=>'/')));
 }
 ?>

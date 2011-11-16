@@ -1,0 +1,669 @@
+function infobox(text, head) { // CONTROL INFOBOX CONTENT
+	var first = $('.ui-page-active').children('.ui-content'),
+		header = ( typeof(head) === 'undefined' ) ? 'Information' : head;
+			
+		first.simpledialog({
+			'mode': 'blank',
+			'prompt': 'Notice',
+			'useDialogForceFalse': true,
+			'cleanOnClose': true,
+			'forceInput': false,
+			'fullHTML': 
+				'<ul data-role="listview" data-theme="c" data-dividertheme="a">'+
+					'<li data-role="list-divider">'+header+'</li>'+
+					'<li>'+text+'</li></ul>'
+		});
+		
+		setTimeout("$('.ui-page-active').children('.ui-content').data('simpledialog').close();", 3000);
+	} // END INFOBOX CONTENT
+
+jQuery.extend(jQuery.mobile.simpledialog.prototype.options, {
+		cleanOnClose: true,
+		useDialogForceFalse: true
+});
+	
+(function($) {
+	$('html').live('pageinit', function() { // BEGIN: Running in test mode?
+		testMode = ( $('[data-role=header]:first').find('h1').text().search('TEST_MODE') > -1 ) ? true : false;
+	}); // END: Check test Mode
+	
+	$('.help-link').live('click', function(e,p) { // BEGIN: Show Help Text
+		var self = $(this),
+			base = $(this).attr('data-base'),
+			subact = $(this).attr('data-sub'),
+			first = $('.ui-page-active').children('.ui-content'),
+			body = '';
+			
+		$.getJSON('/json/help/base:'+base+'/sub:'+subact+'/id:0/', function(data) {
+			self.removeClass('ui-btn-active');
+			if ( data.success === true ) {
+				for ( x=0; x<data.helpbody.length; x++ ) {
+					if ( data.helpbody[x][1] === null ) {
+						body += '<li>'+data.helpbody[x][0]+'</li>';
+					} else {
+						body +=  '<li><p><strong>'+data.helpbody[x][0]+'</strong>: '+data.helpbody[x][1]+'</p></li>';
+					} 
+				}
+				first.simpledialog({
+					'mode': 'blank',
+					'prompt': 'Notice',
+					'forceInput': false,
+					'useDialogForceFalse': true,
+					'cleanOnClose': true,
+					'width': '300px',	
+					'fullHTML': 
+						'<div style="width:370px"><ul data-split-icon="grid" data-role="listview" data-theme="c" data-dividertheme="a">'+
+							'<li data-role="list-divider">'+data.helptitle+'</li>'+
+							body+'</ul></div>'
+				});
+			} else {
+				infobox("Help failed to load");
+			}
+		});
+	}); // END: Show Help Text
+	
+	$('#hoursview').live('datebox', function(e,p) { // BEGIN: Hours calender view handler
+		if ( p.method === 'offset' && p.type === 'm' ) {
+			$.mobile.showPageLoadingMsg();
+			var xxx = window.location.pathname,
+				umonth = xxx.match(/month:(\d+)/),
+				uyear = xxx.match(/year:(\d+)/),
+				id = xxx.match(/id:(\d+)/),
+				which = xxx.match(/type:(\w+)\//),
+				newurl = '/hours/view/type:'+which[1]+'/id:'+id[1];
+			
+			month = parseInt(umonth[1], 10);
+			year = parseInt(uyear[1], 10);
+			
+			if ( p.amount < 0 ) {
+				if ( (month - 1) < 1 ) {
+					month = 12; year = year - 1;
+				} else {
+					month = month - 1;
+				}
+			} else {
+				if ( (month + 1) > 12 ) {
+					month = 1; year = year + 1;
+				} else {
+					month = month + 1;
+				}
+			}
+			
+			$.mobile.changePage(newurl+'/year:'+year+'/month:'+month+'/', { reloadPage: true, transition: 'none'});
+		} else if ( p.method === 'set' ) {
+			var info = $('.ui-page-active #hours-data').find('[data-date='+p.value+']'),
+				first = $('.ui-page-active').children('.ui-content'),
+				lines = '';
+			
+			if ( info.length > 0 ) {
+				thisDate = $(info[0]).attr('data-date');
+				thisType = $(info[0]).attr('data-type');
+				
+				for ( x=0; x<info.length; x++ ) {
+					lines = lines + '<li data-theme="' + (($(info[x]).attr('data-submitted') == 0)?'e':'c') + '">'
+							+ '<a href="#"><strong>' + $(info[x]).attr('data-show') + ':</strong> '
+							+ $(info[x]).attr('data-worked')
+							+ '<p class="ui-li-count">$' + $(info[x]).attr('data-amount') + '</p></a>'
+							+ '<a href="/hours/edit/id:' + $(info[x]).attr('data-recid') + '/">Edit</a></li>';
+				}
+				
+				first.simpledialog({
+					'mode': 'blank',
+					'prompt': 'Notice',
+					'forceInput': false,
+					'useDialogForceFalse': true,
+					'cleanOnClose': true,
+					'width': '300px',	
+					'fullHTML': 
+						'<div style="width:350px"><ul data-split-icon="grid" data-role="listview" data-theme="c" data-dividertheme="a">'+
+							'<li data-role="list-divider">'+thisType+' Worked For :: '+thisDate+'</li>'+
+							lines+'</ul></div>'
+					});
+			}
+		}
+	}); // END: Hours calender view handler
+	
+	$('html').ajaxComplete(function(e,xhr,settings) { // BEGIN: Test Mode Ajax Debug
+		/* DEBUG ALL JSON BASED AJAX */
+		if ( testMode === true && settings.url.search("json") > -1 ) {
+			console.log(xhr.responseText);
+		}
+	}); // END: Test Mode Ajax Debug
+	
+	$('form').live('submit', function(e) { // FORM HANDLEING
+		$.mobile.showPageLoadingMsg();
+		e.preventDefault();
+		
+		var formdata = $(this).serialize(),
+			formurl = $(this).attr('action'),
+			ready = false,
+			needed = [];
+		
+		$('.ui-page-active [data-require=1]').each(function () {
+			if ( $(this).val() == '' ) { 
+				needed.push( $('[for='+$(this).attr('id')+']').text() );
+			}
+		});
+		
+		if ( needed.length > 0 ) {
+			$.mobile.hidePageLoadingMsg();
+			infobox("These fields are required:<br />'"+needed.join("', '")+"'", 'Error');
+		} else {
+			ready = true;
+		}
+		
+		if ( ready ) {
+			$.ajax({
+				type: 'POST',
+				url: formurl,
+				data: formdata,
+				success: 
+					function(dta) {
+						if ( testMode === true ) { console.log(dta); }
+						if ( dta.success === true ) {
+							$.mobile.changePage(dta.location, { reloadPage: true, type: 'post', data: {'infobox': dta.msg}, transition:'slide'});
+						} else {
+							$.mobile.hidePageLoadingMsg();
+							infobox(dta.msg,'Error');
+						}
+				},
+				dataType: 'json'});
+		}
+		
+	}); // END FORM HANDLING
+	
+	$('.ajax-email').die('click');
+	$('.ajax-email').live('click', function(e) { // BEGIN: E-Mail Function
+		$.mobile.showPageLoadingMsg();
+		e.preventDefault();
+		
+		var linkurl = '',
+			o = $(this).data('email');
+
+		switch(o.action) {
+			case 'todo':
+				linkurl = "/json/email/base:todo/id:"+o.id+"/type:"+o.type+"/";
+				break;
+			case 'budget':
+				linkurl = "/json/email/base:budget/id:"+o.id+"/";
+				break;
+			case 'hours':
+				linkurl = "/json/email/base:hours/type:unpaid/id:0/";
+				break;
+		}
+		
+		if ( linkurl !== '' ) {
+			$.getJSON(linkurl, function(data) {
+				$.mobile.hidePageLoadingMsg();
+				if ( data.success === true ) {
+					infobox("E-Mail Sent ("+o.action+")");
+				} else {
+					infobox("E-Mail Send Failed!");
+				}
+			});
+		}
+	}); // END: E-Mail Function
+	
+	$('#hours-delete').live( 'vclick', function(e) {  // BEGIN: Delete Hours
+		e.preventDefault();
+		var linkie = this,
+			xxx = window.location.pathname,
+			id = xxx.match(/id:(\d+)/),
+			first = $('.ui-page-active').children('.ui-content');
+			
+		first.simpledialog({
+			'mode' : 'bool', 
+			'prompt' : 'Delete Hours Item #'+id[1]+'?',
+			'buttons' : {
+				'Yes, Delete' : function () {
+					$.getJSON("/json/delete/base:hours/id:"+id[1]+"/", function(dta) {
+						if ( dta.success === true ) {
+							$.mobile.changePage(dta.location, { reloadPage: true, type: 'post', data: {'infobox': 'Hours Item Deleted'}, transition:'slide'});
+						} else {
+							infobox("Hours Delete Failed!");
+						}
+					}); },
+				'Cancel': function () { return true; }
+			}
+		});
+	}); // END: Delete Hours
+	
+	$('.todo-done').live( 'vclick', function(e) {  // BEGIN: Mark Todo Done
+		e.preventDefault();
+		var linkie = this;
+		if ( ! $(this).data('done') ) {
+			$(this).simpledialog({
+				'mode' : 'bool', 
+				'prompt' : 'Mark Todo Item #'+$(this).data('recid')+' Done?',
+				'buttons' : {
+					'Yes, Mark Done' : function () {
+						$.getJSON("/json/mark/base:todo/json:1/id:"+$(linkie).data('recid')+"/", function(data) {
+							if ( data.success === true ) {
+								$(linkie).parent().insertAfter('#todo-list-done');
+								$(linkie).parent().find('span.ui-li-count').html('done');
+								var count = $('#todo-list-header').find('.ui-li-count');
+								count.text(count.text()-1);
+								infobox("Todo Item #"+$(linkie).data('recid')+" Marked Done");
+							} else {
+								infobox("Todo Item #"+$(linkie).data('recid')+" Mark Failed!");
+							}
+							$(linkie).data('done', 1);
+						}); },
+					'Cancel': function () { return true; }
+				}
+			});
+		}
+	}); // END: Mark Todo Done
+	
+	$('.todo-menu').live( 'vclick', function(e) {  // BEGIN: Todo Menu
+		e.preventDefault();
+		var linkie = this;
+		if ( ! $(this).data('done') ) {
+			$(this).simpledialog({
+				'mode' : 'bool',
+				'prompt' : 'Todo Item #'+$(this).data('recid'),
+				'buttons' : (($(this).data('edit'))?{
+					'Edit' : {
+						'click': function() { $.mobile.changePage("/todo/edit/id:"+$(linkie).data('recid')+"/"); },
+						'icon': 'grid'
+					},
+					'Delete' : {
+						'click': function() {
+							$.getJSON("/json/delete/base:todo/id:"+$(linkie).data('recid')+"/", function(data) {
+								if ( data.success === true ) {
+									$(linkie).parent().find('h3').html('--Removed--');
+									$(linkie).parent().find('span.ui-li-count').html('deleted');
+									if ( ! $(linkie).parent().find('.todo-done').data('done') ) {
+										var count = $('#todo-list-header').find('.ui-li-count');
+										count.text(count.text()-1);
+									}
+									$(linkie).parent().find('.todo-done').data('done', 1);
+									infobox("Todo Item #"+$(linkie).data('recid')+" Deleted");
+								} else {
+									infobox("Todo Item #"+$(linkie).data('recid')+" Delete Failed!");
+								}
+								$(linkie).data('done', 1);
+							});
+						},
+						'icon': 'delete'
+					},
+					'Cancel' : function () { return true; }
+				}:{'Cancel' : function () { return true; }})
+			}); 
+		}
+	}); // END: Todo Menu
+	
+	$('.hours-clear').live('vclick', function (e) { // BEGIN: Clear Hours
+		e.preventDefault();
+		var linkie = this;
+		if ( ! $(this).data('done') ) {
+			$(this).simpledialog({
+				'mode': 'bool',
+				'prompt': 'Clear Hours For User #'+$(linkie).data('recid')+'?',
+				'buttons': { 
+					'Yes, Clear' : function () {
+						$.getJSON("/json/clear/base:hours/id:"+$(linkie).data('recid')+"/", function(data) {
+							if ( data.success === true ) {
+								$(linkie).parent().find('p:first').html('--Submitted--');
+								$(linkie).parent().find('span.ui-li-count').html('-0-');
+								infobox("Hours Cleared");
+							} else {
+								infobox("Hours Clear Failed!");
+							}
+							$(linkie).data('done', 1);
+						}); },
+					'Cancel' : function () { return true; }
+				}
+			});
+		}
+	}); // END: Clear Hours
+	
+	$('.hours-mark').live('vclick', function (e) { // BEGIN: Mark Hours
+		e.preventDefault();
+		var linkie = this;
+		if ( ! $(this).data('done') ) {
+			$(this).simpledialog({
+				'mode': 'bool',
+				'prompt': 'Mark Hours Finished?',
+				'buttons': { 
+					'Yes, Clear' : function () {
+						$.getJSON("/json/mark/base:hours/id:"+$(linkie).data('recid')+"/", function(data) {
+							if ( data.success === true ) {
+								$(linkie).parent().find('.ui-btn-up-b').removeClass('ui-btn-up-b').addClass('ui-btn-up-c');
+								$(linkie).parent().removeClass('ui-btn-up-b').addClass('ui-btn-up-c');
+								$(linkie).parent().find('.pending').html('');
+								infobox("Hours Marked");
+							} else {
+								infobox("Hours Mark Failed!");
+							}
+							$(linkie).data('done', 1);
+						}); },
+					'Cancel' : function () { return true; }
+				}
+			});
+		}
+	}); // END: Mark Hours
+	
+	$('.msg-delete').live('vclick', function (e) { // BEGIN: Delete Message
+		e.preventDefault();
+		var linkie = this;
+		if ( ! $(this).data('done') ) {
+			$(this).simpledialog({
+				'mode': 'bool',
+				'prompt': 'Delete Message #'+$(linkie).data('recid')+'?',
+				'buttons': { 
+					'Yes, Delete' : function () {
+						$.getJSON("/json/delete/base:msg/id:"+$(linkie).data('recid')+"/", function(data) {
+							if ( data.success === true ) {
+								$(linkie).parent().find('h3').html('--Removed--');
+								infobox("Message #"+$(linkie).data('recid')+" Deleted");
+							} else {
+								infobox("Message #"+$(linkie).data('recid')+" Delete Failed!");
+							}
+							$(linkie).data('done', 1);
+						}); },
+					'Cancel' : function () { return true; }
+				}
+			});
+		}
+	}); // END: Delete Message
+	
+	$('#mailClear').die('click');
+	$('#mailClear').live('click', function(e) { // BEGIN: Message Clear
+		$.mobile.showPageLoadingMsg();
+		e.preventDefault();
+		
+		$.getJSON("/json/clear/base:msg/id:0", function(dta) {
+			if ( dta.success === true ) {
+				$.mobile.changePage(dta.location, { reloadPage: true, type: 'post', data: {'infobox': dta.msg}, transition:'slide'});
+			} else {
+				$.mobile.hidePageLoadingMsg();
+				infobox(dta.msg,'Error');
+			}
+		});
+		
+	}); // END: Message Clear
+	
+	$('.show-menu').live('vclick', function (e) { // BEGIN: Show Menu
+		e.preventDefault();
+		var linkie = this;
+		if ( ! $(this).data('done') ) {
+			$(this).simpledialog( {
+				'mode' : 'bool',
+				'prompt' : 'Show #'+$(this).data('recid'),
+				'buttons' : (($(this).data('admin'))?{
+					'Edit' : {
+						'click' : function() { $.mobile.changePage('/shows/edit/id:'+$(linkie).data('recid')+'/'); },
+						'icon' : 'grid'
+					},
+					'Delete' : {
+						'click' :function () {
+							$.getJSON("/json/delete/base:show/id:"+$(linkie).data('recid')+"/", function(data) {
+								if ( data.success === true ) {
+									$(linkie).find('h3').html('--Deleted--');
+									infobox("Show #"+$(linkie).data('recid')+" Deleted");
+								} else {
+									infobox("Show #"+$(linkie).data('recid')+" Delete Failed!");
+								}
+								$(linkie).data('done', 1);
+							});
+						},
+						'icon' : 'delete'
+					},
+					'Cancel' : function () { return true; }
+				}:{ 'Cancel' : function () { return true; } } )
+			});
+		}
+	}); // END: Show Menu
+	
+	$('.budg-menu').live('vclick', function (e) { // BEGIN: Budget Menu
+		e.preventDefault();
+		var linkie = this;
+		if ( ! $(this).data('done') ) {
+			$(this).simpledialog({
+				'mode' : 'bool',
+				'prompt' : 'Budget Item #'+$(this).data('recid'),
+				'buttons' : (($(this).data('edit'))?{
+					'View Detail' : {
+						'click': function() { $.mobile.changePage("/budget/item/id:"+$(linkie).data('recid')+"/"); },
+						'icon': 'grid'
+					},
+					'Edit' : {
+						'click': function() { $.mobile.changePage("/budget/edit/id:"+$(linkie).data('recid')+"/"); },
+						'icon': 'grid'
+					},
+					'Delete' : {
+						'click': function() {
+							$.getJSON("/json/delete/base:budget/id:"+$(linkie).data('recid')+"/", function(data) {
+								if ( data.success === true ) {
+									$(linkie).parent().find('h3').html('--Removed--');
+									$(linkie).parent().find('span.ui-li-count').html('deleted');
+									$(linkie).parent().find('.todo-done').data('done', 1);
+									infobox("Budget Item #"+$(linkie).data('recid')+" Deleted");
+								} else {
+									infobox("Budget Item #"+$(linkie).data('recid')+" Delete Failed!");
+								}
+								$(linkie).data('done', 1);
+							});
+						},
+						'icon': 'delete'
+					},
+					'Cancel' : function () { return true; }
+					
+				}:{
+					'View' : {
+						'click': function() { $.mobile.changePage("/budget/view/id:"+$(linkie).data('recid')+"/"); },
+						'icon': 'grid'
+					},
+					'Cancel' : function () { return true; }
+				})
+			}); 
+		}
+	}); // END: Budget Menu
+	
+	// BEGIN : Recpt Functions
+	$('.rcptrot').live('vclick', function (e) { 
+		var self = this;
+			date = new Date();
+		
+		$(self).removeClass('ui-btn-active');
+		infobox("Reciept Rotating...");
+		$.getJSON("/rcpt.php?imgid="+$(self).data('id')+"&rotate="+$(self).data('rot')+"&save", function(data) {
+			if ( data.success === true ) {
+				$('#rcptimg').attr('src', '/rcpt.php?imgid='+$(self).data('id')+'&rand='+parseInt(date.getTime()/1000));
+				infobox("Reciept Saved");
+			} else {
+				infobox("Reciept Save Failed :"+data.msg);
+			}
+		});
+	}); // END Rcpt Func
+	
+	$('.group-add').live( 'vclick', function(e) { // BEGIN: Group Add
+		e.preventDefault();
+		var linkie = this;
+		$(this).simpledialog({
+			'mode': 'string',
+			'prompt': 'New Group Name?',
+			'buttons': {
+				'Add' : {
+					'click' : function() {
+						if ($(linkie).data('string') !== '') {
+							$.mobile.showPageLoadingMsg();
+							$.getJSON("/json/adm/base:admin/sub:savegroup/id:0/newname:"+$(linkie).data('string')+"/", function(dta) {
+								if ( dta.success === true ) {
+									$.mobile.changePage(dta.location, { reloadPage: true, transition: 'pop', changeHash: 'false', type: 'post', data: {'infobox': dta.msg}});
+								} else {
+									$.mobile.hidePageLoadingMsg();
+									infobox("Add Failed: "+dta.msg);
+								}
+							});
+						}
+					},
+					'icon' : 'plus'
+				},
+				'Cancel' : function () { return true; }
+			}
+		});
+	}); // END : Group Add
+	
+	$('.group-menu').live( 'vclick', function(e) {  // BEGIN: Group Menu
+		e.preventDefault();
+		var linkie = this;
+		$(this).simpledialog({
+			'mode' : ($(this).data('id') > 1 ) ? 'string' : 'bool',
+			'prompt' : 'Group #'+$(this).data('id'),
+			'buttons' : ($(this).data('id') > 1 ) ? 
+				{
+					'Rename' : {
+						'click': function() {
+							if ($(linkie).data('string') !== '') {
+								$.mobile.showPageLoadingMsg();
+								$.getJSON("/json/adm/base:admin/sub:savegroup/id:"+$(linkie).data('id')+"/newname:"+$(linkie).data('string')+"/", function(dta) {
+									if ( dta.success === true ) {
+										$.mobile.changePage(dta.location, { reloadPage: true, transition: 'pop', changeHash: 'false', type: 'post', data: {'infobox': dta.msg}});
+									} else {
+										$.mobile.hidePageLoadingMsg();
+										infobox("Rename Failed: "+dta.msg);
+									}
+								});
+							}
+						},
+						'icon': 'grid'
+					},
+					'Change Perms' : {
+						'click': function() { $.mobile.changePage("/admin/permsedit/id:"+$(linkie).data('id')+"/"); },
+						'icon': 'grid'
+					},
+					'Delete' : {
+						'click': function() {
+							$.mobile.showPageLoadingMsg();
+							$.getJSON("/json/adm/base:admin/sub:deletegroup/id:"+$(linkie).data('id')+"/", function(dta) {
+								if ( dta.success === true ) {
+									$.mobile.changePage(dta.location, { reloadPage: true, transition: 'pop', changeHash: 'false', type: 'post', data: {'infobox': dta.msg}});
+								} else {
+									$.mobile.hidePageLoadingMsg();
+									infobox("Delete Failed: "+dta.msg);
+								}
+							});
+						},
+						'icon': 'delete'
+					},
+					'Cancel' : function () { return true; }
+				} : {
+					'Change Perms' : {
+						'click': function() { $.mobile.changePage("/admin/permsedit/id:"+$(linkie).data('id')+"/"); },
+						'icon': 'grid'
+					},
+					'Cancel' : function () { return true; }
+				}
+		}); 
+	}); // END: Group Menu
+	
+	$('.user-menu').live( 'vclick', function(e) {  // BEGIN: User Menu
+		e.preventDefault();
+		var linkie = this;
+		$(this).simpledialog({
+			'mode' : 'bool',
+			'prompt' : 'User #'+$(this).data('recid'),
+			'buttons' : {
+				'Edit' : {
+					'icon' : 'grid',
+					'click' : function() { $.mobile.changePage("/admin/useredit/id:"+$(linkie).data('recid')+"/"); }
+				},
+				'Toggle Active' : {
+					'icon' : 'check',
+					'click' : function() {
+						$.getJSON("/json/adm/base:admin/sub:toggle/switch:active/id:"+$(linkie).data('recid')+"/", function(dta) {
+								if ( dta.success === true ) {
+									infobox(dta.msg);
+									if ( dta.newval === 1 ) {
+										$(linkie).find('.u-act').attr('src', '/images/perm-ya.png');
+									} else {
+										$(linkie).find('.u-act').attr('src', '/images/perm-no.png');
+									}
+								} else {
+									infobox("Toggle Failed: "+dta.msg);
+								}
+							});
+					}
+				},
+				'Toggle On Payroll' : {
+					'icon' : 'check',
+					'click' : function() {
+						$.getJSON("/json/adm/base:admin/sub:toggle/switch:payroll/id:"+$(linkie).data('recid')+"/", function(dta) {
+								if ( dta.success === true ) {
+									infobox(dta.msg);
+									if ( dta.newval === 1 ) {
+										$(linkie).find('.u-pay').attr('src', '/images/perm-ya.png');
+									} else {
+										$(linkie).find('.u-pay').attr('src', '/images/perm-no.png');
+									}
+								} else {
+									infobox("Toggle Failed: "+dta.msg);
+								}
+							});
+					}
+				},
+				'Toggle Only Own Hours' : {
+					'icon' : 'check',
+					'click' : function() {
+						$.getJSON("/json/adm/base:admin/sub:toggle/switch:limithours/id:"+$(linkie).data('recid')+"/", function(dta) {
+								if ( dta.success === true ) {
+									infobox(dta.msg);
+									if ( dta.newval === 1 ) {
+										$(linkie).find('.u-own').attr('src', '/images/perm-ya.png');
+									} else {
+										$(linkie).find('.u-own').attr('src', '/images/perm-no.png');
+									}
+								} else {
+									infobox("Toggle Failed: "+dta.msg);
+								}
+							});
+					}
+				},
+				'Toggle Notify' : {
+					'icon' : 'check',
+					'click' : function() {
+						$.getJSON("/json/adm/base:admin/sub:toggle/switch:notify/id:"+$(linkie).data('recid')+"/", function(dta) {
+								if ( dta.success === true ) {
+									infobox(dta.msg);
+									if ( dta.newval === 1 ) {
+										$(linkie).find('.u-not').attr('src', '/images/perm-ya.png');
+									} else {
+										$(linkie).find('.u-not').attr('src', '/images/perm-no.png');
+									}
+								} else {
+									infobox("Toggle Failed: "+dta.msg);
+								}
+							});
+					}
+				},
+				'Cancel' : function() { return true; }
+			}
+		});
+	}); // End User Menu
+	
+	$('select').live('change', function(e) { // BEGIN : Add Dropdown Option
+		var self = this;
+
+		$(self+':selected:not([data-placeholder])').each(function(){
+			if ( $(this).attr('data-addoption') ) {
+				$(self).simpledialog({
+					'mode' : 'string',
+					'prompt' : 'Add New Option',
+					'useDialogForceFalse' : true,
+					'buttons' : {
+						'Yes, Add' : function () { 
+							thisopt = $(self).attr('data-string');
+							$('<option value="'+thisopt+'" selected="selected">'+thisopt+'</option>').appendTo($(self));
+							$(self).selectmenu('refresh', true);
+							return true; },
+						'Cancel' : function () { $(self).selectmenu('open'); }
+					}
+				});
+			}
+		});
+	}); // END : Add Dropdown Option
+	
+	
+}) ( jQuery );

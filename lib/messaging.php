@@ -5,45 +5,17 @@
  * 
  * Contains all messaging framework
  * @package tdtrac
- * @version 2.0.0
+ * @version 3.0.0
  * @author J.T.Sage <jtsage@gmail.com>
  * @since 1.0.0beta1
  */
-
-/** 
- * Check for messages
- * 
- * @global object Database Link
- * @global string MySQL Table Prefix
- * @global object User Object
- * @global string Site Address for links
- * @return string HTML Output
- */
-function mail_check() {
-	GLOBAL $db, $MYSQL_PREFIX, $user, $TDTRAC_SITE;
-	$html  = "<div class=\"infobox\"><span style=\"font-size: .7em\">";
-	$tosql = "SELECT COUNT(id) as num FROM `{$MYSQL_PREFIX}msg` WHERE toid = ".$user->id;
-	$fmsql = "SELECT COUNT(id) as num FROM `{$MYSQL_PREFIX}msg` WHERE fromid = ".$user->id;
-	$result1 = mysql_query($tosql, $db);
-	$result2 = mysql_query($fmsql, $db);
-	$row1 = mysql_fetch_array($result1);
-	$row2 = mysql_fetch_array($result2);
-	mysql_free_result($result1);
-	mysql_free_result($result2);
-	$ret = 0;
-	if ( !is_null($row1['num']) && $row1['num'] > 0 ) { $html .= "You Have <strong>{$row1['num']}</strong> Unread Messages Waiting (<a href=\"{$TDTRAC_SITE}mail/inbox/\">[-Read-]</a>)<br />"; $ret = 1; }
-	if ( !is_null($row2['num']) && $row2['num'] > 0 ) { $html .= "You Have <strong>{$row2['num']}</strong> Sent Messages Waiting (<a href=\"{$TDTRAC_SITE}mail/outbox/\">[-View-]</a>)"; $ret = 1; }
-	$html .= "</span></div>\n";
-	if ( $ret ) { return $html; } else { return ""; }
-}
-
 
 /**
  * MAIL Module
  *  Allows viewing of in-system messages.
  * 
  * @package tdtrac
- * @version 2.0.0
+ * @version 3.0.0
  * @since 2.0.0
  * @author J.T.Sage <jtsage@gmail.com>
  */
@@ -52,17 +24,11 @@ class tdtrac_mail {
 	/** @var array Parsed query string */
 	private $action = array();
 	
-	/** @var bool Output format (TURE = json, FALSE = html) */
-	private $output_json = false;
-	
 	/** @var array Formatted HTML */
 	private $html = array();
 	
 	/** @var string Page Title */
-	private $title = "Shows";
-	
-	/** @var array JSON Data */
-	private $json = array();
+	private $title = "Mail";
 	
 	/** 
 	 * Create a new instance of the TO-DO module
@@ -75,70 +41,28 @@ class tdtrac_mail {
 		$this->post = ($_SERVER['REQUEST_METHOD'] == "POST") ? true : false;
 		$this->user = $user;
 		$this->action = $action;
-		$this->output_json = $action['json'];
 	}
 	
 	/**
 	 * Output todo list operation
 	 * 
 	 * @return void
+	 * @global bool App in test mode
 	 */
 	public function output() {
-		if ( !$this->output_json ) { // HTML METHODS
-			switch ( $this->action['action'] ) {
-				case "outbox":
-					$this->title .= " :: Outbox";
-					$this->html = $this->outbox();
-					break;
-				case "inbox":
-					$this->title .= " :: Inbox";
-					$this->html = $this->inbox();
-					break;
-				case "clear":
-					$this->clear();
-					break;
-				default:
-					$this->html = $this->inbox();
-					break;
-			}
-			makePage($this->html, $this->title);
-		} else { 
-			switch($this->action['action']) {
-				case "delete":
-					if ( isset($this->action['id']) && is_numeric($this->action['id']) ) {
-						$this->delete(intval($this->action['id']));
-					} else {
-						$this->json['success'] = false;
-					} break;
-				default:
-					$this->json['success'] = false;
-					break;
-			} echo json_encode($this->json);
+		global $TEST_MODE;
+		switch ( $this->action['action'] ) {
+			case "inbox":
+				$this->title .= "::Inbox";
+				$this->html = $this->inbox();
+				break;
+			default:
+				$this->title .= "::Inbox";
+				$this->html = $this->inbox();
+				break;
 		}
+		makePage($this->html, $this->title);
 	} // END OUTPUT FUNCTION
-	
-	/** 
-	 * View outbox
-	 * 
-	 * @global object Database Link
-	 * @global string MySQL Table Prefix
-	 * @global string Site Address for links
-	 * @return array HTML Output
-	 */
-	private function outbox() {
-		GLOBAL $db, $MYSQL_PREFIX, $TDTRAC_SITE;
-		$sql = "SELECT id, toid, body, DATE_FORMAT(stamp, '%m-%d-%y %h:%i %p') as wtime FROM {$MYSQL_PREFIX}msg WHERE fromid = {$this->user->id} ORDER BY stamp DESC";
-		$result = mysql_query($sql, $db);
-		$html[]  = "<h3>Message Outbox</h3>";
-		if ( mysql_num_rows($result) < 1 ) { return array_merge($html, array("<p>Outbox is empty</p>")); }
-		$tabl = new tdtable("msgoutbox", 'datatable', $this->user->admin);
-		$tabl->addHeader(array('Date', 'Recipient', 'Message'));
-		if ( $this->user->admin ) { $tabl->addAction('mdel'); }
-		while ( $row = mysql_fetch_array($result) ) {
-			$tabl->addRow(array($row['wtime'], $this->user->get_name($row['toid']), $row['body']), $row);
-		}
-		return array_merge($html, $tabl->output(false));
-	}
 
 	/** 
 	 * View inbox
@@ -150,63 +74,24 @@ class tdtrac_mail {
 	 */
 	private function inbox() {
 		GLOBAL $db, $MYSQL_PREFIX, $TDTRAC_SITE;
-		$sql = "SELECT id, fromid, body, DATE_FORMAT(stamp, '%m-%d-%y %h:%i %p') as wtime FROM {$MYSQL_PREFIX}msg WHERE toid = {$this->user->id} ORDER BY stamp DESC";
+		$sql = "SELECT id, fromid, body, DATE_FORMAT(stamp, '%m-%d-%Y') as wtime FROM {$MYSQL_PREFIX}msg WHERE toid = {$this->user->id} ORDER BY stamp DESC";
 		$result = mysql_query($sql, $db);
-		$html[] = "<h3>Message Inbox</h3>";
-		if ( mysql_num_rows($result) < 1 ) { return array_merge($html, array("<p>Inbox is empty</p>")); }
-		$html[] = "<span class=\"upright\">[-<a href=\"{$TDTRAC_SITE}mail/clean/\">Clear Inbox</a>-]</span>";
-		$tabl = new tdtable("msginbox");
-		$tabl->addHeader(array('Date', 'Sender', 'Message'));
-		$tabl->addAction('mdel');
-		while ( $row = mysql_fetch_array($result) ) {
-			$tabl->addRow(array($row['wtime'], $this->user->get_name($row['fromid']), $row['body']), $row);
-		}
-		return array_merge($html, $tabl->output(false));
-	}
-
-	/** 
-	 * Remove a message form the datebase
-	 * 
-	 * @global object Database Link
-	 * @global string MySQL Table Prefix
-	 * @param integer Message ID to remove
-	 * @return void
-	 */
-	private function delete($msgid) {
-		GLOBAL $db, $MYSQL_PREFIX;
 		
-		$sql = "SELECT toid FROM `{$MYSQL_PREFIX}msg` WHERE id = {$msgid}";
-		$result = mysql_query($sql, $db);
-		$row = mysql_fetch_array($result);
-		if ( $row['toid'] == $this->user->id || $this->user->admin ) { 
-			$dsql = "DELETE FROM `{$MYSQL_PREFIX}msg` WHERE id = {$msgid} LIMIT 1";
-			$result = mysql_query($dsql, $db);
-			if ( $result ) {
-				$this->json['success'] = true;
-			} else {
-				$this->json['success'] = false;
-			}
-		} else {
-			$this->json['success'] = false;
+		$list = new tdlist(array('id' => "mail", 'actions' => true, 'icon' => 'delete'));
+		
+		if ( mysql_num_rows($result) < 1) { 
+			$list->setFormat("<h3>%s</h3>");
+			$list->addRow(array("Inbox is Empty"));
+			return $list->output();
 		}
-	}
-
-	/** 
-	 * Clear inbox
-	 * 
-	 * @global object Database Link
-	 * @global string MySQL Table Prefix
-	 * @return void
-	 */
-	private function clear() {
-		GLOBAL $db, $MYSQL_PREFIX;
-		$sql = "DELETE FROM {$MYSQL_PREFIX}msg WHERE toid = {$this->user->id}";
-		$result = mysql_query($sql, $db);
-		if ( $result ) {
-			thrower("Inbox Cleared");
-		} else {
-			thrower("Inbox Clear :: Operation Failed");
+		
+		$list->setFormat("<a href='#'></a><h3>%s</h3><p><strong>Sent By:</strong> %s</p><span class='ui-li-count'><strong>%s</strong></span>");
+		$list->addAction("mdel");
+		
+		while ( $row = mysql_fetch_array($result) ) {
+			$list->addRow(array($row['body'], $this->user->get_name($row['fromid']), $row['wtime']), $row);
 		}
+		return array_merge($list->output(), array("<br /><br /><a href='#' id='mailClear' data-role='button' data-theme='f'>Clear Inbox</a>"));
 	}
 	
 }

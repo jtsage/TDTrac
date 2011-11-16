@@ -86,17 +86,25 @@ if ( !$user->loggedin ) { // Not Logged In
 			
 				$sql = "UPDATE {$MYSQL_PREFIX}rcpts SET data = '" . mysql_real_escape_string($imageblob) . "' WHERE imgid = {$_REQUEST['imgid']}";
 				$result = mysql_query($sql, $db);
+				ob_clean();
+				if ( $result ) {
+					echo json_encode(array('success' => true, 'msg' => "Reciept Saved"));
+				} else {
+					echo json_encode(array('success' => false, 'msg' => "Todo Save Failed".(($TEST_MODE)?mysql_error():"")));
+				}
 			}
 			
-			ob_clean();
-			imagejpeg($image_display, null, 85);
-			$imagedatasize = ob_get_length();
-			$imagedata = ob_get_contents();
+			else {
+				ob_clean();
+				imagejpeg($image_display, null, 85);
+				$imagedatasize = ob_get_length();
+				$imagedata = ob_get_contents();
 			
-			header("Content-Type: image/jpeg");
-			header("Content-Length: {$imagedatasize}");
-			header("Content-Disposition: inline; filename=rcpt-{$_REQUEST['imgid']}.jpg");
-			echo $imagedata;
+				header("Content-Type: image/jpeg");
+				header("Content-Length: {$imagedatasize}");
+				header("Content-Disposition: inline; filename=rcpt-{$_REQUEST['imgid']}.jpg");
+				echo $imagedata;
+			}
 			
 		} else { // Bad Image, show 404
 			$quickdrop = fopen("./images/rcpt-404.jpg", 'rb');

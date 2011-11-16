@@ -5,7 +5,7 @@
  * Contains all show related functions. 
  * Data hardened
  * @package tdtrac
- * @version 2.0.0
+ * @version 3.0.0
  * @author J.T.Sage <jtsage@gmail.com>
  */
  
@@ -14,7 +14,7 @@
  *  Allows configuration of shows
  * 
  * @package tdtrac
- * @version 2.0.0
+ * @version 3.0.0
  * @since 2.0.0
  * @author J.T.Sage <jtsage@gmail.com>
  */
@@ -23,17 +23,11 @@ class tdtrac_shows {
 	/** @var array Parsed query string */
 	private $action = array();
 	
-	/** @var bool Output format (TURE = json, FALSE = html) */
-	private $output_json = false;
-	
 	/** @var array Formatted HTML */
 	private $html = array();
 	
 	/** @var string Page Title */
 	private $title = "Shows";
-	
-	/** @var array JSON Data */
-	private $json = array();
 	
 	/** 
 	 * Create a new instance of the TO-DO module
@@ -55,64 +49,38 @@ class tdtrac_shows {
 	 * @return void
 	 */
 	public function output() {
-		if ( !$this->output_json ) { // HTML METHODS
-			switch ( $this->action['action'] ) {
-				case "add":
-					$this->title .= " :: Add";
-					if ( $this->user->can("addshow") ) {
-						if ( $this->post ) {
-							thrower($this->save(false), 'shows/add/');
-						} else {
-							$this->html = $this->add_form();
-						}
+		global $TEST_MODE, $HEAD_LINK, $CANCEL;
+		switch ( $this->action['action'] ) {
+			case "add":
+				$CANCEL = true;
+				$this->title .= "::Add";
+				if ( $this->user->can("addshow") ) {
+					$this->html = $this->add_form();
+				} else {
+					$this->html = error_page('Access Denied :: You cannot add new shows');
+				} break;
+			case "edit":
+				$CANCEL = true;
+				$this->title .= "::Edit";
+				if ( $this->user->can("editshow") ) {
+					if ( isset($this->action['id']) && is_numeric($this->action['id']) ) {
+						$this->html = $this->edit_form(intval($this->action['id']));
 					} else {
-						thrower('Access Denied :: You cannot add new shows', 'shows/');
-					} break;
-				case "view":
-					if ( $this->user->can('viewshow') ) {
-						$this->title .= " :: View";
-						$this->html = $this->view();
-					} else {
-						thrower("Access Denied :: You Cannot View Shows");
-					} break;
-				case "edit":
-					$this->title .= " :: Edit";
-					if ( $this->user->can("editshow") ) {
-						if ( $this->post ) {
-							if ( isset($_REQUEST['id']) && is_numeric($_REQUEST['id']) ) {
-								thrower($this->save(true), "shows/edit/id:".intval($_REQUEST['id'])."/");
-							} else {
-								thrower('Error :: Data Mismatch Detected', 'shows/');
-							}
-						} else {
-							if ( isset($this->action['id']) && is_numeric($this->action['id']) ) {
-								$this->html = $this->edit_form(intval($this->action['id']));
-							} else {
-								thrower("Error :: Data Mismatch Detected", 'shows/');
-							}
-						}
-					} else {
-						thrower('Access Denied :: You Cannot Edit Shows', 'shows/');
-					} break;
-				default:
-					$this->html = $this->index();
-					break;
-			}
-			makePage($this->html, $this->title);
-		} else { 
-			switch($this->action['action']) {
-				case "delete":
-					if ( isset($this->action['id']) && is_numeric($this->action['id']) && $this->user->admin ) {
-						$this->delete(intval($this->action['id']));
-					} else {
-						$this->json['success'] = false;
-					} break;
-				default:
-					$this->json['success'] = false;
-					break;
-			}
-			echo json_encode($this->json);
+						$this->html = error_page("Error :: Data Mismatch Detected");
+					}
+				} else {
+					$this->html = error_page('Access Denied :: You Cannot Edit Shows');
+				} break;
+			default:
+				if ( $this->user->can('viewshow') ) {
+					$HEAD_LINK = array('shows/add/', 'plus', 'Add Show'); 
+					$this->title .= "::View";
+					$this->html = $this->view();
+				} else {
+					$this->html = error_page("Access Denied :: You Cannot View Shows");
+				} break;
 		}
+		makePage($this->html, $this->title, $this->sidebar());
 	} // END OUTPUT FUNCTION
 
 	/**
@@ -123,12 +91,12 @@ class tdtrac_shows {
 	 */
 	private function add_form() {
 		GLOBAL $TDTRAC_SITE;
-		$form = new tdform("{$TDTRAC_SITE}shows/add/", 'show-add-form', 1, 'genform', 'Add A Show');
+		$form = new tdform(array('action' => "{$TDTRAC_SITE}json/save/base:show/id:0/", 'id' => 'show-add-form'));
 		
-		$result = $form->addText('showname', 'Show Name');
-		$result = $form->addText('company', 'Show Company');
-		$result = $form->addText('venue', 'Show Venue');
-		$result = $form->addDate('dates', 'Show Opening');
+		$result = $form->addText(array('name' => 'showname', 'label' => 'Show Name', 'placeholder' => 'Title of the Show'));
+		$result = $form->addText(array('name' => 'company', 'label' => 'Show Company', 'placeholder' => 'Company or Division Producing Show'));
+		$result = $form->addText(array('name' => 'venue', 'label' => 'Show Venue', 'placeholder' => 'Location of Show'));
+		$result = $form->addDate(array('name' => 'dates', 'label' => 'Show Opening', 'options' => '{"mode":"calbox", "useModal": true}'));
 		
 		return $form->output('Add Show');
 	}
@@ -154,90 +122,17 @@ class tdtrac_shows {
 	
 		$result = mysql_query($sql, $db);
 		$row = mysql_fetch_array($result);
-		$form = new tdform("{$TDTRAC_SITE}shows/edit/id:{$id}/", "showedit", 1, 'genform', 'Edit Show');
+		$form = new tdform(array('action' => "{$TDTRAC_SITE}json/save/base:show/id:{$id}/", 'id' => "showedit"));
 		
-		$fesult = $form->addText('showname', 'Show Name', null, $row['showname']);
-		$result = $form->addText('company', 'Show Company', null, $row['company']);
-		$result = $form->addText('venue', 'Show Venue', null, $row['venue']);
-		$result = $form->addDate('dates', 'Show Dates', null, $row['dates']);
-		$openshow =  ( $row['closed'] ? 0 : 1 );
-		$result = $form->addCheck('closed', 'Show Record Open', null, $openshow);
+		$fesult = $form->addText(array('name' => 'showname', 'label' => 'Show Name', 'preset' => $row['showname']));
+		$result = $form->addText(array('name' => 'company', 'label' => 'Show Company', 'preset' => $row['company']));
+		$result = $form->addText(array('name' => 'venue', 'label' => 'Show Venue', 'preset' => $row['venue']));
+		$result = $form->addDate(array('name' => 'dates', 'label' => 'Show Dates', 'preset' => $row['dates']));
+		$result = $form->addToggle(array('name' => 'closed', 'label' => 'Show Record Open', 'preset' => $row['closed'], 'options' => array(array(1,'Closed'),array(0,'Open'))));
 		$result = $form->addHidden('id', $id);
-		
-		return $form->output('Commit');
+		return array_merge($form->output('Commit'));
 	}
-
-	/**
-	 * Logic to remove a show from the database
-	 *
-	 * @global object Database Link
-	 * @global string MySQL Table Prefix
-	 * @param integer ShowID to nuke
-	 * @return void
-	 */
-	private function delete($id) {
-		GLOBAL $db, $MYSQL_PREFIX;
-		if ( !$this->user->admin || !is_numeric($id) || $id < 1 ) {
-			$this->json['success'] = false;
-		} else {
-			$sqla = "DELETE FROM `{$MYSQL_PREFIX}todo` WHERE showid = ".intval($id);
-			$sqlb = "DELETE FROM `{$MYSQL_PREFIX}hours` WHERE showid = ".intval($id);
-			$sqlc = "DELETE FROM `{$MYSQL_PREFIX}budget` WHERE showid = ".intval($id);
-			$sqld = "DELETE FROM `{$MYSQL_PREFIX}shows` WHERE showid = ".intval($id);
-			// GARBAGE COLLECT RECIEPTS - DELETES ALL HANDLED, UNREFERNCED RECIEPTS.
-			$rgc = "DELETE FROM `{$MYSQL_PREFIX}rcpts` WHERE imgid NOT IN (SELECT imgid FROM `{$MYSQL_PREFIX}budget`) AND handled = 1";
-			$result = mysql_query($sqla, $db);
-			$result = mysql_query($sqlb, $db);
-			$result = mysql_query($sqlc, $db);
-			$result = mysql_query($sqld, $db);
-			$result = mysql_query($rgc, $db);
-			$this->json['success'] = true;
-		}
-	}
-
-	/**
-	 * Logic to save show to database
-	 * 
-	 * @global object Database Link
-	 * @global string MySQL Table Prefix
-	 * @global bool MySQL DEBUG Status
-	 * @param bool True for new record, false for overwrite
-	 * @return void
-	 */
-	private function save($exists = false) {
-		GLOBAL $db, $MYSQL_PREFIX, $MYSQL_DEBUG;
-		if ( !$exists ) {
-			$sqlstring  = "INSERT INTO `{$MYSQL_PREFIX}shows` ( showname, company, venue, dates )";
-			$sqlstring .= " VALUES ( '%s', '%s', '%s', '%s' )";
-			
-			$sql = sprintf($sqlstring,
-				mysql_real_escape_string($_REQUEST['showname']),
-				mysql_real_escape_string($_REQUEST['company']),
-				mysql_real_escape_string($_REQUEST['venue']),
-				mysql_real_escape_string($_REQUEST['dates'])
-			);
-		} else {
-			$sqlstring  = "UPDATE `{$MYSQL_PREFIX}shows` SET showname='%s', company='%s', venue='%s', dates='%s',";
-		    $sqlstring .= " closed=%d WHERE showid = %d";
-		
-			$sql = sprintf($sqlstring,
-				mysql_real_escape_string($_REQUEST['showname']),
-				mysql_real_escape_string($_REQUEST['company']),
-				mysql_real_escape_string($_REQUEST['venue']),
-				mysql_real_escape_string($_REQUEST['dates']),
-				(($_REQUEST['closed'] == 'y') ? 0 : 1),
-				intval($_REQUEST['id'])
-			);
-		}
 	
-		$result = mysql_query($sql, $db);
-		if ( $result ) {
-			return "Show {$_REQUEST['showname']} Saved";
-		} else {
-			return "Show Save :: Operation Failed". (($MYSQL_DEBUG) ? " (".mysql_error().")" : "");
-		}
-	}
-
 	/**
 	 * View all shows in database
 	 * 
@@ -249,54 +144,47 @@ class tdtrac_shows {
 	 */
 	private function view() {
 		GLOBAL $db, $MYSQL_PREFIX, $TDTRAC_SITE, $SITE_SCRIPT;
-		$sql = "SELECT * FROM `{$MYSQL_PREFIX}shows` ORDER BY `created` DESC";
+		$sql = "SELECT * FROM `{$MYSQL_PREFIX}shows` ORDER BY `closed` ASC, `created` DESC";
 		$result = mysql_query($sql, $db);
-		$html = array();
+		$list = new tdlist(array('id' => 'show_view', 'actions' => false, 'inset' => true));
+		$showsopen = true;
+		
+		$list->setFormat("<a data-recid='%d' data-admin='".(($this->user->admin)?1:0)."' class='show-menu' href='#'><h3>%s</h3><p><strong>Company:</strong> %s<br /><strong>Venue:</strong> %s<br /><strong>Dates:</strong> %s</p></a>");
+		$list->addDivide('Open Shows');
 		while ( $row = mysql_fetch_array($result) ) {
-			$html[] = "<h3>{$row['showname']}</h3>";
-			if ( $this->user->admin ) {
-				$safename = preg_replace("/ /", "", $row['showname']);
-				$temp = array();
-				$SITE_SCRIPT[] = "var showdel{$safename} = true;";
-				$SITE_SCRIPT[] = "$(function() { $('.sdel-{$safename}').click( function() {";
-				$SITE_SCRIPT[] = "	if ( showdel{$safename} && confirm('Delete Show #{$row['showid']}?')) {";
-				$SITE_SCRIPT[] = "		$.getJSON(\"{$TDTRAC_SITE}shows/delete/json:1/id:{$row['showid']}/\", function(data) {";
-				$SITE_SCRIPT[] = "			if ( data.success === true ) { ";
-				$SITE_SCRIPT[] = "				$('#popper').html(\"Show #{$row['showid']} Deleted\");";
-				$SITE_SCRIPT[] = "			} else { $('#popper').html(\"Show #{$row['showid']} Delete :: Failed\"); }";
-				$SITE_SCRIPT[] = "			showdel{$safename} = false;";
-				$SITE_SCRIPT[] = "			$('#popperdiv').show('blind');";			
-				$SITE_SCRIPT[] = "	});} return false;";
-				$SITE_SCRIPT[] = "});});";
-				$temp[] = "<span class=\"overright\">[<a href=\"{$TDTRAC_SITE}shows/edit/id:{$row['showid']}/\">Edit</a>]";
-				$temp[] = " [<a href=\"#\" class=\"sdel-{$safename}\" />Delete</a>]";
-				$temp[] = "</span>";
-				$html[] = join($temp);
+			if ( $showsopen && $row['closed'] == 1 ) {
+				$list->addDivide('Closed Shows');
+				$showsopen = false;
 			}
-			$html[] = "  <ul class=\"datalist\">";
-			$html[] = "    <li><strong>Company</strong>: {$row['company']}</li>";
-			$html[] = "    <li><strong>Venue</strong>: {$row['venue']}</li>";
-			$html[] = "    <li><strong>Dates</strong>: {$row['dates']}</li>";
-			$html[] = "    <li><strong>Show Record Open</strong>: " . (( $row['closed'] == 1 ) ? "NO" : "YES") . "</li>";
-			$html[] = "</ul>";
+			$list->addRow(array($row['showid'], $row['showname'], $row['company'], $row['venue'], $row['dates']), $row);
 		}
-		return $html;
+		return $list->output();
 	}
 	
-	/** 
-	 * Show available Show Functions
+	/**
+	 * View sidebar of shows
 	 * 
-	 * @global string TDTrac Root Link HREF
-	 * @return array Formatted HTML
+	 * @global string MySQL Table Prefix
+	 * @return array HTML Output
 	 */
-	public function index() {
-		global $TDTRAC_SITE;
-		$html[] = "<div class=\"tasks\"><ul class=\"linklist\"><li><h3>Show Information</h3><ul class=\"linklist\">";
-		$html[] = "  <li>Manage shows tracked by TDTrac</li>";
-		$html[] = ( $this->user->can('addshow') ) ? "  <li><a href=\"{$TDTRAC_SITE}shows/add/\">Add Show</a></li>" : "";
-		$html[] = ( $this->user->can('viewshow') ) ? "  <li><a href=\"{$TDTRAC_SITE}shows/view/\">View Shows</a></li>" : "";
-		$html[] = "</ul></li></ul></div>";
-		return $html;
+	private function sidebar() {
+		GLOBAL $MYSQL_PREFIX, $TDTRAC_SITE;
+		
+		$shows_open = get_single("SELECT COUNT(showid) as num FROM `{$MYSQL_PREFIX}shows` WHERE closed = 0");
+		$shows_clsd = get_single("SELECT COUNT(showid) as num FROM `{$MYSQL_PREFIX}shows` WHERE closed = 1");
+		
+		$list = new tdlist(array('id' => 'show_sidebar', 'actions' => false, 'inset' => true));
+		$showsopen = true;
+		
+		$html = array('<h4 class="intro">Manage Shows and Jobs</h4>');
+		
+		$list->setFormat("%s");
+		$list->addRow("<h3>Open Shows</h3><p>Shows available for new items</p><p class='ui-li-count'>{$shows_open}</p></h3>");
+		$list->addRow("<h3>Closed Shows</h3><p>Shows from the past</p><p class='ui-li-count'>{$shows_clsd}</p></h3>");
+		$list->addRaw("<li data-icon='plus'><a href='{$TDTRAC_SITE}shows/add/'><h3>Add Show</h3></a></li>");
+		
+		
+		return array_merge($html,$list->output());
 	}
 }
 

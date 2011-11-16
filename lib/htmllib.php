@@ -8,8 +8,6 @@
  * @since 1.4.0
  * @author J.T.Sage <jtsage@gmail.com>
  */
-/** Library: Help Text */
-require_once("helpnodes.php");
 
 /**
  * Master makePage Function
@@ -18,34 +16,31 @@ require_once("helpnodes.php");
  * @param string Page Title
  * @return void
  */
-function makePage($body = '', $title = '') {
-	if (!is_array($body) ) {
-		$body = preg_split("/\n/", $body);
-	}
-	$html = array_merge(makeHeader($title), makeNotice());
-	foreach( $body as $fixme ) {
-		$html[] = "\t\t\t\t{$fixme}";
-	}
-	$html = array_merge($html, makeFooter());
-	ob_clean(); //Hackish method to clear any extra lines / echos before html starts
-	foreach ($html as $line) {
-		echo $line . "\n";
-	}
-}
-
-/**
- * Make infonotice box
- * 
- * @return array Formatted HTML
- */
-function makeNotice() {
-	if ( isset($_SESSION['infodata']) ) { 
-		$html[] = "\t\t\t\t<div id=\"popperdiv\" class=\"infobox\"><span id=\"popper\" style=\"font-size: .7em\">{$_SESSION['infodata']}</span></div>";
-		unset($_SESSION['infodata']);
-		return $html;
-	} else {
-		return array("\t\t\t\t<div id=\"popperdiv\" style=\"display: none\" class=\"infobox\"><span id=\"popper\" style=\"font-size: .7em\"></span></div>");
-	}
+function makePage($body = '', $title = '', $sidebar = '') {
+    GLOBAL $user;
+    if (!is_array($body) ) {
+        $body = preg_split("/\n/", $body);
+    }
+    $html = makeHeader($title);
+    if ( !empty($sidebar) ) {
+        $html[] = "\t\t    <div class='content-secondary'>\n";
+        $html[] = "\t\t\t<div class='tdtractitle'>TD<span class='red'>Trac</span></div>\n";
+        foreach ( $sidebar as $fixme ) {
+            $html[] = "\t\t\t{$fixme}";
+        }
+        $html[] = "\t\t    </div><div class='content-primary'>\n";
+    }
+    foreach( $body as $fixme ) {
+        $html[] = "\t\t\t{$fixme}";
+    }
+    if ( !empty($sidebar) ) {
+        $html[] = "\t\t    </div>\n";
+    }
+    $html = array_merge($html, makeFooter($title, $user->loggedin));
+    //ob_clean(); //Hackish method to clear any extra lines / echos before html starts
+    foreach ($html as $line) {
+        echo $line . "\n";
+    }
 }
 
 /** 
@@ -56,186 +51,87 @@ function makeNotice() {
  * @global string Company Name
  * @global string Base HREF
  * @global object User object
- * @global array JavaScript
- * @global array Parsed Query String
- * @global array Help Node Text
+ * @global array Link for Right Side of Header
+ * @global bool Make back link say CANCEL
+ * @global bool Make back link say CLOSE
  * @return array Formatted HTML
  */
 function makeHeader($title = '') {
-	GLOBAL $TDTRAC_VERSION, $TDTRAC_CPNY, $TDTRAC_SITE, $user, $SITE_SCRIPT, $action, $helpnode;
+    GLOBAL $TDTRAC_VERSION, $TDTRAC_CPNY, $TDTRAC_SITE, $HEAD_LINK, $CANCEL, $CLOSE, $TEST_MODE, $action;
 
-	$SITE_SCRIPT[] = "$(function() {";
-	$SITE_SCRIPT[] = "	var hWide = 500;";
-	$SITE_SCRIPT[] = "	if ( $(document).width() < 768 ) { hWide = 390; }";
-	$SITE_SCRIPT[] = "	if ( $(document).width() < 480 ) { hWide = 220; }";
-	$SITE_SCRIPT[] = "	$( \"#help\" ).dialog({ autoOpen: false, width: hWide, modal: true });";
-	$SITE_SCRIPT[] = "});";
-	$SITE_SCRIPT[] = "$(function() {";
-	$SITE_SCRIPT[] = "	$( \"#helplink\" ).click(function() {";
-	$SITE_SCRIPT[] = "		$( \"#help\" ).dialog('open'); return false;";
-	$SITE_SCRIPT[] = "	});";
-	$SITE_SCRIPT[] = "});";
-	$SITE_SCRIPT[] = "$(document).ready(function(){";
-	$SITE_SCRIPT[] = "	$('ul.subnav').parent().find('div.menubut').append('<span></span>');";
-	$SITE_SCRIPT[] = "	$('ul.topnav li span').click(function() { ";
-	$SITE_SCRIPT[] = "		$(this).parent().parent().find('ul.subnav').slideDown('fast').show();";
-	$SITE_SCRIPT[] = "		$(this).parent().parent().hover(function() {";
-	$SITE_SCRIPT[] = "		}, function(){";
-	$SITE_SCRIPT[] = "			$(this).parent().parent().find('ul.subnav').slideUp('slow'); ";
-	$SITE_SCRIPT[] = "		});";
-	$SITE_SCRIPT[] = "		}).hover(function() {";
-	$SITE_SCRIPT[] = "			$(this).addClass('subhover'); ";
-	$SITE_SCRIPT[] = "		}, function(){	";
-	$SITE_SCRIPT[] = "			$(this).removeClass('subhover');";
-	$SITE_SCRIPT[] = "	});";
-	$SITE_SCRIPT[] = "});";
-
-	$html = array();
-	$html[] = '<!DOCTYPE html>';
-	$html[] = '<html lang="en">';
-	$html[] = "<head>\n\t<meta http-equiv=\"Content-Type\" content=\"text/html; charset=iso-8859-1\" />";
-	$html[] = "\t<title>TDTrac{$TDTRAC_CPNY}:v{$TDTRAC_VERSION} - {$title}</title>";
-	$html[] = "\t<!--[if lt IE 9]>";
-	$html[] = "\t\t<script src=\"http://html5shim.googlecode.com/svn/trunk/html5.js\"></script>";
-	$html[] = "\t<![endif]-->";
-	$html[] = "\t<meta name=\"viewport\" content=\"width=device-width; initial-scale=1\"/>";
-	$html[] = "\t<link href=\"/css/tdtrac.css\" rel=\"stylesheet\" type=\"text/css\" />";
-	$html[] = "\t<link type=\"text/css\" href=\"/css/custom-theme/jquery-ui-1.8.9.custom.css\" rel=\"stylesheet\" />";
-	$html[] = "\t<link type=\"text/css\" href=\"/css/jquery.ui.selectmenu.css\" rel=\"stylesheet\" />";
-	$html[] = "\t<script type=\"text/javascript\" src=\"/js/jquery-1.4.4.min.js\"></script>";
-	$html[] = "\t<script type=\"text/javascript\" src=\"/js/jquery-ui-1.8.9.custom.min.js\"></script>";
-	$html[] = "\t<script type=\"text/javascript\" src=\"/js/jquery.ui.selectmenu.js\"></script>";
-	$html[] = "\t<script type=\"text/javascript\" src=\"/js/jquery.masonry.min.js\"></script>";
-	$html[] = "\t<script type=\"text/javascript\">";
-	foreach ( $SITE_SCRIPT as $line ) {
-		$html[] = "\t\t{$line}";
-	}
-	$html[] = "\n\t</script>\n</head>\n\n<body>";
-	if ( $action['module'] == 'index' ) {
-		$hdivTitle = $helpnode['index']['title'];
-		$hdivData = $helpnode['index']['data'];
-	} else {
-		if ( !isset($helpnode[$action['module']][$action['action']])) {
-			$hdivTitle = $helpnode['error']['title'];
-			$hdivData = $helpnode['error']['data'];
-		} else {
-			$hdivTitle = $helpnode[$action['module']][$action['action']]['title'];
-			$hdivData = $helpnode[$action['module']][$action['action']]['data'];
-		}
-	}
-	$html[] = "\t<div id=\"help\" title=\"{$hdivTitle}\">";
-	foreach ( $hdivData as $line ) {
-		$html[] = "\t\t<p>{$line}</p>";
-	}
-	$html[] = "\t</div>";
-	
-	$html[] = "\t<div id=\"outer\">";
-	$html[] = "\t\t<div id=\"header\">";
-	$html[] = "\t\t\t<div id=\"headercontent\">";
-	$html[] = "\t\t\t\t<h1><span class=\"logoclose\">TD<span class=\"red\">T</span></span><span class=\"red\">rac</span><span class=\"logoclose\">{$TDTRAC_CPNY}</span><sup>{$TDTRAC_VERSION}</sup></h1>";
-	if ( $user->loggedin ) { 
-		$temp = "\t\t\t\t<h3><strong>Logged In User:</strong> {$user->name} (ID::{$user->id}/Group::{$user->group})</h3>"; 
-	} else {
-		$temp = "\t\t\t\t<h3>Budget and Payroll Tracking</h3>";
-	}
-	$html[] = "{$temp}\n\t\t\t</div>";
-	
-
-	if ( $user->loggedin ) {
-		if ( $user->can('viewbudget') ) {
-			$html[] = "\t\t\t<form method=\"post\" action=\"{$TDTRAC_SITE}budget/search/\">\n\t\t\t<div id=\"search\">";
-			$html[] = "\t\t\t\t<input tabindex=\"81\" type=\"text\" class=\"text\" maxlength=\"64\" name=\"keywords\" />";
-			$html[] = "\t\t\t\t<input tabindex=\"82\" type=\"submit\" class=\"submit\" value=\"Search\" />\n\t\t\t</div>\t\t\t</form>";
-		}
-		
-	}
-	$html[] = "\n\t\t</div>";
-	$menu[] = array(true, 'Dashboard', '', 'Main Dashboard');
-	$menu[] = array($user->loggedin, 'Password', 'user/password/', 'Change Your Password');
-	$menu[] = array(true, 'Budget', 'budget/', 'Manage Show Budgets', array(
-		array(($user->loggedin && $user->can('addbudget')), 'Add Expense', 'budget/add/', 'Add An Expense'),
-		array(($user->loggedin && $user->can('viewbudget')), 'View Expenses', 'budget/view/', 'View Show Budgets'),
-		array(($user->loggedin), 'Your Reimbursments', "budget/view/id:0/type:unpaid/user:{$user->id}/", 'View Your Owed Reimbursments'),
-		array(($user->loggedin && $user->admin), 'Owed Reimbursments', 'budget/reimb/', 'View Owed Reimbursments')
-	));
-	$menu[] = array(true, 'Payroll', 'hours/', 'Manage Payroll', array(
-		array(($user->loggedin && $user->onpayroll && $user->can('addhours')), 'Add Own Hours', 'hours/add/own:1/', 'Add Hours to Yourself'),
-		array(($user->loggedin && !$user->isemp && $user->can('addhours')), 'Add Hours', 'hours/add/', 'Add Payroll Hours'),
-		array(($user->loggedin && $user->can('viewhours')), 'View Hours', 'hours/view/', 'View Payroll History'),
-		array(($user->loggedin && $user->admin), 'View Unpaid Hours', 'hours/view/type:unpaid/', 'View Pending Payroll')
-	));
-	$menu[] = array(true, 'Shows', 'shows/', 'Manage Shows', array(
-		array(($user->loggedin && $user->can('addshow')), 'Add Show', 'shows/add/', 'Add a Show'),
-		array(($user->loggedin && $user->can('viewshow')), 'View Shows', 'shows/view/', 'View tracked Shows')
-	));
-	$menu[] = array(true, 'To-Do', 'todo/', 'Manage Todo Lists', array(
-		array(($user->loggedin), 'View Your List', "todo/view/id:{$user->id}/type:user/", 'View Your Todo List'),
-		array(($user->loggedin && $user->can('viewtodo')), 'View Overdue', 'todo/view/id:1/type:overdue', 'View Overdue Todo Items'),
-		array(($user->loggedin && $user->can('viewtodo')), 'View Todo Items', 'todo/view/', 'View Todo Lists'),
-		array(($user->loggedin && $user->can('addtodo')), 'Add Todo Item', 'todo/add', 'Add Todo List Item')
-	));
-	$menu[] = array($user->admin, 'Admin', 'admin/', 'Administration', array(
-		array(true, 'Add User', 'admin/useradd/', 'Add A User'),
-		array(true, 'View Users', 'admin/users/', 'View All Users'),
-		array(true, 'View Permissions', 'admin/perms/', 'Manage Permissions')
-	));
-	$menu[] = array($user->loggedin, 'Logout', 'user/logout/', 'Log out of system');
-
-	$html[] = "\t\t<div id=\"headerpic\"></div>\n\t\t<div id=\"menu\">\n\t\t\t<ul class=\"topnav\">";
-	foreach ( $menu as $key => $item ) {
-		if ( $item[0] ) {
-			$mitem = array();
-			$mitem[] = "<li><div class=\"menubut";
-			if ( preg_match("/\//", $item[2]) ) {
-				$tester = preg_split("/\//", $item[2]);
-				if ( ( $action['action'] == $tester[1] || $action['module'] == $tester[0] ) && $key <> 7 ) {
-					$mitem[] = " active";
-				} 
-			} else { 
-				if ( $key == 0 && $action['module'] == 'index' ) {
-					$mitem[] = " active";
-				}
-			}
-					
-			$mitem[] = "\"><a tabindex=\"".($key+90)."\" href=\"{$TDTRAC_SITE}{$item[2]}\" title=\"{$item[3]}\">{$item[1]}</a></div>";
-			$subs = "";
-			if ( count($item) > 4 ) {
-				foreach( $item[4] as $subitem ) {
-					if ( $subitem[0] ) {
-						$subs .= "<li><a href=\"{$TDTRAC_SITE}{$subitem[2]}\" title=\"{$subitem[3]}\">{$subitem[1]}</a></li>";
-					}
-				}
-				if ( !empty($subs) ) {
-					$mitem[] = "<ul class=\"subnav\">{$subs}</ul>";
-				}
-			}
-			$html[] = "\t\t\t\t".join($mitem)."</li>";
-		}
-	}
-	
-	$html[] = "\t\t\t\t<li><div class=\"menubut\"><a tabindex=\"100\" href=\"\" id=\"helplink\" title=\"Help Popup\" >?</a></div></li>";
-	$html[] = "\t\t\t</ul>\n\t\t</div>\n\t\t<div id=\"menubottom\"></div>\n\n\t\t<div id=\"content\">\n\t\t\t<div id=\"normalcontent\">";
-
-	return $html;
+    $html = array();
+    $html[] = '<!DOCTYPE html>';
+    $html[] = '<html lang="en">';
+    $html[] = '<head>';
+    $html[] = '	<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />';
+    $html[] = ' <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">';
+    $html[] = ' <meta name="apple-mobile-web-app-capable" content="yes">';
+    $html[] = "	<title>TDTrac{$TDTRAC_CPNY}:{$TDTRAC_VERSION} - {$title}</title>";
+    $html[] = '	<!--[if lt IE 9]>';
+    $html[] = '		<script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>';
+    $html[] = '	<![endif]-->';
+    $html[] = '	<link type="text/css" href="http://code.jquery.com/mobile/1.0rc3/jquery.mobile.structure-1.0rc3.min.css" rel="stylesheet" />';
+    $html[] = '	<link type="text/css" href="http://dev.jtsage.com/cdn/datebox/latest/jquery.mobile.datebox.min.css" rel="stylesheet" /> ';
+    $html[] = '	<link type="text/css" href="http://dev.jtsage.com/cdn/simpledialog/latest/jquery.mobile.simpledialog.min.css" rel="stylesheet" /> ';
+    $html[] = '	<link type="text/css" href="'.$TDTRAC_SITE.'css/tdtheme.css" rel="stylesheet" /> ';
+    $html[] = '	<link type="text/css" href="'.$TDTRAC_SITE.'css/tdtheme.mobile.css" rel="stylesheet" /> ';
+    $html[] = '	<script type="text/javascript" src="http://code.jquery.com/jquery-1.7.min.js"></script>';
+    $html[] = '	<script type="text/javascript" src="http://code.jquery.com/mobile/1.0rc3/jquery.mobile-1.0rc3.js"></script>';
+    $html[] = '	<script type="text/javascript" src="http://dev.jtsage.com/cdn/datebox/latest/jquery.mobile.datebox.min.js"></script>';
+    $html[] = '	<script type="text/javascript" src="http://dev.jtsage.com/cdn/simpledialog/latest/jquery.mobile.simpledialog.min.js"></script>';
+    $html[] = '	<script type="text/javascript" src="'.$TDTRAC_SITE.'js/tdtrac.jquery.js"></script>';
+    $html[] = "</head>\n\n<body>";
+    $pageid = ( $action['module'] == 'help' ) ? "help-{$action['action']}-{$action['oper']}" : "{$action['module']}-{$action['action']}";
+    $html[] = "	<div data-role=\"page\" data-theme=\"c\" data-id=\"{$pageid}\">";
+    
+    $html[] = "		<div data-role=\"header\">";
+    if ( $CANCEL ) { $html[] = "			<a href='#' data-icon='delete' data-rel='back'>Cancel</a>";	}
+    if ( $CLOSE )  { $html[] = "			<a href='#' data-icon='arrow-d' data-rel='back'>Close</a>";	}
+    $html[] = "			<h1>".($TEST_MODE?"TEST_MODE":"TDTrac")."::{$title}</h1>";
+    if ( count($HEAD_LINK) == 3 || count($HEAD_LINK) == 4 ) {
+        $html[] = "			<a href=\"{$TDTRAC_SITE}{$HEAD_LINK[0]}\" data-icon=\"{$HEAD_LINK[1]}\" class=\"ui-btn-right\"".((isset($HEAD_LINK[3]))?" id=\"{$HEAD_LINK[3]}\"":"").">{$HEAD_LINK[2]}</a>";
+    }
+    $html[] = "		</div>";
+    if ( $_SEVER['REQUEST_METHOD'] = "POST" && isset($_REQUEST['infobox']) ) {
+        $html[] = "		<script type='text/javascript'>setTimeout(\"infobox('{$_REQUEST['infobox']}');\", 1000);</script>";
+    }
+    unset($_SESSION['infodata']);
+    
+    $html[] = "		<div data-role=\"content\">";
+    if ( $TEST_MODE ) { $html[] = ' <!-- SESSION: '.var_export($_SESSION, true).'-->'; }
+    if ( $TEST_MODE ) { $html[] = ' <!-- REQUEST: '.var_export($_REQUEST, true).'-->'; }
+    
+    return $html;
 }
 
 /**
  * Make page footer
  * 
+ * @param string Page Title
  * @global array Dashboard block as appropriate
+ * @global array Parsed Query String
+ * @global array Help Text
  * @return array Formatted HTML
  */
-function makeFooter() {
-	global $SITE_BLOCK;
-	$html[] = "\t\t\t</div>\n\t\t</div>";
-	$html[] = "\t\t<div id=\"footer\">";
-	$html[] = "\t\t\t<div class=\"left\">&copy; 2008-".date('Y')." JTSage. All rights reserved.</div>";
-	$html[] = "\t\t\t<div class=\"right\"><a href=\"http://tdtrac.com/\" title=\"TDTrac Homepage\">TDTrac Homepage</a></div>";
-	$html[] = "\t\t</div>\n\t</div>";
-	if ( count($SITE_BLOCK) > 0 ) { 
-		$html[] = "\t<div id=\"dashfloat\">". join($SITE_BLOCK) . "</div>"; 
-	}
-	$html[] = "\n</body>\n</html>";
-	return $html;
+function makeFooter($title = '', $loggedin) {
+    global $action, $EXTRA_NAV, $TDTRAC_SITE;
+    $html[] = "		</div>";
+    $html[] = "		<div data-role=\"footer\" data-theme=\"a\">";
+    if ( $loggedin ) {
+        $html[] = "			<div data-role=\"navbar\"><ul>";
+        $html[] = "				<li><a href=\"{$TDTRAC_SITE}\" data-direction='reverse' data-icon=\"home\">Home</a></li>";
+        if ( $EXTRA_NAV ) {
+            $html[] = "				<li><a href=\"{$TDTRAC_SITE}{$action['module']}\" data-direction='reverse' data-icon=\"home\">".ucwords($action['module'])." Home</a></li>";
+        } elseif ( $action['module'] == 'index' && $action['action'] == 'index' ) {
+            $html[] = "				<li><a href=\"{$TDTRAC_SITE}user/password/\" data-icon=\"grid\">Change Password</a></li>";
+        }
+        $html[] = "				<li><a class='help-link' href=\"#\" data-base=\"{$action['module']}\" data-sub=\"{$action['action']}\" data-icon=\"info\">Help</a></li>";
+        $html[] = "				<li><a href=\"{$TDTRAC_SITE}user/logout/\" rel='external' data-transition=\"slidedown\" data-icon=\"alert\">Logout</a></li>";
+        $html[] = "			</ul></div>";
+    }
+    $html[] = "			<h3>&copy; 2008-".date('Y')." J.T.Sage</h3>"; // All rights reserved. <a href=\"http://tdtrac.com/\" title=\"TDTrac Homepage\">TDTrac Homepage</a></h3>";
+    $html[] = "		</div>\n\t</div>";
+    $html[] = "\n</body>\n</html>";
+    return $html;
 }
 ?>

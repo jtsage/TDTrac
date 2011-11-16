@@ -4,15 +4,19 @@
  * 
  * Contains main program logic.
  * @package tdtrac
- * @version 2.0.0
+ * @version 3.0.0
  * @author J.T.Sage <jtsage@gmail.com>
  */
 ob_start(); session_start(); 
 
 ## PROGRAM DETAILS. DO NOT EDIT UNLESS YOU KNOW WHAT YOU ARE DOING
-$TDTRAC_VERSION = "2.0.1";
+$TDTRAC_VERSION = "3.0.a2";
 $TDTRAC_DBVER = "2.0.1";
-$SITE_SCRIPT = array('');
+$TEST_MODE = false;//true;
+$CANCEL = false;
+$CLOSE = false;
+$EXTRA_NAV = false;
+$HEAD_LINK = array('');
 
 /** Site Confiuration File */
 require_once("config.php");
@@ -41,11 +45,17 @@ foreach ( $rawaction as $maybevar ) {
 		$action[$goodvar[0]] = $goodvar[1];
 	}
 }
+if ( $action['module'] <> "json" ) {
+	$_SESSION['tdtrac']['two'] = $_SESSION['tdtrac']['one'];
+	$_SESSION['tdtrac']['one'] = $_SESSION['tdtrac']['this'];
+	$_SESSION['tdtrac']['this'] = "/{$_REQUEST['action']}";
+}
+
 
 if ( !$user->loggedin ) {
 	switch( $action['action'] ) {
 		case "login":
-			$user->login();
+			echo $user->login();
 			break;
 		case "forgot":
 			if ( $_SERVER['REQUEST_METHOD'] == "POST" ) {
@@ -54,86 +64,121 @@ if ( !$user->loggedin ) {
 				makePage($user->password_form(), 'Forgotten Password');
 			} break;
 		default:
+			if ( !isset($_SESSION['infodata']) ) { $_SESSION['infodata'] = "Please Login"; }
 			makePage($user->login_form(), 'Please Login');
 			break;
 	}
 } else {
 	switch ($action['module']) {
-		case "user":
+		case "json":
+			$json = new tdtrac_json($user, $action);
+			$json->handler();
+			break;
+		case "user":			
 			switch( $action['action'] ) {
 				case "logout":
 					$user->logout();
-					thrower("User Logged Out", '');
+					makePage(error_page('You Have Been Logged Out'), 'Logged Out');
+					break;
 				case "password":
-					if ( $user->username == "guest" ) { thrower("You Cannot Change Your Password"); }
+					if ( $user->username == "guest" ) { 
+						makePage(error_page('You Cannot Change Guest Password'), 'Error');
+					}
 					if ( $_SERVER['REQUEST_METHOD'] == "POST" ) {
 						$user->changepass();
 					} else {
 						makePage($user->changepass_form(), 'Change Password');
 					} break;
 				default:
-					thrower(false, ''); 
+					makePage(error_page('Unknown Page'), 'Unknown Page');
 			}
 			break;
 		case "todo":
+			$EXTRA_NAV = true;
 			$todo = new tdtrac_todo($user, $action);
-			$SITE_BLOCK = get_dash('todo');
 			$todo->output();
 			break;
 		case "shows":
+			$EXTRA_NAV = true;
 			$shows = new tdtrac_shows($user, $action);
 			$shows->output();
 			break;
 		case "hours":
+			$EXTRA_NAV = true;
 			$hours = new tdtrac_hours($user, $action);
-			$SITE_BLOCK = ($user->can('viewhours')) ? get_dash('payroll') : array();
 			$hours->output();
 			break;
 		case "mail":
 			$mail = new tdtrac_mail($user, $action);
-			$SITE_BLOCK = get_dash('mail');
 			$mail->output();
 			break;
 		case "admin":
+			$EXTRA_NAV = true;
 			$admin = new tdtrac_admin($user, $action);
-			$SITE_BLOCK = ($user->admin) ? get_dash('user') : array();
 			$admin->output();
 			break;
 		case "budget":
+			$EXTRA_NAV = true;
 			$budget = new tdtrac_budget($user, $action);
-			$SITE_BLOCK = ($user->can('viewbudget')) ? get_dash('budget') : array();
 			$budget->output();
 			break;
+		case "help":
+			if ( !isset($helpnode[$action['action']][$action['oper']]) ) {
+				$hdivTitle = $helpnode['error']['title'];
+				$hdivData = $helpnode['error']['data'];
+			} else {
+				$hdivTitle = $helpnode[$action['action']][$action['oper']]['title'];
+				$hdivData = $helpnode[$action['action']][$action['oper']]['data'];
+			}
+			$html[] = "<h3>{$hdivTitle}</h3>";
+			foreach ( $hdivData as $line ) {
+				$html[] = "			<p>{$line}</p>";
+			}
+			$CLOSE = true;
+			makePage($html, "Help");
+			break;
+	
 		default: 
-			$d_mail = get_dash('mail');
-			$d_budg = ($user->can('viewbudget')) ? get_dash('budget') : array();
-			$d_user = ($user->admin) ? get_dash('user') : array();
-			$d_todo = get_dash('todo');
-			$d_payr = ($user->can('viewhours')) ? get_dash('payroll') : array();
-			$d_show = ($user->can('viewshow')) ? get_dash('shows') : array();
+			$index_items = array();
+			$html = array();
 			
-			$budg = new tdtrac_budget($user, $action);
-			$hour = new tdtrac_hours($user, $action);
-			$show = new tdtrac_shows($user, $action);
-			$todo = new tdtrac_todo($user, $action);
-			$admn = new tdtrac_admin($user, $action);
-
-			$html[] = "<div id=\"dashbubbles\">";
-			$SITE_SCRIPT[] = "$(function() { $('#dashbubbles').masonry({ singleMode: true, itemSelector: '.dashboard', resizeable: false }); });";
-			$SITE_SCRIPT[] = "$(function() { $('#dashmenu').masonry({ singleMode: true, itemSelector: '.tasks', resizeable: false }); });";
-			$SITE_SCRIPT[] = "$(window).resize(function(){";
-			$SITE_SCRIPT[] = "	$('#dashbubbles').masonry({ columnWidth: $('#dashbubbles .dashboard').outerWidth(true) });";
-			$SITE_SCRIPT[] = "	$('#dashmenu').masonry({ columnWidth: $('#dashmenu .tasks').outerWidth(true) });";
-			$SITE_SCRIPT[] = "});";
-			$SITE_SCRIPT[] = "$(window).load(function(){";
-			$SITE_SCRIPT[] = "	$('#dashbubbles').masonry({ columnWidth: $('#dashbubbles .dashboard').outerWidth(true) });";
-			$SITE_SCRIPT[] = "	$('#dashmenu').masonry({ columnWidth: $('#dashmenu .tasks').outerWidth(true) });";
-			$SITE_SCRIPT[] = "});";
+			$list = new tdlist(array('id' => 'mainmenu', 'inset' => true));
+			$list->setFormat("<a href='%s'><img src='/images/main-%s.png' />%s <span class='ui-li-count'>%s</span></a>");
+		
+			$mail_num = get_single("SELECT COUNT(id) as num FROM `{$MYSQL_PREFIX}msg` WHERE toid = ".$user->id);
+			$todo_num = get_single("SELECT COUNT(*) as num FROM {$MYSQL_PREFIX}todo WHERE assigned = {$user->id} AND complete = 0");
 			
-			$html = array_merge($html, $d_mail, $d_todo, $d_budg, $d_payr, $d_user, $d_show);
-			$html[] = "</div><div id=\"dashmenu\">";
-			$html = array_merge($html, $budg->index(), $hour->index(), $show->index(), $todo->index(), $admn->index());
+			$payr_num = (!$user->isemp) ?
+				number_format(get_single("SELECT SUM(worked*payrate) AS num FROM {$MYSQL_PREFIX}hours h, {$MYSQL_PREFIX}users u WHERE h.userid = u.userid AND submitted = 0{$extrasql}"),2) :
+				number_format(get_single("SELECT SUM(worked*payrate) AS num FROM {$MYSQL_PREFIX}hours h, {$MYSQL_PREFIX}users u WHERE h.userid = u.userid AND submitted = 0 AND h.userid = {$user->id}"),2);
+			
+			$index_items[] = array('/mail/inbox/', 'msg', 'Messages', "Unread: {$mail_num}");
+			$index_items[] = array('/todo/', 'todo', 'Todo Lists', "Incomplete: {$todo_num}");
+			$index_items[] = array('/hours/', 'hours', (($user->isemp)?"Your ":"")."Payroll", "Pending: \${$payr_num}");
+			
+			if ( $user->can('viewbudget') ) {
+				$index_items[] = array('/budget/', 'budget', 'Budgets', "Pending: \$".number_format(get_single("SELECT SUM(price+tax) AS num FROM {$MYSQL_PREFIX}budget"),2));
+			}
+			if ( $user->can('editshow') ) {
+				$index_items[] = array('/shows/', 'shows', 'Shows', "Open: ".get_single("SELECT COUNT(*) AS num FROM {$MYSQL_PREFIX}shows WHERE closed = 0"));
+			}
+			if ( $user->admin ) {
+				$index_items[] = array('/admin/', 'admin', 'Administration', '&nbsp;');
+			}
+			
+			$col = 1;
+			$parts = array('', 'a','b','c');
+			$html[] = "<div data-theme='b' class='ui-grid-b tdtrac-index'>";
+			foreach ( $index_items as $item ) {
+				$html[] = "<div class='ui-block-{$parts[$col]}'><div class='main-index-img ui-bar ui-bar-c'>"
+					."<a href='{$item[0]}'><img src='/images/main-{$item[1]}.png' />"
+					."<br /><h2>{$item[2]}</h2>"
+					."<p>{$item[3]}</p>"
+					."</a></div></div>";
+				$col++; if ( $col == 4 ) { $col = 1; }
+			}
 			$html[] = "</div>";
+			
 			makePage($html, 'TD Tracking Made Easy');
 			break;
 	}
