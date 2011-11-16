@@ -386,8 +386,8 @@ class tdtrac_hours {
 		$html[] = "<input type='date' data-role='datebox' id='hoursview' name='hoursview' data-options='".json_encode($dboxopt)."' />";
 		$html[] = "</div>";
 		
-		$nextlink = ($nextdate==0)?'#':$TDTRAC_SITE . 'hours/view/type:show/id:' . $id . '/year:' . date('Y', strtotime($nextdate)) . '/month:' . date('n', strtotime($nextdate)) . '/';
-		$prevlink = ($prevdate==0)?'#':$TDTRAC_SITE . 'hours/view/type:show/id:' . $id . '/year:' . date('Y', strtotime($prevdate)) . '/month:' . date('n', strtotime($prevdate)) . '/';
+		$nextlink = ($nextdate==0)?'#':$TDTRAC_SITE . 'hours/view/type:' . $type . '/id:' . $id . '/year:' . date('Y', strtotime($nextdate)) . '/month:' . date('n', strtotime($nextdate)) . '/';
+		$prevlink = ($prevdate==0)?'#':$TDTRAC_SITE . 'hours/view/type:' . $type . '/id:' . $id . '/year:' . date('Y', strtotime($prevdate)) . '/month:' . date('n', strtotime($prevdate)) . '/';
 		
 		$html[] = '<div data-role="controlgroup" data-type="horizontal" style="text-align: center">';
 		$html[] = '	<a href="'.$prevlink.'" rel="external" data-role="button" data-theme="'.(($prevdate==0)?'f':'d').'" data-icon="arrow-l">Previous Hours</a>';
