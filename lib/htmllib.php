@@ -122,6 +122,8 @@ function makeFooter($title = '', $loggedin) {
 		$html[] = "				<li><a href=\"{$TDTRAC_SITE}\" data-direction='reverse' data-icon=\"home\">Home</a></li>";
 		if ( $EXTRA_NAV ) {
 			$html[] = "				<li><a href=\"{$TDTRAC_SITE}{$action['module']}\" data-direction='reverse' data-icon=\"home\">".ucwords($action['module'])." Home</a></li>";
+		} elseif ( $action['module'] == 'index' && $action['action'] == 'index' ) {
+			$html[] = "				<li><a href=\"{$TDTRAC_SITE}user/password/\" data-icon=\"grid\">Change Password</a></li>";
 		}
 		$html[] = "				<li><a class='help-link' href=\"#\" data-base=\"{$action['module']}\" data-sub=\"{$action['action']}\" data-icon=\"info\">Help</a></li>";
 		$html[] = "				<li><a href=\"{$TDTRAC_SITE}user/logout/\" rel='external' data-transition=\"slidedown\" data-icon=\"alert\">Logout</a></li>";

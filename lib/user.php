@@ -246,9 +246,9 @@ class tdtrac_user {
 	 */
 	public function changepass_form() {
 		GLOBAL $TDTRAC_SITE;
-		$form = new tdform("{$TDTRAC_SITE}user/password/", 'genform', 1, 'genform', 'Change Password');
-		$result = $form->addPass('newpass1', "New Password");
-		$result = $form->addPass('newpass2', "Verify Password");
+		$form = new tdform(array('action' => "{$TDTRAC_SITE}user/password/"));
+		$result = $form->addPass(array('name' => 'newpass1', 'label' => 'New Password', 'placeholder' => 'Enter New Password'));
+		$result = $form->addPass(array('name' => 'newpass2', 'label' => 'Verify Password', 'placeholder' => 'Verify New Password'));
 		return $form->output('Change Password');
 	}
 	
@@ -262,17 +262,21 @@ class tdtrac_user {
 	 */
 	public function changepass() {
 		GLOBAL $db, $MYSQL_PREFIX;
+		$json = array('success' => false, 'msg' => "Unknown Error");
 		if ( $_REQUEST['newpass1'] == $_REQUEST['newpass2'] ) {
-			if ( strlen($_REQUEST['newpass1']) < 4 ) { thrower("Password must be at least 5 characters"); }
-			if ( strlen($_REQUEST['newpass1']) > 15 ) { thrower("Password may not exceed 15 characters"); }
+			if ( strlen($_REQUEST['newpass1']) < 4 ) { $json = array('success' => false, 'msg' => "Password must be at least 5 characters"); }
+			if ( strlen($_REQUEST['newpass1']) > 15 ) { $json = array('success' => false, 'msg' => "Password may not exceed 15 characters"); }
 			$sql = sprintf("UPDATE `{$MYSQL_PREFIX}users` SET `chpass` = 0 , `password` = '%s' WHERE `userid` = %d LIMIT 1",
 				mysql_real_escape_string($_REQUEST['newpass1']),
 				$this->id
 			);
 			$result = mysql_query($sql, $db);
-			if ( $result ) { thrower("Password Changed - Please Re-Login"); }
-			else { thrower("Password Change Failed"); }
-		} else { thrower("Password Mismatch - Not Changed"); }
+			if ( $result ) { $json = array('success' => true, 'msg' => "Password Changed"); }
+			else { $json = array('success' => false, 'msg' => "Password Change Failed"); }
+		} else { $json = array('success' => false, 'msg' => "Password Change Mismatch"); }
+		
+		$json['location'] = '/';
+		echo json_encode($json);
 	}
 	
 	/**

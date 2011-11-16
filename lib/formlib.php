@@ -159,7 +159,8 @@ class tdform {
 			'enabled'	=> True,
 			'id'		=> null,
 			'type'		=> 'password',
-			'role'		=> null
+			'role'		=> null,
+			'placeholder' => ''
 			);
 		$options = merge_defaults($default, $passed);
 		return $this->addText($options);
