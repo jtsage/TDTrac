@@ -24,7 +24,8 @@ jQuery.extend(jQuery.mobile.simpledialog.prototype.options, {
 	
 (function($) {
 	$('html').live('pageinit', function() { // BEGIN: Running in test mode?
-		testMode = ( $('[data-role=header]:first').find('h1').text().search('TEST_MODE') > -1 ) ? true : false;
+		testMode = ($('#tdtracconfig').attr('data-testmode') == 1 )?true:false;
+		baseHREF = $('#tdtracconfig').attr('data-base');
 	}); // END: Check test Mode
 	
 	$('.help-link').live('click', function(e,p) { // BEGIN: Show Help Text
@@ -34,7 +35,7 @@ jQuery.extend(jQuery.mobile.simpledialog.prototype.options, {
 			first = $('.ui-page-active').children('.ui-content'),
 			body = '';
 			
-		$.getJSON('/json/help/base:'+base+'/sub:'+subact+'/id:0/', function(data) {
+		$.getJSON(baseHREF+'json/help/base:'+base+'/sub:'+subact+'/id:0/', function(data) {
 			self.removeClass('ui-btn-active');
 			if ( data.success === true ) {
 				for ( x=0; x<data.helpbody.length; x++ ) {
@@ -70,7 +71,7 @@ jQuery.extend(jQuery.mobile.simpledialog.prototype.options, {
 				uyear = xxx.match(/year:(\d+)/),
 				id = xxx.match(/id:(\d+)/),
 				which = xxx.match(/type:(\w+)\//),
-				newurl = '/hours/view/type:'+which[1]+'/id:'+id[1];
+				newurl = baseHREF+'hours/view/type:'+which[1]+'/id:'+id[1];
 			
 			month = parseInt(umonth[1], 10);
 			year = parseInt(uyear[1], 10);
@@ -104,7 +105,7 @@ jQuery.extend(jQuery.mobile.simpledialog.prototype.options, {
 							+ '<a href="#"><strong>' + $(info[x]).attr('data-show') + ':</strong> '
 							+ $(info[x]).attr('data-worked')
 							+ '<p class="ui-li-count">$' + $(info[x]).attr('data-amount') + '</p></a>'
-							+ '<a href="/hours/edit/id:' + $(info[x]).attr('data-recid') + '/">Edit</a></li>';
+							+ '<a href="'+baseHREF+'hours/edit/id:' + $(info[x]).attr('data-recid') + '/">Edit</a></li>';
 				}
 				
 				first.simpledialog({
@@ -182,13 +183,13 @@ jQuery.extend(jQuery.mobile.simpledialog.prototype.options, {
 
 		switch(o.action) {
 			case 'todo':
-				linkurl = "/json/email/base:todo/id:"+o.id+"/type:"+o.type+"/";
+				linkurl = baseHREF+"json/email/base:todo/id:"+o.id+"/type:"+o.type+"/";
 				break;
 			case 'budget':
-				linkurl = "/json/email/base:budget/id:"+o.id+"/";
+				linkurl = baseHREF+"json/email/base:budget/id:"+o.id+"/";
 				break;
 			case 'hours':
-				linkurl = "/json/email/base:hours/type:unpaid/id:0/";
+				linkurl = baseHREF+"json/email/base:hours/type:unpaid/id:0/";
 				break;
 		}
 		
@@ -216,7 +217,7 @@ jQuery.extend(jQuery.mobile.simpledialog.prototype.options, {
 			'prompt' : 'Delete Hours Item #'+id[1]+'?',
 			'buttons' : {
 				'Yes, Delete' : function () {
-					$.getJSON("/json/delete/base:hours/id:"+id[1]+"/", function(dta) {
+					$.getJSON(baseHREF+"json/delete/base:hours/id:"+id[1]+"/", function(dta) {
 						if ( dta.success === true ) {
 							$.mobile.changePage(dta.location, { reloadPage: true, type: 'post', data: {'infobox': 'Hours Item Deleted'}, transition:'slide'});
 						} else {
@@ -237,7 +238,7 @@ jQuery.extend(jQuery.mobile.simpledialog.prototype.options, {
 				'prompt' : 'Mark Todo Item #'+$(this).data('recid')+' Done?',
 				'buttons' : {
 					'Yes, Mark Done' : function () {
-						$.getJSON("/json/mark/base:todo/json:1/id:"+$(linkie).data('recid')+"/", function(data) {
+						$.getJSON(baseHREF+"json/mark/base:todo/json:1/id:"+$(linkie).data('recid')+"/", function(data) {
 							if ( data.success === true ) {
 								$(linkie).parent().insertAfter('#todo-list-done');
 								$(linkie).parent().find('span.ui-li-count').html('done');
@@ -264,12 +265,12 @@ jQuery.extend(jQuery.mobile.simpledialog.prototype.options, {
 				'prompt' : 'Todo Item #'+$(this).data('recid'),
 				'buttons' : (($(this).data('edit'))?{
 					'Edit' : {
-						'click': function() { $.mobile.changePage("/todo/edit/id:"+$(linkie).data('recid')+"/"); },
+						'click': function() { $.mobile.changePage(baseHREF+"todo/edit/id:"+$(linkie).data('recid')+"/"); },
 						'icon': 'grid'
 					},
 					'Delete' : {
 						'click': function() {
-							$.getJSON("/json/delete/base:todo/id:"+$(linkie).data('recid')+"/", function(data) {
+							$.getJSON(baseHREF+"json/delete/base:todo/id:"+$(linkie).data('recid')+"/", function(data) {
 								if ( data.success === true ) {
 									$(linkie).parent().find('h3').html('--Removed--');
 									$(linkie).parent().find('span.ui-li-count').html('deleted');
@@ -302,7 +303,7 @@ jQuery.extend(jQuery.mobile.simpledialog.prototype.options, {
 				'prompt': 'Clear Hours For User #'+$(linkie).data('recid')+'?',
 				'buttons': { 
 					'Yes, Clear' : function () {
-						$.getJSON("/json/clear/base:hours/id:"+$(linkie).data('recid')+"/", function(data) {
+						$.getJSON(baseHREF+"json/clear/base:hours/id:"+$(linkie).data('recid')+"/", function(data) {
 							if ( data.success === true ) {
 								$(linkie).parent().find('p:first').html('--Submitted--');
 								$(linkie).parent().find('span.ui-li-count').html('-0-');
@@ -327,7 +328,7 @@ jQuery.extend(jQuery.mobile.simpledialog.prototype.options, {
 				'prompt': 'Mark Hours Finished?',
 				'buttons': { 
 					'Yes, Clear' : function () {
-						$.getJSON("/json/mark/base:hours/id:"+$(linkie).data('recid')+"/", function(data) {
+						$.getJSON(baseHREF+"json/mark/base:hours/id:"+$(linkie).data('recid')+"/", function(data) {
 							if ( data.success === true ) {
 								$(linkie).parent().find('.ui-btn-up-b').removeClass('ui-btn-up-b').addClass('ui-btn-up-c');
 								$(linkie).parent().removeClass('ui-btn-up-b').addClass('ui-btn-up-c');
@@ -353,7 +354,7 @@ jQuery.extend(jQuery.mobile.simpledialog.prototype.options, {
 				'prompt': 'Delete Message #'+$(linkie).data('recid')+'?',
 				'buttons': { 
 					'Yes, Delete' : function () {
-						$.getJSON("/json/delete/base:msg/id:"+$(linkie).data('recid')+"/", function(data) {
+						$.getJSON(baseHREF+"json/delete/base:msg/id:"+$(linkie).data('recid')+"/", function(data) {
 							if ( data.success === true ) {
 								$(linkie).parent().find('h3').html('--Removed--');
 								infobox("Message #"+$(linkie).data('recid')+" Deleted");
@@ -373,7 +374,7 @@ jQuery.extend(jQuery.mobile.simpledialog.prototype.options, {
 		$.mobile.showPageLoadingMsg();
 		e.preventDefault();
 		
-		$.getJSON("/json/clear/base:msg/id:0", function(dta) {
+		$.getJSON(baseHREF+"json/clear/base:msg/id:0", function(dta) {
 			if ( dta.success === true ) {
 				$.mobile.changePage(dta.location, { reloadPage: true, type: 'post', data: {'infobox': dta.msg}, transition:'slide'});
 			} else {
@@ -393,12 +394,12 @@ jQuery.extend(jQuery.mobile.simpledialog.prototype.options, {
 				'prompt' : 'Show #'+$(this).data('recid'),
 				'buttons' : (($(this).data('admin'))?{
 					'Edit' : {
-						'click' : function() { $.mobile.changePage('/shows/edit/id:'+$(linkie).data('recid')+'/'); },
+						'click' : function() { $.mobile.changePage(baseHREF+'shows/edit/id:'+$(linkie).data('recid')+'/'); },
 						'icon' : 'grid'
 					},
 					'Delete' : {
 						'click' :function () {
-							$.getJSON("/json/delete/base:show/id:"+$(linkie).data('recid')+"/", function(data) {
+							$.getJSON(baseHREF+"json/delete/base:show/id:"+$(linkie).data('recid')+"/", function(data) {
 								if ( data.success === true ) {
 									$(linkie).find('h3').html('--Deleted--');
 									infobox("Show #"+$(linkie).data('recid')+" Deleted");
@@ -425,16 +426,16 @@ jQuery.extend(jQuery.mobile.simpledialog.prototype.options, {
 				'prompt' : 'Budget Item #'+$(this).data('recid'),
 				'buttons' : (($(this).data('edit'))?{
 					'View Detail' : {
-						'click': function() { $.mobile.changePage("/budget/item/id:"+$(linkie).data('recid')+"/"); },
+						'click': function() { $.mobile.changePage(baseHREF+"budget/item/id:"+$(linkie).data('recid')+"/"); },
 						'icon': 'grid'
 					},
 					'Edit' : {
-						'click': function() { $.mobile.changePage("/budget/edit/id:"+$(linkie).data('recid')+"/"); },
+						'click': function() { $.mobile.changePage(baseHREF+"budget/edit/id:"+$(linkie).data('recid')+"/"); },
 						'icon': 'grid'
 					},
 					'Delete' : {
 						'click': function() {
-							$.getJSON("/json/delete/base:budget/id:"+$(linkie).data('recid')+"/", function(data) {
+							$.getJSON(baseHREF+"json/delete/base:budget/id:"+$(linkie).data('recid')+"/", function(data) {
 								if ( data.success === true ) {
 									$(linkie).parent().find('h3').html('--Removed--');
 									$(linkie).parent().find('span.ui-li-count').html('deleted');
@@ -452,7 +453,7 @@ jQuery.extend(jQuery.mobile.simpledialog.prototype.options, {
 					
 				}:{
 					'View' : {
-						'click': function() { $.mobile.changePage("/budget/view/id:"+$(linkie).data('recid')+"/"); },
+						'click': function() { $.mobile.changePage(baseHREF+"budget/view/id:"+$(linkie).data('recid')+"/"); },
 						'icon': 'grid'
 					},
 					'Cancel' : function () { return true; }
@@ -468,9 +469,9 @@ jQuery.extend(jQuery.mobile.simpledialog.prototype.options, {
 		
 		$(self).removeClass('ui-btn-active');
 		infobox("Reciept Rotating...");
-		$.getJSON("/rcpt.php?imgid="+$(self).data('id')+"&rotate="+$(self).data('rot')+"&save", function(data) {
+		$.getJSON(baseHREF+"rcpt.php?imgid="+$(self).data('id')+"&rotate="+$(self).data('rot')+"&save", function(data) {
 			if ( data.success === true ) {
-				$('#rcptimg').attr('src', '/rcpt.php?imgid='+$(self).data('id')+'&rand='+parseInt(date.getTime()/1000));
+				$('#rcptimg').attr('src', baseHREF+'rcpt.php?imgid='+$(self).data('id')+'&rand='+parseInt(date.getTime()/1000));
 				infobox("Reciept Saved");
 			} else {
 				infobox("Reciept Save Failed :"+data.msg);
@@ -489,7 +490,7 @@ jQuery.extend(jQuery.mobile.simpledialog.prototype.options, {
 					'click' : function() {
 						if ($(linkie).data('string') !== '') {
 							$.mobile.showPageLoadingMsg();
-							$.getJSON("/json/adm/base:admin/sub:savegroup/id:0/newname:"+$(linkie).data('string')+"/", function(dta) {
+							$.getJSON(baseHREF+"json/adm/base:admin/sub:savegroup/id:0/newname:"+$(linkie).data('string')+"/", function(dta) {
 								if ( dta.success === true ) {
 									$.mobile.changePage(dta.location, { reloadPage: true, transition: 'pop', changeHash: 'false', type: 'post', data: {'infobox': dta.msg}});
 								} else {
@@ -518,7 +519,7 @@ jQuery.extend(jQuery.mobile.simpledialog.prototype.options, {
 						'click': function() {
 							if ($(linkie).data('string') !== '') {
 								$.mobile.showPageLoadingMsg();
-								$.getJSON("/json/adm/base:admin/sub:savegroup/id:"+$(linkie).data('id')+"/newname:"+$(linkie).data('string')+"/", function(dta) {
+								$.getJSON(baseHREF+"json/adm/base:admin/sub:savegroup/id:"+$(linkie).data('id')+"/newname:"+$(linkie).data('string')+"/", function(dta) {
 									if ( dta.success === true ) {
 										$.mobile.changePage(dta.location, { reloadPage: true, transition: 'pop', changeHash: 'false', type: 'post', data: {'infobox': dta.msg}});
 									} else {
@@ -531,13 +532,13 @@ jQuery.extend(jQuery.mobile.simpledialog.prototype.options, {
 						'icon': 'grid'
 					},
 					'Change Perms' : {
-						'click': function() { $.mobile.changePage("/admin/permsedit/id:"+$(linkie).data('id')+"/"); },
+						'click': function() { $.mobile.changePage(baseHREF+"admin/permsedit/id:"+$(linkie).data('id')+"/"); },
 						'icon': 'grid'
 					},
 					'Delete' : {
 						'click': function() {
 							$.mobile.showPageLoadingMsg();
-							$.getJSON("/json/adm/base:admin/sub:deletegroup/id:"+$(linkie).data('id')+"/", function(dta) {
+							$.getJSON(baseHREF+"json/adm/base:admin/sub:deletegroup/id:"+$(linkie).data('id')+"/", function(dta) {
 								if ( dta.success === true ) {
 									$.mobile.changePage(dta.location, { reloadPage: true, transition: 'pop', changeHash: 'false', type: 'post', data: {'infobox': dta.msg}});
 								} else {
@@ -551,7 +552,7 @@ jQuery.extend(jQuery.mobile.simpledialog.prototype.options, {
 					'Cancel' : function () { return true; }
 				} : {
 					'Change Perms' : {
-						'click': function() { $.mobile.changePage("/admin/permsedit/id:"+$(linkie).data('id')+"/"); },
+						'click': function() { $.mobile.changePage(baseHREF+"admin/permsedit/id:"+$(linkie).data('id')+"/"); },
 						'icon': 'grid'
 					},
 					'Cancel' : function () { return true; }
@@ -568,18 +569,18 @@ jQuery.extend(jQuery.mobile.simpledialog.prototype.options, {
 			'buttons' : {
 				'Edit' : {
 					'icon' : 'grid',
-					'click' : function() { $.mobile.changePage("/admin/useredit/id:"+$(linkie).data('recid')+"/"); }
+					'click' : function() { $.mobile.changePage(baseHREF+"admin/useredit/id:"+$(linkie).data('recid')+"/"); }
 				},
 				'Toggle Active' : {
 					'icon' : 'check',
 					'click' : function() {
-						$.getJSON("/json/adm/base:admin/sub:toggle/switch:active/id:"+$(linkie).data('recid')+"/", function(dta) {
+						$.getJSON(baseHREF+"json/adm/base:admin/sub:toggle/switch:active/id:"+$(linkie).data('recid')+"/", function(dta) {
 								if ( dta.success === true ) {
 									infobox(dta.msg);
 									if ( dta.newval === 1 ) {
-										$(linkie).find('.u-act').attr('src', '/images/perm-ya.png');
+										$(linkie).find('.u-act').attr('src', baseHREF+'images/perm-ya.png');
 									} else {
-										$(linkie).find('.u-act').attr('src', '/images/perm-no.png');
+										$(linkie).find('.u-act').attr('src', baseHREF+'images/perm-no.png');
 									}
 								} else {
 									infobox("Toggle Failed: "+dta.msg);
@@ -590,13 +591,13 @@ jQuery.extend(jQuery.mobile.simpledialog.prototype.options, {
 				'Toggle On Payroll' : {
 					'icon' : 'check',
 					'click' : function() {
-						$.getJSON("/json/adm/base:admin/sub:toggle/switch:payroll/id:"+$(linkie).data('recid')+"/", function(dta) {
+						$.getJSON(baseHREF+"json/adm/base:admin/sub:toggle/switch:payroll/id:"+$(linkie).data('recid')+"/", function(dta) {
 								if ( dta.success === true ) {
 									infobox(dta.msg);
 									if ( dta.newval === 1 ) {
-										$(linkie).find('.u-pay').attr('src', '/images/perm-ya.png');
+										$(linkie).find('.u-pay').attr('src', baseHREF+'images/perm-ya.png');
 									} else {
-										$(linkie).find('.u-pay').attr('src', '/images/perm-no.png');
+										$(linkie).find('.u-pay').attr('src', baseHREF+'images/perm-no.png');
 									}
 								} else {
 									infobox("Toggle Failed: "+dta.msg);
@@ -607,13 +608,13 @@ jQuery.extend(jQuery.mobile.simpledialog.prototype.options, {
 				'Toggle Only Own Hours' : {
 					'icon' : 'check',
 					'click' : function() {
-						$.getJSON("/json/adm/base:admin/sub:toggle/switch:limithours/id:"+$(linkie).data('recid')+"/", function(dta) {
+						$.getJSON(baseHREF+"json/adm/base:admin/sub:toggle/switch:limithours/id:"+$(linkie).data('recid')+"/", function(dta) {
 								if ( dta.success === true ) {
 									infobox(dta.msg);
 									if ( dta.newval === 1 ) {
-										$(linkie).find('.u-own').attr('src', '/images/perm-ya.png');
+										$(linkie).find('.u-own').attr('src', baseHREF+'images/perm-ya.png');
 									} else {
-										$(linkie).find('.u-own').attr('src', '/images/perm-no.png');
+										$(linkie).find('.u-own').attr('src', baseHREF+'images/perm-no.png');
 									}
 								} else {
 									infobox("Toggle Failed: "+dta.msg);
@@ -624,13 +625,13 @@ jQuery.extend(jQuery.mobile.simpledialog.prototype.options, {
 				'Toggle Notify' : {
 					'icon' : 'check',
 					'click' : function() {
-						$.getJSON("/json/adm/base:admin/sub:toggle/switch:notify/id:"+$(linkie).data('recid')+"/", function(dta) {
+						$.getJSON(baseHREF+"json/adm/base:admin/sub:toggle/switch:notify/id:"+$(linkie).data('recid')+"/", function(dta) {
 								if ( dta.success === true ) {
 									infobox(dta.msg);
 									if ( dta.newval === 1 ) {
-										$(linkie).find('.u-not').attr('src', '/images/perm-ya.png');
+										$(linkie).find('.u-not').attr('src', baseHREF+'images/perm-ya.png');
 									} else {
-										$(linkie).find('.u-not').attr('src', '/images/perm-no.png');
+										$(linkie).find('.u-not').attr('src', baseHREF+'images/perm-no.png');
 									}
 								} else {
 									infobox("Toggle Failed: "+dta.msg);

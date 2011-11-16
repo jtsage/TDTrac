@@ -12,7 +12,9 @@ ob_start(); session_start();
 ## PROGRAM DETAILS. DO NOT EDIT UNLESS YOU KNOW WHAT YOU ARE DOING
 $TDTRAC_VERSION = "3.0.a2";
 $TDTRAC_DBVER = "2.0.1";
-$TEST_MODE = false;//true;
+$TEST_MODE = true; // BE VERY, VERY VERBOSE
+$TEST_MODE_STOPUDSQL = false; // STOP UPDATE/DELETE SQL FROM RUNNING
+$TEST_MODE_STOPISQL = false; // STOP INSERT SQL FROM RUNNING - INPLIES STOPUDSQL
 $CANCEL = false;
 $CLOSE = false;
 $EXTRA_NAV = false;
@@ -48,7 +50,7 @@ foreach ( $rawaction as $maybevar ) {
 if ( $action['module'] <> "json" ) {
 	$_SESSION['tdtrac']['two'] = $_SESSION['tdtrac']['one'];
 	$_SESSION['tdtrac']['one'] = $_SESSION['tdtrac']['this'];
-	$_SESSION['tdtrac']['this'] = "/{$_REQUEST['action']}";
+	$_SESSION['tdtrac']['this'] = "{$TDTRAC_SITE}{$_REQUEST['action']}";
 }
 
 
@@ -141,9 +143,6 @@ if ( !$user->loggedin ) {
 		default: 
 			$index_items = array();
 			$html = array();
-			
-			$list = new tdlist(array('id' => 'mainmenu', 'inset' => true));
-			$list->setFormat("<a href='%s'><img src='/images/main-%s.png' />%s <span class='ui-li-count'>%s</span></a>");
 		
 			$mail_num = get_single("SELECT COUNT(id) as num FROM `{$MYSQL_PREFIX}msg` WHERE toid = ".$user->id);
 			$todo_num = get_single("SELECT COUNT(*) as num FROM {$MYSQL_PREFIX}todo WHERE assigned = {$user->id} AND complete = 0");
@@ -152,18 +151,18 @@ if ( !$user->loggedin ) {
 				number_format(get_single("SELECT SUM(worked*payrate) AS num FROM {$MYSQL_PREFIX}hours h, {$MYSQL_PREFIX}users u WHERE h.userid = u.userid AND submitted = 0{$extrasql}"),2) :
 				number_format(get_single("SELECT SUM(worked*payrate) AS num FROM {$MYSQL_PREFIX}hours h, {$MYSQL_PREFIX}users u WHERE h.userid = u.userid AND submitted = 0 AND h.userid = {$user->id}"),2);
 			
-			$index_items[] = array('/mail/inbox/', 'msg', 'Messages', "Unread: {$mail_num}");
-			$index_items[] = array('/todo/', 'todo', 'Todo Lists', "Incomplete: {$todo_num}");
-			$index_items[] = array('/hours/', 'hours', (($user->isemp)?"Your ":"")."Payroll", "Pending: \${$payr_num}");
+			$index_items[] = array($TDTRAC_SITE.'mail/inbox/', 'msg', 'Messages', "Unread: {$mail_num}");
+			$index_items[] = array($TDTRAC_SITE.'todo/', 'todo', 'Todo Lists', "Incomplete: {$todo_num}");
+			$index_items[] = array($TDTRAC_SITE.'hours/', 'hours', (($user->isemp)?"Your ":"")."Payroll", "Pending: \${$payr_num}");
 			
 			if ( $user->can('viewbudget') ) {
-				$index_items[] = array('/budget/', 'budget', 'Budgets', "Pending: \$".number_format(get_single("SELECT SUM(price+tax) AS num FROM {$MYSQL_PREFIX}budget"),2));
+				$index_items[] = array($TDTRAC_SITE.'budget/', 'budget', 'Budgets', "Pending: \$".number_format(get_single("SELECT SUM(price+tax) AS num FROM {$MYSQL_PREFIX}budget"),2));
 			}
 			if ( $user->can('editshow') ) {
-				$index_items[] = array('/shows/', 'shows', 'Shows', "Open: ".get_single("SELECT COUNT(*) AS num FROM {$MYSQL_PREFIX}shows WHERE closed = 0"));
+				$index_items[] = array($TDTRAC_SITE.'shows/', 'shows', 'Shows', "Open: ".get_single("SELECT COUNT(*) AS num FROM {$MYSQL_PREFIX}shows WHERE closed = 0"));
 			}
 			if ( $user->admin ) {
-				$index_items[] = array('/admin/', 'admin', 'Administration', '&nbsp;');
+				$index_items[] = array($TDTRAC_SITE.'admin/', 'admin', 'Administration', '&nbsp;');
 			}
 			
 			$col = 1;
@@ -171,7 +170,7 @@ if ( !$user->loggedin ) {
 			$html[] = "<div data-theme='b' class='ui-grid-b tdtrac-index'>";
 			foreach ( $index_items as $item ) {
 				$html[] = "<div class='ui-block-{$parts[$col]}'><div class='main-index-img ui-bar ui-bar-c'>"
-					."<a href='{$item[0]}'><img src='/images/main-{$item[1]}.png' />"
+					."<a href='{$item[0]}'><img src='{$TDTRAC_SITE}images/main-{$item[1]}.png' />"
 					."<br /><h2>{$item[2]}</h2>"
 					."<p>{$item[3]}</p>"
 					."</a></div></div>";

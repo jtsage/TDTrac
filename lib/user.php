@@ -233,7 +233,7 @@ class tdtrac_user {
 		if ( isset($_COOKIE['loginredirect']) ) {
 			$json['location'] = $_COOKIE['loginredirect'];
 		} else {
-			$json['location'] = "/";
+			$json['location'] = $TDTRAC_SITE;
 		}
 		return json_encode($json);
 	}
@@ -261,7 +261,7 @@ class tdtrac_user {
 	 * @return void
 	 */
 	public function changepass() {
-		GLOBAL $db, $MYSQL_PREFIX;
+		GLOBAL $db, $MYSQL_PREFIX, $TDTRAC_SITE;
 		$json = array('success' => false, 'msg' => "Unknown Error");
 		if ( $_REQUEST['newpass1'] == $_REQUEST['newpass2'] ) {
 			if ( strlen($_REQUEST['newpass1']) < 4 ) { $json = array('success' => false, 'msg' => "Password must be at least 5 characters"); }
@@ -275,7 +275,7 @@ class tdtrac_user {
 			else { $json = array('success' => false, 'msg' => "Password Change Failed"); }
 		} else { $json = array('success' => false, 'msg' => "Password Change Mismatch"); }
 		
-		$json['location'] = '/';
+		$json['location'] = $TDTRAC_SITE;
 		echo json_encode($json);
 	}
 	
@@ -322,9 +322,9 @@ class tdtrac_user {
  * @return void
  */
 function email_pwsend() {
-	GLOBAL $db, $MYSQL_PREFIX;
+	GLOBAL $db, $MYSQL_PREFIX, $TDTRAC_SITE;
 	if ( !($_REQUEST["tracemail"]) || $_REQUEST["tracemail"] == "" ) { 
-		echo(json_encode(array('msg'=>"E-Mail Address Invalid", 'success'=>true, 'location'=>'/')));
+		echo(json_encode(array('msg'=>"E-Mail Address Invalid", 'success'=>true, 'location'=>$TDTRAC_SITE)));
 	} else {
 		$sql = "SELECT username, password FROM {$MYSQL_PREFIX}users WHERE email = '".mysql_real_escape_string($_REQUEST["tracemail"])."'";
 		$result = mysql_query($sql, $db);
@@ -343,6 +343,6 @@ function email_pwsend() {
 			mail($sendto, $subject, $body, $headers);
 		}
 	}
-	echo(json_encode(array('msg'=>"Password Reminder Sent", 'success'=>true, 'location'=>'/')));
+	echo(json_encode(array('msg'=>"Password Reminder Sent", 'success'=>true, 'location'=>$TDTRAC_SITE)));
 }
 ?>

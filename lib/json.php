@@ -48,7 +48,7 @@ class tdtrac_json {
 	 * @return void
 	 */
 	public function handler() {
-		global $HEAD_LINK, $CANCEL, $TEST_MODE, $MYSQL_PREFIX, $db;
+		global $HEAD_LINK, $CANCEL, $TEST_MODE, $MYSQL_PREFIX, $db, $TDTRAC_SITE;
 		$this->json['success'] = false; $this->json['msg'] = "Unknown Error";
 		
 		if ( !isset($this->action['base']) || !isset($this->action['action']) || ! is_numeric($this->action['id']) ) {
@@ -73,7 +73,7 @@ class tdtrac_json {
 								if ( isset($_SESSION['tdtrac']['one']) ) {
 									$this->json['location'] = $_SESSION['tdtrac']['one'];
 								} else {
-									$this->json['location'] = "/{$this->action['base']}/";
+									$this->json['location'] = "{$TDTRAC_SITE}{$this->action['base']}/";
 								} break;
 							case "budget":
 								$this->do_sql("DELETE FROM `{$MYSQL_PREFIX}budget` WHERE id = ".intval($this->action['id'])." LIMIT 1");
@@ -126,7 +126,7 @@ class tdtrac_json {
 							case "hours":
 								$mod = new tdtrac_hours($this->user, $this->action);
 								if ( $this->action['type'] == 'remind' ) {
-									$this->json['location'] = '/hours/';
+									$this->json['location'] = $TDTRAC_SITE.'hours/';
 									$this->json['success'] = $mod->remind_send();
 								} elseif ( $this->action['type'] == 'unpaid' ) {
 									$this->json['success'] = $mod->email();
@@ -162,13 +162,13 @@ class tdtrac_json {
 					if ( isset($_SESSION['tdtrac']['one']) ) {
 						$this->json['location'] = $_SESSION['tdtrac']['one'];
 					} else {
-						$this->json['location'] = "/{$this->action['base']}/";
+						$this->json['location'] = $TDTRAC_SITE."{$this->action['base']}/";
 					} break;
 				case "clear":
 					switch ( $this->action['base'] ) {
 						case 'msg':
 							$this->do_sql("DELETE FROM `{$MYSQL_PREFIX}msg` WHERE toid = {$this->user->id}");
-							$this->json['location'] = "/";
+							$this->json['location'] = $TDTRAC_SITE;
 							break;
 						case 'hours':
 							$this->do_sql("UPDATE `{$MYSQL_PREFIX}hours` SET submitted = 1 WHERE userid = ".intval($this->action['id']));
@@ -180,7 +180,7 @@ class tdtrac_json {
 					} else {
 						switch ( $this->action['sub'] ) {
 							case "saveuser":
-								$this->json['location'] = "/admin/users/";
+								$this->json['location'] = $TDTRAC_SITE."admin/users/";
 								if ( $this->action['id'] == 0 ) {
 									$this->do_sql($this->get_insert_sql('user'), true);
 									$sql = sprintf("INSERT INTO `{$MYSQL_PREFIX}usergroups` ( `userid`, `groupid` ) VALUES ( %d, %d )",
@@ -192,14 +192,14 @@ class tdtrac_json {
 									$this->do_sql($this->get_update_sql('user'));
 								} break;
 							case "deletegroup":
-								$this->json['location'] = "/admin/groups/";
+								$this->json['location'] = $TDTRAC_SITE."admin/groups/";
 								if ( $this->action['id'] > 99 ) {
 									$this->do_sql("DELETE FROM `{$MYSQL_PREFIX}groupnames` WHERE groupid = ".intval($this->action['id'])." LIMIT 1");
 								} else {
 									$this->json['msg'] = "Invalid group to delete";
 								} break;
 							case "savegroup":
-								$this->json['location'] = "/admin/groups/";
+								$this->json['location'] = $TDTRAC_SITE."admin/groups/";
 								if ( $this->action['id'] == 0 ) {
 									$this->do_sql($this->get_insert_sql('group'), true);
 								} elseif ( $this->action['id'] == 1 ) {
@@ -208,11 +208,11 @@ class tdtrac_json {
 									$this->do_sql($this->get_update_sql('group'));
 								} break;
 							case "saveperms":
-								$this->json['location'] = "/admin/groups/";
+								$this->json['location'] = $TDTRAC_SITE."admin/groups/";
 								$this->do_sql($this->get_update_sql('perm'),true);
 								break;
 							case "savemailcode":
-								$this->json['location'] = "/admin/";
+								$this->json['location'] = $TDTRAC_SITE."admin/";
 								$this->do_sql($this->get_update_sql('mailcode'));
 								break;
 							case "toggle":
@@ -259,30 +259,48 @@ class tdtrac_json {
 	 * @return void Noting
 	 */
 	private function do_sql($sql, $doalways = false) {
-		GLOBAL $db, $TEST_MODE;
+		GLOBAL $db, $TEST_MODE, $TEST_MODE_STOPISQL, $TEST_MODE_STOPUDSQL;
 		
-		if ( $TEST_MODE && !$doalways ) { 
+		$results = array();
+		$errors = array();
+		
+		if ( !is_array($sql) ) { $sql = array($sql); }
+		
+		if ( $TEST_MODE ) {
+			if ( is_array($this->json['sqlquery']) ) {
+				$this->json['sqlquery'][] = $sql;
+			} else {
+				$this->json['sqlquery'] = array($sql);
+			}
+		}
+		
+		if ( $TEST_MODE && ( $TEST_MODE_STOPISQL || ( $TEST_MODE_STOPUDSQL && !$doalways ) ) ) { 
 			$this->json['success'] = true;
 			$this->json['msg'] = 'TEST MODE - Nothing Done';
-			$this->json['sqlquery'] = $sql;
 		} else {
-			if ( $TEST_MODE ) { $this->json['sqlquery'] = $sql; }
+			foreach ( $sql as $eachsql ) {
+				if ( ! (mysql_query($eachsql, $db)) ) {
+					$errors[] = mysql_error();
+					$results[] = false;
+				} else {
+					$errors[] = '';
+					$results[] = true;
+				}
+			} 
 			
-			if ( is_array($sql) ) {
-				foreach ( $sql as $eachsql ) {
-					$result = mysql_query($eachsql, $db);
-				} 
-			} else {
-				$result = mysql_query($sql, $db);
+			$this->json['msg'] = 'Success';
+			$this->json['success'] = true;
+			
+			if ( $TEST_MODE ) {
+				$this->json['sqlerrors'] = $errors;
+				$this->json['sqlresults'] = $results;
 			}
 			
-			if ( $result ) {
-				$this->json['success'] = true;
-				$this->json['msg'] = 'Success!';
-			} else {
-				$this->json['success'] = false;
-				$this->json['msg'] = 'Oh oh, Something went wrong!';
-				$this->json['sqlerror'] = mysql_error();
+			foreach ( $results as $result ) {
+				if ( ! $result ) {
+					$this->json['success'] = false;
+					$this->json['msg'] = 'Oh oh, Something went wrong!';
+				}
 			}
 		}
 	}
