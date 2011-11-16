@@ -748,7 +748,9 @@ class tdtrac_budget {
 		$list->addRow("<h3>All Shows</h3><p>Expenses for all shows</p><p class='ui-li-count'>\${$budg_all}</p></h3>");
 		$list->addRow("<h3>Pending Items</h3><p>Expenses pending payment</p><p class='ui-li-count'>\${$budg_pend}</p></h3>");
 		$list->addRow("<h3>Reimbursable</h3><p>Pending reimbursmentsp</p><p class='ui-li-count'>\${$budg_reim}</p></h3>");
-		$list->addRaw("<li data-icon='plus'><a href='{$TDTRAC_SITE}budget/add/'><h3>Add Item</h3></a></li>");
+		if ( $this->action['action'] <> 'add' ) {
+			$list->addRaw("<li data-icon='plus'><a href='{$TDTRAC_SITE}budget/add/'><h3>Add Item</h3></a></li>");
+		}
 		
 		
 		return array_merge($html,$list->output());

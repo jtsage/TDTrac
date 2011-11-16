@@ -525,7 +525,9 @@ class tdtrac_hours {
 		$list->addRow("<h3>Unpaid {$htype}</h3><p>Unpaid {$htype}</p><p class='ui-li-count'>{$hours_unpaidn}</p></h3>");
 		$list->addRow("<h3>Unpaid Amount</h3><p>Total unpaid amount</p><p class='ui-li-count'>\${$hours_unpaidm}</p></h3>");
 		$list->addRow("<h3>Total Payroll</h3><p>Total payroll amount</p><p class='ui-li-count'>\${$hours_total}</p></h3>");
-		$list->addRaw("<li data-icon='plus'><a href='{$TDTRAC_SITE}hours/add/'><h3>Add Item</h3></a></li>");
+		if ( $this->action['action'] <> 'add' ) {
+			$list->addRaw("<li data-icon='plus'><a href='{$TDTRAC_SITE}hours/add/'><h3>Add Item</h3></a></li>");
+		}
 		
 		return array_merge($html,$list->output());
 	}

@@ -181,7 +181,9 @@ class tdtrac_shows {
 		$list->setFormat("%s");
 		$list->addRow("<h3>Open Shows</h3><p>Shows available for new items</p><p class='ui-li-count'>{$shows_open}</p></h3>");
 		$list->addRow("<h3>Closed Shows</h3><p>Shows from the past</p><p class='ui-li-count'>{$shows_clsd}</p></h3>");
-		$list->addRaw("<li data-icon='plus'><a href='{$TDTRAC_SITE}shows/add/'><h3>Add Show</h3></a></li>");
+		if ( $this->action['action'] <> 'add' ) {
+			$list->addRaw("<li data-icon='plus'><a href='{$TDTRAC_SITE}shows/add/'><h3>Add Show</h3></a></li>");
+		}
 		
 		
 		return array_merge($html,$list->output());

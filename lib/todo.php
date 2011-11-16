@@ -347,7 +347,9 @@ class tdtrac_todo {
 			$list->addRow("<h3>Incomplete Items</h3><p>Total outstanding items</p><p class='ui-li-count'>{$todo_open}</p></h3>");
 			$list->addRow("<h3>Total Items</h3><p>Total of all items</p><p class='ui-li-count'>{$todo_totl}</p></h3>");
 		}
-		$list->addRaw("<li data-icon='plus'><a href='{$TDTRAC_SITE}todo/add/'><h3>Add Item</h3></a></li>");
+		if ( $this->action['action'] <> 'add' ) {
+			$list->addRaw("<li data-icon='plus'><a href='{$TDTRAC_SITE}todo/add/'><h3>Add Item</h3></a></li>");
+		}
 		
 		
 		return array_merge($html,$list->output());
