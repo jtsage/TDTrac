@@ -4,7 +4,7 @@
  * 
  * Contains main program logic.
  * @package tdtrac
- * @version 2.0.0 (db: 2.0.1)
+ * @version 3.0.0 (db: 2.0.1)
  * @author J.T.Sage <jtsage@gmail.com>
  */
 GLOBAL $MYSQL_PREFIX, $db;
@@ -166,7 +166,7 @@ $sql_todo = "CREATE TABLE IF NOT EXISTS `{$MYSQL_PREFIX}todo` (
   
 $todo_result = mysql_query($sql_todo, $db);
 
-$ins_tdtrac = "INSERT INTO `{$MYSQL_PREFIX}tdtrac` (`name`, `value`) VALUES ( 'version', '1.1.0' ), ( 'version', '1.2.0'), ( 'version', '1.2.1'), ( 'version', '1.2.2'), ( 'version', '1.2.4'), ( 'version', '1.2.5'), ( 'version', '1.2.6'), ( 'version', '1.3.0'), ( 'version', '1.3.1' )";
+$ins_tdtrac = "INSERT INTO `{$MYSQL_PREFIX}tdtrac` (`name`, `value`) VALUES ( 'version', '1.1.0' ), ( 'version', '1.2.0'), ( 'version', '1.2.1'), ( 'version', '1.2.2'), ( 'version', '1.2.4'), ( 'version', '1.2.5'), ( 'version', '1.2.6'), ( 'version', '1.3.0'), ( 'version', '1.3.1' ), ('version', '2.0.1')";
 
 $tdtracins_result = mysql_query($ins_tdtrac, $db);
 

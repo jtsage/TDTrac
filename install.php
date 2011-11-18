@@ -10,7 +10,7 @@
 ob_start(); session_start(); 
 
 ## PROGRAM DETAILS. DO NOT EDIT UNLESS YOU KNOW WHAT YOU ARE DOING
-$TDTRAC_VERSION = "2.0.0";
+$TDTRAC_VERSION = "3.0.0";
 $TDTRAC_PERMS = array("addshow", "editshow", "viewshow", "addbudget", "editbudget", "viewbudget", "addhours", "edithours", "viewhours", "adduser");
 $INSTALL_FILES = array(
 	"index.php",
@@ -27,7 +27,7 @@ $INSTALL_FILES = array(
 	"./lib/user.php",
 	"./lib/messaging.php",
 	"./lib/todo.php",
-	"./lib/tablelib.php",
+	"./lib/json.php",
 	"./lib/show.php" );
 $INSTALL_TABLES = array(
 	"tdtrac",
@@ -71,13 +71,13 @@ switch ($page_title) {
 		fwrite($fh, "\$TDTRAC_PAYRATE = \"{$_REQUEST['payrate']}\";\n?>\n");
 		header("Location: install.php");
 	} else {
-		$form = new tdform("install.php?site", "form1", 1, 'genform', 'Site Config');
+		$form = new tdform(array('action' => "install.php?site"));
 		
-		$fes = $form->addText('cpny', "Site Name", null, $TDTRAC_CPNY);
-		$fes = $form->addText('site', "Site URL", null, $TDTRAC_SITE);
-		$fes = $form->addText('dayrate', "Day Rate", null, $TDTRAC_DAYRATE);
+		$fes = $form->addText(array('id' => 'cpny', 'label' => "Site Name", 'preset' => $TDTRAC_CPNY));
+		$fes = $form->addText(array('id' => 'site', 'label' => "Site URL", 'preset' => $TDTRAC_SITE));
 		$fes = $form->addInfo("Enter 1 for Daily rate, 0 for Hourly");
-		$fes = $form->addText('payrate', "Default Pay Rate", null, $TDTRAC_PAYRATE);
+		$fes = $form->addText(array('id' => 'dayrate', 'label' => "Day Rate", 'preset' => $TDTRAC_DAYRATE));
+		$fes = $form->addText(array('id' => 'payrate', 'label' => "Default Pay Rate", 'preset' => $TDTRAC_PAYRATE));
 		
 		echo join("\n", $form->output('Save Values'));
 	}
@@ -97,11 +97,11 @@ switch ($page_title) {
 		$form = new tdform("install.php?mysql", "form1", 1, 'genform', "MySQL Config");
 		
 		$fes = $form->addInfo("hostname[:port]");
-		$fes = $form->addText('server', "MySQL Host", null, $MYSQL_SERVER);
-		$fes = $form->addText('user', "Username", null, $MYSQL_USER);
-		$fes = $form->addText('password', "Password", null, $MYSQL_PASS);
-		$fes = $form->addText('dbase', "Database", null, $MYSQL_DATABASE);
-		$fes = $form->addText('prefix', "Table Prefix", null, $MYSQL_PREFIX);
+		$fes = $form->addText(array('id' => 'server', 'label' => "MySQL Host", 'preset' => $MYSQL_SERVER));
+		$fes = $form->addText(array('id' => 'user', 'label' => "Username", 'preset' => $MYSQL_USER));
+		$fes = $form->addText(array('id' => 'password', 'label' => "Password", 'preset' => $MYSQL_PASS));
+		$fes = $form->addText(array('id' => 'dbase', 'label' => "Database", 'preset' => $MYSQL_DATABASE));
+		$fes = $form->addText(array('id' => 'prefix', 'label' => "Table Prefix", 'preset' => $MYSQL_PREFIX));
 		
 		echo join("\n", $form->output('Save Values'));
 	}
@@ -172,7 +172,7 @@ switch ($page_title) {
 	break;
 }
 
-foreach ( makeFooter() as $line ) { echo "{$line}\n"; }
+foreach ( makeFooter('', false) as $line ) { echo "{$line}\n"; }
 
 function merge_defaults($orig, $override) {
 	foreach ( $orig as $key=>$value ) {
