@@ -83,9 +83,10 @@ function makeHeader($title = '') {
     $html[] = '	<script type="text/javascript" src="http://dev.jtsage.com/cdn/simpledialog/latest/jquery.mobile.simpledialog'.$min.'.js"></script>';
     $html[] = '	<script type="text/javascript" src="'.$TDTRAC_SITE.'js/tdtrac.jquery.js"></script>';
     $html[] = "</head>\n\n<body>";
+    $stamp = time();
     $pageid = ( $action['module'] == 'help' ) ? "help-{$action['action']}-{$action['oper']}" : "{$action['module']}-{$action['action']}";
     $html[] = " <div id='tdtracconfig' data-base='{$TDTRAC_SITE}' data-testmode='{$TEST_MODE}'></div>";
-    $html[] = "	<div data-role=\"page\" data-theme=\"c\" data-id=\"{$pageid}\">";
+    $html[] = "	<div data-role=\"page\" data-theme=\"c\" data-id=\"{$pageid}-{$stamp}\">";
     
     $html[] = "		<div data-role=\"header\">";
     if ( $CANCEL ) { $html[] = "			<a href='#' data-icon='delete' data-rel='back'>Cancel</a>";	}

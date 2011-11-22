@@ -45,6 +45,10 @@ div.content-secondary {
     display: none;
 }
 
+.ui-page {
+    -webkit-backface-visibility: hidden;
+}
+
 @media all and (min-width: 400px){
 	#hours-user-show .ui-datebox-container { width: 90% !important;}
 	#hours-user-show .ui-datebox-griddate { width: 13% !important; font-size: 24px; line-height: 50px; height: 50px;}
