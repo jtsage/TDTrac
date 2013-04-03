@@ -63,6 +63,7 @@ $helpnode['hours']['edit']['data'][] = array("Employee", "The employee's name to
 $helpnode['hours']['edit']['data'][] = array("Show", "The associated show name for these hours worked");
 $helpnode['hours']['edit']['data'][] = array("Date", "The date of the hours worked.");
 $helpnode['hours']['edit']['data'][] = array("Worked", "The amount of time worked");
+$helpnode['hours']['edit']['data'][] = array("Note", "A Per-Entry Note for the hours");
 $helpnode['hours']['edit']['data'][] = array("Hours Paid Out", "Toggle whether the hours have been paid");
 
 $helpnode['hours']['add']['title'] = "Add Hours Form";

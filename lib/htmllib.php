@@ -77,13 +77,14 @@ function makeHeader($title = '') {
     $html[] = '	<link type="text/css" href="http://dev.jtsage.com/cdn/simpledialog/latest/jquery.mobile.simpledialog'.$min.'.css" rel="stylesheet" /> ';
     $html[] = '	<link type="text/css" href="'.$TDTRAC_SITE.'css/tdtheme.css" rel="stylesheet" /> ';
     $html[] = '	<link type="text/css" href="'.$TDTRAC_SITE.'css/tdtheme.mobile.css" rel="stylesheet" /> ';
-    $html[] = '	<script type="text/javascript" src="http://code.jquery.com/jquery-1.7'.$min.'.js"></script>';
+    $html[] = '	<script type="text/javascript" src="http://code.jquery.com/jquery-1.7.1'.$min.'.js"></script>';
     $html[] = '	<script type="text/javascript" src="http://code.jquery.com/mobile/1.3.0/jquery.mobile-1.3.0'.$min.'.js"></script>';
 	$html[] = '	<script type="text/javascript" src="http://dev.jtsage.com/cdn/datebox/latest/jqm-datebox.core'.$min.'.js"></script>';
 	$html[] = '	<script type="text/javascript" src="http://dev.jtsage.com/cdn/datebox/latest/jqm-datebox.mode.calbox'.$min.'.js"></script>';
 	$html[] = '	<script type="text/javascript" src="http://dev.jtsage.com/cdn/datebox/i18n/jquery.mobile.datebox.i18n.en_US.utf8.js"></script>';
     $html[] = '	<script type="text/javascript" src="http://dev.jtsage.com/cdn/simpledialog/latest/jquery.mobile.simpledialog'.$min.'.js"></script>';
     $html[] = '	<script type="text/javascript" src="'.$TDTRAC_SITE.'js/tdtrac.jquery.js"></script>';
+	$html[] = '	<script type="text/javascript">jQuery.extend(jQuery.mobile.datebox.prototype.options, { "overrideDateFormat":"%Y-%m-%d" });</script>';
     $html[] = "</head>\n\n<body>";
     $stamp = time();
     $pageid = ( $action['module'] == 'help' ) ? "help-{$action['action']}-{$action['oper']}" : "{$action['module']}-{$action['action']}";

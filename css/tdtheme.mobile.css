@@ -1754,9 +1754,9 @@ Built by David Kaneda and maintained by Jonathan Stark.
 .ui-btn-inline { display: inline-block; }
 .ui-btn-inner { padding: .6em 25px; display: block; text-overflow: ellipsis; overflow: hidden; white-space: nowrap; position: relative; zoom: 1; }
 .ui-btn input, .ui-btn button { z-index: 2; }
-.ui-header .ui-btn-inner, .ui-footer .ui-btn-inner, .ui-bar .ui-btn-inner { padding: .4em 8px .5em; }
+/*.ui-header .ui-btn-inner, .ui-footer .ui-btn-inner, .ui-bar .ui-btn-inner { padding: .4em 8px .5em; }*/
 .ui-btn-icon-notext { width: 24px; height: 24px; }
-.ui-btn-icon-notext .ui-btn-inner { padding: 2px 1px 2px 3px; }
+/*.ui-btn-icon-notext .ui-btn-inner { padding: 2px 1px 2px 3px; }*/
 .ui-btn-text { position: relative; z-index: 1; }
 .ui-btn-icon-notext .ui-btn-text { position: absolute; left: -9999px; }
 .ui-btn-icon-left .ui-btn-inner { padding-left: 33px; }

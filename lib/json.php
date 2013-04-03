@@ -383,14 +383,15 @@ class tdtrac_json {
 					$sql[] = "UPDATE {$MYSQL_PREFIX}rcpts SET handled = '1' WHERE imgid = '{$rcptid}'";
 				} break;
 			case "hours":
-				$sqlstring  = "INSERT INTO `{$MYSQL_PREFIX}hours` ( `userid`, `showid`, `date`, `worked` )";
-				$sqlstring .= " VALUES ( %d, %d, '%s', '%f' )";
+				$sqlstring  = "INSERT INTO `{$MYSQL_PREFIX}hours` ( `userid`, `showid`, `date`, `worked`, `note` )";
+				$sqlstring .= " VALUES ( %d, %d, '%s', '%f', '%s' )";
 				
 				$sql = sprintf($sqlstring,
 					intval($_REQUEST['userid']),
 					intval($_REQUEST['showid']),
 					make_date($_REQUEST['date']),
-					floatval($_REQUEST['worked'])
+					floatval($_REQUEST['worked']),
+					mysql_real_escape_string($_REQUEST['note'])
 				); break;
 		}
 		return $sql;
@@ -495,13 +496,14 @@ class tdtrac_json {
 				); break;
 			case "hours":
 				$sqlstring  = "UPDATE `{$MYSQL_PREFIX}hours` SET `showid` = %d, `date` = '%s', `worked` = '%f',";
-				$sqlstring .= " submitted = %d WHERE id = %d";
+				$sqlstring .= " submitted = %d, `note` = '%s' WHERE id = %d";
 				
 				$sql = sprintf($sqlstring,
 					intval($_REQUEST['showid']),
 					make_date($_REQUEST['date']),
 					floatval($_REQUEST['worked']),
 					intval($_REQUEST['submitted']),
+					mysql_real_escape_string($_REQUEST['note']),
 					intval($_REQUEST['id'])
 				); break;
 		}

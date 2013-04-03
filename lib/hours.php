@@ -139,6 +139,7 @@ class tdtrac_hours {
 		
 		$fesult = $form->addDate(array('name' => 'date', 'label' => 'Date', 'placeholder' => 'Date worked'));
 		$fesult = $form->addText(array('name' => 'worked', 'label' => (($TDTRAC_DAYRATE)?"Days":"Hours")." Worked", 'placeholder' => 'Amount Worked'));
+		$fesult = $form->addText(array('name' => 'note', 'label' => "Note", 'placeholder' => 'Note'));
 		
 		return $form->output('Add Hours');
 	}
@@ -177,6 +178,7 @@ class tdtrac_hours {
 		
 		$fesult = $form->addDate(array('name' => 'date', 'label' => 'Date', 'placeholder' => 'Date worked', 'preset' => $recd['date']));
 		$fesult = $form->addText(array('name' => 'worked', 'label' => (($TDTRAC_DAYRATE)?"Days":"Hours")." Worked", 'placeholder' => 'Amount Worked', 'preset' => $recd['worked']));
+		$fesult = $form->addText(array('name' => 'note', 'label' => "Note", 'placeholder' => 'Note', 'preset' => $recd['note']));
 		
 		$fesult = $form->addToggle(array(
 			'name' => 'submitted',
@@ -282,10 +284,10 @@ class tdtrac_hours {
 		} else {
 			while ( $row = mysql_fetch_array($result) ) {
 				$hoursowed = array();
-				$sql2 = "SELECT date,worked FROM `{$MYSQL_PREFIX}hours` WHERE submitted = 0 AND userid = {$row['userid']}";
+				$sql2 = "SELECT date,worked,note FROM `{$MYSQL_PREFIX}hours` WHERE submitted = 0 AND userid = {$row['userid']}";
 				$result2 = mysql_query($sql2, $db);
 				while ( $row2 = mysql_fetch_array($result2) ) {
-					$hoursowed[] = "<strong>{$row2['date']} :</strong> {$row2['worked']}";
+					$hoursowed[] = "<strong>{$row2['date']} :</strong> {$row2['worked']} <em>{$row2['note']}</em>";
 				}
 				$list->addRow(array(
 					$row['userid'],
@@ -323,7 +325,7 @@ class tdtrac_hours {
 		$thename = ( $type=='user' ) ? $this->user->get_name($id) : get_single("SELECT showname as num FROM `{$MYSQL_PREFIX}shows` WHERE showid = {$id}");
 		$html[] = "<h3>Hours For: {$thename}</h3>";
 		
-		$sql = "SELECT h.*, showname, (h.worked*u.payrate) as amount, CONCAT(u.first, ' ', u.last) as name "
+		$sql = "SELECT h.*, showname, (h.worked*u.payrate) as amount, h.note as note, CONCAT(u.first, ' ', u.last) as name "
 			. "FROM `{$MYSQL_PREFIX}hours` h, `{$MYSQL_PREFIX}shows` s, `{$MYSQL_PREFIX}users` u "
 			. "WHERE h.showid = s.showid AND h.userid = u.userid "
 			. (($type=='user')?"AND h.userid = {$id} ":"AND s.showid = {$id} ")
@@ -357,7 +359,7 @@ class tdtrac_hours {
 		} else {
 			$html[] = "<div id='hours-data' style='display:none;'>";
 			while ( $row = mysql_fetch_array($result) ) {
-				$html[] = "  <div data-recid='{$row['id']}' data-date='{$row['date']}' data-type='".(($TDTRAC_DAYRATE)?"Days":"Hours")."' data-submitted='{$row['submitted']}' data-show=\"".(($type=='user')?$row['showname']:$row['name'])."\" data-worked='{$row['worked']}' data-amount='".number_format($row['amount'],2)."'></div>";
+				$html[] = "  <div data-recid='{$row['id']}' data-note='".htmlspecialchars($row['note'])."' data-date='{$row['date']}' data-type='".(($TDTRAC_DAYRATE)?"Days":"Hours")."' data-submitted='{$row['submitted']}' data-show=\"".(($type=='user')?$row['showname']:$row['name'])."\" data-worked='{$row['worked']}' data-amount='".number_format($row['amount'],2)."'></div>";
 				if ( $row['submitted'] == 0 ) {
 					$theseHighDates[] = $row['date'];
 				} else {
@@ -409,7 +411,7 @@ class tdtrac_hours {
 		if ( ! $this->user->admin ) {
 			return false;
 		} else {
-			$sql  = "SELECT CONCAT(first, ' ', last) as name, u.userid, worked, date, showname, submitted, h.id as hid FROM {$MYSQL_PREFIX}users u, {$MYSQL_PREFIX}shows s, {$MYSQL_PREFIX}hours h WHERE ";
+			$sql  = "SELECT CONCAT(first, ' ', last) as name, u.userid, h.note as note, worked, date, showname, submitted, h.id as hid FROM {$MYSQL_PREFIX}users u, {$MYSQL_PREFIX}shows s, {$MYSQL_PREFIX}hours h WHERE ";
 			$sql .= "u.userid = h.userid AND s.showid = h.showid AND h.submitted = 0 ORDER BY last ASC, date DESC";
 			
 			$result = mysql_query($sql, $db);
@@ -429,10 +431,11 @@ class tdtrac_hours {
 				$body .= "<table><tr><th>Date</th><th>Show</th><th>".(($TDTRAC_DAYRATE)?"Days":"Hours")." Worked</th></tr>";
 				
 				foreach ( $data as $num => $line ) {
-					$body .= sprintf("<tr><td>%s</td><td>%s</td><td>%s</td></tr>",
+					$body .= sprintf("<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>",
 						$line['date'],
 						$line['showname'],
-						number_format($line['worked'],2)
+						number_format($line['worked'],2),
+						$line['note']
 					);
 				}
 				

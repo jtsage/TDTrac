@@ -104,6 +104,7 @@ jQuery.extend(jQuery.mobile.simpledialog.prototype.options, {
 					lines = lines + '<li data-theme="' + (($(info[x]).attr('data-submitted') == 0)?'e':'c') + '">'
 							+ '<a href="#"><strong>' + $(info[x]).attr('data-show') + ':</strong> '
 							+ $(info[x]).attr('data-worked')
+							+ '<p style="margin-top:0">' + $(info[x]).attr('data-note') + '</p>'
 							+ '<p class="ui-li-count">$' + $(info[x]).attr('data-amount') + '</p></a>'
 							+ '<a href="'+baseHREF+'hours/edit/id:' + $(info[x]).attr('data-recid') + '/">Edit</a></li>';
 				}
@@ -116,7 +117,7 @@ jQuery.extend(jQuery.mobile.simpledialog.prototype.options, {
 					'cleanOnClose': true,
 					'width': '300px',	
 					'fullHTML': 
-						'<div style="width:350px"><ul data-split-icon="grid" data-role="listview" data-theme="c" data-dividertheme="a">'+
+						'<div style="width:100%"><ul data-split-icon="grid" data-role="listview" data-theme="c" data-dividertheme="a">'+
 							'<li data-role="list-divider">'+thisType+' Worked For :: '+thisDate+'</li>'+
 							lines+'</ul></div>'
 					});
