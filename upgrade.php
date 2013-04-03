@@ -4,13 +4,13 @@
  * 
  * Contains main program logic.
  * @package tdtrac
- * @version 2.0.1
+ * @version 3.1.0
  * @author J.T.Sage <jtsage@gmail.com>
  */
 ob_start(); session_start(); 
 
 ## PROGRAM DETAILS. DO NOT EDIT UNLESS YOU KNOW WHAT YOU ARE DOING
-$TDTRAC_VERSION = "2.0.1";
+$TDTRAC_VERSION = "3.1.0";
 $TDTRAC_PERMS = array("addshow", "editshow", "viewshow", "addbudget", "editbudget", "viewbudget", "addhours", "edithours", "viewhours", "adduser");
 $INSTALL_FILES = array(
 	"index.php",
@@ -27,7 +27,6 @@ $INSTALL_FILES = array(
 	"./lib/user.php",
 	"./lib/messaging.php",
 	"./lib/todo.php",
-	"./lib/tablelib.php",
 	"./lib/show.php" );
 $INSTALL_TABLES = array(
 	"tdtrac",
@@ -118,6 +117,11 @@ $V201ADDS = array(
   "INSERT INTO `{$MYSQL_PREFIX}tdtrac` (`name`, `value`) VALUES ( 'version', '2.0.1' )",
   "ALTER TABLE `{$MYSQL_PREFIX}budget` ADD payto smallint(5) unsigned NOT NULL DEFAULT '0'",
   "INSERT INTO `{$MYSQL_PREFIX}msg` (`toid`, `fromid`, `body`) VALUES ('1', '1', 'Updated to v2.0.1 :: Employe Reimbursments!')"
+);
+$V310ADDS = array(
+  "ALTER TABLE `{$MYSQL_PREFIX}hours` ADD note varchar(200)",
+  "INSERT INTO `{$MYSQL_PREFIX}tdtrac` (`name`, `value`) VALUES ( 'version', '3.1.0' )",
+  "INSERT INTO `{$MYSQL_PREFIX}msg` (`toid`, `fromid`, `body`) VALUES ('1', '1', 'Updated to v3.1.0 :: Pre-Hour Notes!')"
 );
 
 switch ($page_title) {
@@ -222,6 +226,7 @@ switch ($page_title) {
 			if ( $verline['value'] == "1.3.0" ) { $found125 = 1; $found124 = 1; $found122 = 1; $found121 = 1; $found120 = 1; $found126 = 1; $found130 = 1;}
 			if ( $verline['value'] == "1.3.1" ) { $found125 = 1; $found124 = 1; $found122 = 1; $found121 = 1; $found120 = 1; $found126 = 1; $found130 = 1; $found131 = 1;}
 			if ( $verline['value'] == "2.0.1" ) { $found125 = 1; $found124 = 1; $found122 = 1; $found121 = 1; $found120 = 1; $found126 = 1; $found130 = 1; $found131 = 1; $found201 = 1;}
+			if ( $verline['value'] == "3.1.0" ) { $found125 = 1; $found124 = 1; $found122 = 1; $found121 = 1; $found120 = 1; $found126 = 1; $found130 = 1; $found131 = 1; $found201 = 1; $found310 = 1;}
 		} 
 		if ( !$found120 ) { // 1.2.0 UPGRADE
 			foreach ( $V120ADDS as $thissql ) { $result = mysql_query($thissql, $db); echo mysql_error(); }
@@ -267,6 +272,11 @@ switch ($page_title) {
 			foreach ( $V201ADDS as $thissql ) { $result = mysql_query($thissql, $db); echo mysql_error(); }
 			echo "<li style=\"color: green\"><b>UPGRADE::</b> Upgraded to version 2.0.1</li>"; $didinstall = 1;
 		} else { echo "<li style=\"color: green\"><b>VERSION::</b> 2.0.1 confirmed</li>\n"; }
+
+		if ( $found120 && $found121 && $found122 && $found124 && $found125 && $found126 && $found130 && $found131 && $found201 && !$found310 ) { // 3.1.0 UPGRADE
+			foreach ( $V310ADDS as $thissql ) { $result = mysql_query($thissql, $db); echo mysql_error(); }
+			echo "<li style=\"color: green\"><b>UPGRADE::</b> Upgraded to version 3.1.0</li>"; $didinstall = 1;
+		} else { echo "<li style=\"color: green\"><b>VERSION::</b> 3.1.0 confirmed</li>\n"; }
 	}	
 	
 	echo "</ul></li></ul></div><div style=\"text-align: center\">\n";
@@ -279,6 +289,6 @@ switch ($page_title) {
 	break;
 }
 
-foreach ( makeFooter() as $line ) { echo "{$line}\n"; }
+foreach ( makeFooter('Updater',false) as $line ) { echo "{$line}\n"; }
 
 ?>

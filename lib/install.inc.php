@@ -4,11 +4,11 @@
  * 
  * Contains main program logic.
  * @package tdtrac
- * @version 3.0.0 (db: 2.0.1)
+ * @version 3.1.0 (db: 3.1.0)
  * @author J.T.Sage <jtsage@gmail.com>
  */
 GLOBAL $MYSQL_PREFIX, $db;
-//This is version 2.0.1
+//This is version 3.1.0
 
 $sql_budget  = "CREATE TABLE IF NOT EXISTS `{$MYSQL_PREFIX}budget` (";
 $sql_budget .= "  `id` int(10) unsigned NOT NULL auto_increment,";
@@ -50,6 +50,7 @@ $sql_hours .= "  `showid` smallint(5) unsigned NOT NULL,";
 $sql_hours .= "  `date` date NOT NULL,";
 $sql_hours .= "  `worked` float NOT NULL,";
 $sql_hours .= "  `submitted` tinyint(4) unsigned NOT NULL DEFAULT '0',";
+$sql_hours .= "  `note` varchar(200),";
 $sql_hours .= "  PRIMARY KEY  (`id`),";
 $sql_hours .= "  KEY `userid` (`userid`,`showid`)";
 $sql_hours .= ") ENGINE=MyISAM  DEFAULT CHARSET=latin1;";
@@ -166,7 +167,7 @@ $sql_todo = "CREATE TABLE IF NOT EXISTS `{$MYSQL_PREFIX}todo` (
   
 $todo_result = mysql_query($sql_todo, $db);
 
-$ins_tdtrac = "INSERT INTO `{$MYSQL_PREFIX}tdtrac` (`name`, `value`) VALUES ( 'version', '1.1.0' ), ( 'version', '1.2.0'), ( 'version', '1.2.1'), ( 'version', '1.2.2'), ( 'version', '1.2.4'), ( 'version', '1.2.5'), ( 'version', '1.2.6'), ( 'version', '1.3.0'), ( 'version', '1.3.1' ), ('version', '2.0.1')";
+$ins_tdtrac = "INSERT INTO `{$MYSQL_PREFIX}tdtrac` (`name`, `value`) VALUES ( 'version', '1.1.0' ), ( 'version', '1.2.0'), ( 'version', '1.2.1'), ( 'version', '1.2.2'), ( 'version', '1.2.4'), ( 'version', '1.2.5'), ( 'version', '1.2.6'), ( 'version', '1.3.0'), ( 'version', '1.3.1' ), ('version', '2.0.1'), ('version', '3.1.0')";
 
 $tdtracins_result = mysql_query($ins_tdtrac, $db);
 
