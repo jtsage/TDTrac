@@ -53,7 +53,7 @@ jQuery.extend(jQuery.mobile.simpledialog.prototype.options, {
 					'cleanOnClose': true,
 					'width': '300px',	
 					'fullHTML': 
-						'<div style="width:370px"><ul data-split-icon="grid" data-role="listview" data-theme="c" data-dividertheme="a">'+
+						'<div style="width:100%"><ul data-split-icon="grid" data-role="listview" data-theme="c" data-dividertheme="a">'+
 							'<li data-role="list-divider">'+data.helptitle+'</li>'+
 							body+'</ul></div>'
 				});

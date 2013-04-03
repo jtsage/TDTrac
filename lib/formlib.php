@@ -128,7 +128,7 @@ class tdform {
 			'role'		=> 'datebox',
 			'require'	=> 'true',
 			'placeholder' => '',
-			'options'	=> '{"pickPageButtonTheme":"c", "mode": "calbox", "useModal": true}'
+			'options'	=> '{"useNewStyle": true, "pickPageButtonTheme":"c", "mode": "calbox", "useModal": true}'
 			);
 		$options = merge_defaults($default, $passed);
 		return $this->addText($options);
