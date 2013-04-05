@@ -203,11 +203,11 @@ function infobox(text, head) { // CONTROL INFOBOX CONTENT
 			first = $('.ui-page-active').children('.ui-content');
 			
 		$('<div>').popupwrapper({
-			'displayMode' : 'button', 
-			'headerText': 'DELETE!',
-			'headerMinWidth': '300px',
-			'subTitle' : 'Delete Hours Item #'+id[1]+'?',
-			'buttons' : {
+			displayMode: 'button', 
+			headerText: 'DELETE!',
+			headerMinWidth: '300px',
+			subTitle : 'Delete Hours Item #'+id[1]+'?',
+			buttons : {
 				'Yes, Delete' : function () {
 					$.getJSON(baseHREF+"json/delete/base:hours/id:"+id[1]+"/", function(dta) {
 						if ( dta.success === true ) {
@@ -216,7 +216,7 @@ function infobox(text, head) { // CONTROL INFOBOX CONTENT
 							infobox("Hours Delete Failed!");
 						}
 					}); },
-				'Cancel': function () { return true; }
+				'Cancel': { 'click': function () { return true; }, icon: 'delete' }
 			}
 		});
 	}); // END: Delete Hours
@@ -225,10 +225,12 @@ function infobox(text, head) { // CONTROL INFOBOX CONTENT
 		e.preventDefault();
 		var linkie = this;
 		if ( ! $(this).data('done') ) {
-			$(this).simpledialog({
-				'mode' : 'bool', 
-				'prompt' : 'Mark Todo Item #'+$(this).data('recid')+' Done?',
-				'buttons' : {
+			$('<div>').popupwrapper({
+				displayMode: 'button',
+				headerText: 'MARK?',
+				headerMinWidth: '300px',
+				subTitle: 'Mark Todo Item #'+$(this).data('recid')+' Done?',
+				buttons : {
 					'Yes, Mark Done' : function () {
 						$.getJSON(baseHREF+"json/mark/base:todo/json:1/id:"+$(linkie).data('recid')+"/", function(data) {
 							if ( data.success === true ) {
@@ -242,7 +244,7 @@ function infobox(text, head) { // CONTROL INFOBOX CONTENT
 							}
 							$(linkie).data('done', 1);
 						}); },
-					'Cancel': function () { return true; }
+					'Cancel': { 'click': function () { return true; }, icon: 'delete' }
 				}
 			});
 		}
@@ -252,13 +254,17 @@ function infobox(text, head) { // CONTROL INFOBOX CONTENT
 		e.preventDefault();
 		var linkie = this;
 		if ( ! $(this).data('done') ) {
-			$(this).simpledialog({
-				'mode' : 'bool',
-				'prompt' : 'Todo Item #'+$(this).data('recid'),
-				'buttons' : (($(this).data('edit'))?{
+			$('<div>').popupwrapper({
+				displayMode: 'button',
+				buttonMode: 'list',
+				headerText: 'To-Do',
+				headerMinWidth: '300px',
+				subTitle : 'Todo Item #'+$(this).data('recid'),
+				buttons : (($(this).data('edit'))?{
 					'Edit' : {
 						'click': function() { $.mobile.changePage(baseHREF+"todo/edit/id:"+$(linkie).data('recid')+"/"); },
-						'icon': 'grid'
+						'icon': 'grid',
+						'close': false
 					},
 					'Delete' : {
 						'click': function() {
