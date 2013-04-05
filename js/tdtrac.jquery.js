@@ -296,10 +296,12 @@ function infobox(text, head) { // CONTROL INFOBOX CONTENT
 		e.preventDefault();
 		var linkie = this;
 		if ( ! $(this).data('done') ) {
-			$(this).simpledialog({
-				'mode': 'bool',
-				'prompt': 'Clear Hours For User #'+$(linkie).data('recid')+'?',
-				'buttons': { 
+			$('<div>').popupwrapper({
+				displayMode: 'button',
+				headerText: 'CLEAR?',
+				headerMinWidth: '350px',
+				subTitle: 'Clear Hours For User #'+$(linkie).data('recid')+'?',
+				buttons: { 
 					'Yes, Clear' : function () {
 						$.getJSON(baseHREF+"json/clear/base:hours/id:"+$(linkie).data('recid')+"/", function(data) {
 							if ( data.success === true ) {
@@ -311,7 +313,7 @@ function infobox(text, head) { // CONTROL INFOBOX CONTENT
 							}
 							$(linkie).data('done', 1);
 						}); },
-					'Cancel' : function () { return true; }
+					'Cancel' : {click: function () { return true; }, icon: 'delete' }
 				}
 			});
 		}
@@ -321,10 +323,12 @@ function infobox(text, head) { // CONTROL INFOBOX CONTENT
 		e.preventDefault();
 		var linkie = this;
 		if ( ! $(this).data('done') ) {
-			$(this).simpledialog({
-				'mode': 'bool',
-				'prompt': 'Mark Hours Finished?',
-				'buttons': { 
+			$('<div>').popupwrapper({
+				displayMode: 'button',
+				headerText: 'MARK?',
+				headerMinWidth: '350px',
+				subTitle: 'Mark Hours Finished?',
+				buttons: { 
 					'Yes, Clear' : function () {
 						$.getJSON(baseHREF+"json/mark/base:hours/id:"+$(linkie).data('recid')+"/", function(data) {
 							if ( data.success === true ) {
@@ -337,7 +341,7 @@ function infobox(text, head) { // CONTROL INFOBOX CONTENT
 							}
 							$(linkie).data('done', 1);
 						}); },
-					'Cancel' : function () { return true; }
+					'Cancel' : { click:function () { return true; }, icon: 'delete' }
 				}
 			});
 		}
@@ -347,10 +351,12 @@ function infobox(text, head) { // CONTROL INFOBOX CONTENT
 		e.preventDefault();
 		var linkie = this;
 		if ( ! $(this).data('done') ) {
-			$(this).simpledialog({
-				'mode': 'bool',
-				'prompt': 'Delete Message #'+$(linkie).data('recid')+'?',
-				'buttons': { 
+			$('<div>').popupwrapper({
+				displayMode: 'button',
+				headerText: 'DELETE!',
+				headerMinWidth: '350px',
+				subTitle: 'Delete Message #'+$(linkie).data('recid')+'?',
+				buttons: { 
 					'Yes, Delete' : function () {
 						$.getJSON(baseHREF+"json/delete/base:msg/id:"+$(linkie).data('recid')+"/", function(data) {
 							if ( data.success === true ) {
@@ -361,7 +367,7 @@ function infobox(text, head) { // CONTROL INFOBOX CONTENT
 							}
 							$(linkie).data('done', 1);
 						}); },
-					'Cancel' : function () { return true; }
+					'Cancel' : { click: function () { return true; }, icon: 'delete' }
 				}
 			});
 		}
@@ -387,13 +393,17 @@ function infobox(text, head) { // CONTROL INFOBOX CONTENT
 		e.preventDefault();
 		var linkie = this;
 		if ( ! $(this).data('done') ) {
-			$(this).simpledialog( {
-				'mode' : 'bool',
-				'prompt' : 'Show #'+$(this).data('recid'),
-				'buttons' : (($(this).data('admin'))?{
+			$('<div>').popupwrapper({
+				displayMode: 'button',
+				buttonMode:'list',
+				headerText: 'SHOW',
+				headerMinWidth: '350px',
+				subTitle: 'Show #'+$(this).data('recid'),
+				buttons : (($(this).data('admin'))?{
 					'Edit' : {
 						'click' : function() { $.mobile.changePage(baseHREF+'shows/edit/id:'+$(linkie).data('recid')+'/'); },
-						'icon' : 'grid'
+						'icon' : 'grid',
+						close: false
 					},
 					'Delete' : {
 						'click' :function () {
@@ -419,17 +429,22 @@ function infobox(text, head) { // CONTROL INFOBOX CONTENT
 		e.preventDefault();
 		var linkie = this;
 		if ( ! $(this).data('done') ) {
-			$(this).simpledialog({
-				'mode' : 'bool',
-				'prompt' : 'Budget Item #'+$(this).data('recid'),
-				'buttons' : (($(this).data('edit'))?{
+			$('<div>').popupwrapper({
+				displayMode: 'button',
+				buttonMode: 'list',
+				headerText: 'BUDGET',
+				headerMinWidth: '350px',
+				subTitle: 'Budget Item #'+$(this).data('recid'),
+				buttons : (($(this).data('edit'))?{
 					'View Detail' : {
 						'click': function() { $.mobile.changePage(baseHREF+"budget/item/id:"+$(linkie).data('recid')+"/"); },
-						'icon': 'grid'
+						'icon': 'grid',
+						close: false
 					},
 					'Edit' : {
 						'click': function() { $.mobile.changePage(baseHREF+"budget/edit/id:"+$(linkie).data('recid')+"/"); },
-						'icon': 'grid'
+						'icon': 'grid',
+						close: false
 					},
 					'Delete' : {
 						'click': function() {
@@ -452,7 +467,8 @@ function infobox(text, head) { // CONTROL INFOBOX CONTENT
 				}:{
 					'View' : {
 						'click': function() { $.mobile.changePage(baseHREF+"budget/view/id:"+$(linkie).data('recid')+"/"); },
-						'icon': 'grid'
+						'icon': 'grid',
+						close: false
 					},
 					'Cancel' : function () { return true; }
 				})
@@ -561,13 +577,17 @@ function infobox(text, head) { // CONTROL INFOBOX CONTENT
 	$('.user-menu').live( 'vclick', function(e) {  // BEGIN: User Menu
 		e.preventDefault();
 		var linkie = this;
-		$(this).simpledialog({
-			'mode' : 'bool',
-			'prompt' : 'User #'+$(this).data('recid'),
-			'buttons' : {
+		$('<div>').popupwrapper({
+			displayMode: 'button',
+			buttonMode: 'list',
+			headerText: 'USER',
+			headerMinWidth: '350px',
+			subTitle: 'User #'+$(this).data('recid'),
+			buttons : {
 				'Edit' : {
 					'icon' : 'grid',
-					'click' : function() { $.mobile.changePage(baseHREF+"admin/useredit/id:"+$(linkie).data('recid')+"/"); }
+					'click' : function() { $.mobile.changePage(baseHREF+"admin/useredit/id:"+$(linkie).data('recid')+"/"); },
+					close: false
 				},
 				'Toggle Active' : {
 					'icon' : 'check',
@@ -647,19 +667,22 @@ function infobox(text, head) { // CONTROL INFOBOX CONTENT
 
 		$(self+':selected:not([data-placeholder])').each(function(){
 			if ( $(this).attr('data-addoption') ) {
-				$(self).simpledialog({
-					'mode' : 'string',
-					'prompt' : 'Add New Option',
-					'useDialogForceFalse' : true,
-					'buttons' : {
-						'Yes, Add' : function () { 
-							thisopt = $(self).attr('data-string');
-							$('<option value="'+thisopt+'" selected="selected">'+thisopt+'</option>').appendTo($(self));
-							$(self).selectmenu('refresh', true);
-							return true; },
-						'Cancel' : function () { $(self).selectmenu('open'); }
-					}
-				});
+				setTimeout(function() {
+					$('<div>').popupwrapper({
+						displayMode: 'button',
+						headerText: 'ADD',
+						headerMinWidth: '350px',
+						inputList: [{'id':'newOPT', 'title':'New Option'}],
+						buttons : {
+							'Yes, Add' : function () { 
+								thisopt = this.basePop.find('#newOPT').val();
+								$('<option value="'+thisopt+'" selected="selected">'+thisopt+'</option>').appendTo($(self));
+								$(self).selectmenu('refresh', true);
+								return true; },
+							'Cancel' : { click: function () { $(self).selectmenu('open'); }, icon: 'delete', close: false }
+						}
+					});
+				}, 250);
 			}
 		});
 	}); // END : Add Dropdown Option
