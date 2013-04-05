@@ -1,27 +1,20 @@
 function infobox(text, head) { // CONTROL INFOBOX CONTENT
-	var first = $('.ui-page-active').children('.ui-content'),
-		header = ( typeof(head) === 'undefined' ) ? 'Information' : head;
-			
-		first.simpledialog({
-			'mode': 'blank',
-			'prompt': 'Notice',
-			'useDialogForceFalse': true,
-			'cleanOnClose': true,
-			'forceInput': false,
-			'fullHTML': 
-				'<ul data-role="listview" data-theme="c" data-dividertheme="a">'+
-					'<li data-role="list-divider">'+header+'</li>'+
-					'<li>'+text+'</li></ul>'
-		});
-		
-		setTimeout("$('.ui-page-active').children('.ui-content').data('simpledialog').close();", 3000);
-	} // END INFOBOX CONTENT
+	var header = ( typeof(head) === 'undefined' ) ? 'Information' : head;
+	$('<div>').popupwrapper({
+		displayMode: 'blank',
+		callbackOpen: function () { 
+			window.thisInfoBox = this.basePop;
+			window.thisPopTime = setTimeout(function () { window.thisInfoBox.popup('close'); }, 3000);
+		},
+		callbackClose: function () { clearTimeout(window.thisPopTime); },
+		content: 
+	    	'<div data-role="header" data-theme="a" class="ui-corner-top">'+
+				'<h1>'+header+'</h1>'+
+			'</div>'+
+			'<div data-role="content" data-theme="d" class="ui-corner-bottom ui-content">' + text + '</div>'
+	});
+} // END INFOBOX CONTENT
 
-jQuery.extend(jQuery.mobile.simpledialog.prototype.options, {
-		cleanOnClose: true,
-		useDialogForceFalse: true
-});
-	
 (function($) {
 	$('html').live('pageinit', function() { // BEGIN: Running in test mode?
 		testMode = ($('#tdtracconfig').attr('data-testmode') == 1 )?true:false;
@@ -32,7 +25,6 @@ jQuery.extend(jQuery.mobile.simpledialog.prototype.options, {
 		var self = $(this),
 			base = $(this).attr('data-base'),
 			subact = $(this).attr('data-sub'),
-			first = $('.ui-page-active').children('.ui-content'),
 			body = '';
 			
 		$.getJSON(baseHREF+'json/help/base:'+base+'/sub:'+subact+'/id:0/', function(data) {
@@ -45,17 +37,16 @@ jQuery.extend(jQuery.mobile.simpledialog.prototype.options, {
 						body +=  '<li><p><strong>'+data.helpbody[x][0]+'</strong>: '+data.helpbody[x][1]+'</p></li>';
 					} 
 				}
-				first.simpledialog({
-					'mode': 'blank',
-					'prompt': 'Notice',
-					'forceInput': false,
-					'useDialogForceFalse': true,
-					'cleanOnClose': true,
-					'width': '300px',	
-					'fullHTML': 
-						'<div style="width:100%"><ul data-split-icon="grid" data-role="listview" data-theme="c" data-dividertheme="a">'+
-							'<li data-role="list-divider">'+data.helptitle+'</li>'+
-							body+'</ul></div>'
+				$('<div>').popupwrapper({
+					displayMode: 'blank',
+					closeButton: 'left',
+					content:
+		            	'<div data-role="header" data-theme="a" class="ui-corner-top">'+
+		                	'<h1>' + data.helptitle + '</h1>'+
+			            '</div>'+
+			            '<div data-role="content" data-theme="d" class="ui-corner-bottom ui-content">' +
+			                '<ul data-role="listview" data-theme="c">' + body + '</ul>' +
+		    	        '</div>'
 				});
 			} else {
 				infobox("Help failed to load");
@@ -108,25 +99,23 @@ jQuery.extend(jQuery.mobile.simpledialog.prototype.options, {
 							+ '<p class="ui-li-count">$' + $(info[x]).attr('data-amount') + '</p></a>'
 							+ '<a href="'+baseHREF+'hours/edit/id:' + $(info[x]).attr('data-recid') + '/">Edit</a></li>';
 				}
-				
-				first.simpledialog({
-					'mode': 'blank',
-					'prompt': 'Notice',
-					'forceInput': false,
-					'useDialogForceFalse': true,
-					'cleanOnClose': true,
-					'width': '300px',	
-					'fullHTML': 
-						'<div style="width:100%"><ul data-split-icon="grid" data-role="listview" data-theme="c" data-dividertheme="a">'+
-							'<li data-role="list-divider">'+thisType+' Worked For :: '+thisDate+'</li>'+
-							lines+'</ul></div>'
-					});
+				$('<div>').popupwrapper({
+					displayMode: 'blank',
+					closeButton: 'right',
+					content:
+                    	'<div data-role="header" data-theme="a" style="min-width: 350px" class="ui-corner-top ui-bar-a">'+
+                        	'<h2 class="ui-title">' + thisType + ' Worked For :: ' + thisDate + '</h2>'+
+	                    '</div>'+
+    	                '<div data-role="content" data-theme="d" class="ui-corner-bottom ui-content">' +
+        	                '<ul data-role="listview" data-theme="c">' + lines + '</ul>' +
+            	        '</div>'
+				});
 			}
 		}
 	}); // END: Hours calender view handler
 	
 	$('html').ajaxComplete(function(e,xhr,settings) { // BEGIN: Test Mode Ajax Debug
-		/* DEBUG ALL JSON BASED AJAX */
+		//* DEBUG ALL JSON BASED AJAX /
 		if ( testMode === true && settings.url.search("json") > -1 ) {
 			console.log(xhr.responseText);
 		}
@@ -210,12 +199,14 @@ jQuery.extend(jQuery.mobile.simpledialog.prototype.options, {
 		e.preventDefault();
 		var linkie = this,
 			xxx = window.location.pathname,
-			id = xxx.match(/id:(\d+)/),
+			id = xxx.match(/id:(\d+)/);
 			first = $('.ui-page-active').children('.ui-content');
 			
-		first.simpledialog({
-			'mode' : 'bool', 
-			'prompt' : 'Delete Hours Item #'+id[1]+'?',
+		$('<div>').popupwrapper({
+			'displayMode' : 'button', 
+			'headerText': 'DELETE!',
+			'headerMinWidth': '300px',
+			'subTitle' : 'Delete Hours Item #'+id[1]+'?',
 			'buttons' : {
 				'Yes, Delete' : function () {
 					$.getJSON(baseHREF+"json/delete/base:hours/id:"+id[1]+"/", function(dta) {

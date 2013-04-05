@@ -393,7 +393,7 @@ class tdtrac_hours {
 		
 		$html[] = '<div data-role="controlgroup" data-type="horizontal" style="text-align: center">';
 		$html[] = '	<a href="'.$prevlink.'" rel="external" data-role="button" data-theme="'.(($prevdate==0)?'f':'d').'" data-icon="arrow-l">Previous Hours</a>';
-		$html[] = '	<a href="'.$nextlink.'" rel="external" data-role="button" data-theme="'.(($nextdate==0)?'f':'d').'"data-icon="arrow-r">Next Hours</a>';
+		$html[] = '	<a href="'.$nextlink.'" rel="external" data-role="button" data-theme="'.(($nextdate==0)?'f':'d').'" data-icon="arrow-r">Next Hours</a>';
 		$html[] = '</div>';
 		return $html;
 	}
@@ -546,10 +546,10 @@ class tdtrac_hours {
 		$html = array('<h4 class="intro">Manage Payroll Records</h4>');
 		
 		$list->setFormat("%s");
-		$list->addRow("<h3>Open Shows</h3><p>Payroll total for open shows</p><p class='ui-li-count'>\${$hours_open}</p></h3>");
-		$list->addRow("<h3>Unpaid {$htype}</h3><p>Unpaid {$htype}</p><p class='ui-li-count'>{$hours_unpaidn}</p></h3>");
-		$list->addRow("<h3>Unpaid Amount</h3><p>Total unpaid amount</p><p class='ui-li-count'>\${$hours_unpaidm}</p></h3>");
-		$list->addRow("<h3>Total Payroll</h3><p>Total payroll amount</p><p class='ui-li-count'>\${$hours_total}</p></h3>");
+		$list->addRow("<h3>Open Shows</h3><p>Payroll total for open shows</p><p class='ui-li-count'>\${$hours_open}</p>");
+		$list->addRow("<h3>Unpaid {$htype}</h3><p>Unpaid {$htype}</p><p class='ui-li-count'>{$hours_unpaidn}</p>");
+		$list->addRow("<h3>Unpaid Amount</h3><p>Total unpaid amount</p><p class='ui-li-count'>\${$hours_unpaidm}</p>");
+		$list->addRow("<h3>Total Payroll</h3><p>Total payroll amount</p><p class='ui-li-count'>\${$hours_total}</p>");
 		if ( $this->action['action'] <> 'add' ) {
 			$list->addRaw("<li data-icon='plus'><a href='{$TDTRAC_SITE}hours/add/'><h3>Add Item</h3></a></li>");
 		}
