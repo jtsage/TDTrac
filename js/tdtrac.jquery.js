@@ -496,15 +496,18 @@ function infobox(text, head) { // CONTROL INFOBOX CONTENT
 	$('.group-add').live( 'vclick', function(e) { // BEGIN: Group Add
 		e.preventDefault();
 		var linkie = this;
-		$(this).simpledialog({
-			'mode': 'string',
-			'prompt': 'New Group Name?',
-			'buttons': {
+		$('<div>').popupwrapper({
+			displayMode: 'button',
+			headerText: 'NEW',
+			headerMinWidth: '350px',
+			inputList: [{'id': 'newGRP', 'title': 'Group Name'}],
+			buttons: {
 				'Add' : {
 					'click' : function() {
-						if ($(linkie).data('string') !== '') {
+						newGROUP = this.basePop.find('#newGRP').val();
+						if (newGROUP !== '') {
 							$.mobile.showPageLoadingMsg();
-							$.getJSON(baseHREF+"json/adm/base:admin/sub:savegroup/id:0/newname:"+$(linkie).data('string')+"/", function(dta) {
+							$.getJSON(baseHREF+"json/adm/base:admin/sub:savegroup/id:0/newname:"+newGROUP+"/", function(dta) {
 								if ( dta.success === true ) {
 									$.mobile.changePage(dta.location, { reloadPage: true, transition: 'pop', changeHash: 'false', type: 'post', data: {'infobox': dta.msg}});
 								} else {
@@ -514,7 +517,8 @@ function infobox(text, head) { // CONTROL INFOBOX CONTENT
 							});
 						}
 					},
-					'icon' : 'plus'
+					'icon' : 'plus',
+					close: false
 				},
 				'Cancel' : function () { return true; }
 			}
@@ -524,16 +528,21 @@ function infobox(text, head) { // CONTROL INFOBOX CONTENT
 	$('.group-menu').live( 'vclick', function(e) {  // BEGIN: Group Menu
 		e.preventDefault();
 		var linkie = this;
-		$(this).simpledialog({
-			'mode' : ($(this).data('id') > 1 ) ? 'string' : 'bool',
-			'prompt' : 'Group #'+$(this).data('id'),
-			'buttons' : ($(this).data('id') > 1 ) ? 
+		$('<div>').popupwrapper({
+			displayMode: 'button',
+			buttonMode: 'list',
+			headerText: 'GROUP',
+			headerMinWidth: '350px',
+			inputList: (($(this).data('id') > 1) ? [{'id':'grpNAME', 'title':'New Name'}] : false),
+			subTitle: 'Group #'+$(this).data('id'),
+			buttons : ($(this).data('id') > 1 ) ? 
 				{
 					'Rename' : {
 						'click': function() {
-							if ($(linkie).data('string') !== '') {
+							newNAME = this.basePop.find('#grpNAME').val();
+							if (newNAME !== '') {
 								$.mobile.showPageLoadingMsg();
-								$.getJSON(baseHREF+"json/adm/base:admin/sub:savegroup/id:"+$(linkie).data('id')+"/newname:"+$(linkie).data('string')+"/", function(dta) {
+								$.getJSON(baseHREF+"json/adm/base:admin/sub:savegroup/id:"+$(linkie).data('id')+"/newname:"+newNAME+"/", function(dta) {
 									if ( dta.success === true ) {
 										$.mobile.changePage(dta.location, { reloadPage: true, transition: 'pop', changeHash: 'false', type: 'post', data: {'infobox': dta.msg}});
 									} else {
@@ -547,7 +556,8 @@ function infobox(text, head) { // CONTROL INFOBOX CONTENT
 					},
 					'Change Perms' : {
 						'click': function() { $.mobile.changePage(baseHREF+"admin/permsedit/id:"+$(linkie).data('id')+"/"); },
-						'icon': 'grid'
+						'icon': 'grid',
+						close: false
 					},
 					'Delete' : {
 						'click': function() {
