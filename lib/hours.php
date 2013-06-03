@@ -382,7 +382,7 @@ class tdtrac_hours {
 			'pickPageOAHighButtonTheme' => 'b',
 			'pickPageOHighButtonTheme' => 'e',
 			'pickPageButtonTheme' => 'a',
-			'defaultPickerValue' => array($this->action['year'],($this->action['month']-1),1)
+			'defaultValue' => array(intval($this->action['year']),($this->action['month']-1),1)
 		);
 		
 		$html[] = "<input type='date' data-role='datebox' id='hoursview' name='hoursview' data-options='".json_encode($dboxopt)."' />";
