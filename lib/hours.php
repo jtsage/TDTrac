@@ -379,13 +379,10 @@ class tdtrac_hours {
 			'mode' => 'calbox',
 			'calHighToday' => false,
 			'themeDateToday' => 'd',
-			'calShowOnlyMonth' => false,
-			'calHighPicked' => false,
+			'calOnlyMonth' => false,
+			'calHighPick' => false,
 			'highDates' => (empty($theseHighDates)?false:$theseHighDates),
 			'highDatesAlt' => (empty($theseHighDatesAlt)?false:$theseHighDatesAlt),
-			'pickPageOAHighButtonTheme' => 'b',
-			'pickPageOHighButtonTheme' => 'e',
-			'pickPageButtonTheme' => 'a',
 			'defaultValue' => array(intval($this->action['year']),($this->action['month']-1),1)
 		);
 		
