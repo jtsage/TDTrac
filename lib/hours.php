@@ -76,6 +76,9 @@ class tdtrac_hours {
 					case 'show':
 						$this->html = $this->view_standard(intval($this->action['id']), 'show');
 						break;
+					case 'showlist':
+						$this->html = $this->view_list(intval($this->action['id']));
+						break;
 					case 'unpaid':
 						$this->html = $this->view_pending();
 						break;
@@ -372,9 +375,10 @@ class tdtrac_hours {
 		$html[] = "<div id='hours-user-show'>";
 		$dboxopt = array(
 			'useInline' => True,
-			'useInlineHideInput' => True,
+			'hideInput' => True,
 			'mode' => 'calbox',
 			'calHighToday' => false,
+			'themeDateToday' => 'd',
 			'calShowOnlyMonth' => false,
 			'calHighPicked' => false,
 			'highDates' => (empty($theseHighDates)?false:$theseHighDates),
@@ -398,6 +402,47 @@ class tdtrac_hours {
 		return $html;
 	}
 	
+	
+	/** 
+	 * Show Hours by Show in a list
+	 * 
+	 * @global object MySQL Database Resource
+	 * @global string MySQL Table Prefix
+	 * @param integer Show or User ID
+	 * @param string Type to display
+	 * @return array Formatted HTML
+	 */
+	public function view_list($id) {
+		GLOBAL $db, $MYSQL_PREFIX, $TDTRAC_DAYRATE, $TDTRAC_SITE;
+		
+		$html = array();
+		
+		$thename = get_single("SELECT showname as num FROM `{$MYSQL_PREFIX}shows` WHERE showid = {$id}");
+		$html[] = "<h3>Hours For: {$thename}</h3>";
+		
+		$sql = "SELECT h.*, showname, (h.worked*u.payrate) as amount, h.note as note, CONCAT(u.first, ' ', u.last) as name "
+			. "FROM `{$MYSQL_PREFIX}hours` h, `{$MYSQL_PREFIX}shows` s, `{$MYSQL_PREFIX}users` u "
+			. "WHERE h.showid = s.showid AND h.userid = u.userid "
+			. "ORDER BY date ASC, u.last ASC";
+			
+		$result = mysql_query($sql);
+		
+		if ( mysql_num_rows($result) < 1 ) {
+			$theseHighDates = False;
+			$theseHighDatesAlt = False;
+		} else {
+			$html[] = "<table style='width:100%' border='1' cellspacing='0'><tr><th>Date</th><th>Employee</th><th>Hours</th><th>Amount</th><th>Note</th></tr>";
+			
+			while ( $row = mysql_fetch_array($result) ) {
+				$bdon = $row['submitted'] == 0 ? "<strong>":"";
+				$bdof = $row['submitted'] == 0 ? "</strong>":"";
+				$html[] = "  <tr><td>{$bdon}{$row['date']}{$bdof}</td><td>{$bdon}{$row['name']}{$bdof}</td><td>{$bdon}{$row['worked']}{$bdof}".
+				  "</td><td>{$bdon}".number_format($row['amount'],2)."{$bdof}</td><td>{$row['note']}</td></tr>";
+			}
+			$html[] = "</table>";
+		}
+		return $html;
+	}
 	/**
 	 * Send hours via email
 	 * 
@@ -550,6 +595,15 @@ class tdtrac_hours {
 		$list->addRow("<h3>Unpaid {$htype}</h3><p>Unpaid {$htype}</p><p class='ui-li-count'>{$hours_unpaidn}</p>");
 		$list->addRow("<h3>Unpaid Amount</h3><p>Total unpaid amount</p><p class='ui-li-count'>\${$hours_unpaidm}</p>");
 		$list->addRow("<h3>Total Payroll</h3><p>Total payroll amount</p><p class='ui-li-count'>\${$hours_total}</p>");
+		if ( $this->action['action'] == 'view' ) {
+			$type = (isset($this->action['type']))?$this->action['type']:'user';
+			if ( $type == 'show' ) {
+				$list->addRaw("<li data-icon='arrow-r'><a href='{$TDTRAC_SITE}hours/view/type:showlist/id:{$this->action['id']}'><h3>View as List</h3></a></li>");
+			}
+			if ( $type == 'showlist' ) {
+				$list->addRaw("<li data-icon='arrow-r'><a href='{$TDTRAC_SITE}hours/view/type:show/id:{$this->action['id']}'><h3>View as Calendar</h3></a></li>");
+			}
+		}
 		if ( $this->action['action'] <> 'add' ) {
 			$list->addRaw("<li data-icon='plus'><a href='{$TDTRAC_SITE}hours/add/'><h3>Add Item</h3></a></li>");
 		}
