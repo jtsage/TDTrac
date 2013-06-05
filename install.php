@@ -10,7 +10,7 @@
 ob_start(); session_start(); 
 
 ## PROGRAM DETAILS. DO NOT EDIT UNLESS YOU KNOW WHAT YOU ARE DOING
-$TDTRAC_VERSION = "3.2.1";
+$TDTRAC_VERSION = "3.2.2";
 $TDTRAC_PERMS = array("addshow", "editshow", "viewshow", "addbudget", "editbudget", "viewbudget", "addhours", "edithours", "viewhours", "adduser");
 $INSTALL_FILES = array(
 	"index.php",
@@ -68,6 +68,7 @@ switch ($page_title) {
 		fwrite($fh, "\$TDTRAC_CPNY = \"{$_REQUEST['cpny']}\";\n");
 		fwrite($fh, "\$TDTRAC_SITE = \"{$_REQUEST['site']}\";\n");
 		fwrite($fh, "\$TDTRAC_DAYRATE = \"{$_REQUEST['dayrate']}\";\n");
+		fwrite($fh, "\$TDTRAC_PAYDAYLIMIT = \"{$_REQUEST['paydaylimit']}\";\n");
 		fwrite($fh, "\$TDTRAC_PAYRATE = \"{$_REQUEST['payrate']}\";\n?>\n");
 		header("Location: install.php");
 	} else {
@@ -78,6 +79,7 @@ switch ($page_title) {
 		$fes = $form->addInfo("Enter 1 for Daily rate, 0 for Hourly");
 		$fes = $form->addText(array('id' => 'dayrate', 'label' => "Day Rate", 'preset' => $TDTRAC_DAYRATE));
 		$fes = $form->addText(array('id' => 'payrate', 'label' => "Default Pay Rate", 'preset' => $TDTRAC_PAYRATE));
+		$fes = $form->addText(array('id' => 'paydaylimit', 'label' => "No Pay Entry after # Days old", 'preset' => $TDTRAC_PAYDAYLIMIT));
 		
 		echo join("\n", $form->output('Save Values'));
 	}

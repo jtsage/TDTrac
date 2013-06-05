@@ -123,7 +123,7 @@ class tdtrac_hours {
 	 * @return array HTML output
 	 */
 	private function add_form () {
-		GLOBAL $TDTRAC_DAYRATE, $TDTRAC_SITE;
+		GLOBAL $TDTRAC_DAYRATE, $TDTRAC_SITE, $TDTRAC_PAYDAYLIMIT;
 		$form = new tdform(array( 'action' => "{$TDTRAC_SITE}json/save/base:hours/id:0/", 'id' => 'hours-add-form'));
 		
 		$fesult = $form->addDrop(array(
@@ -139,8 +139,13 @@ class tdtrac_hours {
 			'selected' => ((isset($this->action['show']) && is_numeric($this->action['show']))?$this->action['show']:0),
 			'options' => db_list(get_sql_const('showid'), array(showid, showname))
 		));
-		
-		$fesult = $form->addDate(array('name' => 'date', 'label' => 'Date', 'placeholder' => 'Date worked'));
+
+	    $dateopt = ($this->user->groupnum > 2 && $TDTRAC_PAYDAYLIMIT > 0) ? '{"minDays":'.$TDTRAC_PAYDAYLIMIT.', "useNewStyle": true, "pickPageButtonTheme":"c", "mode": "calbox", "useModal": true}':'{"useNewStyle": true, "pickPageButtonTheme":"c", "mode": "calbox", "useModal": true}';
+
+		if ( $this->user->groupnum > 2 && $TDTRAC_PAYDAYLIMIT > 0 ) {
+			$fesult = $form->addInfo("<div style='text-align:center'><strong>Note:</strong> You may only add hours that occured within the last 48hrs.  For old payroll, please contact your administrator.</div>");
+		}
+		$fesult = $form->addDate(array('name' => 'date', 'label' => 'Date', 'placeholder' => 'Date worked', 'options' => $dateopt));
 		$fesult = $form->addText(array('name' => 'worked', 'label' => (($TDTRAC_DAYRATE)?"Days":"Hours")." Worked", 'placeholder' => 'Amount Worked'));
 		$fesult = $form->addText(array('name' => 'note', 'label' => "Note", 'placeholder' => 'Note'));
 		

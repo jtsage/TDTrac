@@ -81,6 +81,7 @@ class tdtrac_user {
 		$this->id = $row['userid'];
 		$this->email = $row['email'];
 		$this->group = $row['groupname'];
+		$this->groupnum = $row['gid'];
 		$this->isemp = ($row['limithours']) ? true : false;
 		if ( $row['gid'] == 1 ) { $this->admin = true; }
 	}
