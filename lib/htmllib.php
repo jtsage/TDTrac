@@ -23,23 +23,32 @@ function makePage($body = '', $title = '', $sidebar = '') {
     }
     $html = makeHeader($title);
     if ( !empty($sidebar) ) {
-        $html[] = "\t\t    <div class='content-secondary'>\n";
-        $html[] = "\t\t\t<div class='tdtractitle'>TD<span class='red'>Trac</span></div>\n";
+        $html[] = "<div class='content-secondary'>\n";
+        $html[] = "<div class='tdtractitle'>TD<span class='red'>Trac</span></div>\n";
         foreach ( $sidebar as $fixme ) {
-            $html[] = "\t\t\t{$fixme}";
+            $html[] = "{$fixme}";
         }
-        $html[] = "\t\t    </div><div class='content-primary'>\n";
+        $html[] = "</div><div class='content-primary'>\n";
     }
     foreach( $body as $fixme ) {
-        $html[] = "\t\t\t{$fixme}";
+        $html[] = "{$fixme}";
     }
     if ( !empty($sidebar) ) {
-        $html[] = "\t\t    </div>\n";
+        $html[] = "</div>\n";
     }
     $html = array_merge($html, makeFooter($title, $user->loggedin));
     if ( !$TEST_MODE ) { ob_clean(); } //Hackish method to clear any extra lines / echos before html starts
+    $indent = 0;
     foreach ($html as $line) {
+        $line = preg_replace("/\t/", $line);
+        if ( preg_match("/^<div/") ) { $indent++; }
+        if ( preg_match("/<head>/") ) { $indent++; }
+        if ( preg_match("/<body>/") ) { $indent++; }
+        if ( preg_match("/\/div>$/") ) { $indent--; }
+        if ( preg_match("/</head>/") ) { $indent--; }
+        if ( preg_match("/</body>/") ) { $indent--; }
         echo $line . "\n";
+        if ( preg_match("/<\/div/") ) { $indent--; }
     }
 }
 
