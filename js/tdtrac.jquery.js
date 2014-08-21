@@ -1,60 +1,60 @@
-function infobox(text, head) { // CONTROL INFOBOX CONTENT
-	var header = ( typeof(head) === 'undefined' ) ? 'Information' : head;
-	$('<div>').popupwrapper({
-		displayMode: 'blank',
-		callbackOpen: function () { 
-			window.thisInfoBox = this.basePop;
-			window.thisPopTime = setTimeout(function () { window.thisInfoBox.popup('close'); }, 3000);
-		},
-		callbackClose: function () { clearTimeout(window.thisPopTime); },
-		content: 
-	    	'<div data-role="header" data-theme="a" class="ui-corner-top">'+
-				'<h1>'+header+'</h1>'+
-			'</div>'+
-			'<div data-role="content" data-theme="d" class="ui-corner-bottom ui-content">' + text + '</div>'
-	});
+function infobox(text, head) { //v4 CONTROL INFOBOX CONTENT
+	var element = "<div style='min-width: 400px' data-theme='a'>" +
+		"<a href='#' data-rel='back' class='ui-btn ui-corner-all ui-shadow ui-btn-a " + 
+		"ui-icon-delete ui-btn-icon-notext ui-btn-left'>Close</a>" +
+		(( typeof(head) === "undefined" ) ?
+			"" :
+			"<div data-role='header'><h1>" + head + "</h1></div>" 
+		) +
+		"<div data-role='content' class='ui-content'>" + text + "</div>" +
+		"</div>";
+		
+	$(element).enhanceWithin().alertbox();
 } // END INFOBOX CONTENT
 
 (function($) {
-	$('html').live('pageinit', function() { // BEGIN: Running in test mode?
+	var closeButton = "<a href='#' data-rel='back' class='ui-btn ui-corner-all ui-shadow ui-btn-a " + 
+		"ui-icon-delete ui-btn-icon-notext ui-btn-left'>Close</a>";
+		
+	$('html').on('pageinit', function() { // BEGIN: Running in test mode?
 		testMode = ($('#tdtracconfig').attr('data-testmode') == 1 )?true:false;
 		baseHREF = $('#tdtracconfig').attr('data-base');
+		console.log('ran');
 	}); // END: Check test Mode
 	
-	$('.help-link').live('click', function(e,p) { // BEGIN: Show Help Text
+	$(document).on("click", ".help-link", function(e,p) { // BEGIN: Show Help Text
 		var self = $(this),
-			base = $(this).attr('data-base'),
-			subact = $(this).attr('data-sub'),
-			body = '';
+			base = $(this).attr( "data-base" ),
+			subact = $(this).attr( "data-sub" ),
+			body = "",
+			full = "<div data-theme='a' style='min-width: 400px'>";
 			
-		$.getJSON(baseHREF+'json/help/base:'+base+'/sub:'+subact+'/id:0/', function(data) {
-			self.removeClass('ui-btn-active');
+		$.getJSON(baseHREF + "json/help/base:" + base + "/sub:" + subact + "/id:0/", function(data) {
+			self.removeClass( "ui-btn-active" );
 			if ( data.success === true ) {
-				for ( x=0; x<data.helpbody.length; x++ ) {
+				console.log(data);
+				for ( x = 0; x < data.helpbody.length; ++x ) {
 					if ( data.helpbody[x][1] === null ) {
-						body += '<li>'+data.helpbody[x][0]+'</li>';
+						body += "<li>" + data.helpbody[x][0] + "</li>";
 					} else {
-						body +=  '<li><p><strong>'+data.helpbody[x][0]+'</strong>: '+data.helpbody[x][1]+'</p></li>';
+						body += "<li><p><strong>" + data.helpbody[x][0] + "</strong>: " +
+							data.helpbody[x][1] + "</p></li>";
 					} 
 				}
-				$('<div>').popupwrapper({
-					displayMode: 'blank',
-					closeButton: 'left',
-					content:
-		            	'<div data-role="header" data-theme="a" class="ui-corner-top">'+
-		                	'<h1>' + data.helptitle + '</h1>'+
-			            '</div>'+
-			            '<div data-role="content" data-theme="d" class="ui-corner-bottom ui-content">' +
-			                '<ul data-role="listview" data-theme="c">' + body + '</ul>' +
-		    	        '</div>'
-				});
+				
+				full += closeButton + "<div data-role='header'><h1>" + data.helptitle + "</h1></div>" +
+					"<div class='ui-content'><ul data-role='listview'>" + body + "</ul></div>" +
+					"</div>";
+					
+				$(full).enhanceWithin().popup().popup( "open" );
+				
 			} else {
-				infobox("Help failed to load");
+				infobox("Help failed to load", "Error");
 			}
 		});
 	}); // END: Show Help Text
 	
-	$('#hoursview').live('datebox', function(e,p) { // BEGIN: Hours calender view handler
+	$('#hoursview').on('datebox', function(e,p) { // BEGIN: Hours calender view handler
 		if ( p.method === 'offset' && p.type === 'm' ) {
 			$.mobile.showPageLoadingMsg();
 			var xxx = window.location.pathname,
@@ -121,50 +121,59 @@ function infobox(text, head) { // CONTROL INFOBOX CONTENT
 		}
 	}); // END: Test Mode Ajax Debug
 	
-	$('form').live('submit', function(e) { // FORM HANDLEING
-		$.mobile.showPageLoadingMsg();
+	$(document).on("submit", "form", function(e) { // FORM HANDLEING
+		console.log('fuck?');
+		$.mobile.loading("show");
 		e.preventDefault();
 		
 		var formdata = $(this).serialize(),
-			formurl = $(this).attr('action'),
+			formurl = $(this).attr( "action" ),
 			ready = false,
 			needed = [];
 		
-		$('.ui-page-active [data-require=1]').each(function () {
-			if ( $(this).val() == '' ) { 
-				needed.push( $('[for='+$(this).attr('id')+']').text() );
+		$( ".ui-page-active [data-require=1]" ).each(function () {
+			if ( $(this).val() == "" ) { 
+				needed.push( $( "[for=" + $(this).attr( "id" ) + "]" ).text() );
 			}
 		});
 		
 		if ( needed.length > 0 ) {
-			$.mobile.hidePageLoadingMsg();
-			infobox("These fields are required:<br />'"+needed.join("', '")+"'", 'Error');
+			$.mobile.loading("hide");
+			infobox("These fields are required:<br />'"+needed.join("', '")+"'", "Error");
 		} else {
 			ready = true;
 		}
 		
 		if ( ready ) {
 			$.ajax({
-				type: 'POST',
+				type: "POST",
 				url: formurl,
 				data: formdata,
 				success: 
 					function(dta) {
 						if ( testMode === true ) { console.log(dta); }
 						if ( dta.success === true ) {
-							$.mobile.changePage(dta.location, { reloadPage: true, type: 'post', data: {'infobox': dta.msg}, transition:'slide'});
+							$.mobile.changePage(
+								dta.location, 
+								{ 
+									reloadPage: true,
+									type: "post",
+									data: {"infobox": dta.msg},
+									transition:"slide"
+								}
+							);
 						} else {
-							$.mobile.hidePageLoadingMsg();
-							infobox(dta.msg,'Error');
+							$.mobile.loading("hide");
+							infobox(dta.msg,"Error");
 						}
 				},
-				dataType: 'json'});
+				dataType: "json"});
 		}
 		
 	}); // END FORM HANDLING
 	
-	$('.ajax-email').die('click');
-	$('.ajax-email').live('click', function(e) { // BEGIN: E-Mail Function
+	$('.ajax-email').off('click');
+	$('.ajax-email').on('click', function(e) { // BEGIN: E-Mail Function
 		$.mobile.showPageLoadingMsg();
 		e.preventDefault();
 		
@@ -195,7 +204,7 @@ function infobox(text, head) { // CONTROL INFOBOX CONTENT
 		}
 	}); // END: E-Mail Function
 	
-	$('#hours-delete').live( 'vclick', function(e) {  // BEGIN: Delete Hours
+	$('#hours-delete').on( 'vclick', function(e) {  // BEGIN: Delete Hours
 		e.preventDefault();
 		var linkie = this,
 			xxx = window.location.pathname,
@@ -221,7 +230,7 @@ function infobox(text, head) { // CONTROL INFOBOX CONTENT
 		});
 	}); // END: Delete Hours
 	
-	$('.todo-done').live( 'vclick', function(e) {  // BEGIN: Mark Todo Done
+	$('.todo-done').on( 'vclick', function(e) {  // BEGIN: Mark Todo Done
 		e.preventDefault();
 		var linkie = this;
 		if ( ! $(this).data('done') ) {
@@ -250,7 +259,7 @@ function infobox(text, head) { // CONTROL INFOBOX CONTENT
 		}
 	}); // END: Mark Todo Done
 	
-	$('.todo-menu').live( 'vclick', function(e) {  // BEGIN: Todo Menu
+	$('.todo-menu').on( 'vclick', function(e) {  // BEGIN: Todo Menu
 		e.preventDefault();
 		var linkie = this;
 		if ( ! $(this).data('done') ) {
@@ -292,7 +301,7 @@ function infobox(text, head) { // CONTROL INFOBOX CONTENT
 		}
 	}); // END: Todo Menu
 	
-	$('.hours-clear').live('vclick', function (e) { // BEGIN: Clear Hours
+	$('.hours-clear').on('vclick', function (e) { // BEGIN: Clear Hours
 		e.preventDefault();
 		var linkie = this;
 		if ( ! $(this).data('done') ) {
@@ -319,7 +328,7 @@ function infobox(text, head) { // CONTROL INFOBOX CONTENT
 		}
 	}); // END: Clear Hours
 	
-	$('.hours-mark').live('vclick', function (e) { // BEGIN: Mark Hours
+	$('.hours-mark').on('vclick', function (e) { // BEGIN: Mark Hours
 		e.preventDefault();
 		var linkie = this;
 		if ( ! $(this).data('done') ) {
@@ -347,7 +356,7 @@ function infobox(text, head) { // CONTROL INFOBOX CONTENT
 		}
 	}); // END: Mark Hours
 	
-	$('.msg-delete').live('vclick', function (e) { // BEGIN: Delete Message
+	$('.msg-delete').on('vclick', function (e) { // BEGIN: Delete Message
 		e.preventDefault();
 		var linkie = this;
 		if ( ! $(this).data('done') ) {
@@ -373,8 +382,8 @@ function infobox(text, head) { // CONTROL INFOBOX CONTENT
 		}
 	}); // END: Delete Message
 	
-	$('#mailClear').die('click');
-	$('#mailClear').live('click', function(e) { // BEGIN: Message Clear
+	$('#mailClear').off('click');
+	$('#mailClear').on('click', function(e) { // BEGIN: Message Clear
 		$.mobile.showPageLoadingMsg();
 		e.preventDefault();
 		
@@ -389,7 +398,7 @@ function infobox(text, head) { // CONTROL INFOBOX CONTENT
 		
 	}); // END: Message Clear
 	
-	$('.show-menu').live('vclick', function (e) { // BEGIN: Show Menu
+	$('.show-menu').on('vclick', function (e) { // BEGIN: Show Menu
 		e.preventDefault();
 		var linkie = this;
 		if ( ! $(this).data('done') ) {
@@ -425,7 +434,7 @@ function infobox(text, head) { // CONTROL INFOBOX CONTENT
 		}
 	}); // END: Show Menu
 	
-	$('.budg-menu').live('vclick', function (e) { // BEGIN: Budget Menu
+	$('.budg-menu').on('vclick', function (e) { // BEGIN: Budget Menu
 		e.preventDefault();
 		var linkie = this;
 		if ( ! $(this).data('done') ) {
@@ -477,7 +486,7 @@ function infobox(text, head) { // CONTROL INFOBOX CONTENT
 	}); // END: Budget Menu
 	
 	// BEGIN : Recpt Functions
-	$('.rcptrot').live('vclick', function (e) { 
+	$('.rcptrot').on('vclick', function (e) { 
 		var self = this;
 			date = new Date();
 		
@@ -493,7 +502,7 @@ function infobox(text, head) { // CONTROL INFOBOX CONTENT
 		});
 	}); // END Rcpt Func
 	
-	$('.group-add').live( 'vclick', function(e) { // BEGIN: Group Add
+	$('.group-add').on( 'vclick', function(e) { // BEGIN: Group Add
 		e.preventDefault();
 		var linkie = this;
 		$('<div>').popupwrapper({
@@ -525,7 +534,7 @@ function infobox(text, head) { // CONTROL INFOBOX CONTENT
 		});
 	}); // END : Group Add
 	
-	$('.group-menu').live( 'vclick', function(e) {  // BEGIN: Group Menu
+	$('.group-menu').on( 'vclick', function(e) {  // BEGIN: Group Menu
 		e.preventDefault();
 		var linkie = this;
 		$('<div>').popupwrapper({
@@ -584,7 +593,7 @@ function infobox(text, head) { // CONTROL INFOBOX CONTENT
 		}); 
 	}); // END: Group Menu
 	
-	$('.user-menu').live( 'vclick', function(e) {  // BEGIN: User Menu
+	$('.user-menu').on( 'vclick', function(e) {  // BEGIN: User Menu
 		e.preventDefault();
 		var linkie = this;
 		$('<div>').popupwrapper({
@@ -672,7 +681,7 @@ function infobox(text, head) { // CONTROL INFOBOX CONTENT
 		});
 	}); // End User Menu
 	
-	$('select').live('change', function(e) { // BEGIN : Add Dropdown Option
+	$('select').on('change', function(e) { // BEGIN : Add Dropdown Option
 		var self = this;
 
 		$(self+':selected:not([data-placeholder])').each(function(){

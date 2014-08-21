@@ -40,7 +40,7 @@ class tdform {
 	 * @return object Form Object
 	 */
 	public function __construct($passed) {
-		$default = array( 'action' => '/', 'theme' => 'c', 'id' => 'tdform' );
+		$default = array( 'action' => '/', 'theme' => 'a', 'id' => 'tdform' );
 		$options = merge_defaults($default, $passed);
 		$this->html[] = "<form method='post' data-ajax='false' data-theme='{$options['theme']}' action='{$options['action']}'>";
 		$this->formname = $options['id'];
@@ -128,7 +128,7 @@ class tdform {
 			'role'		=> 'datebox',
 			'require'	=> 'true',
 			'placeholder' => '',
-			'options'	=> '{"useNewStyle": true, "pickPageButtonTheme":"c", "mode": "calbox", "useModal": true}'
+			'options'	=> '{"mode": "calbox", "useModal": true}'
 			);
 		$options = merge_defaults($default, $passed);
 		return $this->addText($options);
@@ -203,7 +203,7 @@ class tdform {
 		
 		$this->members[] = array($options['type'], $options['name'], $options['label'], $options['title'], $options['preset']);
 		
-		$temp  = "  <div data-role='fieldcontain' title='{$options['title']}'><label for='{$options['id']}'>{$options['label']}</label><input ".(($options['role'] != null)?"data-role='{$options['role']}' ":"")."type='{$options['type']}' data-theme='c' placeholder='{$options['placeholder']}' data-require='{$options['require']}' name='{$options['name']}' id='{$options['id']}' ";
+		$temp  = "  <div class='ui-field-contain' title='{$options['title']}'><label for='{$options['id']}'>{$options['label']}</label><input ".(($options['role'] != null)?"data-role='{$options['role']}' ":"")."type='{$options['type']}' data-theme='c' placeholder='{$options['placeholder']}' data-require='{$options['require']}' name='{$options['name']}' id='{$options['id']}' ";
 		if ( $options['preset'] != null )	{ $temp .= "value='{$options['preset']}' "; }
 		if ( $options['options'] != null ) 	{ $temp .= "data-options='{$options['options']}' "; }
 		if ( ! $options['enabled'] )		{ $temp .= "disabled='disabled' "; }
@@ -245,7 +245,7 @@ class tdform {
 		
 		$this->members[] = array('radio', $options['name'], $options['label'], $options['title'], $options['options']);
 
-		$temp  = "<div data-role='fieldcontain'>";
+		$temp  = "<div class='ui-field-contain'>";
 		$temp .= "<fieldset data-role='controlgroup' data-type='horizontal'>";
 		$temp .= "<legend>{$options['label']}</legend>"; 
 		$ident = "a";
@@ -294,7 +294,7 @@ class tdform {
 		if ( $options['id'] == null )		{ $options['id'] = $options['name']; }
 		if ( $options['title'] == null ) { $options['title'] = $options['label']; }
 
-		$temp  = "  <div data-role='fieldcontain'><label for='{$options['id']}'>{$options['label']}</label><select data-require='{$options['require']}' data-native-menu='false' name='{$options['name']}' id='{$options['id']}' ".(!$options['enabled'] ? " disabled='disabled'":"").">";
+		$temp  = "  <div class='ui-field-contain'><label for='{$options['id']}'>{$options['label']}</label><select data-require='{$options['require']}' data-native-menu='false' name='{$options['name']}' id='{$options['id']}' ".(!$options['enabled'] ? " disabled='disabled'":"").">";
 		if ( $options['header'] ) {
 			$temp .= "<option data-placeholder='true' value=''>Choose one...</option>";
 		}
@@ -355,7 +355,7 @@ class tdform {
 	 */
 	public function addInfo($text) {
 		$this->members[] = array('info', null, $text, null, null);
-		$this->html[] = "  <div data-role='fieldcontain'>{$text}</div>";
+		$this->html[] = "  <div class='ui-field-contain'>{$text}</div>";
 		return true;
 	}
 	
@@ -400,7 +400,7 @@ class tdform {
 		
 		$this->members[] = array('checkbox', $options['name'], $options['label'], $options['title'], $options['preset']);
 		
-		$this->html[] = "  <div data-role='fieldcontain'><fieldset data-role='controlgroup'><legend>{$options['label']}</legend><input type='checkbox' name='{$options['name']}' id='{$options['id']}' class='custom' value='{$options['value']}'".($options['preset']?"checked='checked' ":"").(!$options['enabled']?"disabled='disabled' ":"")." /><label for='{$options['id']}'>{$options['text']}</label></fieldset></div>";
+		$this->html[] = "  <div class='ui-field-contain'><fieldset data-role='controlgroup'><legend>{$options['label']}</legend><input type='checkbox' name='{$options['name']}' id='{$options['id']}' class='custom' value='{$options['value']}'".($options['preset']?"checked='checked' ":"").(!$options['enabled']?"disabled='disabled' ":"")." /><label for='{$options['id']}'>{$options['text']}</label></fieldset></div>";
 		return true;
 	}
 	
@@ -429,7 +429,7 @@ class tdform {
 		
 		$this->members[] = array('checkbox', $options['name'], $options['label'], $options['title'], $options['preset']);
 		
-		$this->html[] = "  <div data-role='fieldcontain'><fieldset data-role='controlgroup'><legend>{$options['label']}</legend>";
+		$this->html[] = "  <div class='ui-field-contain'><fieldset data-role='controlgroup'><legend>{$options['label']}</legend>";
 		$int = 0;
 		foreach ( $options['value'] as $each ) {
 			$int++;

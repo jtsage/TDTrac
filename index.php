@@ -167,9 +167,9 @@ if ( !$user->loggedin ) {
 			
 			$col = 1;
 			$parts = array('', 'a','b','c');
-			$html[] = "<div data-theme='b' class='ui-grid-b tdtrac-index'>";
+			$html[] = "<div data-theme='a' class='ui-grid-b tdtrac-index'>";
 			foreach ( $index_items as $item ) {
-				$html[] = "<div class='ui-block-{$parts[$col]}'><div class='main-index-img ui-bar ui-bar-c'>"
+				$html[] = "<div class='ui-block-{$parts[$col]}'><div class='main-index-img ui-bar ui-bar-a'>"
 					."<a href='{$item[0]}'><img src='{$TDTRAC_SITE}images/main-{$item[1]}.png' />"
 					."<br /><h2>{$item[2]}</h2>"
 					."<p>{$item[3]}</p>"

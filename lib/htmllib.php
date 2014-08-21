@@ -4,7 +4,7 @@
  * 
  * Contains site header.
  * @package tdtrac
- * @version 2.0.0
+ * @version 3.0.0
  * @since 1.4.0
  * @author J.T.Sage <jtsage@gmail.com>
  */
@@ -65,41 +65,41 @@ function makeHeader($title = '') {
     $html[] = '<!DOCTYPE html>';
     $html[] = '<html lang="en">';
     $html[] = '<head>';
-    $html[] = '	<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />';
+    $html[] = '	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />';
     $html[] = '	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">';
     $html[] = '	<meta name="apple-mobile-web-app-capable" content="yes">';
     $html[] = "	<title>TDTrac{$TDTRAC_CPNY}:{$TDTRAC_VERSION} - {$title}</title>";
     $html[] = '	<!--[if lt IE 9]>';
     $html[] = '		<script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>';
     $html[] = '	<![endif]-->';
-    $html[] = '	<link type="text/css" href="http://code.jquery.com/mobile/1.3.0/jquery.mobile.structure-1.3.0'.$min.'.css" rel="stylesheet" />';
+    $html[] = '	<link type="text/css" href="http://code.jquery.com/mobile/1.4.3/jquery.mobile.structure-1.4.3'.$min.'.css" rel="stylesheet" />';
     $html[] = '	<link type="text/css" href="http://dev.jtsage.com/cdn/datebox/latest/jqm-datebox'.$min.'.css" rel="stylesheet" /> ';
     $html[] = '	<link type="text/css" href="'.$TDTRAC_SITE.'css/tdtheme.css" rel="stylesheet" /> ';
     $html[] = '	<link type="text/css" href="'.$TDTRAC_SITE.'css/tdtheme.mobile.css" rel="stylesheet" /> ';
-    $html[] = '	<script type="text/javascript" src="http://code.jquery.com/jquery-1.7.1'.$min.'.js"></script>';
-    $html[] = '	<script type="text/javascript" src="http://code.jquery.com/mobile/1.3.0/jquery.mobile-1.3.0'.$min.'.js"></script>';
-	$html[] = '	<script type="text/javascript" src="http://dev.jtsage.com/cdn/datebox/latest/jqm-datebox.core'.$min.'.js"></script>';
-	$html[] = '	<script type="text/javascript" src="http://dev.jtsage.com/cdn/datebox/latest/jqm-datebox.mode.calbox'.$min.'.js"></script>';
+    $html[] = '	<script type="text/javascript" src="http://code.jquery.com/jquery-2.1.1'.$min.'.js"></script>';
+    $html[] = '	<script type="text/javascript" src="http://code.jquery.com/mobile/1.4.3/jquery.mobile-1.4.3'.$min.'.js"></script>';
+	$html[] = '	<script type="text/javascript" src="http://dev.jtsage.com/cdn/datebox/1.4.4/jqm-datebox-1.4.4.comp.calbox'.$min.'.js"></script>';
 	$html[] = '	<script type="text/javascript" src="http://dev.jtsage.com/cdn/datebox/i18n/jquery.mobile.datebox.i18n.en_US.utf8.js"></script>';
-    $html[] = '	<script type="text/javascript" src="http://dev.jtsage.com/cdn/popupwrap/latest/jqm-popupwrap'.$min.'.js"></script>';
+    $html[] = '	<script type="text/javascript" src="http://dev.jtsage.com/cdn/windows/1.4.3/jqm-windows-1.4.3.mdialog'.$min.'.js"></script>';
+    $html[] = '	<script type="text/javascript" src="http://dev.jtsage.com/cdn/windows/1.4.3/jqm-windows-1.4.3.alertbox'.$min.'.js"></script>';
     $html[] = '	<script type="text/javascript" src="'.$TDTRAC_SITE.'js/tdtrac.jquery.js"></script>';
-	$html[] = '	<script type="text/javascript">jQuery.extend(jQuery.mobile.datebox.prototype.options, { "useNewStyle": true, "overrideDateFormat":"%Y-%m-%d" });</script>';
+	$html[] = '	<script type="text/javascript">jQuery.extend(jQuery.mobile.datebox.prototype.options, { "overrideDateFormat":"%Y-%m-%d" });</script>';
     $html[] = "</head>\n\n<body>";
     $stamp = time();
     $pageid = ( $action['module'] == 'help' ) ? "help-{$action['action']}-{$action['oper']}" : "{$action['module']}-{$action['action']}";
     $html[] = " <div id='tdtracconfig' data-base='{$TDTRAC_SITE}' data-testmode='{$TEST_MODE}'></div>";
-    $html[] = "	<div data-role=\"page\" data-theme=\"c\" data-id=\"{$pageid}-{$stamp}\">";
+    $html[] = "	<div data-role=\"page\" data-id=\"{$pageid}-{$stamp}\">";
     
-    $html[] = "		<div data-role=\"header\">";
-    if ( $CANCEL ) { $html[] = "			<a href='#' data-icon='delete' data-rel='back'>Cancel</a>";	}
-    if ( $CLOSE )  { $html[] = "			<a href='#' data-icon='arrow-d' data-rel='back'>Close</a>";	}
-    $html[] = "			<h1>TDTrac::{$title}</h1>";
+    $html[] = "<div data-role=\"header\" data-position='fixed'  data-theme=\"b\">";
+    if ( $CANCEL ) { $html[] = "<a href='#' data-icon='delete' data-rel='back'>Cancel</a>"; }
+    if ( $CLOSE )  { $html[] = "<a href='#' data-icon='arrow-d' data-rel='back'>Close</a>"; }
+    $html[] = "<h1>TDTrac::{$title}</h1>";
     if ( count($HEAD_LINK) == 3 || count($HEAD_LINK) == 4 ) {
-        $html[] = "			<a href=\"{$TDTRAC_SITE}{$HEAD_LINK[0]}\" data-icon=\"{$HEAD_LINK[1]}\" class=\"ui-btn-right\"".((isset($HEAD_LINK[3]))?" id=\"{$HEAD_LINK[3]}\"":"").">{$HEAD_LINK[2]}</a>";
+        $html[] = "<a href=\"{$TDTRAC_SITE}{$HEAD_LINK[0]}\" data-icon=\"{$HEAD_LINK[1]}\" class=\"ui-btn-right\"".((isset($HEAD_LINK[3]))?" id=\"{$HEAD_LINK[3]}\"":"").">{$HEAD_LINK[2]}</a>";
     }
-    $html[] = "		</div>";
+    $html[] = "</div>";
     if ( $_SEVER['REQUEST_METHOD'] = "POST" && isset($_REQUEST['infobox']) ) {
-        $html[] = "		<script type='text/javascript'>setTimeout(\"infobox('{$_REQUEST['infobox']}');\", 1000);</script>";
+        $html[] = "<script type='text/javascript'>setTimeout(\"infobox('{$_REQUEST['infobox']}');\", 1000);</script>";
     }
     unset($_SESSION['infodata']);
     
@@ -122,7 +122,7 @@ function makeHeader($title = '') {
 function makeFooter($title = '', $loggedin) {
     global $action, $EXTRA_NAV, $TDTRAC_SITE;
     $html[] = "		</div>";
-    $html[] = "		<div data-role=\"footer\" data-theme=\"a\">";
+    $html[] = "		<div data-role=\"footer\" data-position='fixed' data-theme=\"a\">";
     if ( $loggedin ) {
         $html[] = "			<div data-role=\"navbar\"><ul>";
         $html[] = "				<li><a href=\"{$TDTRAC_SITE}\" data-direction='reverse' data-icon=\"home\">Home</a></li>";
