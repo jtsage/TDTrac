@@ -96,7 +96,7 @@ class tdlist {
 	 * @return null
 	 */
 	public function addRow($text, $raw=null, $passed=null) {
-		$default = array('numbers' => false, 'noformat' => false, 'theme' => 'c');
+		$default = array('numbers' => false, 'noformat' => false, 'theme' => 'a');
 		$argus = merge_defaults($default, $passed);
 		
 		if ( $argus['noformat'] ) {
@@ -135,7 +135,7 @@ class tdlist {
 	 */
 	public function output() {
 		return array_merge(
-			array("<ul id='list_{$this->options['id']}' ".($this->options['inset']?'data-inset="true" ':'').($this->options['actions']?"data-split-icon='{$this->options['icon']}' data-split-theme='d'":"")." data-role='listview'>"),
+			array("<ul id='list_{$this->options['id']}' ".($this->options['inset']?'data-inset="true" ':'').($this->options['actions']?"data-split-icon='{$this->options['icon']}' data-split-theme='a'":"")." data-role='listview'>"),
 			$this->items,
 			array("</ul>"));
 	}

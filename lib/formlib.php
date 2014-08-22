@@ -203,7 +203,7 @@ class tdform {
 		
 		$this->members[] = array($options['type'], $options['name'], $options['label'], $options['title'], $options['preset']);
 		
-		$temp  = "  <div class='ui-field-contain' title='{$options['title']}'><label for='{$options['id']}'>{$options['label']}</label><input ".(($options['role'] != null)?"data-role='{$options['role']}' ":"")."type='{$options['type']}' data-theme='c' placeholder='{$options['placeholder']}' data-require='{$options['require']}' name='{$options['name']}' id='{$options['id']}' ";
+		$temp  = "  <div class='ui-field-contain' title='{$options['title']}'><label for='{$options['id']}'>{$options['label']}</label><input ".(($options['role'] != null)?"data-role='{$options['role']}' ":"")."type='{$options['type']}' placeholder='{$options['placeholder']}' data-require='{$options['require']}' name='{$options['name']}' id='{$options['id']}' ";
 		if ( $options['preset'] != null )	{ $temp .= "value='{$options['preset']}' "; }
 		if ( $options['options'] != null ) 	{ $temp .= "data-options='{$options['options']}' "; }
 		if ( ! $options['enabled'] )		{ $temp .= "disabled='disabled' "; }

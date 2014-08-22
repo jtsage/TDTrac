@@ -13,45 +13,48 @@ function infobox(text, head) { //v4 CONTROL INFOBOX CONTENT
 } // END INFOBOX CONTENT
 
 (function($) {
-	var closeButton = "<a href='#' data-rel='back' class='ui-btn ui-corner-all ui-shadow ui-btn-a " + 
-		"ui-icon-delete ui-btn-icon-notext ui-btn-left'>Close</a>";
+	var closeButton = "<a href='#' data-rel='back' class='ui-btn ui-corner-all ui-shadow " + 
+		"ui-btn-a ui-icon-delete ui-btn-icon-notext ui-btn-left'>Close</a>";
 		
-	$('html').on('pageinit', function() { // BEGIN: Running in test mode?
+	$('html').on('pageinit', function() { // v4 BEGIN: Running in test mode?
 		testMode = ($('#tdtracconfig').attr('data-testmode') == 1 )?true:false;
 		baseHREF = $('#tdtracconfig').attr('data-base');
 		console.log('ran');
 	}); // END: Check test Mode
 	
-	$(document).on("click", ".help-link", function(e,p) { // BEGIN: Show Help Text
+	$(document).on("click", ".help-link", function(e,p) { // v4 BEGIN: Show Help Text
 		var self = $(this),
 			base = $(this).attr( "data-base" ),
 			subact = $(this).attr( "data-sub" ),
 			body = "",
 			full = "<div data-theme='a' style='min-width: 400px'>";
 			
-		$.getJSON(baseHREF + "json/help/base:" + base + "/sub:" + subact + "/id:0/", function(data) {
-			self.removeClass( "ui-btn-active" );
-			if ( data.success === true ) {
-				console.log(data);
-				for ( x = 0; x < data.helpbody.length; ++x ) {
-					if ( data.helpbody[x][1] === null ) {
-						body += "<li>" + data.helpbody[x][0] + "</li>";
-					} else {
-						body += "<li><p><strong>" + data.helpbody[x][0] + "</strong>: " +
-							data.helpbody[x][1] + "</p></li>";
-					} 
-				}
+		$.getJSON(
+			baseHREF + "json/help/base:" + base + "/sub:" + subact + "/id:0/", 
+			function(data) {
+				self.removeClass( "ui-btn-active" );
+				if ( data.success === true ) {
+					console.log(data);
+					for ( x = 0; x < data.helpbody.length; ++x ) {
+						if ( data.helpbody[x][1] === null ) {
+							body += "<li>" + data.helpbody[x][0] + "</li>";
+						} else {
+							body += "<li><p><strong>" + data.helpbody[x][0] + "</strong>: " +
+								data.helpbody[x][1] + "</p></li>";
+						} 
+					}
 				
-				full += closeButton + "<div data-role='header'><h1>" + data.helptitle + "</h1></div>" +
-					"<div class='ui-content'><ul data-role='listview'>" + body + "</ul></div>" +
-					"</div>";
+					full += closeButton + "<div data-role='header'><h1>" + data.helptitle +
+						"</h1></div><div class='ui-content'><ul data-role='listview'>" + body +
+						"</ul></div></div>";
 					
-				$(full).enhanceWithin().popup().popup( "open" );
+					$(full).enhanceWithin().popup().popup( "open" );
 				
-			} else {
-				infobox("Help failed to load", "Error");
+				} else {
+					infobox("Help failed to load", "Error");
+				}
 			}
-		});
+		);
 	}); // END: Show Help Text
 	
 	$('#hoursview').on('datebox', function(e,p) { // BEGIN: Hours calender view handler
@@ -121,8 +124,7 @@ function infobox(text, head) { //v4 CONTROL INFOBOX CONTENT
 		}
 	}); // END: Test Mode Ajax Debug
 	
-	$(document).on("submit", "form", function(e) { // FORM HANDLEING
-		console.log('fuck?');
+	$(document).on("submit", "form", function(e) { // v4 FORM HANDLEING
 		$.mobile.loading("show");
 		e.preventDefault();
 		
@@ -230,73 +232,91 @@ function infobox(text, head) { //v4 CONTROL INFOBOX CONTENT
 		});
 	}); // END: Delete Hours
 	
-	$('.todo-done').on( 'vclick', function(e) {  // BEGIN: Mark Todo Done
+	$(document).on("vclick", ".todo-done", function(e) {  // BEGIN: Mark Todo Done
 		e.preventDefault();
-		var linkie = this;
-		if ( ! $(this).data('done') ) {
-			$('<div>').popupwrapper({
-				displayMode: 'button',
-				headerText: 'MARK?',
-				headerMinWidth: '300px',
-				subTitle: 'Mark Todo Item #'+$(this).data('recid')+' Done?',
+		var linkie = this,
+			linkpar = $(this).parent();
+			
+		if ( ! $(this).data( "done" ) ) {
+			$("<div>").mdialog({
+				useMenuMode: true,
+				menuHeaderText: "MARK?",
+				menuMinWidth: "300px",
+				menuSubtitle: "Mark Todo Item #" + $(this).data( "recid" ) + " Done?",
 				buttons : {
-					'Yes, Mark Done' : function () {
-						$.getJSON(baseHREF+"json/mark/base:todo/json:1/id:"+$(linkie).data('recid')+"/", function(data) {
-							if ( data.success === true ) {
-								$(linkie).parent().insertAfter('#todo-list-done');
-								$(linkie).parent().find('span.ui-li-count').html('done');
-								var count = $('#todo-list-header').find('.ui-li-count');
-								count.text(count.text()-1);
-								infobox("Todo Item #"+$(linkie).data('recid')+" Marked Done");
-							} else {
-								infobox("Todo Item #"+$(linkie).data('recid')+" Mark Failed!");
+					"Yes, Mark Done" : function () {
+						$.getJSON(
+							baseHREF + "json/mark/base:todo/json:1/id:" + $(linkie).data("recid") + "/",
+							function(data) {
+								if ( data.success === true ) {
+									linkpar.insertAfter( "#todo-list-done" );
+									linkpar.find( "span.ui-li-count" ).html( "done" );
+									var count = $( "#todo-list-header" ).find( ".ui-li-count" );
+									count.text( count.text() - 1 );
+									infobox(
+										"Todo Item #" + $(linkie).data( "recid" ) + " Marked Done",
+										"Success"
+									);
+								} else {
+									infobox(
+										"Todo Item #" + $(linkie).data( "recid" ) + " Mark Failed!",
+										"Error"
+									);
+								}
+								$(linkie).data( "done", 1 );
 							}
-							$(linkie).data('done', 1);
-						}); },
-					'Cancel': { 'click': function () { return true; }, icon: 'delete' }
+						); },
+					"Cancel": { click: function () { return true; }, icon: "delete" }
 				}
 			});
 		}
 	}); // END: Mark Todo Done
 	
-	$('.todo-menu').on( 'vclick', function(e) {  // BEGIN: Todo Menu
+	$(document).on("vclick", ".todo-menu", function(e) {  // BEGINv4: Todo Menu
 		e.preventDefault();
-		var linkie = this;
-		if ( ! $(this).data('done') ) {
-			$('<div>').popupwrapper({
-				displayMode: 'button',
-				buttonMode: 'list',
-				headerText: 'To-Do',
-				headerMinWidth: '300px',
-				subTitle : 'Todo Item #'+$(this).data('recid'),
-				buttons : (($(this).data('edit'))?{
-					'Edit' : {
-						'click': function() { $.mobile.changePage(baseHREF+"todo/edit/id:"+$(linkie).data('recid')+"/"); },
-						'icon': 'grid',
-						'close': false
-					},
-					'Delete' : {
-						'click': function() {
-							$.getJSON(baseHREF+"json/delete/base:todo/id:"+$(linkie).data('recid')+"/", function(data) {
-								if ( data.success === true ) {
-									$(linkie).parent().find('h3').html('--Removed--');
-									$(linkie).parent().find('span.ui-li-count').html('deleted');
-									if ( ! $(linkie).parent().find('.todo-done').data('done') ) {
-										var count = $('#todo-list-header').find('.ui-li-count');
-										count.text(count.text()-1);
-									}
-									$(linkie).parent().find('.todo-done').data('done', 1);
-									infobox("Todo Item #"+$(linkie).data('recid')+" Deleted");
-								} else {
-									infobox("Todo Item #"+$(linkie).data('recid')+" Delete Failed!");
-								}
-								$(linkie).data('done', 1);
-							});
+		var linkie = this,
+			linkpar = $(this).parent();
+		if ( ! $(this).data( "done" ) ) {
+			$( "<div>" ).mdialog({
+				useMenuMode: true,
+				menuHeaderText: "To-Do",
+				menuMinWidth: "300px",
+				menuSubtitle : "Todo Item #" + $(this).data( "recid" ),
+				buttons : (($(this).data( "edit" ))?{
+					"Edit" : {
+						click: function() {
+							$.mobile.changePage(
+								baseHREF + "todo/edit/id:" + $(linkie).data("recid") + "/"
+							); 
 						},
-						'icon': 'delete'
+						icon: "grid",
+						close: false
 					},
-					'Cancel' : function () { return true; }
-				}:{'Cancel' : function () { return true; }})
+					"Delete" : {
+						click: function() {
+							$.getJSON(
+								baseHREF + "json/delete/base:todo/id:" + $(linkie).data("recid") + "/",
+								function(data) {
+									if ( data.success === true ) {
+										linkpar.find( "h3" ).html( "--Removed--");
+										linkpar.find( "span.ui-li-count" ).html( "deleted" );
+										if ( ! linkpar.find( ".todo-done" ).data( "done" ) ) {
+											var count = $( "#todo-list-header" ).find( ".ui-li-count" );
+											count.text( count.text() - 1 );
+										}
+										linkpar.find( ".todo-done" ).data( "done", 1 );
+										infobox( "Todo Item #" + $(linkie).data("recid") + " Deleted" );
+									} else {
+										infobox( "Todo Item #" + $(linkie).data("recid") + " Delete Failed!" );
+									}
+									$(linkie).data( "done", 1 );
+								}
+							);
+						},
+						icon: "delete"
+					},
+					"Cancel" : function () { return true; }
+				}:{ "Cancel" : function () { return true; }})
 			}); 
 		}
 	}); // END: Todo Menu
