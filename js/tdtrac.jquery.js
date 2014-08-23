@@ -174,33 +174,32 @@ function infobox(text, head) { //v4 CONTROL INFOBOX CONTENT
 		
 	}); // END FORM HANDLING
 	
-	$('.ajax-email').off('click');
-	$('.ajax-email').on('click', function(e) { // BEGIN: E-Mail Function
-		$.mobile.showPageLoadingMsg();
+	$(document).on("click", ".ajax-email", function(e) { // BEGIN: E-Mail Function
+		$.mobile.loading( "show" );
 		e.preventDefault();
 		
-		var linkurl = '',
-			o = $(this).data('email');
+		var linkurl = "",
+			o = $(this).data( "email" );
 
 		switch(o.action) {
-			case 'todo':
-				linkurl = baseHREF+"json/email/base:todo/id:"+o.id+"/type:"+o.type+"/";
+			case "todo":
+				linkurl = baseHREF + "json/email/base:todo/id:" + o.id + "/type:" + o.type + "/";
 				break;
-			case 'budget':
-				linkurl = baseHREF+"json/email/base:budget/id:"+o.id+"/";
+			case "budget":
+				linkurl = baseHREF + "json/email/base:budget/id:" + o.id + "/";
 				break;
-			case 'hours':
-				linkurl = baseHREF+"json/email/base:hours/type:unpaid/id:0/";
+			case "hours":
+				linkurl = baseHREF + "json/email/base:hours/type:unpaid/id:0/";
 				break;
 		}
 		
-		if ( linkurl !== '' ) {
+		if ( linkurl !== "" ) {
 			$.getJSON(linkurl, function(data) {
-				$.mobile.hidePageLoadingMsg();
+				$.mobile.loading( "hide" );
 				if ( data.success === true ) {
-					infobox("E-Mail Sent ("+o.action+")");
+					infobox( "E-Mail Sent (" + o.action + ")", "Success" );
 				} else {
-					infobox("E-Mail Send Failed!");
+					infobox( "E-Mail Send Failed!", "Error" );
 				}
 			});
 		}
@@ -251,6 +250,10 @@ function infobox(text, head) { //v4 CONTROL INFOBOX CONTENT
 								if ( data.success === true ) {
 									linkpar.insertAfter( "#todo-list-done" );
 									linkpar.find( "span.ui-li-count" ).html( "done" );
+									linkpar.find(".todo-menu")
+										.removeClass("ui-btn-e")
+										.removeClass("ui-btn-a")
+										.addClass("ui-btn-c");
 									var count = $( "#todo-list-header" ).find( ".ui-li-count" );
 									count.text( count.text() - 1 );
 									infobox(

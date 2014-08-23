@@ -45,6 +45,14 @@ div.content-secondary {
     display: none;
 }
 
+div.content-primary form {
+	display: inline-block;
+	width: 100%;
+}
+div.content-primary form .ui-slider-switch {
+	width: 8.8em;
+}
+
 .ui-page {
     -webkit-backface-visibility: hidden;
 }
@@ -74,9 +82,6 @@ div.content-secondary {
         margin-top: 50px;
     }
     .ui-body {
-        clear: none !important;
-    }
-    .ui-datebox-grid {
         clear: none !important;
     }
 }

@@ -86,7 +86,7 @@ function makeHeader($title = '') {
 	$html[] = '<![endif]-->';
 	
 	$css = array(
-		"http://code.jquery.com/mobile/1.4.3/jquery.mobile.structure-1.4.3" . $min . ".css",
+		"http://code.jquery.com/mobile/1.4.3/jquery.mobile-1.4.3" . $min . ".css",
 		"http://dev.jtsage.com/cdn/datebox/1.4.4/jqm-datebox-1.4.4" . $min . ".css",
 		$TDTRAC_SITE . "css/tdtheme.css",
 		$TDTRAC_SITE . "css/tdtheme.mobile.css",

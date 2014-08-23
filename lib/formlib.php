@@ -79,7 +79,7 @@ class tdform {
 					$temp .= "<input type='hidden' name='{$hide[0]}' value='{$hide[1]}' />";
 				}
 			}
-			$temp .= "<input type='submit' class='subbie' value='{$actioname}' title='{$actioname}' /></div>";
+			$temp .= "<input type='submit' class='subbie' data-theme='c' value='{$actioname}' title='{$actioname}' /></div>";
 			$output[] = $temp;
 		}
 		$output[] = "</form>";
@@ -124,7 +124,7 @@ class tdform {
 			'preset'	=> null,
 			'enabled'	=> True,
 			'id'		=> null,
-			'type'		=> 'date',
+			'type'		=> 'text',
 			'role'		=> 'datebox',
 			'require'	=> 'true',
 			'placeholder' => '',
@@ -294,7 +294,7 @@ class tdform {
 		if ( $options['id'] == null )		{ $options['id'] = $options['name']; }
 		if ( $options['title'] == null ) { $options['title'] = $options['label']; }
 
-		$temp  = "  <div class='ui-field-contain'><label for='{$options['id']}'>{$options['label']}</label><select data-require='{$options['require']}' data-native-menu='false' name='{$options['name']}' id='{$options['id']}' ".(!$options['enabled'] ? " disabled='disabled'":"").">";
+		$temp  = "  <div class='ui-field-contain'><label for='{$options['id']}'>{$options['label']}</label><select data-require='{$options['require']}' data-native-menu='true' name='{$options['name']}' id='{$options['id']}' ".(!$options['enabled'] ? " disabled='disabled'":"").">";
 		if ( $options['header'] ) {
 			$temp .= "<option data-placeholder='true' value=''>Choose one...</option>";
 		}
