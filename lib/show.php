@@ -5,7 +5,7 @@
  * Contains all show related functions. 
  * Data hardened
  * @package tdtrac
- * @version 3.0.0
+ * @version 4.0.0
  * @author J.T.Sage <jtsage@gmail.com>
  */
  
@@ -14,7 +14,7 @@
  *  Allows configuration of shows
  * 
  * @package tdtrac
- * @version 3.0.0
+ * @version 4.0.0
  * @since 2.0.0
  * @author J.T.Sage <jtsage@gmail.com>
  */
@@ -91,12 +91,32 @@ class tdtrac_shows {
 	 */
 	private function add_form() {
 		GLOBAL $TDTRAC_SITE;
-		$form = new tdform(array('action' => "{$TDTRAC_SITE}json/save/base:show/id:0/", 'id' => 'show-add-form'));
+		$form = new tdform(array(
+			'action' => "{$TDTRAC_SITE}json/save/base:show/id:0/",
+			'id' => 'show-add-form'
+		));
 		
-		$result = $form->addText(array('name' => 'showname', 'label' => 'Show Name', 'placeholder' => 'Title of the Show'));
-		$result = $form->addText(array('name' => 'company', 'label' => 'Show Company', 'placeholder' => 'Company or Division Producing Show'));
-		$result = $form->addText(array('name' => 'venue', 'label' => 'Show Venue', 'placeholder' => 'Location of Show'));
-		$result = $form->addDate(array('name' => 'dates', 'label' => 'Show Opening', 'options' => '{"mode":"calbox", "useModal": true}'));
+		$result = $form->addText(array(
+			'name' => 'showname',
+			'label' => 'Show Name',
+			'placeholder' => 'Title of the Show'
+		));
+		$result = $form->addText(array(
+			'name' => 'company',
+			'label' => 'Show Company',
+			'placeholder' => 'Company or Division Producing Show'
+		));
+		$result = $form->addText(array(
+			'name' => 'venue',
+			'label' => 'Show Venue',
+			'placeholder' => 'Location of Show'
+		));
+		$result = $form->addDate(array(
+			'name' => 'dates',
+			'label' => 'Show Opening',
+			'placeholder' => "Opening Date",
+			'options' => '{"mode":"calbox"}'
+		));
 		
 		return $form->output('Add Show');
 	}
@@ -113,8 +133,9 @@ class tdtrac_shows {
 	private function edit_form($id) {
 		GLOBAL $db, $MYSQL_PREFIX, $TDTRAC_SITE;
 	
-		$sqlstring  = "SELECT `showname`, `company`, `venue`, `dates`, `closed` FROM `{$MYSQL_PREFIX}shows`";
-		$sqlstring .= " WHERE `showid` = %d LIMIT 1";
+		$sqlstring  = "SELECT `showname`, `company`, `venue`, `dates`, `closed`" .
+			" FROM `{$MYSQL_PREFIX}shows`" .
+			" WHERE `showid` = %d LIMIT 1";
 	
 		$sql = sprintf($sqlstring,
 			intval($id)
@@ -122,13 +143,41 @@ class tdtrac_shows {
 	
 		$result = mysql_query($sql, $db);
 		$row = mysql_fetch_array($result);
-		$form = new tdform(array('action' => "{$TDTRAC_SITE}json/save/base:show/id:{$id}/", 'id' => "showedit"));
+		$form = new tdform(array(
+			'action' => "{$TDTRAC_SITE}json/save/base:show/id:{$id}/",
+			'id' => "showedit"
+		));
 		
-		$fesult = $form->addText(array('name' => 'showname', 'label' => 'Show Name', 'preset' => $row['showname']));
-		$result = $form->addText(array('name' => 'company', 'label' => 'Show Company', 'preset' => $row['company']));
-		$result = $form->addText(array('name' => 'venue', 'label' => 'Show Venue', 'preset' => $row['venue']));
-		$result = $form->addDate(array('name' => 'dates', 'label' => 'Show Dates', 'preset' => $row['dates']));
-		$result = $form->addToggle(array('name' => 'closed', 'label' => 'Show Record Open', 'preset' => $row['closed'], 'options' => array(array(1,'Closed'),array(0,'Open'))));
+		$fesult = $form->addText(array(
+			'name' => 'showname',
+			'label' => 'Show Name',
+			'preset' => $row['showname']
+		));
+		$result = $form->addText(array(
+			'name' => 'company',
+			'label' => 'Show Company',
+			'preset' => $row['company']
+		));
+		$result = $form->addText(array(
+			'name' => 'venue',
+			'label' => 'Show Venue',
+			'preset' => $row['venue']
+		));
+		$result = $form->addDate(array(
+			'name' => 'dates',
+			'label' => 'Show Dates',
+			'placeholder' => 'Opening Date',
+			'preset' => $row['dates']
+		));
+		$result = $form->addToggle(array(
+			'name' => 'closed',
+			'label' => 'Show Record Open',
+			'preset' => $row['closed'],
+			'options' => array(
+				array(1,'Closed'),
+				array(0,'Open')
+			)
+		));
 		$result = $form->addHidden('id', $id);
 		return array_merge($form->output('Commit'));
 	}
@@ -149,14 +198,30 @@ class tdtrac_shows {
 		$list = new tdlist(array('id' => 'show_view', 'actions' => false, 'inset' => true));
 		$showsopen = true;
 		
-		$list->setFormat("<a data-recid='%d' data-admin='".(($this->user->admin)?1:0)."' class='show-menu' href='#'><h3>%s</h3><p><strong>Company:</strong> %s<br /><strong>Venue:</strong> %s<br /><strong>Dates:</strong> %s</p></a>");
+		$list->setFormat(
+			"<a data-recid='%d' data-admin='" . ( ( $this->user->admin) ? 1 : 0 ) . 
+			"' class='show-menu' href='#'><h3>%s</h3>" .
+			"<p><strong>Company:</strong> %s<br /><strong>Venue:</strong> %s<br />" . 
+			"<strong>Dates:</strong> %s</p></a>"
+		);
+		
 		$list->addDivide('Open Shows');
+		
 		while ( $row = mysql_fetch_array($result) ) {
 			if ( $showsopen && $row['closed'] == 1 ) {
 				$list->addDivide('Closed Shows');
 				$showsopen = false;
 			}
-			$list->addRow(array($row['showid'], $row['showname'], $row['company'], $row['venue'], $row['dates']), $row);
+			$list->addRow(
+				array(
+					$row['showid'],
+					$row['showname'],
+					$row['company'],
+					$row['venue'],
+					$row['dates']
+				),
+				$row
+			);
 		}
 		return $list->output();
 	}
@@ -170,26 +235,39 @@ class tdtrac_shows {
 	private function sidebar() {
 		GLOBAL $MYSQL_PREFIX, $TDTRAC_SITE;
 		
-		$shows_open = get_single("SELECT COUNT(showid) as num FROM `{$MYSQL_PREFIX}shows` WHERE closed = 0");
-		$shows_clsd = get_single("SELECT COUNT(showid) as num FROM `{$MYSQL_PREFIX}shows` WHERE closed = 1");
+		$shows_open = get_single(
+			"SELECT COUNT(showid) as num FROM `{$MYSQL_PREFIX}shows` WHERE closed = 0"
+		);
+		$shows_clsd = get_single(
+			"SELECT COUNT(showid) as num FROM `{$MYSQL_PREFIX}shows` WHERE closed = 1"
+		);
 		
-		$list = new tdlist(array('id' => 'show_sidebar', 'actions' => false, 'inset' => true));
+		$list = new tdlist(array(
+			'id' => 'show_sidebar',
+			'actions' => false,
+			'inset' => true
+		));
 		$showsopen = true;
 		
 		$html = array('<h4 class="intro">Manage Shows and Jobs</h4>');
 		
 		$list->setFormat("%s");
-		$list->addRow("<h3>Open Shows</h3><p>Shows available for new items</p><p class='ui-li-count'>{$shows_open}</p></h3>");
-		$list->addRow("<h3>Closed Shows</h3><p>Shows from the past</p><p class='ui-li-count'>{$shows_clsd}</p></h3>");
+		$list->addRow(
+			"<h3>Open Shows</h3><p>Shows available for new items</p>" .
+			"<p class='ui-li-count'>{$shows_open}</p></h3>"
+		);
+		$list->addRow(
+			"<h3>Closed Shows</h3><p>Shows from the past</p>" .
+			"<p class='ui-li-count'>{$shows_clsd}</p></h3>"
+		);
 		if ( $this->action['action'] <> 'add' ) {
-			$list->addRaw("<li data-icon='plus'><a href='{$TDTRAC_SITE}shows/add/'><h3>Add Show</h3></a></li>");
+			$list->addRaw(
+				"<li data-icon='plus'><a href='{$TDTRAC_SITE}shows/add/'>" .
+				"<h3>Add Show</h3></a></li>"
+			);
 		}
-		
 		
 		return array_merge($html,$list->output());
 	}
 }
-
-
-
 ?>

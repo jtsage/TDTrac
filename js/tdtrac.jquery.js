@@ -439,38 +439,50 @@ function infobox(text, head) { //v4 CONTROL INFOBOX CONTENT
 		
 	}); // END: Message Clear
 	
-	$('.show-menu').on('vclick', function (e) { // BEGIN: Show Menu
+	$(document).on("vclick", ".show-menu", function (e) { // BEGINv4: Show Menu
 		e.preventDefault();
 		var linkie = this;
-		if ( ! $(this).data('done') ) {
-			$('<div>').popupwrapper({
-				displayMode: 'button',
-				buttonMode:'list',
-				headerText: 'SHOW',
-				headerMinWidth: '350px',
-				subTitle: 'Show #'+$(this).data('recid'),
-				buttons : (($(this).data('admin'))?{
-					'Edit' : {
-						'click' : function() { $.mobile.changePage(baseHREF+'shows/edit/id:'+$(linkie).data('recid')+'/'); },
-						'icon' : 'grid',
+		if ( ! $(this).data( "done" ) ) {
+			$("<div>").mdialog({
+				useMenuMode: true,
+				menuHeaderText: "SHOW",
+				menuMinWidth: "350px",
+				meunSubtitle: "Show #" + $(this).data( "recid" ),
+				buttons : (($(this).data( "admin" ))?{
+					"Edit" : {
+						click : function() { 
+							$.mobile.changePage(
+								baseHREF + "shows/edit/id:" + $(linkie).data( "recid" ) + "/"
+							);
+						},
+						icon : "grid",
 						close: false
 					},
-					'Delete' : {
-						'click' :function () {
-							$.getJSON(baseHREF+"json/delete/base:show/id:"+$(linkie).data('recid')+"/", function(data) {
-								if ( data.success === true ) {
-									$(linkie).find('h3').html('--Deleted--');
-									infobox("Show #"+$(linkie).data('recid')+" Deleted");
-								} else {
-									infobox("Show #"+$(linkie).data('recid')+" Delete Failed!");
+					"Delete" : {
+						click :function () {
+							$.getJSON(
+								baseHREF + "json/delete/base:show/id:" + $(linkie).data("recid") + "/",
+								function(data) {
+									if ( data.success === true ) {
+										$(linkie).find( "h3" ).html( "--Deleted--" );
+										infobox(
+											"Show #" + $(linkie).data( "recid" ) + " Deleted",
+											"Success"
+										);
+									} else {
+										infobox(
+											"Show #" + $(linkie).data( "recid" ) + " Delete Failed!",
+											"Error"
+										);
+									}
+									$(linkie).data( "done", 1 );
 								}
-								$(linkie).data('done', 1);
-							});
+							);
 						},
-						'icon' : 'delete'
+						icon : "delete"
 					},
-					'Cancel' : function () { return true; }
-				}:{ 'Cancel' : function () { return true; } } )
+					"Cancel" : function () { return true; }
+				}:{ "Cancel" : function () { return true; } } )
 			});
 		}
 	}); // END: Show Menu

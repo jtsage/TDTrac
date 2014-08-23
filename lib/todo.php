@@ -181,6 +181,7 @@ class tdtrac_todo {
 		$result = $form->addDate(array(
 			'name' => 'date',
 			'label' => 'Due Date',
+			'placeholder' => 'Due Date',
 			'preset' => $row['duedate'],
 			'options' => '{"mode":"calbox"}'
 		));
