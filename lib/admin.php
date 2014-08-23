@@ -5,7 +5,7 @@
  * Contains all access control framework
  * Data hardened
  * @package tdtrac
- * @version 3.0.0
+ * @version 4.0.0
  * @author J.T.Sage <jtsage@gmail.com>
  */
 
@@ -15,7 +15,7 @@
  *  Allows configuration of users, groups and permissions
  * 
  * @package tdtrac
- * @version 3.0.0
+ * @version 4.0.0
  * @since 2.0.0
  * @author J.T.Sage <jtsage@gmail.com>
  */
@@ -31,10 +31,23 @@ class tdtrac_admin {
 	private $title = "Admin";
 	
 	/** @var array Available Permissions */
-	private $perms_avail = array("addshow", "editshow", "viewshow", "addbudget", "editbudget", "viewbudget", "addhours", "edithours", "viewhours", "addtodo", "edittodo", "viewtodo");
+	private $perms_avail = array(
+		"addshow",
+		"editshow",
+		"viewshow",
+		"addbudget",
+		"editbudget",
+		"viewbudget",
+		"addhours",
+		"edithours",
+		"viewhours",
+		"addtodo",
+		"edittodo",
+		"viewtodo"
+	);
 	
 	/** 
-	 * Create a new instance of the TO-DO module
+	 * Create a new instance of the ADMIN module
 	 * 
 	 * @param object User object
 	 * @param array Parsed query string
@@ -48,7 +61,7 @@ class tdtrac_admin {
 	}
 	
 	/**
-	 * Output todo list operation
+	 * Output admin operation
 	 * 
 	 * @return void
 	 */
@@ -165,7 +178,11 @@ class tdtrac_admin {
 			$dbperm[$pname] = $pvalue;
 		}
 		foreach ( $this->perms_avail as $perm ) {
-			$fesult = $form->addToggle(array('name' => $perm, 'preset' => $dbperm[$perm], 'label' => $perm));
+			$fesult = $form->addToggle(array(
+				'name' => $perm,
+				'preset' => $dbperm[$perm],
+				'label' => $perm
+			));
 		}	
 		return $form->output('Save');
 	}
@@ -180,15 +197,47 @@ class tdtrac_admin {
 	 */
 	private function user_add_form() {
 		GLOBAL $db, $MYSQL_PREFIX, $TDTRAC_SITE;
-		$form = new tdform(array('action' => "{$TDTRAC_SITE}json/adm/base:admin/sub:saveuser/id:0/", 'id' => 'adduser'));
+		$form = new tdform(array(
+			'action' => "{$TDTRAC_SITE}json/adm/base:admin/sub:saveuser/id:0/",
+			'id' => 'adduser'
+		));
 		
-		$fesult = $form->addText(array('name' => 'username', 'label' => "User Name", 'placeholder' => 'User login ID'));
-		$fesult = $form->addText(array('name' => 'password', 'label' => "Password", 'placeholder' => 'Initial Password'));
-		$fesult = $form->addText(array('name' => 'payrate', 'label' => "Pay Rate", 'placeholder' => 'User\'s Payrate'));
-		$fesult = $form->addText(array('name' => 'first', 'label' => "First Name", 'placeholder' => 'First Name'));
-		$fesult = $form->addText(array('name' => 'last', 'label' => "Last Name", 'placeholder' => 'Surname'));
-		$fesult = $form->addText(array('name' => 'phone', 'label' => "Phone", 'require' => false, 'placeholder' => 'Phone Number'));
-		$fesult = $form->addText(array('name' => 'email', 'label' => "E-Mail", 'placeholder' => 'E-Mail Address'));
+		$fesult = $form->addText(array(
+			'name' => 'username',
+			'label' => "User Name",
+			'placeholder' => 'User login ID'
+		));
+		$fesult = $form->addText(array(
+			'name' => 'password',
+			'label' => "Password",
+			'placeholder' => 'Initial Password'
+		));
+		$fesult = $form->addText(array(
+			'name' => 'payrate',
+			'label' => "Pay Rate",
+			'placeholder' => 'User\'s Payrate'
+		));
+		$fesult = $form->addText(array(
+			'name' => 'first',
+			'label' => "First Name",
+			'placeholder' => 'First Name'
+		));
+		$fesult = $form->addText(array(
+			'name' => 'last',
+			'label' => "Last Name",
+			'placeholder' => 'Surname'
+		));
+		$fesult = $form->addText(array(
+			'name' => 'phone',
+			'label' => "Phone",
+			'require' => false,
+			'placeholder' => 'Phone Number'
+		));
+		$fesult = $form->addText(array(
+			'name' => 'email',
+			'label' => "E-Mail",
+			'placeholder' => 'E-Mail Address'
+		));
 		$fesult = $form->addDrop(array(
 			'name' => 'groupid', 
 			'label' => "Group", 
@@ -209,18 +258,52 @@ class tdtrac_admin {
 	 */
 	private function user_edit_form($id) {
 		GLOBAL $db, $MYSQL_PREFIX, $TDTRAC_SITE;
-		$sql = "SELECT u.*, groupid FROM `{$MYSQL_PREFIX}users` u, `{$MYSQL_PREFIX}usergroups` ug WHERE u.userid = ug.userid AND u.userid = ".intval($id)." LIMIT 1";
+		$sql = "SELECT u.*, groupid FROM `{$MYSQL_PREFIX}users` u, `{$MYSQL_PREFIX}usergroups` ug" .
+			" WHERE u.userid = ug.userid AND u.userid = ".intval($id)." LIMIT 1";
+		
 		$result = mysql_query($sql, $db);
 		$row = mysql_fetch_array($result);
-		$form = new tdform(array('action' => "{$TDTRAC_SITE}json/adm/base:admin/sub:saveuser/id:{$id}/", 'id' => 'edituser'));
 		
-		$fesult = $form->addText(array('name' => 'username', 'label' => "User Name", 'preset' => $row['username']));
-		$fesult = $form->addText(array('name' => 'password', 'label' => "Password", 'preset' => $row['password']));
-		$fesult = $form->addText(array('name' => 'payrate', 'label' => "Pay Rate", 'preset' => $row['payrate']));
-		$fesult = $form->addText(array('name' => 'first', 'label' => "First Name", 'preset' => $row['first']));
-		$fesult = $form->addText(array('name' => 'last', 'label' => "Last Name", 'preset' => $row['last']));
-		$fesult = $form->addText(array('name' => 'phone', 'label' => "Phone", 'preset' => $row['phone']));
-		$fesult = $form->addText(array('name' => 'email', 'label' => "E-Mail", 'preset' => $row['email']));
+		$form = new tdform(array(
+			'action' => "{$TDTRAC_SITE}json/adm/base:admin/sub:saveuser/id:{$id}/",
+			'id' => 'edituser'
+		));
+		
+		$fesult = $form->addText(array(
+			'name' => 'username',
+			'label' => "User Name",
+			'preset' => $row['username']
+		));
+		$fesult = $form->addText(array(
+			'name' => 'password',
+			'label' => "Password",
+			'preset' => $row['password']
+		));
+		$fesult = $form->addText(array(
+			'name' => 'payrate',
+			'label' => "Pay Rate",
+			'preset' => $row['payrate']
+		));
+		$fesult = $form->addText(array(
+			'name' => 'first',
+			'label' => "First Name",
+			'preset' => $row['first']
+		));
+		$fesult = $form->addText(array(
+			'name' => 'last',
+			'label' => "Last Name",
+			'preset' => $row['last']
+		));
+		$fesult = $form->addText(array(
+			'name' => 'phone',
+			'label' => "Phone",
+			'preset' => $row['phone']
+		));
+		$fesult = $form->addText(array(
+			'name' => 'email',
+			'label' => "E-Mail",
+			'preset' => $row['email']
+		));
 		$fesult = $form->addDrop(array(
 			'name' => 'groupid', 
 			'label' => "Group", 
@@ -243,7 +326,9 @@ class tdtrac_admin {
 	 */
 	private function user_view() {
 		GLOBAL $db, $MYSQL_PREFIX, $TDTRAC_SITE, $SITE_SCRIPT;
-		$sql = "SELECT *, DATE_FORMAT(lastlogin, '%b %D %h:%i %p') AS lastlog FROM `{$MYSQL_PREFIX}users` ORDER BY last ASC, first ASC";
+		$sql = "SELECT *, DATE_FORMAT(lastlogin, '%b %D %h:%i %p') AS lastlog" .
+			" FROM `{$MYSQL_PREFIX}users` ORDER BY last ASC, first ASC";
+			
 		$result = mysql_query($sql, $db); $html = "";
 		
 		$list = new tdlist(array('id' => 'user_list', 'inset' => true));
@@ -254,7 +339,11 @@ class tdtrac_admin {
 		foreach ( array('u-act' => 'Active', 'u-pay' => 'Payroll', 'u-own' => 'A/V/E Only Own Hours', 'u-not' => 'Notify on Payroll') as $thiscls => $thisdet ) {
 			$sidebar[] = "<strong>{$thisdet}:</strong> <img class='{$thiscls}' src='/images/perm-%s.png'>";
 		}
-		$list->setFormat("<a href='#' class='user-menu' data-recid='%d'><h3>%s</h3><p>".join("<br />", $details)."</p><p class='ui-li-aside'>".join("<br />", $sidebar)."</p></a>");
+		$list->setFormat(
+			"<a href='#' class='user-menu' data-recid='%d'><h3>%s</h3>" .
+			"<p>".join("<br />", $details)."</p>" .
+			"<p class='ui-li-aside'>".join("<br />", $sidebar)."</p></a>"
+		);
 		
 		while ( $row = mysql_fetch_array($result) ) {
 			$list->addRow(array(

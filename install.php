@@ -4,13 +4,13 @@
  * 
  * Contains main program logic.
  * @package tdtrac
- * @version 2.0.0
+ * @version 4.0.0
  * @author J.T.Sage <jtsage@gmail.com>
  */
 ob_start(); session_start(); 
 
 ## PROGRAM DETAILS. DO NOT EDIT UNLESS YOU KNOW WHAT YOU ARE DOING
-$TDTRAC_VERSION = "3.2.2";
+$TDTRAC_VERSION = "4.0.0";
 $TDTRAC_PERMS = array("addshow", "editshow", "viewshow", "addbudget", "editbudget", "viewbudget", "addhours", "edithours", "viewhours", "adduser");
 $INSTALL_FILES = array(
 	"index.php",

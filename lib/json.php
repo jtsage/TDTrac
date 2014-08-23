@@ -4,7 +4,7 @@
  * 
  * Contains the json functions (all)
  * @package tdtrac
- * @version 3.0.0
+ * @version 4.0.0
  * @author J.T.Sage <jtsage@gmail.com>
  * @since 3.0.0
  */
@@ -14,7 +14,7 @@
  *  Allows per-user and per-show task lists
  * 
  * @package tdtrac
- * @version 3.0.0
+ * @version 4.0.0
  * @since 2.0.0
  * @author J.T.Sage <jtsage@gmail.com>
  */

@@ -4,7 +4,7 @@
  * 
  * Loads all other function files.
  * @package tdtrac
- * @version 3.0.0
+ * @version 4.0.0
  * @author J.T.Sage <jtsage@gmail.com>
  */
  

@@ -4,7 +4,7 @@
  * 
  * Contains main program logic.
  * @package tdtrac
- * @version 3.2.2
+ * @version 4.0.0
  */
 $MYSQL_SERVER = "mysql.jtsage.com";
 $MYSQL_USER = "tdtrac";

@@ -291,7 +291,7 @@ function infobox(text, head) { //v4 CONTROL INFOBOX CONTENT
 								baseHREF + "todo/edit/id:" + $(linkie).data("recid") + "/"
 							); 
 						},
-						icon: "grid",
+						icon: "edit",
 						close: false
 					},
 					"Delete" : {
@@ -315,7 +315,7 @@ function infobox(text, head) { //v4 CONTROL INFOBOX CONTENT
 								}
 							);
 						},
-						icon: "delete"
+						icon: "recycle"
 					},
 					"Cancel" : function () { return true; }
 				}:{ "Cancel" : function () { return true; }})
@@ -455,7 +455,7 @@ function infobox(text, head) { //v4 CONTROL INFOBOX CONTENT
 								baseHREF + "shows/edit/id:" + $(linkie).data( "recid" ) + "/"
 							);
 						},
-						icon : "grid",
+						icon : "edit",
 						close: false
 					},
 					"Delete" : {
@@ -479,7 +479,7 @@ function infobox(text, head) { //v4 CONTROL INFOBOX CONTENT
 								}
 							);
 						},
-						icon : "delete"
+						icon : "recycle"
 					},
 					"Cancel" : function () { return true; }
 				}:{ "Cancel" : function () { return true; } } )
@@ -555,181 +555,270 @@ function infobox(text, head) { //v4 CONTROL INFOBOX CONTENT
 		});
 	}); // END Rcpt Func
 	
-	$('.group-add').on( 'vclick', function(e) { // BEGIN: Group Add
+	$(document).on("click", ".group-add", function(e) { // BEGINv4: Group Add
 		e.preventDefault();
 		var linkie = this;
-		$('<div>').popupwrapper({
-			displayMode: 'button',
-			headerText: 'NEW',
-			headerMinWidth: '350px',
-			inputList: [{'id': 'newGRP', 'title': 'Group Name'}],
+		$("<div>").mdialog({
+			useMenuMode: true,
+			menuHeaderText: "NEW",
+			menuMinWidth: "350px",
+			menuSubtitle: "Add this group?",
+			menuInputList: [{
+				id: "newGRP",
+				title: "Group Name",
+				type: "text",
+			}],
 			buttons: {
-				'Add' : {
-					'click' : function() {
-						newGROUP = this.basePop.find('#newGRP').val();
-						if (newGROUP !== '') {
-							$.mobile.showPageLoadingMsg();
-							$.getJSON(baseHREF+"json/adm/base:admin/sub:savegroup/id:0/newname:"+newGROUP+"/", function(dta) {
-								if ( dta.success === true ) {
-									$.mobile.changePage(dta.location, { reloadPage: true, transition: 'pop', changeHash: 'false', type: 'post', data: {'infobox': dta.msg}});
-								} else {
-									$.mobile.hidePageLoadingMsg();
-									infobox("Add Failed: "+dta.msg);
+				"Add" : {
+					click : function(e,a) {
+						newGROUP = a[1];
+						if (newGROUP !== "") {
+							$.mobile.loading("show");
+							$.getJSON(
+								baseHREF+"json/adm/base:admin/sub:savegroup/id:0/newname:" + newGROUP + "/",
+								function(dta) {
+									if ( dta.success === true ) {
+										$.mobile.changePage(
+											dta.location, 
+											{
+												reloadPage: true,
+												transition: "pop",
+												changeHash: "false",
+												type: "post",
+												data: {infobox: dta.msg}
+											}
+										);
+									} else {
+										$.mobile.loading("hide");
+										infobox( "Add Failed: " + dta.msg );
+									}
 								}
-							});
+							);
 						}
 					},
-					'icon' : 'plus',
+					icon : "plus",
 					close: false
 				},
-				'Cancel' : function () { return true; }
+				"Cancel" : {
+					icon: "delete",
+					click: function () { return true; }
+				}
 			}
 		});
 	}); // END : Group Add
 	
-	$('.group-menu').on( 'vclick', function(e) {  // BEGIN: Group Menu
+	$(document).on("vclick", ".group-menu", function(e) {  // BEGIN: Group Menu
 		e.preventDefault();
 		var linkie = this;
-		$('<div>').popupwrapper({
-			displayMode: 'button',
-			buttonMode: 'list',
-			headerText: 'GROUP',
-			headerMinWidth: '350px',
-			inputList: (($(this).data('id') > 1) ? [{'id':'grpNAME', 'title':'New Name'}] : false),
-			subTitle: 'Group #'+$(this).data('id'),
-			buttons : ($(this).data('id') > 1 ) ? 
+		$("<div>").mdialog({
+			useMenuMode: true,
+			menuHeaderText: "GROUP",
+			menuMinWidth: "350px",
+			menuInputList: ( ( $(this).data('id') > 1 ) ?
+				[{
+					id: "grpNAME",
+					title: "New Name",
+					type: "text"
+				}] :
+				false
+			),
+			menuSubtitle: "Group #" + $(this).data( "id" ),
+			buttons : ($(this).data("id") > 1 ) ? 
 				{
-					'Rename' : {
-						'click': function() {
-							newNAME = this.basePop.find('#grpNAME').val();
-							if (newNAME !== '') {
-								$.mobile.showPageLoadingMsg();
-								$.getJSON(baseHREF+"json/adm/base:admin/sub:savegroup/id:"+$(linkie).data('id')+"/newname:"+newNAME+"/", function(dta) {
-									if ( dta.success === true ) {
-										$.mobile.changePage(dta.location, { reloadPage: true, transition: 'pop', changeHash: 'false', type: 'post', data: {'infobox': dta.msg}});
-									} else {
-										$.mobile.hidePageLoadingMsg();
-										infobox("Rename Failed: "+dta.msg);
+					"Rename" : {
+						click: function(e,a) {
+							newNAME = a[1];
+							if (newNAME !== "") {
+								$.mobile.loading("show");
+								$.getJSON(
+									baseHREF + "json/adm/base:admin/sub:savegroup/id:" + $(linkie).data("id") + "/newname:" + newNAME + "/",
+									function(dta) {
+										if ( dta.success === true ) {
+											$.mobile.changePage(
+												dta.location, 
+												{
+													reloadPage: true,
+													transition: "pop",
+													changeHash: false,
+													type: "post",
+													data: {infobox: dta.msg}
+												}
+											);
+										} else {
+											$.mobile.loading("hide");
+											infobox( "Rename Failed: " + dta.msg, "Error");
+										}
 									}
-								});
+								);
 							}
 						},
-						'icon': 'grid'
+						icon: "edit"
 					},
-					'Change Perms' : {
-						'click': function() { $.mobile.changePage(baseHREF+"admin/permsedit/id:"+$(linkie).data('id')+"/"); },
-						'icon': 'grid',
+					"Change Perms" : {
+						click: function() { 
+							$.mobile.changePage(
+								baseHREF + "admin/permsedit/id:" + $(linkie).data("id") + "/"
+							);
+						},
+						icon: "action",
 						close: false
 					},
-					'Delete' : {
-						'click': function() {
-							$.mobile.showPageLoadingMsg();
-							$.getJSON(baseHREF+"json/adm/base:admin/sub:deletegroup/id:"+$(linkie).data('id')+"/", function(dta) {
-								if ( dta.success === true ) {
-									$.mobile.changePage(dta.location, { reloadPage: true, transition: 'pop', changeHash: 'false', type: 'post', data: {'infobox': dta.msg}});
-								} else {
-									$.mobile.hidePageLoadingMsg();
-									infobox("Delete Failed: "+dta.msg);
+					"Delete" : {
+						click: function() {
+							$.mobile.loading("show");
+							$.getJSON(
+								baseHREF + "json/adm/base:admin/sub:deletegroup/id:" + $(linkie).data("id") + "/",
+								function(dta) {
+									if ( dta.success === true ) {
+										$.mobile.changePage(
+											dta.location,
+											{
+												reloadPage: true,
+												transition: "pop",
+												changeHash: false,
+												type: "post",
+												data: {infobox: dta.msg}
+											}
+										);
+									} else {
+										$.mobile.loading("hide");
+										infobox( "Delete Failed: " + dta.msg, "Error");
+									}
 								}
-							});
+							);
 						},
-						'icon': 'delete'
+						icon: "recycle"
 					},
-					'Cancel' : function () { return true; }
+					"Cancel" : {
+						icon: "delete",
+						click: function () { return true; }
+					}
 				} : {
-					'Change Perms' : {
-						'click': function() { $.mobile.changePage(baseHREF+"admin/permsedit/id:"+$(linkie).data('id')+"/"); },
-						'icon': 'grid'
+					"Change Perms" : {
+						click: function() { 
+							$.mobile.changePage(
+								baseHREF+"admin/permsedit/id:" + $(linkie).data("id") + "/"
+							);
+						},
+						icon: "action"
 					},
-					'Cancel' : function () { return true; }
+					"Cancel" : {
+						icon: "delete",
+						click: function () { return true; }
+					}
 				}
 		}); 
 	}); // END: Group Menu
 	
-	$('.user-menu').on( 'vclick', function(e) {  // BEGIN: User Menu
+	$(document).on("vclick", ".user-menu", function(e) {  // BEGINv4: User Menu
 		e.preventDefault();
 		var linkie = this;
-		$('<div>').popupwrapper({
-			displayMode: 'button',
-			buttonMode: 'list',
-			headerText: 'USER',
-			headerMinWidth: '350px',
-			subTitle: 'User #'+$(this).data('recid'),
+		$("<div>").mdialog({
+			useMenuMode: true,
+			menuHeaderText: "USER",
+			menuMinWidth: "350px",
+			menuSubtitle: "User #" + $(this).data( "recid" ),
 			buttons : {
-				'Edit' : {
-					'icon' : 'grid',
-					'click' : function() { $.mobile.changePage(baseHREF+"admin/useredit/id:"+$(linkie).data('recid')+"/"); },
+				"Edit" : {
+					icon : "edit",
+					click : function() {
+						$.mobile.changePage(
+							baseHREF + "admin/useredit/id:" + $(linkie).data("recid") + "/"
+						);
+					},
 					close: false
 				},
-				'Toggle Active' : {
-					'icon' : 'check',
-					'click' : function() {
-						$.getJSON(baseHREF+"json/adm/base:admin/sub:toggle/switch:active/id:"+$(linkie).data('recid')+"/", function(dta) {
+				"Toggle Active" : {
+					icon : "check",
+					click : function() {
+						$.getJSON(
+							baseHREF + "json/adm/base:admin/sub:toggle/switch:active/id:" + $(linkie).data("recid") + "/",
+							function(dta) {
 								if ( dta.success === true ) {
 									infobox(dta.msg);
 									if ( dta.newval === 1 ) {
-										$(linkie).find('.u-act').attr('src', baseHREF+'images/perm-ya.png');
+										$(linkie).find(".u-act")
+											.attr("src", baseHREF + "images/perm-ya.png");
 									} else {
-										$(linkie).find('.u-act').attr('src', baseHREF+'images/perm-no.png');
+										$(linkie).find(".u-act")
+											.attr("src", baseHREF + "images/perm-no.png");
 									}
 								} else {
-									infobox("Toggle Failed: "+dta.msg);
+									infobox("Toggle Failed: " + dta.msg);
+								}
+							}
+						);
+					}
+				},
+				"Toggle On Payroll" : {
+					icon : "check",
+					click : function() {
+						$.getJSON(
+							baseHREF + "json/adm/base:admin/sub:toggle/switch:payroll/id:" + $(linkie).data("recid") + "/",
+							function(dta) {
+								if ( dta.success === true ) {
+									infobox(dta.msg);
+									if ( dta.newval === 1 ) {
+										$(linkie).find(".u-pay")
+											.attr("src", baseHREF + "images/perm-ya.png");
+									} else {
+										$(linkie).find(".u-pay")
+											.attr("src", baseHREF + "images/perm-no.png");
+									}
+								} else {
+									infobox("Toggle Failed: " + dta.msg);
+								}
+							}
+						);
+					}
+				},
+				"Toggle Only Own Hours": {
+					icon : "check",
+					click : function() {
+						$.getJSON(
+							baseHREF + "json/adm/base:admin/sub:toggle/switch:limithours/id:" + $(linkie).data("recid") + "/",
+							function(dta) {
+								if ( dta.success === true ) {
+									infobox(dta.msg);
+									if ( dta.newval === 1 ) {
+										$(linkie).find(".u-own")
+											.attr("src", baseHREF + "images/perm-ya.png");
+									} else {
+										$(linkie).find(".u-own")
+											.attr("src", baseHREF + "images/perm-no.png");
+									}
+								} else {
+									infobox( "Toggle Failed: " + dta.msg );
 								}
 							});
 					}
 				},
-				'Toggle On Payroll' : {
-					'icon' : 'check',
-					'click' : function() {
-						$.getJSON(baseHREF+"json/adm/base:admin/sub:toggle/switch:payroll/id:"+$(linkie).data('recid')+"/", function(dta) {
+				"Toggle Notify" : {
+					icon : "check",
+					click : function() {
+						$.getJSON(
+							baseHREF + "json/adm/base:admin/sub:toggle/switch:notify/id:" + $(linkie).data( "recid") + "/",
+							function(dta) {
 								if ( dta.success === true ) {
 									infobox(dta.msg);
 									if ( dta.newval === 1 ) {
-										$(linkie).find('.u-pay').attr('src', baseHREF+'images/perm-ya.png');
+										$(linkie).find(".u-not")
+											.attr("src", baseHREF + "images/perm-ya.png");
 									} else {
-										$(linkie).find('.u-pay').attr('src', baseHREF+'images/perm-no.png');
+										$(linkie).find(".u-not")
+											.attr("src", baseHREF + "images/perm-no.png");
 									}
 								} else {
 									infobox("Toggle Failed: "+dta.msg);
 								}
-							});
+							}
+						);
 					}
 				},
-				'Toggle Only Own Hours' : {
-					'icon' : 'check',
-					'click' : function() {
-						$.getJSON(baseHREF+"json/adm/base:admin/sub:toggle/switch:limithours/id:"+$(linkie).data('recid')+"/", function(dta) {
-								if ( dta.success === true ) {
-									infobox(dta.msg);
-									if ( dta.newval === 1 ) {
-										$(linkie).find('.u-own').attr('src', baseHREF+'images/perm-ya.png');
-									} else {
-										$(linkie).find('.u-own').attr('src', baseHREF+'images/perm-no.png');
-									}
-								} else {
-									infobox("Toggle Failed: "+dta.msg);
-								}
-							});
-					}
-				},
-				'Toggle Notify' : {
-					'icon' : 'check',
-					'click' : function() {
-						$.getJSON(baseHREF+"json/adm/base:admin/sub:toggle/switch:notify/id:"+$(linkie).data('recid')+"/", function(dta) {
-								if ( dta.success === true ) {
-									infobox(dta.msg);
-									if ( dta.newval === 1 ) {
-										$(linkie).find('.u-not').attr('src', baseHREF+'images/perm-ya.png');
-									} else {
-										$(linkie).find('.u-not').attr('src', baseHREF+'images/perm-no.png');
-									}
-								} else {
-									infobox("Toggle Failed: "+dta.msg);
-								}
-							});
-					}
-				},
-				'Cancel' : function() { return true; }
+				"Cancel" : { 
+					icon: "delete",
+					click: function() { return true; }
+				}
 			}
 		});
 	}); // End User Menu
