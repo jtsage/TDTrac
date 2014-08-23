@@ -5,7 +5,7 @@
  * 
  * Contains all messaging framework
  * @package tdtrac
- * @version 3.0.0
+ * @version 4.0.0
  * @author J.T.Sage <jtsage@gmail.com>
  * @since 1.0.0beta1
  */
@@ -15,7 +15,7 @@
  *  Allows viewing of in-system messages.
  * 
  * @package tdtrac
- * @version 3.0.0
+ * @version 4.0.0
  * @since 2.0.0
  * @author J.T.Sage <jtsage@gmail.com>
  */
@@ -77,7 +77,11 @@ class tdtrac_mail {
 		$sql = "SELECT id, fromid, body, DATE_FORMAT(stamp, '%m-%d-%Y') as wtime FROM {$MYSQL_PREFIX}msg WHERE toid = {$this->user->id} ORDER BY stamp DESC";
 		$result = mysql_query($sql, $db);
 		
-		$list = new tdlist(array('id' => "mail", 'actions' => true, 'icon' => 'delete'));
+		$list = new tdlist(array(
+			'id' => "mail",
+			'actions' => true,
+			'icon' => 'delete'
+		));
 		
 		if ( mysql_num_rows($result) < 1) { 
 			$list->setFormat("<h3>%s</h3>");
@@ -85,13 +89,27 @@ class tdtrac_mail {
 			return $list->output();
 		}
 		
-		$list->setFormat("<a href='#'></a><h3>%s</h3><p><strong>Sent By:</strong> %s</p><span class='ui-li-count'><strong>%s</strong></span>");
+		$list->setFormat(
+			"<a href='#'><h3>%s</h3>" . 
+			"<p><strong>Sent By:</strong> %s</p>" . 
+			"<span class='ui-li-count'><strong>%s</strong></span></a>"
+		);
 		$list->addAction("mdel");
 		
 		while ( $row = mysql_fetch_array($result) ) {
-			$list->addRow(array($row['body'], $this->user->get_name($row['fromid']), $row['wtime']), $row);
+			$list->addRow(
+				array(
+					$row['body'],
+					$this->user->get_name($row['fromid']),
+					$row['wtime']
+				),
+				$row
+			);
 		}
-		return array_merge($list->output(), array("<br /><br /><a href='#' id='mailClear' data-role='button' data-theme='f'>Clear Inbox</a>"));
+		return array_merge(
+			$list->output(),
+			array("<br /><br /><a href='#' id='mailClear' data-role='button' data-theme='d'>Clear Inbox</a>")
+		);
 	}
 	
 }

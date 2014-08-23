@@ -16,10 +16,9 @@ function infobox(text, head) { //v4 CONTROL INFOBOX CONTENT
 	var closeButton = "<a href='#' data-rel='back' class='ui-btn ui-corner-all ui-shadow " + 
 		"ui-btn-a ui-icon-delete ui-btn-icon-notext ui-btn-left'>Close</a>";
 		
-	$('html').on('pageinit', function() { // v4 BEGIN: Running in test mode?
-		testMode = ($('#tdtracconfig').attr('data-testmode') == 1 )?true:false;
-		baseHREF = $('#tdtracconfig').attr('data-base');
-		console.log('ran');
+	$("html").on("pageinit", function() { // v4 BEGIN: Running in test mode?
+		testMode = ($( "#tdtracconfig" ).attr("data-testmode") == 1 ) ? true : false;
+		baseHREF = $( "#tdtracconfig" ).attr( "data-base" );
 	}); // END: Check test Mode
 	
 	$(document).on("click", ".help-link", function(e,p) { // v4 BEGIN: Show Help Text
@@ -117,7 +116,7 @@ function infobox(text, head) { //v4 CONTROL INFOBOX CONTENT
 		}
 	}); // END: Hours calender view handler
 	
-	$('html').ajaxComplete(function(e,xhr,settings) { // BEGIN: Test Mode Ajax Debug
+	$( "html" ).ajaxComplete(function(e,xhr,settings) { // BEGINv4: Test Mode Ajax Debug
 		//* DEBUG ALL JSON BASED AJAX /
 		if ( testMode === true && settings.url.search("json") > -1 ) {
 			console.log(xhr.responseText);
@@ -379,43 +378,62 @@ function infobox(text, head) { //v4 CONTROL INFOBOX CONTENT
 		}
 	}); // END: Mark Hours
 	
-	$('.msg-delete').on('vclick', function (e) { // BEGIN: Delete Message
+	$(document).on("vclick", ".msg-delete", function (e) { // BEGIN: Delete Message
 		e.preventDefault();
 		var linkie = this;
-		if ( ! $(this).data('done') ) {
-			$('<div>').popupwrapper({
-				displayMode: 'button',
-				headerText: 'DELETE!',
-				headerMinWidth: '350px',
-				subTitle: 'Delete Message #'+$(linkie).data('recid')+'?',
+		if ( ! $(this).data( "done" ) ) {
+			$( "<div>" ).mdialog({
+				useMenuMode: true,
+				menuHeaderText: "DELETE!",
+				menuMinWidth: "350px",
+				menuSubtitle: "Delete Message #" + $(linkie).data( "recid" ) + "?",
 				buttons: { 
-					'Yes, Delete' : function () {
-						$.getJSON(baseHREF+"json/delete/base:msg/id:"+$(linkie).data('recid')+"/", function(data) {
-							if ( data.success === true ) {
-								$(linkie).parent().find('h3').html('--Removed--');
-								infobox("Message #"+$(linkie).data('recid')+" Deleted");
-							} else {
-								infobox("Message #"+$(linkie).data('recid')+" Delete Failed!");
+					"Yes, Delete" : function () {
+						$.getJSON(
+							baseHREF + "json/delete/base:msg/id:" + $(linkie).data("recid") + "/",
+							function(data) {
+								if ( data.success === true ) {
+									$(linkie).parent().find("h3").html("--Removed--");
+									infobox(
+										"Message #" + $(linkie).data("recid") + " Deleted",
+										"Success"
+									);
+								} else {
+									infobox(
+										"Message #" + $(linkie).data("recid") + " Delete Failed!",
+										"Error"
+									);
+								}
+								$(linkie).data( "done", 1 );
 							}
-							$(linkie).data('done', 1);
-						}); },
-					'Cancel' : { click: function () { return true; }, icon: 'delete' }
+						); },
+					"Cancel" : { 
+						click: function () { return true; },
+						icon: "delete"
+					}
 				}
 			});
 		}
 	}); // END: Delete Message
 	
-	$('#mailClear').off('click');
-	$('#mailClear').on('click', function(e) { // BEGIN: Message Clear
-		$.mobile.showPageLoadingMsg();
+	$(document).on("click", "#mailClear", function(e) { // BEGINv4: Message Clear
+		$.mobile.loading("show");
 		e.preventDefault();
 		
-		$.getJSON(baseHREF+"json/clear/base:msg/id:0", function(dta) {
+		$.getJSON( baseHREF + "json/clear/base:msg/id:0", function(dta) {
 			if ( dta.success === true ) {
-				$.mobile.changePage(dta.location, { reloadPage: true, type: 'post', data: {'infobox': dta.msg}, transition:'slide'});
+				$.mobile.changePage(
+					dta.location, 
+					{ 
+						reloadPage: true,
+						type: "post",
+						data: {"infobox": dta.msg},
+						transition:"slide"
+					}
+				);
 			} else {
-				$.mobile.hidePageLoadingMsg();
-				infobox(dta.msg,'Error');
+				$.mobile.loading("hide");
+				infobox( dta.msg, "Error" );
 			}
 		});
 		
