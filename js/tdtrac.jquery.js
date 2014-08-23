@@ -487,52 +487,78 @@ function infobox(text, head) { //v4 CONTROL INFOBOX CONTENT
 		}
 	}); // END: Show Menu
 	
-	$('.budg-menu').on('vclick', function (e) { // BEGIN: Budget Menu
+	$(document).on("vclick", ".budg-menu", function (e) { // BEGINv4: Budget Menu
 		e.preventDefault();
-		var linkie = this;
-		if ( ! $(this).data('done') ) {
-			$('<div>').popupwrapper({
-				displayMode: 'button',
-				buttonMode: 'list',
-				headerText: 'BUDGET',
-				headerMinWidth: '350px',
-				subTitle: 'Budget Item #'+$(this).data('recid'),
-				buttons : (($(this).data('edit'))?{
-					'View Detail' : {
-						'click': function() { $.mobile.changePage(baseHREF+"budget/item/id:"+$(linkie).data('recid')+"/"); },
-						'icon': 'grid',
+		var linkie = this,
+			linkpar = $(this).parent();
+			
+		if ( ! $(this).data( "done" ) ) {
+			$("<div>").mdialog({
+				useMenuMode: true,
+				menuHeaderText: "BUDGET",
+				menuMinWidth: "350px",
+				menuSubtitle: "Budget Item #" + $(this).data( "recid" ),
+				buttons : ( ( $(this).data( "edit") ) ? {
+					"View Detail" : {
+						click: function() {
+							$.mobile.changePage(
+								baseHREF + "budget/item/id:" + $(linkie).data( "recid" ) + "/" 
+							);
+						},
+						icon: "action",
 						close: false
 					},
-					'Edit' : {
-						'click': function() { $.mobile.changePage(baseHREF+"budget/edit/id:"+$(linkie).data('recid')+"/"); },
-						'icon': 'grid',
+					"Edit" : {
+						click: function() {
+							$.mobile.changePage(
+								baseHREF + "budget/edit/id:" + $(linkie).data( "recid" ) + "/"
+							);
+						},
+						icon: "edit",
 						close: false
 					},
-					'Delete' : {
-						'click': function() {
-							$.getJSON(baseHREF+"json/delete/base:budget/id:"+$(linkie).data('recid')+"/", function(data) {
-								if ( data.success === true ) {
-									$(linkie).parent().find('h3').html('--Removed--');
-									$(linkie).parent().find('span.ui-li-count').html('deleted');
-									$(linkie).parent().find('.todo-done').data('done', 1);
-									infobox("Budget Item #"+$(linkie).data('recid')+" Deleted");
-								} else {
-									infobox("Budget Item #"+$(linkie).data('recid')+" Delete Failed!");
-								}
-								$(linkie).data('done', 1);
+					"Delete" : {
+						click: function() {
+							$.getJSON(
+								baseHREF + "json/delete/base:budget/id:" + $(linkie).data("recid") + "/",
+								function(data) {
+									if ( data.success === true ) {
+										linkpar.find( "h3" ).html( "--Removed--" );
+										linkpar.find( "span.ui-li-count" ).html( "deleted" );
+										linkpar.find( ".todo-done" ).data( "done", 1 );
+										infobox(
+											"Budget Item #" + $(linkie).data( "recid") + " Deleted",
+											"Success"
+										);
+									} else {
+										infobox(
+											"Budget Item #" + $(linkie).data("recid") + " Delete Failed!",
+											"Error"
+										);
+									}
+									$(linkie).data("done", 1);
 							});
 						},
-						'icon': 'delete'
+						icon: "recycle"
 					},
-					'Cancel' : function () { return true; }
-					
+					"Cancel" : {
+						icon: "delete",
+						click: function () { return true; }
+					}
 				}:{
-					'View' : {
-						'click': function() { $.mobile.changePage(baseHREF+"budget/view/id:"+$(linkie).data('recid')+"/"); },
-						'icon': 'grid',
+					"View" : {
+						click: function() {
+							$.mobile.changePage(
+								baseHREF + "budget/view/id:" + $(linkie).data("recid") + "/"
+							);
+						},
+						icon: "action",
 						close: false
 					},
-					'Cancel' : function () { return true; }
+					"Cancel" : {
+						icon: "delete",
+						click: function () { return true; }
+					}
 				})
 			}); 
 		}
@@ -823,30 +849,36 @@ function infobox(text, head) { //v4 CONTROL INFOBOX CONTENT
 		});
 	}); // End User Menu
 	
-	$('select').on('change', function(e) { // BEGIN : Add Dropdown Option
+	$(document).on("change", "select", function(e) { // BEGINv4: Add Dropdown Option
 		var self = this;
 
-		$(self+':selected:not([data-placeholder])').each(function(){
-			if ( $(this).attr('data-addoption') ) {
-				setTimeout(function() {
-					$('<div>').popupwrapper({
-						displayMode: 'button',
-						headerText: 'ADD',
-						headerMinWidth: '350px',
-						inputList: [{'id':'newOPT', 'title':'New Option'}],
-						buttons : {
-							'Yes, Add' : function () { 
-								thisopt = this.basePop.find('#newOPT').val();
-								$('<option value="'+thisopt+'" selected="selected">'+thisopt+'</option>').appendTo($(self));
-								$(self).selectmenu('refresh', true);
-								return true; },
-							'Cancel' : { click: function () { $(self).selectmenu('open'); }, icon: 'delete', close: false }
+		$(self).find(":selected").each(function() {
+			if ( $(this).data("addoption") === true ) {
+				$("<div>").mdialog({
+					useMenuMode: true,
+					menuHeaderText: "ADD",
+					menuMinWidth: "350px",
+					menuSubtitle: "Add new item...",
+					menuInputList: [{
+						id: "newOPT",
+						title: "New Option",
+						type: "text"
+					}],
+					buttons : {
+						"Yes, Add" : function (e,a) { 
+							thisopt = a[1];
+							$("<option value='" + thisopt + "' selected='selected'>" + thisopt + "</option>").appendTo($(self));
+							$(self).selectmenu("refresh");
+							return true;
+						},
+						"Cancel" : { 
+							icon: "delete",
+							click: function () { return true; }
 						}
-					});
-				}, 250);
+					}
+				});
 			}
 		});
 	}); // END : Add Dropdown Option
-	
 	
 }) ( jQuery );

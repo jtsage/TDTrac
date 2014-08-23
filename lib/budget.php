@@ -6,7 +6,7 @@
  * Data hardened as of 1.3.1
  *  
  * @package tdtrac
- * @version 3.0.0
+ * @version 4.0.0
  * @author J.T.Sage <jtsage@gmail.com>
  * @since 0.0.9a
  */
@@ -16,7 +16,7 @@
  *  Allows per-show budget tracking
  * 
  * @package tdtrac
- * @version 3.0.0
+ * @version 4.0.0
  * @since 2.0.0
  * @author J.T.Sage <jtsage@gmail.com>
  */
@@ -143,7 +143,7 @@ class tdtrac_budget {
 		GLOBAL $db, $MYSQL_PREFIX, $TDTRAC_SITE;
 		$sql = "SELECT showid, showname FROM `{$MYSQL_PREFIX}shows` WHERE closed = 0 ORDER BY created DESC";
 		
-		$list = new tdlist(array('id' => 'budget-showlist', 'actions' => true, 'icon' => 'add', 'inset' => true));
+		$list = new tdlist(array('id' => 'budget-showlist', 'actions' => true, 'icon' => 'plus', 'inset' => true));
 		$list->addAction('badd');
 		$list->setFormat("<a href='{$TDTRAC_SITE}budget/view/type:show/id:%d/'><h3>%s</h3>"
 				."<p><strong>Budget Expense:</strong> $%s"
@@ -168,10 +168,10 @@ class tdtrac_budget {
 		$allr = '$' . number_format(get_single("SELECT SUM(price+tax) AS num FROM {$MYSQL_PREFIX}budget WHERE needrepay = 1 AND gotrepay = 0"),2);
 		$your = '$' . number_format(get_single("SELECT SUM(price+tax) AS num FROM {$MYSQL_PREFIX}budget WHERE needrepay = 1 AND gotrepay = 0 AND payto = {$this->user->id}"),2);
 		$rrpt = get_single("SELECT COUNT(imgid) as num FROM `{$MYSQL_PREFIX}rcpts` WHERE handled = 0");
-		$list->addRaw("<li data-theme='c'><a href='{$TDTRAC_SITE}budget/rcpt/'><h3>All Pending Reciepts</h3><span class='ui-li-count'>{$rrpt}</span></a></li>");
-		$list->addRaw("<li data-theme='c'><a href='{$TDTRAC_SITE}budget/view/type:reimb/id:0/'><h3>All Pending Reimbursment</h3><span class='ui-li-count'>{$allr}</span></a></li>");
-		$list->addRaw("<li data-theme='c'><a href='{$TDTRAC_SITE}budget/view/type:pending/id:0/'><h3>All Pending Payment</h3><span class='ui-li-count'>{$allp}</span></a></li>");
-		$list->addRaw("<li data-theme='c'><a href='{$TDTRAC_SITE}budget/view/type:reimb/id:{$this->user->id}/'><h3>Your Reimbursments</h3><span class='ui-li-count'>{$your}</span></a></li>");
+		$list->addRaw("<li data-theme='a'><a href='{$TDTRAC_SITE}budget/rcpt/'><h3>All Pending Reciepts</h3><span class='ui-li-count'>{$rrpt}</span></a></li>");
+		$list->addRaw("<li data-theme='a'><a href='{$TDTRAC_SITE}budget/view/type:reimb/id:0/'><h3>All Pending Reimbursment</h3><span class='ui-li-count'>{$allr}</span></a></li>");
+		$list->addRaw("<li data-theme='a'><a href='{$TDTRAC_SITE}budget/view/type:pending/id:0/'><h3>All Pending Payment</h3><span class='ui-li-count'>{$allp}</span></a></li>");
+		$list->addRaw("<li data-theme='a'><a href='{$TDTRAC_SITE}budget/view/type:reimb/id:{$this->user->id}/'><h3>Your Reimbursments</h3><span class='ui-li-count'>{$your}</span></a></li>");
 		return $list->output();
 	}
 	
@@ -370,13 +370,13 @@ class tdtrac_budget {
 	 * @param bool Use a pre-formatted link
 	 * @return array Formatted HTML
 	 */
-	private function make_row($cat, $price, $html, $showid, $link = true) {
+	private function make_row($cat, $price, $html, $showid, $link = true, $theme = "a") {
 		GLOBAL $TDTRAC_SITE;
 		$html[] = "</tbody></table>";
 		if ( $link ) { array_unshift($html, "<a href='{$TDTRAC_SITE}budget/view/type:show/id:{$showid}/cat:{$cat}/'>"); }
 		$list = new tdlist(array('id' => "b-view-{$cat}", 'inset' => true));
 		$list->addRaw("<li data-role='list-divider'>{$cat}<span class='ui-li-count'>$".number_format($price, 2)."</span></li>");
-		$list->addRaw("<li data-theme='c'>".join($html).(($link)?"</a>":"")."</li>");
+		$list->addRaw("<li data-theme='{$theme}'>".join($html).(($link)?"</a>":"")."</li>");
 		return $list->output();
 	}
 	
@@ -456,15 +456,18 @@ class tdtrac_budget {
 			."<br /><strong>Other Info:</strong> %s</p>"
 			."<span class='ui-li-count'>$%s</span></a>");
 		
-        
-        while ( $item = mysql_fetch_array($result) ) {
+		
+		while ( $item = mysql_fetch_array($result) ) {
+			$theme = 'a';
 			$extra = array();
 			if ( $item['tax'] > 0 ) { $extra[] = "Taxed ($".number_format($item['tax'],2).")"; }
-			if ( $item['pending'] ) { $extra[] = "<span style='color: red'>Pending Payment</span>"; }
+			if ( $item['pending'] ) { $theme = 'e'; $extra[] = "<span style='color: red'>Pending Payment</span>"; }
 			if ( $item['needrepay'] ) {
 				if ( $item['gotrepay'] ) { 
 					$extra[] = "Reimbursed"; 
-				} else { 
+					$theme = 'c';
+				} else {
+					$theme = 'e'; 
 					if ( $item['payto'] > 0 ) { 
 						$extra[] = "<strong>" . $this->user->get_name($item['payto']) . " Needs Reimbursment</strong>";
 					} else {
@@ -474,13 +477,19 @@ class tdtrac_budget {
 			}
 			if ( $item['imgid'] > 0 ) { $extra[] = "Has Receipt"; }
 				
-			$list->addRow(array(
+			$list->addRow(
+				array(
 					$item['id'],
 					$item['dscr'],
 					$item['vendor'],
 					join(', ', $extra),
 					number_format($item['tax'] + $item['price'], 2)
-				), $item);
+				),
+				$item,
+				array(
+					"theme" => $theme
+				)
+			);
 		}
 		
 		return array_merge(array("<h3>{$showname} - {$cat}</h3>"), $list->output());
@@ -558,7 +567,7 @@ class tdtrac_budget {
 			$html = array_merge($html, $this->make_row($lastcat, $subtot, $thisCatHtml, $showid, false));
 		}
 		array_unshift($html, "<h3>{$showname} ($".number_format($total, 2).")</h3>");
-		return array_merge($html, array("<br /><br /><a class=\"ajax-email\" data-email='{\"action\": \"budget\", \"id\": \"{$showid}\"}' data-role=\"button\" data-theme=\"f\" href=\"#\">E-Mail this Report to Yourself</a>"));
+		return array_merge($html, array("<br /><br /><a class=\"ajax-email\" data-email='{\"action\": \"budget\", \"id\": \"{$showid}\"}' data-role=\"button\" data-theme=\"d\" href=\"#\">E-Mail this Report to Yourself</a>"));
 	}
 	
 	/* 
