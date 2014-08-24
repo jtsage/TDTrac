@@ -6,10 +6,10 @@ Basically, any request in the directory that tdtrac is installed in, if a
 physical file or directory does not exist for it, should be redirected to
 the index, with the query string of action=[page requested].
 
-RewriteEngine on
+    RewriteEngine on
 
-RewriteBase /
+    RewriteBase /
  
-RewriteCond %{REQUEST_FILENAME} !-f
-RewriteCond %{REQUEST_FILENAME} !-d
-RewriteRule (.+) /index.php?action=$1 [L] 
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule (.+) /index.php?action=$1 [L] 
