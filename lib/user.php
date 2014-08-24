@@ -4,7 +4,7 @@
  * 
  * Functions that pertain to the logged in user
  * @package tdtrac
- * @version 2.0.0
+ * @version 4.0.0
  * @since 2.0.0
  * @author J.T.Sage <jtsage@gmail.com>
  */
@@ -15,7 +15,7 @@
  * Contains all login and user related functions. 
  * Data hardened
  * @package tdtrac
- * @version 2.0.0
+ * @version 4.0.0
  * @since 2.0.0
  * @author J.T.Sage <jtsage@gmail.com>
  */
