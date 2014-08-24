@@ -510,7 +510,7 @@ function infobox(text, head) { //v4 CONTROL INFOBOX CONTENT
 		}
 	}); // END: Budget Menu
 	
-	// BEGIN : Recpt Functions
+	// BEGIN : Recpt Functions (whole section doesn't work - mail handler is broken)
 	$('.rcptrot').on('vclick', function (e) { 
 		var self = this;
 			date = new Date();
