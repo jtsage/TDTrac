@@ -21,7 +21,7 @@ function infobox(text, head) { //v4 CONTROL INFOBOX CONTENT
 		baseHREF = $( "#tdtracconfig" ).attr( "data-base" );
 	}); // END: Check test Mode
 	
-	$(document).on("click", ".help-link", function(e,p) { // v4 BEGIN: Show Help Text
+	$(document).on("click", ".help-link", function(e,p) { // BEGINv4: Show Help Text
 		var self = $(this),
 			base = $(this).attr( "data-base" ),
 			subact = $(this).attr( "data-sub" ),
@@ -56,62 +56,54 @@ function infobox(text, head) { //v4 CONTROL INFOBOX CONTENT
 		);
 	}); // END: Show Help Text
 	
-	$('#hoursview').on('datebox', function(e,p) { // BEGIN: Hours calender view handler
-		if ( p.method === 'offset' && p.type === 'm' ) {
-			$.mobile.showPageLoadingMsg();
-			var xxx = window.location.pathname,
-				umonth = xxx.match(/month:(\d+)/),
-				uyear = xxx.match(/year:(\d+)/),
-				id = xxx.match(/id:(\d+)/),
-				which = xxx.match(/type:(\w+)\//),
-				newurl = baseHREF+'hours/view/type:'+which[1]+'/id:'+id[1];
+	$(document).on("datebox", "#hoursview", function(e,p) { // BEGINv4: Hours calender view handler
+		if ( p.method === "offset" ) {
+			var oldLocation = window.location.pathname,
+				locID = oldLocation.match(/id:(\d+)\//),
+				locType = oldLocation.match(/type:(\w+)\//),
+				locMonth = p.newDate.getMonth() + 1,
+				locYear = p.newDate.getFullYear();
 			
-			month = parseInt(umonth[1], 10);
-			year = parseInt(uyear[1], 10);
-			
-			if ( p.amount < 0 ) {
-				if ( (month - 1) < 1 ) {
-					month = 12; year = year - 1;
-				} else {
-					month = month - 1;
+			$.mobile.changePage(
+				baseHREF + "hours/view" +
+					"/type:" + locType[1] +
+					"/id:" + locID[1] +
+					"/year:" + locYear +
+					"/month:" + locMonth +
+					"/",
+				{
+					reloadPage: true,
+					transition: "none"
 				}
-			} else {
-				if ( (month + 1) > 12 ) {
-					month = 1; year = year + 1;
-				} else {
-					month = month + 1;
-				}
-			}
-			
-			$.mobile.changePage(newurl+'/year:'+year+'/month:'+month+'/', { reloadPage: true, transition: 'none'});
-		} else if ( p.method === 'set' ) {
-			var info = $('.ui-page-active #hours-data').find('[data-date='+p.value+']'),
-				first = $('.ui-page-active').children('.ui-content'),
-				lines = '';
+			);
+		} else if ( p.method === "set" ) {
+			var thisDate, thisType, thisData,
+				info = $(".ui-page-active #hours-data").find("[data-date=" + p.value + "]"),
+				poppie = "<div style='min-width: 400px' data-theme='a'>" + closeButton,
+				content = "";
 			
 			if ( info.length > 0 ) {
-				thisDate = $(info[0]).attr('data-date');
-				thisType = $(info[0]).attr('data-type');
+				thisDate = $(info[0]).data("date");
+				thisType = $(info[0]).data("type");
 				
 				for ( x=0; x<info.length; x++ ) {
-					lines = lines + '<li data-theme="' + (($(info[x]).attr('data-submitted') == 0)?'e':'c') + '">'
-							+ '<a href="#"><strong>' + $(info[x]).attr('data-show') + ':</strong> '
-							+ $(info[x]).attr('data-worked')
-							+ '<p style="margin-top:0">' + $(info[x]).attr('data-note') + '</p>'
-							+ '<p class="ui-li-count">$' + $(info[x]).attr('data-amount') + '</p></a>'
-							+ '<a href="'+baseHREF+'hours/edit/id:' + $(info[x]).attr('data-recid') + '/">Edit</a></li>';
+					thisData = $(info[x]).data();
+					content = content +
+						"<li data-theme='" + (thisData.submitted == 0 ? "e":"c") + "'>" +
+						"<a href='#'><h3><strong>" + thisData.show + ":</strong> " + thisData.worked +
+						"</h3>" +
+						"<p style='margin-top:0'>" + thisData.note + "</p>" +
+						"<p style='margin-top: -1em;' class='ui-li-count'>$" + thisData.amount + "</p></a>" +
+						"<a href='" + baseHREF + "hours/edit/id:" + thisData.recid + "/'Edit</a></li>";
 				}
-				$('<div>').popupwrapper({
-					displayMode: 'blank',
-					closeButton: 'right',
-					content:
-                    	'<div data-role="header" data-theme="a" style="min-width: 350px" class="ui-corner-top ui-bar-a">'+
-                        	'<h2 class="ui-title">' + thisType + ' Worked For :: ' + thisDate + '</h2>'+
-	                    '</div>'+
-    	                '<div data-role="content" data-theme="d" class="ui-corner-bottom ui-content">' +
-        	                '<ul data-role="listview" data-theme="c">' + lines + '</ul>' +
-            	        '</div>'
-				});
+				
+				poppie = poppie +
+					"<div data-role='header'><h1>" + thisDate + ":" + thisType + "</h1></div>" +
+					"<div data-role='content' class='ui-content'>" +
+					"<ul data-role='listview'>" + content + "</ul>" + 
+					"</div></div>";
+					
+				$(poppie).enhanceWithin().popup().popup("open");
 			}
 		}
 	}); // END: Hours calender view handler
@@ -203,32 +195,6 @@ function infobox(text, head) { //v4 CONTROL INFOBOX CONTENT
 			});
 		}
 	}); // END: E-Mail Function
-	
-	$('#hours-delete').on( 'vclick', function(e) {  // BEGIN: Delete Hours
-		e.preventDefault();
-		var linkie = this,
-			xxx = window.location.pathname,
-			id = xxx.match(/id:(\d+)/);
-			first = $('.ui-page-active').children('.ui-content');
-			
-		$('<div>').popupwrapper({
-			displayMode: 'button', 
-			headerText: 'DELETE!',
-			headerMinWidth: '300px',
-			subTitle : 'Delete Hours Item #'+id[1]+'?',
-			buttons : {
-				'Yes, Delete' : function () {
-					$.getJSON(baseHREF+"json/delete/base:hours/id:"+id[1]+"/", function(dta) {
-						if ( dta.success === true ) {
-							$.mobile.changePage(dta.location, { reloadPage: true, type: 'post', data: {'infobox': 'Hours Item Deleted'}, transition:'slide'});
-						} else {
-							infobox("Hours Delete Failed!");
-						}
-					}); },
-				'Cancel': { 'click': function () { return true; }, icon: 'delete' }
-			}
-		});
-	}); // END: Delete Hours
 	
 	$(document).on("vclick", ".todo-done", function(e) {  // BEGIN: Mark Todo Done
 		e.preventDefault();
@@ -323,60 +289,40 @@ function infobox(text, head) { //v4 CONTROL INFOBOX CONTENT
 		}
 	}); // END: Todo Menu
 	
-	$('.hours-clear').on('vclick', function (e) { // BEGIN: Clear Hours
+	$(document).on("vclick", ".hours-clear", function (e) { // BEGIN: Clear Hours
 		e.preventDefault();
-		var linkie = this;
-		if ( ! $(this).data('done') ) {
-			$('<div>').popupwrapper({
-				displayMode: 'button',
-				headerText: 'CLEAR?',
-				headerMinWidth: '350px',
-				subTitle: 'Clear Hours For User #'+$(linkie).data('recid')+'?',
+		var linkie = this,
+			linkpar = $(this).parent();
+		if ( ! $(this).data("done") ) {
+			$("<div>").mdialog({
+				useMenuMode: true,
+				menuHeaderText: "MARK PAID?",
+				menuMinWidth: "350px",
+				menuSubtitle: "Mark Paid For User #" + $(linkie).data("recid") + "?",
 				buttons: { 
-					'Yes, Clear' : function () {
-						$.getJSON(baseHREF+"json/clear/base:hours/id:"+$(linkie).data('recid')+"/", function(data) {
-							if ( data.success === true ) {
-								$(linkie).parent().find('p:first').html('--Submitted--');
-								$(linkie).parent().find('span.ui-li-count').html('-0-');
-								infobox("Hours Cleared");
-							} else {
-								infobox("Hours Clear Failed!");
+					"Yes, Mark" : function () {
+						$.getJSON(
+							baseHREF + "json/clear/base:hours/id:" + $(linkie).data("recid") + "/",
+							function(data) {
+								if ( data.success === true ) {
+									$("<p>--Submitted--<p>").insertBefore(linkpar.find("p:first"));
+									linkpar.find("span.ui-li-count").html("-0-");
+									infobox("Hours Cleared", "Success");
+								} else {
+									infobox("Hours Clear Failed!", "Error");
+								}
+								$(linkie).data("done", 1);
 							}
-							$(linkie).data('done', 1);
-						}); },
-					'Cancel' : {click: function () { return true; }, icon: 'delete' }
+						);
+					},
+					"Cancel" : {
+						click: function () { return true; },
+						icon: "delete"
+					}
 				}
 			});
 		}
 	}); // END: Clear Hours
-	
-	$('.hours-mark').on('vclick', function (e) { // BEGIN: Mark Hours
-		e.preventDefault();
-		var linkie = this;
-		if ( ! $(this).data('done') ) {
-			$('<div>').popupwrapper({
-				displayMode: 'button',
-				headerText: 'MARK?',
-				headerMinWidth: '350px',
-				subTitle: 'Mark Hours Finished?',
-				buttons: { 
-					'Yes, Clear' : function () {
-						$.getJSON(baseHREF+"json/mark/base:hours/id:"+$(linkie).data('recid')+"/", function(data) {
-							if ( data.success === true ) {
-								$(linkie).parent().find('.ui-btn-up-b').removeClass('ui-btn-up-b').addClass('ui-btn-up-c');
-								$(linkie).parent().removeClass('ui-btn-up-b').addClass('ui-btn-up-c');
-								$(linkie).parent().find('.pending').html('');
-								infobox("Hours Marked");
-							} else {
-								infobox("Hours Mark Failed!");
-							}
-							$(linkie).data('done', 1);
-						}); },
-					'Cancel' : { click:function () { return true; }, icon: 'delete' }
-				}
-			});
-		}
-	}); // END: Mark Hours
 	
 	$(document).on("vclick", ".msg-delete", function (e) { // BEGIN: Delete Message
 		e.preventDefault();

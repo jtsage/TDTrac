@@ -5,7 +5,7 @@
  * Contains all payroll related functions. 
  * Data hardened
  * @package tdtrac
- * @version 3.0.0
+ * @version 4.0.0
  * @author J.T.Sage <jtsage@gmail.com>
  */
 
@@ -14,7 +14,7 @@
  *  Allows configuration of shows
  * 
  * @package tdtrac
- * @version 3.0.0
+ * @version 4.0.0
  * @since 2.0.0
  * @author J.T.Sage <jtsage@gmail.com>
  */
@@ -77,7 +77,7 @@ class tdtrac_hours {
 						$this->html = $this->view_standard(intval($this->action['id']), 'show');
 						break;
 					case 'showlist':
-						$this->html = $this->view_list(intval($this->action['id']));
+						$this->html = $this->view_list(intval($this->action['id']), intval($this->action['listtype']));
 						break;
 					case 'unpaid':
 						$this->html = $this->view_pending();
@@ -306,7 +306,7 @@ class tdtrac_hours {
 			}
 		}
 		
-		return array_merge($list->output(), array("<br /><br /><a class=\"ajax-email\" data-email='{\"action\": \"hours\", \"id\": \"0\"}' data-role=\"button\" data-theme=\"f\" href=\"#\">E-Mail this Report to Yourself</a>"));
+		return array_merge($list->output(), array("<br /><br /><a class=\"ajax-email\" data-email='{\"action\": \"hours\", \"id\": \"0\"}' data-role=\"button\" data-theme=\"d\" href=\"#\">E-Mail this Report to Yourself</a>"));
 	}
 	
 	/** 
@@ -384,10 +384,13 @@ class tdtrac_hours {
 			'mode' => 'calbox',
 			'calHighToday' => false,
 			'themeDateToday' => 'd',
-			'calOnlyMonth' => false,
+			'calOnlyMonth' => true,
 			'calHighPick' => false,
-			'highDates' => (empty($theseHighDates)?false:$theseHighDates),
-			'highDatesAlt' => (empty($theseHighDatesAlt)?false:$theseHighDatesAlt),
+			'calControlGroup' => false,
+			'themeDateHighAlt' => 'e',
+			'themeDateHigh' => 'c',
+			'highDatesAlt' => (empty($theseHighDates)?false:$theseHighDates),
+			'highDates' => (empty($theseHighDatesAlt)?false:$theseHighDatesAlt),
 			'defaultValue' => array(intval($this->action['year']),($this->action['month']-1),1)
 		);
 		
@@ -398,8 +401,8 @@ class tdtrac_hours {
 		$prevlink = ($prevdate==0)?'#':$TDTRAC_SITE . 'hours/view/type:' . $type . '/id:' . $id . '/year:' . date('Y', strtotime($prevdate)) . '/month:' . date('n', strtotime($prevdate)) . '/';
 		
 		$html[] = '<div data-role="controlgroup" data-type="horizontal" style="text-align: center">';
-		$html[] = '	<a href="'.$prevlink.'" rel="external" data-role="button" data-theme="'.(($prevdate==0)?'f':'d').'" data-icon="arrow-l">Previous Hours</a>';
-		$html[] = '	<a href="'.$nextlink.'" rel="external" data-role="button" data-theme="'.(($nextdate==0)?'f':'d').'" data-icon="arrow-r">Next Hours</a>';
+		$html[] = '	<a href="'.$prevlink.'" rel="external" data-role="button" data-theme="'.(($prevdate==0)?'d':'c').'" data-icon="arrow-l">Previous Hours</a>';
+		$html[] = '	<a href="'.$nextlink.'" rel="external" data-role="button" data-theme="'.(($nextdate==0)?'d':'c').'" data-icon="arrow-r">Next Hours</a>';
 		$html[] = '</div>';
 		return $html;
 	}
@@ -414,25 +417,29 @@ class tdtrac_hours {
 	 * @param string Type to display
 	 * @return array Formatted HTML
 	 */
-	public function view_list($id) {
+	public function view_list($id, $type=1) {
 		GLOBAL $db, $MYSQL_PREFIX, $TDTRAC_DAYRATE, $TDTRAC_SITE;
 		
 		$html = array();
+		if ( $type == 1 ) {
+			$extext = "(by Date)";
+			$order = "ORDER BY date ASC, u.last ASC";
+		} else if ( $type == 2 ) {
+			$extext = "(by Name)";
+			$order = "ORDER BY u.last ASC, date ASC";
+		}
 		
 		$thename = get_single("SELECT showname as num FROM `{$MYSQL_PREFIX}shows` WHERE showid = {$id}");
-		$html[] = "<h3>Hours For: {$thename}</h3>";
+		$html[] = "<h3>Hours For: {$thename} {$extext}</h3>";
 		
 		$sql = "SELECT h.*, showname, (h.worked*u.payrate) as amount, h.note as note, CONCAT(u.first, ' ', u.last) as name "
 			. "FROM `{$MYSQL_PREFIX}hours` h, `{$MYSQL_PREFIX}shows` s, `{$MYSQL_PREFIX}users` u "
 			. "WHERE h.showid = s.showid AND h.userid = u.userid "
-			. "ORDER BY date ASC, u.last ASC";
+			. $order;
 			
 		$result = mysql_query($sql);
 		
-		if ( mysql_num_rows($result) < 1 ) {
-			$theseHighDates = False;
-			$theseHighDatesAlt = False;
-		} else {
+		if ( mysql_num_rows($result) > 0 ) {
 			$html[] = "<table style='width:100%' border='1' cellspacing='0'><tr><th>Date</th><th>Employee</th><th>Hours</th><th>Amount</th><th>Note</th></tr>";
 			
 			while ( $row = mysql_fetch_array($result) ) {
@@ -600,7 +607,8 @@ class tdtrac_hours {
 		if ( $this->action['action'] == 'view' ) {
 			$type = (isset($this->action['type']))?$this->action['type']:'user';
 			if ( $type == 'show' ) {
-				$list->addRaw("<li data-icon='arrow-r'><a href='{$TDTRAC_SITE}hours/view/type:showlist/id:{$this->action['id']}'><h3>View as List</h3></a></li>");
+				$list->addRaw("<li data-icon='arrow-r'><a href='{$TDTRAC_SITE}hours/view/type:showlist/listtype:1/id:{$this->action['id']}'><h3>View as List (by Date)</h3></a></li>");
+				$list->addRaw("<li data-icon='arrow-r'><a href='{$TDTRAC_SITE}hours/view/type:showlist/listtype:2/id:{$this->action['id']}'><h3>View as List (by Name)</h3></a></li>");
 			}
 			if ( $type == 'showlist' ) {
 				$list->addRaw("<li data-icon='arrow-r'><a href='{$TDTRAC_SITE}hours/view/type:show/id:{$this->action['id']}'><h3>View as Calendar</h3></a></li>");
