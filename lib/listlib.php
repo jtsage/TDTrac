@@ -135,7 +135,7 @@ class tdlist {
 	 */
 	public function output() {
 		return array_merge(
-			array("<ul id='list_{$this->options['id']}' ".($this->options['inset']?'data-inset="true" ':'').($this->options['actions']?"data-split-icon='{$this->options['icon']}' data-split-theme='a'":"")." data-role='listview'>"),
+			array("<ul data-divider-theme='b' id='list_{$this->options['id']}' ".($this->options['inset']?'data-inset="true" ':'').($this->options['actions']?"data-split-icon='{$this->options['icon']}' data-split-theme='a'":"")." data-role='listview'>"),
 			$this->items,
 			array("</ul>"));
 	}

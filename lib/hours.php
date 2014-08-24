@@ -59,6 +59,14 @@ class tdtrac_hours {
 				} else {
 					$this->html = error_page('Access Denied :: You cannot add new hour items');
 				} break;
+			case "find":
+				$CANCEL = true;
+				$this->title .= "::Search";
+				if ( $this->user->admin ) {
+					$this->html = $this->find_form();
+				} else {
+					$this->html = error_page('Access Denied :: You cannot search hours');
+				} break;
 			case "view":
 				if ( $this->user->can('addhours') ) {
 					$HEAD_LINK = array('hours/add/', 'plus', 'Add Hours'); 
@@ -81,6 +89,9 @@ class tdtrac_hours {
 						break;
 					case 'unpaid':
 						$this->html = $this->view_pending();
+						break;
+					case 'search':
+						$this->html = $this->view_search($this->action['start'], $this->action['end'], intval($this->action['listtype']));
 						break;
 				} break;
 			case "edit":
@@ -114,6 +125,39 @@ class tdtrac_hours {
 		makePage($this->html, $this->title, $this->sidebar());
 		
 	} // END OUTPUT FUNCTION
+	
+	/**
+	 * Show hours search form
+	 * 
+	 * @global bool Use daily or hourly pay rates
+	 * @global string Site address for links
+	 * @return array HTML output
+	 */
+	private function find_form () {
+		GLOBAL $TDTRAC_DAYRATE, $TDTRAC_SITE, $TDTRAC_PAYDAYLIMIT;
+		$form = new tdform(array(
+			'action' => "{$TDTRAC_SITE}json/nav/id:0/base:hours/type:listview/",
+			'id' => 'hours-add-form')
+		);
+		
+		$fesult = $form->addDate(array(
+			'name' => 'start',
+			'label' => 'Start Date',
+			'placeholder' => 'Start Date',
+		));
+		$fesult = $form->addDate(array(
+			'name' => 'end',
+			'label' => 'End Date',
+			'placeholder' => 'End Date',
+		));
+		$fesult = $form->addToggle(array(
+			'name' => 'listtype',
+			'label' => 'View By',
+			'options' => array(array(1,'Date'),array(2,'Name')),
+			'preset' => 1
+		));
+		return $form->output('Find Hours');
+	}
 	
 	/**
 	 * Show hours add form
@@ -226,6 +270,7 @@ class tdtrac_hours {
 		if ( $this->user->admin ) {
 			$list->addRaw("<li><a href='{$TDTRAC_SITE}hours/remind/'><h3>Send Payroll Reminders</h3></a></li>");
 			$list->addDivide('Special Reports');
+			$list->addRaw("<li><a href='{$TDTRAC_SITE}hours/find/'><h3>Find by Date Range</h3></a></li>");
 			$total = get_single("SELECT SUM(h.worked*u.payrate) num FROM `{$MYSQL_PREFIX}hours` h, `{$MYSQL_PREFIX}users` u, `{$MYSQL_PREFIX}shows` s WHERE h.userid = u.userid AND s.showid = h.showid AND closed = 0 AND submitted = 0");
 			$list->addRow(array(
 					'unpaid',
@@ -407,14 +452,60 @@ class tdtrac_hours {
 		return $html;
 	}
 	
-	
+	/** 
+	 * Show Hours by Date Match in a list
+	 * 
+	 * @global object MySQL Database Resource
+	 * @global string MySQL Table Prefix
+	 * @param string Start Date
+	 * @param string End Date
+	 * @param integer Type to display (by date/name)
+	 * @return array Formatted HTML
+	 */
+	public function view_search($start, $end, $type=1) {
+		GLOBAL $db, $MYSQL_PREFIX, $TDTRAC_DAYRATE, $TDTRAC_SITE;
+		
+		$html = array();
+		
+		if ( $type == 1 ) {
+			$extext = "(by Date)";
+			$order = "ORDER BY date ASC, u.last ASC";
+		} else if ( $type == 2 ) {
+			$extext = "(by Name)";
+			$order = "ORDER BY u.last ASC, date ASC";
+		}
+		
+		$thename = get_single("SELECT showname as num FROM `{$MYSQL_PREFIX}shows` WHERE showid = {$id}");
+		$html[] = "<h3>Hours For: {$start} - {$end} {$extext}</h3>";
+		
+		$sql = "SELECT h.*, showname, (h.worked*u.payrate) as amount, h.note as note, CONCAT(u.first, ' ', u.last) as name "
+			. "FROM `{$MYSQL_PREFIX}hours` h, `{$MYSQL_PREFIX}shows` s, `{$MYSQL_PREFIX}users` u "
+			. "WHERE h.showid = s.showid AND h.userid = u.userid "
+			. "AND h.date >= '{$start}' AND h.date <= '{$end}' "
+			. $order;
+			
+		$result = mysql_query($sql);
+		
+		if ( mysql_num_rows($result) > 0 ) {
+			$html[] = "<table style='width:100%' border='1' cellspacing='0'><tr><th>Date</th><th>Show</th><th>Employee</th><th>Hours</th><th>Amount</th><th>Note</th></tr>";
+			
+			while ( $row = mysql_fetch_array($result) ) {
+				$bdon = $row['submitted'] == 0 ? "<strong>":"";
+				$bdof = $row['submitted'] == 0 ? "</strong>":"";
+				$html[] = "  <tr><td>{$bdon}{$row['date']}{$bdof}</td><td>{$bdon}{$row['showname']}{$bdof}</td><td>{$bdon}{$row['name']}{$bdof}</td><td style='text-align:right'>{$bdon}{$row['worked']}{$bdof}".
+				  "</td><td style='text-align:right'>{$bdon}$".number_format($row['amount'],2)."{$bdof}</td><td>{$row['note']}</td></tr>";
+			}
+			$html[] = "</table>";
+		}
+		return $html;
+	}
 	/** 
 	 * Show Hours by Show in a list
 	 * 
 	 * @global object MySQL Database Resource
 	 * @global string MySQL Table Prefix
 	 * @param integer Show or User ID
-	 * @param string Type to display
+	 * @param integer Type to display (by date/name)
 	 * @return array Formatted HTML
 	 */
 	public function view_list($id, $type=1) {
@@ -434,7 +525,7 @@ class tdtrac_hours {
 		
 		$sql = "SELECT h.*, showname, (h.worked*u.payrate) as amount, h.note as note, CONCAT(u.first, ' ', u.last) as name "
 			. "FROM `{$MYSQL_PREFIX}hours` h, `{$MYSQL_PREFIX}shows` s, `{$MYSQL_PREFIX}users` u "
-			. "WHERE h.showid = s.showid AND h.userid = u.userid "
+			. "WHERE h.showid = s.showid AND h.userid = u.userid AND h.showid = {$id} "
 			. $order;
 			
 		$result = mysql_query($sql);
@@ -445,8 +536,8 @@ class tdtrac_hours {
 			while ( $row = mysql_fetch_array($result) ) {
 				$bdon = $row['submitted'] == 0 ? "<strong>":"";
 				$bdof = $row['submitted'] == 0 ? "</strong>":"";
-				$html[] = "  <tr><td>{$bdon}{$row['date']}{$bdof}</td><td>{$bdon}{$row['name']}{$bdof}</td><td>{$bdon}{$row['worked']}{$bdof}".
-				  "</td><td>{$bdon}".number_format($row['amount'],2)."{$bdof}</td><td>{$row['note']}</td></tr>";
+				$html[] = "  <tr><td>{$bdon}{$row['date']}{$bdof}</td><td>{$bdon}{$row['name']}{$bdof}</td><td style='text-align:right'>{$bdon}{$row['worked']}{$bdof}".
+				  "</td><td style='text-align:right'>{$bdon}$".number_format($row['amount'],2)."{$bdof}</td><td>{$row['note']}</td></tr>";
 			}
 			$html[] = "</table>";
 		}

@@ -174,6 +174,14 @@ class tdtrac_json {
 							$this->do_sql("UPDATE `{$MYSQL_PREFIX}hours` SET submitted = 1 WHERE userid = ".intval($this->action['id']));
 							break;
 					} break;
+				case "nav":
+					switch ( $this->action['base'] ) {
+						case 'hours':
+							$this->json['success'] = true;
+							$this->json['msg'] = "Data loaded";
+							$this->json['location'] = $TDTRAC_SITE."hours/view/type:search/listtype:" . $_POST['listtype'] . "/start:" . $_POST['start'] . "/end:" . $_POST['end'] . "/";
+							break;
+					} break;
 				case "adm":
 					if ( ! $this->user->admin || ! isset($this->action['sub']) ) {
 						$this->json['msg'] = "Permission Denied";

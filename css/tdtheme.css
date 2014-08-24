@@ -57,6 +57,11 @@ div.content-primary form .ui-slider-switch {
 	-webkit-backface-visibility: hidden;
 }
 
+@media print {
+	div[data-role='header'], div[data-role='footer'] {
+		display: none;
+	}
+}
 @media all and (min-width: 400px){
 	#hours-user-show .ui-datebox-container { width: 90% !important; margin-right: auto; margin-left: auto;}
 	#hours-user-show .ui-datebox-griddate { width: 14% !important; font-size: 24px; line-height: 50px; height: 50px;}
