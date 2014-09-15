@@ -322,7 +322,7 @@ class tdtrac_hours {
 	public function view_pending() {
 		GLOBAL $db, $MYSQL_PREFIX, $TDTRAC_SITE;
 		
-		$sql = "SELECT userid, sum(worked) as total FROM `{$MYSQL_PREFIX}hours` WHERE submitted = 0 GROUP BY userid ORDER BY userid";
+		$sql = "SELECT userid, sum(worked) as total FROM `{$MYSQL_PREFIX}hours` WHERE submitted = 0 GROUP BY userid ORDER BY userid ASC";
 		$result = mysql_query($sql, $db);
 		
 		$list = new tdlist(array('id' => 'hours-index', 'actions' => true, 'icon' => 'check', 'inset' => true));
@@ -337,7 +337,7 @@ class tdtrac_hours {
 		} else {
 			while ( $row = mysql_fetch_array($result) ) {
 				$hoursowed = array();
-				$sql2 = "SELECT date,worked,note FROM `{$MYSQL_PREFIX}hours` WHERE submitted = 0 AND userid = {$row['userid']}";
+				$sql2 = "SELECT date,worked,note FROM `{$MYSQL_PREFIX}hours` WHERE submitted = 0 AND userid = {$row['userid']} ORDER BY date ASC";
 				$result2 = mysql_query($sql2, $db);
 				while ( $row2 = mysql_fetch_array($result2) ) {
 					$hoursowed[] = "<strong>{$row2['date']} :</strong> {$row2['worked']} <em>{$row2['note']}</em>";
