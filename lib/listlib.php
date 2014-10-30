@@ -62,6 +62,9 @@ class tdlist {
 	 * @param mixed Action name / array of names
 	 * @return void
 	 */
+	public function clearAction() {
+		$this->actionlist = null;
+	}
 	public function addAction($name) {
 		if ( is_array($name) ) {
 			foreach ($name as $item) {

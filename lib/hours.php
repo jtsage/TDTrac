@@ -322,7 +322,7 @@ class tdtrac_hours {
 	public function view_pending() {
 		GLOBAL $db, $MYSQL_PREFIX, $TDTRAC_SITE;
 		
-		$sql = "SELECT userid, sum(worked) as total FROM `{$MYSQL_PREFIX}hours` WHERE submitted = 0 GROUP BY userid ORDER BY userid ASC";
+		$sql = "SELECT payrate, h.userid, sum(worked) as total FROM `{$MYSQL_PREFIX}hours` h, `{$MYSQL_PREFIX}users` u WHERE h.userid = u.userid AND submitted = 0 GROUP BY h.userid ORDER BY h.userid ASC";
 		$result = mysql_query($sql, $db);
 		
 		$list = new tdlist(array('id' => 'hours-index', 'actions' => true, 'icon' => 'check', 'inset' => true));
@@ -331,7 +331,9 @@ class tdtrac_hours {
 				."<span class='ui-li-count'>%s</span></a>");
 				
 		$list->addDivide('Unpaid Hours');
-		
+		$total_hours = 0;
+		$total_amount = 0;
+
 		if ( mysql_num_rows($result) < 1 ) {
 			$list->addRaw("<li data-theme='a'>No Unpaid Hours Found</li>");
 		} else {
@@ -342,6 +344,9 @@ class tdtrac_hours {
 				while ( $row2 = mysql_fetch_array($result2) ) {
 					$hoursowed[] = "<strong>{$row2['date']} :</strong> {$row2['worked']} <em>{$row2['note']}</em>";
 				}
+				$hoursowed[] = "<strong>Total Due :</strong><em> {$row['total']}, $" . number_format($row['total'] * $row['payrate'], 2) . "</em>";
+				$total_hours += $row['total'];
+				$total_amount += ( $row['total'] * $row['payrate'] );
 				$list->addRow(array(
 					$row['userid'],
 					$this->user->get_name($row['userid']),
@@ -349,6 +354,15 @@ class tdtrac_hours {
 					$row['total']
 				), $row);
 			}
+			$list->setFormat("<h3>%s</h3><p><strong>Hours:</strong> %d<br><strong>Amount:</strong> $%.2f</p>");
+			$list->clearAction();
+			//$list->actionlist = [];
+			$list->addRow(array(
+				"Total Due",
+				$total_hours,
+				$total_amount
+			), null);
+
 		}
 		
 		return array_merge($list->output(), array("<br /><br /><a class=\"ajax-email\" data-email='{\"action\": \"hours\", \"id\": \"0\"}' data-role=\"button\" data-theme=\"d\" href=\"#\">E-Mail this Report to Yourself</a>"));
@@ -530,15 +544,35 @@ class tdtrac_hours {
 			
 		$result = mysql_query($sql);
 		
+		$total_hours_all = 0;
+		$total_amount_all = 0;
+		$total_hours_owed = 0;
+		$total_amount_owed = 0;
+
 		if ( mysql_num_rows($result) > 0 ) {
 			$html[] = "<table style='width:100%' border='1' cellspacing='0'><tr><th>Date</th><th>Employee</th><th>Hours</th><th>Amount</th><th>Note</th></tr>";
 			
 			while ( $row = mysql_fetch_array($result) ) {
 				$bdon = $row['submitted'] == 0 ? "<strong>":"";
 				$bdof = $row['submitted'] == 0 ? "</strong>":"";
+				$total_hours_all += $row['worked'];
+				$total_amount_all += $row['amount'];
+
+				if ( $row['submitted'] == 0 ) {
+					$total_hours_owed += $row['worked'];
+					$total_amount_owed += $row['amount'];
+				}
+
 				$html[] = "  <tr><td>{$bdon}{$row['date']}{$bdof}</td><td>{$bdon}{$row['name']}{$bdof}</td><td style='text-align:right'>{$bdon}{$row['worked']}{$bdof}".
 				  "</td><td style='text-align:right'>{$bdon}$".number_format($row['amount'],2)."{$bdof}</td><td>{$row['note']}</td></tr>";
 			}
+			$html[] = "  <tr><td colspan=2><strong>Payroll Still Pending</strong></td><td style='text-align:right'>{$total_hours_owed}</td><td style='text-align:right'>$".
+				number_format($total_amount_owed,2)."</td><td></td></tr>";
+			$html[] = "  <tr><td colspan=2><strong>Payroll Already Cleared</strong></td><td style='text-align:right'>" . ($total_hours_all - $total_hours_owed) . "</td><td style='text-align:right'>$".
+				number_format($total_amount_all - $total_amount_owed,2)."</td><td></td></tr>";
+			$html[] = "  <tr><td colspan=2><strong>Total Payroll Expense</strong></td><td style='text-align:right'><strong>{$total_hours_all}</strong></td><td style='text-align:right'><strong>$".
+				number_format($total_amount_all,2)."</strong></td><td></td></tr>";
+
 			$html[] = "</table>";
 		}
 		return $html;
