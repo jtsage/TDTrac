@@ -500,15 +500,35 @@ class tdtrac_hours {
 			
 		$result = mysql_query($sql);
 		
+		$total_hours_all = 0;
+		$total_amount_all = 0;
+		$total_hours_owed = 0;
+		$total_amount_owed = 0;
+
 		if ( mysql_num_rows($result) > 0 ) {
 			$html[] = "<table style='width:100%' border='1' cellspacing='0'><tr><th>Date</th><th>Show</th><th>Employee</th><th>Hours</th><th>Amount</th><th>Note</th></tr>";
 			
 			while ( $row = mysql_fetch_array($result) ) {
 				$bdon = $row['submitted'] == 0 ? "<strong>":"";
 				$bdof = $row['submitted'] == 0 ? "</strong>":"";
+				$total_hours_all += $row['worked'];
+				$total_amount_all += $row['amount'];
+
+				if ( $row['submitted'] == 0 ) {
+					$total_hours_owed += $row['worked'];
+					$total_amount_owed += $row['amount'];
+				}
+
 				$html[] = "  <tr><td>{$bdon}{$row['date']}{$bdof}</td><td>{$bdon}{$row['showname']}{$bdof}</td><td>{$bdon}{$row['name']}{$bdof}</td><td style='text-align:right'>{$bdon}{$row['worked']}{$bdof}".
 				  "</td><td style='text-align:right'>{$bdon}$".number_format($row['amount'],2)."{$bdof}</td><td>{$row['note']}</td></tr>";
 			}
+			$html[] = "  <tr><td colspan=2><strong>Payroll Still Pending</strong></td><td style='text-align:right'>{$total_hours_owed}</td><td style='text-align:right'>$".
+				number_format($total_amount_owed,2)."</td><td></td></tr>";
+			$html[] = "  <tr><td colspan=2><strong>Payroll Already Cleared</strong></td><td style='text-align:right'>" . ($total_hours_all - $total_hours_owed) . "</td><td style='text-align:right'>$".
+				number_format($total_amount_all - $total_amount_owed,2)."</td><td></td></tr>";
+			$html[] = "  <tr><td colspan=2><strong>Total Payroll Expense</strong></td><td style='text-align:right'><strong>{$total_hours_all}</strong></td><td style='text-align:right'><strong>$".
+				number_format($total_amount_all,2)."</strong></td><td></td></tr>";
+
 			$html[] = "</table>";
 		}
 		return $html;
