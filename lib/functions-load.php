@@ -78,10 +78,10 @@ function error_page($text, $extra = '') {
  */
 function db_list($sql, $columns) {
 	GLOBAL $db;
-	$result = mysql_query($sql, $db);
+	$result = mysqli_query($db, $sql);
 	$listreturn = is_array($columns);
-	if ( mysql_num_rows($result) == 0 ) { return False; }
-	while ( $row = mysql_fetch_array($result) ) {
+	if ( mysqli_num_rows($result) == 0 ) { return False; }
+	while ( $row = mysqli_fetch_array($result) ) {
 		if ( $listreturn ) {
 			$returner[] = array($row[$columns[0]], $row[$columns[1]]);
 		} else {
@@ -101,9 +101,9 @@ function db_list($sql, $columns) {
  */
  function get_single($sql, $col='num') {
 	 GLOBAL $db;
-	 $result = mysql_query($sql, $db);
-	 if ( !$result || mysql_num_rows($result) < 1 ) { return 0; }
-	 $row = mysql_fetch_array($result);
+	 $result = mysqli_query($db, $sql);
+	 if ( !$result || mysqli_num_rows($result) < 1 ) { return 0; }
+	 $row = mysqli_fetch_array($result);
 	 return $row[$col];
 }
 

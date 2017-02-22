@@ -159,8 +159,8 @@ class tdtrac_todo {
 	private function edit_form($id) {
 		GLOBAL $db, $MYSQL_PREFIX, $TDTRAC_SITE;
 		$sql = "SELECT *, DATE_FORMAT(`due`, '%Y-%m-%d') as duedate FROM `{$MYSQL_PREFIX}todo` WHERE id = {$id}";
-		$result = mysql_query($sql, $db);
-		$row = mysql_fetch_array($result);
+		$result = mysqli_query($db, $sql);
+		$row = mysqli_fetch_array($result);
 		
 		$form = new tdform(array(
 			'action' => "{$TDTRAC_SITE}json/save/base:todo/id:{$id}/",
@@ -236,11 +236,11 @@ class tdtrac_todo {
 				" LEFT JOIN {$MYSQL_PREFIX}todo t ON t.complete = 0 AND u.userid = t.assigned" .
 				" WHERE active = 1 ORDER BY last ASC";
 			
-			$result = mysql_query($sql, $db);
+			$result = mysqli_query($db, $sql);
 			
-			$list->addDivide("List By User",mysql_num_rows($result)." Users");
-			if ( mysql_num_rows($result) > 0 ) {
-				while ( $row = mysql_fetch_array($result) ) {
+			$list->addDivide("List By User",mysqli_num_rows($result)." Users");
+			if ( mysqli_num_rows($result) > 0 ) {
+				while ( $row = mysqli_fetch_array($result) ) {
 					$list->addRow(array(
 						"todo/view/type:user/id:{$row['userid']}/",
 						$row['name'],
@@ -253,16 +253,16 @@ class tdtrac_todo {
 				" WHERE t.showid = s.showid AND s.closed = 0 AND t.complete = 0" .
 				" GROUP BY t.showid";
 				
-			$result = mysql_query($sql, $db);
-			$list->addDivide( "List By Show", mysql_num_rows($result)." Shows" );
+			$result = mysqli_query($db, $sql);
+			$list->addDivide( "List By Show", mysqli_num_rows($result)." Shows" );
 			
 			$sql = "SELECT showid, showname FROM {$MYSQL_PREFIX}shows s" .
 				" WHERE s.closed = 0 ORDER BY s.created DESC";
 				
-			$result = mysql_query($sql, $db);
+			$result = mysqli_query($db, $sql);
 			
-			if ( mysql_num_rows($result) > 0 ) {
-				while ( $row = mysql_fetch_array($result) ) {
+			if ( mysqli_num_rows($result) > 0 ) {
+				while ( $row = mysqli_fetch_array($result) ) {
 					$the_num = get_single(
 						"SELECT COUNT(*) as num FROM {$MYSQL_PREFIX}todo" .
 						" WHERE complete = 0 and showid={$row['showid']}"
@@ -328,15 +328,15 @@ class tdtrac_todo {
 				$num = get_single("SELECT COUNT(*) as num FROM {$MYSQL_PREFIX}todo WHERE complete = 0 AND due < NOW()");
 				$list->addRaw("<li data-theme='b' id='todo-list-header'><h3>Overdue Items Todo List</h3> <span class='ui-li-count'>{$num}</span></li>");
 			}
-			$result = mysql_query($sql, $db);
+			$result = mysqli_query($db, $sql);
 			$priorities = $this->priorities;
 			
 			$list->addAction("tdone");
 			$laststatus = -1;
-			if ( mysql_num_rows($result) < 1 ) {
+			if ( mysqli_num_rows($result) < 1 ) {
 				$list->addRaw("<li><h3>No Todo Items Found</h3></li>");
 			} else {
-				while ( $row = mysql_fetch_array($result) ) {
+				while ( $row = mysqli_fetch_array($result) ) {
 					if ( $laststatus < $row['complete'] ) {
 						$laststatus = $row['complete'];
 						$list->addRaw("<li data-role='list-divider' ".(($laststatus == 1)?" id='todo-list-done'":"").">".(($laststatus == 0)?"Incomplete Items":"Completed Items")."</li>");
@@ -409,12 +409,12 @@ class tdtrac_todo {
 			$sql = "SELECT todo.*, showname, DATE_FORMAT(`due`, '%Y-%m-%d') as duedate, TIME_TO_SEC( TIMEDIFF(`due` , NOW())) AS remain FROM {$MYSQL_PREFIX}todo as todo, {$MYSQL_PREFIX}shows as shows WHERE shows.showid = todo.showid AND todo.due < CURRENT_TIMESTAMP AND todo.complete = 0 ORDER BY due DESC, added DESC";
 			$html[] = "<h3>Overdue Todo Tasks</h3>\n";
 		}
-		$result = mysql_query($sql, $db);
+		$result = mysqli_query($db, $sql);
 		$priorities = $this->priorities;
 		$html[] = "<br /><br />";
 		$html[] = "<table><tr><th>Status</th><th>Due</th><th>Priority</th><th>Assigned To</th><th>Description</th></tr>";
 		
-		while ( $row = mysql_fetch_array($result) ) {
+		while ( $row = mysqli_fetch_array($result) ) {
 			$html[] = sprintf("<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>",
 				(($row['complete'])?"DONE":""),
 				$row['duedate'],

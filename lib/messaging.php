@@ -75,7 +75,7 @@ class tdtrac_mail {
 	private function inbox() {
 		GLOBAL $db, $MYSQL_PREFIX, $TDTRAC_SITE;
 		$sql = "SELECT id, fromid, body, DATE_FORMAT(stamp, '%m-%d-%Y') as wtime FROM {$MYSQL_PREFIX}msg WHERE toid = {$this->user->id} ORDER BY stamp DESC";
-		$result = mysql_query($sql, $db);
+		$result = mysqli_query($db, $sql);
 		
 		$list = new tdlist(array(
 			'id' => "mail",
@@ -83,7 +83,7 @@ class tdtrac_mail {
 			'icon' => 'delete'
 		));
 		
-		if ( mysql_num_rows($result) < 1) { 
+		if ( mysqli_num_rows($result) < 1) { 
 			$list->setFormat("<h3>%s</h3>");
 			$list->addRow(array("Inbox is Empty"));
 			return $list->output();
@@ -96,7 +96,7 @@ class tdtrac_mail {
 		);
 		$list->addAction("mdel");
 		
-		while ( $row = mysql_fetch_array($result) ) {
+		while ( $row = mysqli_fetch_array($result) ) {
 			$list->addRow(
 				array(
 					$row['body'],

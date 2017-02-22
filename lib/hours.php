@@ -209,8 +209,8 @@ class tdtrac_hours {
 	private function edit_form ($hid) {
 		GLOBAL $db, $MYSQL_PREFIX, $TDTRAC_DAYRATE, $TDTRAC_SITE;
 		$sql .= "SELECT h.*, CONCAT(first, ' ', last) as name FROM {$MYSQL_PREFIX}hours h, {$MYSQL_PREFIX}users u WHERE h.userid = u.userid AND h.id = " . intval($hid) . " LIMIT 1";
-		$result = mysql_query($sql, $db);
-		$recd = mysql_fetch_array($result);
+		$result = mysqli_query($db, $sql);
+		$recd = mysqli_fetch_array($result);
 		
 		$form = new tdform(array( 'action' => "{$TDTRAC_SITE}json/save/base:hours/id:{$hid}/", 'id' => 'hours-add-form'));
 		
@@ -323,7 +323,7 @@ class tdtrac_hours {
 		GLOBAL $db, $MYSQL_PREFIX, $TDTRAC_SITE;
 		
 		$sql = "SELECT payrate, h.userid, sum(worked) as total FROM `{$MYSQL_PREFIX}hours` h, `{$MYSQL_PREFIX}users` u WHERE h.userid = u.userid AND submitted = 0 GROUP BY h.userid ORDER BY h.userid ASC";
-		$result = mysql_query($sql, $db);
+		$result = mysqli_query($db, $sql);
 		
 		$list = new tdlist(array('id' => 'hours-index', 'actions' => true, 'icon' => 'check', 'inset' => true));
 		$list->addAction('hclear');
@@ -334,14 +334,14 @@ class tdtrac_hours {
 		$total_hours = 0;
 		$total_amount = 0;
 
-		if ( mysql_num_rows($result) < 1 ) {
+		if ( mysqli_num_rows($result) < 1 ) {
 			$list->addRaw("<li data-theme='a'>No Unpaid Hours Found</li>");
 		} else {
-			while ( $row = mysql_fetch_array($result) ) {
+			while ( $row = mysqli_fetch_array($result) ) {
 				$hoursowed = array();
 				$sql2 = "SELECT date,worked,note FROM `{$MYSQL_PREFIX}hours` WHERE submitted = 0 AND userid = {$row['userid']} ORDER BY date ASC";
-				$result2 = mysql_query($sql2, $db);
-				while ( $row2 = mysql_fetch_array($result2) ) {
+				$result2 = mysqli_query($db, $sql2);
+				while ( $row2 = mysqli_fetch_array($result2) ) {
 					$hoursowed[] = "<strong>{$row2['date']} :</strong> {$row2['worked']} <em>{$row2['note']}</em>";
 				}
 				$hoursowed[] = "<strong>Total Due :</strong><em> {$row['total']}, $" . number_format($row['total'] * $row['payrate'], 2) . "</em>";
@@ -415,17 +415,17 @@ class tdtrac_hours {
 		$nextdate = get_single($sqlnext);
 		$prevdate = get_single($sqlprev);
 		
-		$result = mysql_query($sql);
+		$result = mysqli_query($db, $sql);
 		$extrainfo = array();
 		$theseHighDates = array();
 		$theseHighDatesAlt = array();
 		
-		if ( mysql_num_rows($result) < 1 ) {
+		if ( mysqli_num_rows($result) < 1 ) {
 			$theseHighDates = False;
 			$theseHighDatesAlt = False;
 		} else {
 			$html[] = "<div id='hours-data' style='display:none;'>";
-			while ( $row = mysql_fetch_array($result) ) {
+			while ( $row = mysqli_fetch_array($result) ) {
 				$html[] = "  <div data-recid='{$row['id']}' data-note='".htmlspecialchars($row['note'])."' data-date='{$row['date']}' data-type='".(($TDTRAC_DAYRATE)?"Days":"Hours")."' data-submitted='{$row['submitted']}' data-show=\"".(($type=='user')?$row['showname']:$row['name'])."\" data-worked='{$row['worked']}' data-amount='".number_format($row['amount'],2)."'></div>";
 				if ( $row['submitted'] == 0 ) {
 					$theseHighDates[] = $row['date'];
@@ -498,17 +498,17 @@ class tdtrac_hours {
 			. "AND h.date >= '{$start}' AND h.date <= '{$end}' "
 			. $order;
 			
-		$result = mysql_query($sql);
+		$result = mysqli_query($db, $sql);
 		
 		$total_hours_all = 0;
 		$total_amount_all = 0;
 		$total_hours_owed = 0;
 		$total_amount_owed = 0;
 
-		if ( mysql_num_rows($result) > 0 ) {
+		if ( mysqli_num_rows($result) > 0 ) {
 			$html[] = "<table style='width:100%' border='1' cellspacing='0'><tr><th>Date</th><th>Show</th><th>Employee</th><th>Hours</th><th>Amount</th><th>Note</th></tr>";
 			
-			while ( $row = mysql_fetch_array($result) ) {
+			while ( $row = mysqli_fetch_array($result) ) {
 				$bdon = $row['submitted'] == 0 ? "<strong>":"";
 				$bdof = $row['submitted'] == 0 ? "</strong>":"";
 				$total_hours_all += $row['worked'];
@@ -562,17 +562,17 @@ class tdtrac_hours {
 			. "WHERE h.showid = s.showid AND h.userid = u.userid AND h.showid = {$id} "
 			. $order;
 			
-		$result = mysql_query($sql);
+		$result = mysqli_query($db, $sql);
 		
 		$total_hours_all = 0;
 		$total_amount_all = 0;
 		$total_hours_owed = 0;
 		$total_amount_owed = 0;
 
-		if ( mysql_num_rows($result) > 0 ) {
+		if ( mysqli_num_rows($result) > 0 ) {
 			$html[] = "<table style='width:100%' border='1' cellspacing='0'><tr><th>Date</th><th>Employee</th><th>Hours</th><th>Amount</th><th>Note</th></tr>";
 			
-			while ( $row = mysql_fetch_array($result) ) {
+			while ( $row = mysqli_fetch_array($result) ) {
 				$bdon = $row['submitted'] == 0 ? "<strong>":"";
 				$bdof = $row['submitted'] == 0 ? "</strong>":"";
 				$total_hours_all += $row['worked'];
@@ -613,8 +613,8 @@ class tdtrac_hours {
 			$sql  = "SELECT CONCAT(first, ' ', last) as name, u.userid, h.note as note, worked, date, showname, submitted, h.id as hid FROM {$MYSQL_PREFIX}users u, {$MYSQL_PREFIX}shows s, {$MYSQL_PREFIX}hours h WHERE ";
 			$sql .= "u.userid = h.userid AND s.showid = h.showid AND h.submitted = 0 ORDER BY last ASC, date DESC";
 			
-			$result = mysql_query($sql, $db);
-			while ( $row = mysql_fetch_array($result) ) {
+			$result = mysqli_query($db, $sql);
+			while ( $row = mysqli_fetch_array($result) ) {
 				$dbarray[$row['name']][] = $row;
 			}
 			
@@ -686,9 +686,9 @@ class tdtrac_hours {
 		foreach ( $_REQUEST['toremind'] as $remid ) {
 			$this->remind_email(
 				intval($remid), 
-				mysql_real_escape_string($_REQUEST['duedate']),
-				mysql_real_escape_string($_REQUEST['sdate']),
-				mysql_real_escape_string($_REQUEST['edate'])
+				mysqli_real_escape_string($db, $_REQUEST['duedate']),
+				mysqli_real_escape_string($db, $_REQUEST['sdate']),
+				mysqli_real_escape_string($db, $_REQUEST['edate'])
 			);
 		}
 		return true;
@@ -709,8 +709,8 @@ class tdtrac_hours {
 	private function remind_email($userid, $duedate, $sdate, $edate) {
 		GLOBAL $db, $MYSQL_PREFIX, $TDTRAC_SITE;
 		$sql1 = "SELECT CONCAT(first, ' ', last) as name, username, email, password FROM {$MYSQL_PREFIX}users WHERE userid = '{$userid}'";
-		$resul1 = mysql_query($sql1, $db);
-		$row1 = mysql_fetch_array($resul1);
+		$resul1 = mysqli_query($db, $sql1);
+		$row1 = mysqli_fetch_array($resul1);
 		$sendto = $row1['email'];
 		
 		$subject = "TDTrac Hours Are Due: {$duedate}";	

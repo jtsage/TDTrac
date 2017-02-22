@@ -7,6 +7,8 @@
  * @version 4.0.0
  * @author J.T.Sage <jtsage@gmail.com>
  */
+#error_reporting(-1);
+#ini_set('display_errors', 'On');
 ob_start(); session_start(); 
 
 ## PROGRAM DETAILS. DO NOT EDIT UNLESS YOU KNOW WHAT YOU ARE DOING

@@ -25,9 +25,9 @@ if ( !$user->loggedin ) { // Not Logged In
 } else { // Logged In, Proceed
 	if ( isset($_REQUEST['imgid']) && is_numeric($_REQUEST['imgid']) ) { // Good Call to the script
 		$sql = "SELECT * FROM {$MYSQL_PREFIX}rcpts WHERE imgid = {$_REQUEST['imgid']}";
-		$result = mysql_query($sql, $db);
-		if ( mysql_num_rows($result) > 0 ) { // Good Image, proceed to show.
-			$line = mysql_fetch_array($result);
+		$result = mysqli_query($db, $sql);
+		if ( mysqli_num_rows($result) > 0 ) { // Good Image, proceed to show.
+			$line = mysqli_fetch_array($result);
 			
 			$image_sql = imagecreatefromstring($line['data']);
 			
@@ -84,13 +84,13 @@ if ( !$user->loggedin ) { // Not Logged In
 				imagejpeg($save_finished, null, 85);
 				$imageblob = ob_get_contents();
 			
-				$sql = "UPDATE {$MYSQL_PREFIX}rcpts SET data = '" . mysql_real_escape_string($imageblob) . "' WHERE imgid = {$_REQUEST['imgid']}";
-				$result = mysql_query($sql, $db);
+				$sql = "UPDATE {$MYSQL_PREFIX}rcpts SET data = '" . mysqli_real_escape_string($imageblob) . "' WHERE imgid = {$_REQUEST['imgid']}";
+				$result = mysqli_query($db, $sql);
 				ob_clean();
 				if ( $result ) {
 					echo json_encode(array('success' => true, 'msg' => "Reciept Saved"));
 				} else {
-					echo json_encode(array('success' => false, 'msg' => "Todo Save Failed".(($TEST_MODE)?mysql_error():"")));
+					echo json_encode(array('success' => false, 'msg' => "Todo Save Failed".(($TEST_MODE)?mysqli_error($db):"")));
 				}
 			}
 			

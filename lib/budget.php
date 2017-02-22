@@ -151,8 +151,8 @@ class tdtrac_budget {
 				."</p><span class='ui-li-count'>$%s</span></a>");
 				
 		$list->addDivide('Show Reports');
-		$result = mysql_query($sql, $db);
-		while ( $row = mysql_fetch_array($result) ) {
+		$result = mysqli_query($db, $sql);
+		while ( $row = mysqli_fetch_array($result) ) {
 			$bud = get_single("SELECT SUM(price+tax) num FROM `{$MYSQL_PREFIX}budget` WHERE showid = {$row['showid']}");
 			$lab = get_single("SELECT SUM(h.worked*u.payrate) num FROM `{$MYSQL_PREFIX}hours` h, `{$MYSQL_PREFIX}users` u WHERE h.userid = u.userid AND showid = {$row['showid']}");
 			$list->addRow(array(
@@ -205,15 +205,15 @@ class tdtrac_budget {
 	private function reciept_list() {
 		GLOBAL $db, $MYSQL_PREFIX, $TDTRAC_SITE;
 		$sql = "SELECT added, imgid FROM `{$MYSQL_PREFIX}rcpts` WHERE handled = 0";
-		$result = mysql_query($sql, $db);
+		$result = mysqli_query($db, $sql);
 		
-		if ( mysql_num_rows($result) < 1 ) {
+		if ( mysqli_num_rows($result) < 1 ) {
 			return error_page("No unhandled receipts");
 		} else {
 			$list = new tdlist(array('id' => 'rcpt_list', 'inset' => true));
 			$list->setFormat("<a href='{$TDTRAC_SITE}budget/add/rcpt:%d/'><img src='{$TDTRAC_SITE}rcpt.php?imgid=%d' /><h3>Recieved: %s</h3></a>");
 			
-			while ( $row = mysql_fetch_array($result) ) {
+			while ( $row = mysqli_fetch_array($result) ) {
 				$list->addRow(array($row['imgid'], $row['imgid'], $row['added']));
 			}
 			return $list->output();
@@ -301,8 +301,8 @@ class tdtrac_budget {
 		GLOBAL $db, $MYSQL_PREFIX, $TDTRAC_SITE;
 		$html = array();
 		$sql = "SELECT showname, {$MYSQL_PREFIX}budget.* FROM `{$MYSQL_PREFIX}shows`, `{$MYSQL_PREFIX}budget` WHERE {$MYSQL_PREFIX}budget.id = {$id} AND {$MYSQL_PREFIX}budget.showid = {$MYSQL_PREFIX}shows.showid LIMIT 1;";
-		$result = mysql_query($sql, $db);
-		$row = mysql_fetch_array($result);
+		$result = mysqli_query($db, $sql);
+		$row = mysqli_fetch_array($result);
 		
 		$form = new tdform(array('action' => "{$TDTRAC_SITE}json/save/base:budget/id:{$id}/", 'id' => 'todo-edit-form'));
 		
@@ -392,18 +392,18 @@ class tdtrac_budget {
 	private function view_item($id) {
 		GLOBAL $db, $MYSQL_PREFIX, $HEAD_LINK, $TDTRAC_SITE;
 		$sql = "SELECT * FROM `{$MYSQL_PREFIX}budget` WHERE id = '".intval($id)."' LIMIT 1";
-		$result = mysql_query($sql, $db);
+		$result = mysqli_query($db, $sql);
 		$list = new tdlist(array('id' => 'b-view-item', 'inset' => 'true'));
 		
 		$list->setFormat("%s<span class='ui-li-count'>%s</span>");
 		
-		if ( mysql_num_rows($result) < 0 ) {
+		if ( mysqli_num_rows($result) < 0 ) {
 			return error_page('Budget Item Not Found!');
 		} else {
 			if ( $this->user->can('editbudget') ) {
 				$HEAD_LINK = array('budget/edit/id:'.$id.'/', 'grid', 'Edit Item'); 
 			}
-			$row = mysql_fetch_array($result);
+			$row = mysqli_fetch_array($result);
 			$list->addRow(array(get_single("SELECT showname as num FROM `{$MYSQL_PREFIX}shows` WHERE showid = {$row['showid']}"), 'Show'));
 			$list->addRow(array($row['category'], 'Category'));
 			$list->addRow(array($row['vendor'], 'Vendor'));
@@ -446,8 +446,8 @@ class tdtrac_budget {
 	private function view_cat($showid, $cat) {
 		GLOBAL $db, $MYSQL_PREFIX;
 		$showname = get_single("SELECT showname as num FROM `{$MYSQL_PREFIX}shows` WHERE showid = '".intval($showid)."'");
-		$sql = "SELECT * FROM `{$MYSQL_PREFIX}budget` WHERE showid = '".intval($showid)."' AND category = '".mysql_real_escape_string($cat)."'";
-		$result = mysql_query($sql, $db);
+		$sql = "SELECT * FROM `{$MYSQL_PREFIX}budget` WHERE showid = '".intval($showid)."' AND category = '".mysqli_real_escape_string($db, $cat)."'";
+		$result = mysqli_query($db, $sql);
 		
 		$list = new tdlist(array('id' => 'cat-view', 'inset' => true));
 		    
@@ -457,7 +457,7 @@ class tdtrac_budget {
 			."<span class='ui-li-count'>$%s</span></a>");
 		
 		
-		while ( $item = mysql_fetch_array($result) ) {
+		while ( $item = mysqli_fetch_array($result) ) {
 			$theme = 'a';
 			$extra = array();
 			if ( $item['tax'] > 0 ) { $extra[] = "Taxed ($".number_format($item['tax'],2).")"; }
@@ -507,21 +507,21 @@ class tdtrac_budget {
 		GLOBAL $db, $MYSQL_PREFIX;
 		$html = array();
 		$show_sql = "SELECT * FROM `{$MYSQL_PREFIX}shows` WHERE showid = '".intval($showid)."'";
-		$show_res = mysql_query($show_sql, $db);
-		$row = mysql_fetch_array($show_res);
+		$show_res = mysqli_query($show_sql, $db);
+		$row = mysqli_fetch_array($show_res);
 		$showname = $row['showname'];
 		$tableopen = "<table style='width:80%'><thead><tr><td style='width:20%'>Vendor</td><td style='width:40%'>Description</td><td style='text-align: right; width:10%'>Amount</td><td></td></thead><tbody style='font-weight:normal'>";
 		
 		$sql_exp = "SELECT * FROM {$MYSQL_PREFIX}budget WHERE showid = {$row['showid']}{$sqlwhere} ORDER BY category ASC, date ASC, vendor ASC";
-		$res_exp= mysql_query($sql_exp, $db); 
+		$res_exp= mysqli_query($db, $sql_exp); 
 		
 		$lastcat = ''; $subtot = 0; $total = 0;
-		if ( mysql_num_rows($res_exp) < 1 ) {
+		if ( mysqli_num_rows($res_exp) < 1 ) {
 			$html[] = "<p>No Budget Items Found</p>";
 		} else {
 			$thisCatHtml = array($tableopen);
 			
-			while ( $item = mysql_fetch_array($res_exp) ) {
+			while ( $item = mysqli_fetch_array($res_exp) ) {
 				if ( $lastcat == '' ) { $lastcat = $item['category']; }
 				if ( $lastcat <> $item['category'] ) { // NEW CATEGORY
 					$html = array_merge($html, $this->make_row($lastcat, $subtot, $thisCatHtml, $showid));
@@ -551,14 +551,14 @@ class tdtrac_budget {
 		}
 		
 		$sql_pay = "SELECT SUM(worked * payrate) as price, CONCAT(first, ' ', last) as name FROM {$MYSQL_PREFIX}users u, {$MYSQL_PREFIX}hours h WHERE u.userid = h.userid AND h.showid = '".intval($showid)."' GROUP BY h.userid ORDER BY last ASC";
-		$res_pay = mysql_query($sql_pay, $db);
+		$res_pay = mysqli_query($db, $sql_pay);
 		
-		if ( mysql_num_rows($res_pay) > 0 ) {
+		if ( mysqli_num_rows($res_pay) > 0 ) {
 			$subtot = 0;
 			$lastcat = 'Payroll';
 			$thisCatHtml = array("<table style='width:80%'><thead><tr><td>Employee</td><td>Amount</td></thead><tbody style='font-weight:normal'>");
 						
-			while ( $pay = mysql_fetch_array($res_pay) ) {
+			while ( $pay = mysqli_fetch_array($res_pay) ) {
 				$thisCatHtml[] = "<tr><td>{$pay['name']}</td><td style='align:right'>$".number_format($pay['price'], 2)."</td></tr>";
 				$total += $pay['price'];
 				$subtot += $pay['price'];
@@ -580,7 +580,7 @@ class tdtrac_budget {
 	private function view_pending() {
 		GLOBAL $db, $MYSQL_PREFIX;
 		$sql = "SELECT b.*, showname FROM `{$MYSQL_PREFIX}budget` b, `{$MYSQL_PREFIX}shows` s WHERE s.showid = b.showid AND b.pending = 1";
-		$result = mysql_query($sql, $db);
+		$result = mysqli_query($db, $sql);
 		
 		$list = new tdlist(array('id' => 'cat-view', 'inset' => true));
 		    
@@ -590,11 +590,11 @@ class tdtrac_budget {
 			."<br /><strong>Other Info:</strong> %s</p>"
 			."<span class='ui-li-count'>$%s</span></a>");
 		
-		if ( mysql_num_rows($result) == 0 ) {
+		if ( mysqli_num_rows($result) == 0 ) {
 			$list->addRaw("<li data-theme='a'>No Items Found</li>");
 		}
 		
-		while ( $item = mysql_fetch_array($result) ) {
+		while ( $item = mysqli_fetch_array($result) ) {
 			$extra = array();
 			if ( $item['tax'] > 0 ) { $extra[] = "Taxed ($".number_format($item['tax'],2).")"; }
 			if ( $item['pending'] ) { $extra[] = "<span style='color: red'>Pending Payment</span>"; }
@@ -642,7 +642,7 @@ class tdtrac_budget {
 			$sql = "SELECT b.*, showname FROM `{$MYSQL_PREFIX}budget` b, `{$MYSQL_PREFIX}shows` s WHERE s.showid = b.showid AND b.needrepay = 1 AND b.gotrepay = 0 AND b.payto = ".intval($id);
 			$extratitle = $this->user->get_name($id);
 		}
-		$result = mysql_query($sql, $db);
+		$result = mysqli_query($sql, $db);
 		
 		$list = new tdlist(array('id' => 'cat-view', 'inset' => true));
 		    
@@ -652,11 +652,11 @@ class tdtrac_budget {
 			."<br /><strong>Other Info:</strong> %s</p>"
 			."<span class='ui-li-count'>$%s</span></a>");
 		
-		if ( mysql_num_rows($result) == 0 ) {
+		if ( mysqli_num_rows($result) == 0 ) {
 			$list->addRaw("<li data-theme='a'>No Items Found</li>");
 		}
 		
-        while ( $item = mysql_fetch_array($result) ) {
+        while ( $item = mysqli_fetch_array($result) ) {
 			$extra = array();
 			if ( $item['tax'] > 0 ) { $extra[] = "Taxed ($".number_format($item['tax'],2).")"; }
 			if ( $item['pending'] ) { $extra[] = "<span style='color: red'>Pending Payment</span>"; }
@@ -699,9 +699,9 @@ class tdtrac_budget {
 	public function email($showid) {
 		GLOBAL $db, $MYSQL_PREFIX;
 		$sql = "SELECT * FROM {$MYSQL_PREFIX}shows WHERE showid = {$showid}";
-		$result = mysql_query($sql, $db); 
+		$result = mysqli_query($db, $sql); 
 		$body = "";
-		$row = mysql_fetch_array($result);
+		$row = mysqli_fetch_array($result);
 		$body .= "<h2>{$row['showname']}</h2><p><ul>\n";
 		$body .= "<li><strong>Company</strong>: {$row['company']}</li>\n";
 		$body .= "<li><strong>Venue</strong>: {$row['venue']}</li>\n";
@@ -716,9 +716,9 @@ class tdtrac_budget {
 		$body .= "<table><tr><th>Date</th><th>Vendor</th><th>Category</th><th>Description</th><th>Price</th><th>Tax</th></tr>";
 		
 		$sql = "SELECT * FROM {$MYSQL_PREFIX}budget WHERE showid = {$showid} ORDER BY category ASC, date ASC, vendor ASC";
-		$result = mysql_query($sql, $db); 
+		$result = mysqli_query($sql, $db); 
 		
-		while ( $exp = mysql_fetch_array($result) ) {
+		while ( $exp = mysqli_fetch_array($result) ) {
 			$body .= sprintf("<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>",
 				$exp['date'],
 				$exp['vendor'],

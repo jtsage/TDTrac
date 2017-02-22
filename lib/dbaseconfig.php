@@ -9,13 +9,13 @@
  */
 GLOBAL $MYSQL_SERVER, $MYSQL_USER, $MYSQL_PASS, $MYSQL_DATABASE;
 
-	$db = mysql_connect($MYSQL_SERVER, $MYSQL_USER, $MYSQL_PASS);
+	$db = mysqli_connect($MYSQL_SERVER, $MYSQL_USER, $MYSQL_PASS);
 	if (!$db) {
-		die('Could not connect: ' . mysql_error());
+		die('Could not connect: ' . mysqli_error());
 	}
 
-	$dbr = mysql_select_db($MYSQL_DATABASE, $db);
+	$dbr = mysqli_select_db($db, $MYSQL_DATABASE);
 	if (!$dbr) {
-		die ("Can\'t use tdtrac::{$MYSQL_DATABASE}:" . mysql_error());
+		die ("Can\'t use tdtrac::{$MYSQL_DATABASE}:" . mysqli_error());
 	}
 ?>

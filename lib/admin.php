@@ -149,8 +149,8 @@ class tdtrac_admin {
 		$sql = sprintf("SELECT groupname FROM `{$MYSQL_PREFIX}groupnames` gn, `{$MYSQL_PREFIX}usergroups` ug, `{$MYSQL_PREFIX}users` u WHERE u.userid = %d AND u.userid = ug.userid AND ug.groupid = gn.groupid",
 			intval($id)
 		);
-		$result = mysql_query($sql, $db);
-		while ( $row = mysql_fetch_array($result) ) {
+		$result = mysqli_query($db, $sql);
+		while ( $row = mysqli_fetch_array($result) ) {
 		   $retty[] = $row['groupname'];
 		}
 		return $retty;
@@ -172,8 +172,8 @@ class tdtrac_admin {
 	
 		$fesult = $form->addHidden('id', $id);
 		$sql = "SELECT permid, permcan FROM {$MYSQL_PREFIX}permissions pm WHERE groupid = {$id}";
-		$result = mysql_query($sql, $db);
-		while ( $row = mysql_fetch_array($result) ) {
+		$result = mysqli_query($db, $sql);
+		while ( $row = mysqli_fetch_array($result) ) {
 			$pname = $row['permid']; $pvalue = $row['permcan'];
 			$dbperm[$pname] = $pvalue;
 		}
@@ -261,8 +261,8 @@ class tdtrac_admin {
 		$sql = "SELECT u.*, groupid FROM `{$MYSQL_PREFIX}users` u, `{$MYSQL_PREFIX}usergroups` ug" .
 			" WHERE u.userid = ug.userid AND u.userid = ".intval($id)." LIMIT 1";
 		
-		$result = mysql_query($sql, $db);
-		$row = mysql_fetch_array($result);
+		$result = mysqli_query($db, $sql);
+		$row = mysqli_fetch_array($result);
 		
 		$form = new tdform(array(
 			'action' => "{$TDTRAC_SITE}json/adm/base:admin/sub:saveuser/id:{$id}/",
@@ -329,7 +329,7 @@ class tdtrac_admin {
 		$sql = "SELECT *, DATE_FORMAT(lastlogin, '%b %D %h:%i %p') AS lastlog" .
 			" FROM `{$MYSQL_PREFIX}users` ORDER BY last ASC, first ASC";
 			
-		$result = mysql_query($sql, $db); $html = "";
+		$result = mysqli_query($db, $sql); $html = "";
 		
 		$list = new tdlist(array('id' => 'user_list', 'inset' => true));
 		
@@ -345,7 +345,7 @@ class tdtrac_admin {
 			"<p class='ui-li-aside'>".join("<br />", $sidebar)."</p></a>"
 		);
 		
-		while ( $row = mysql_fetch_array($result) ) {
+		while ( $row = mysqli_fetch_array($result) ) {
 			$list->addRow(array(
 				$row['userid'],
 				$row['first'] . " " . $row['last'],
@@ -376,8 +376,8 @@ class tdtrac_admin {
 	private function groups() {
 		GLOBAL $db, $MYSQL_PREFIX, $TDTRAC_SITE, $HEAD_LINK;
 		$perm_sql = "SELECT groupname, permid FROM `{$MYSQL_PREFIX}groupnames` gn, `{$MYSQL_PREFIX}permissions` pm WHERE pm.groupid = gn.groupid AND pm.permcan = 1 ORDER BY groupname, permid";
-		$perm_res = mysql_query($perm_sql, $db);
-		while ( $row = mysql_fetch_array($perm_res) ) {
+		$perm_res = mysqli_query($db, $perm_sql);
+		while ( $row = mysqli_fetch_array($perm_res) ) {
 			$disperm[$row['groupname']][$row['permid']] = true;
 		}
 		
@@ -407,11 +407,11 @@ class tdtrac_admin {
 				}
 			}
 			$sql = "SELECT u.username FROM `{$MYSQL_PREFIX}users` u, `{$MYSQL_PREFIX}groupnames` gn, `{$MYSQL_PREFIX}usergroups` ug WHERE gn.groupname = '{$group[1]}' AND gn.groupid = ug.groupid AND ug.userid = u.userid ORDER BY username ASC";
-			$result = mysql_query($sql, $db);
-			if ( mysql_num_rows($result) < 1 ) { 
+			$result = mysqli_query($db, $sql);
+			if ( mysqli_num_rows($result) < 1 ) { 
 				$members[] = "<em>N/A</em>";
 			} else {
-				while ( $mrow = mysql_fetch_array($result) ) {
+				while ( $mrow = mysqli_fetch_array($result) ) {
 					$members[] = $mrow['username'];
 				}
 			}
@@ -442,8 +442,8 @@ class tdtrac_admin {
 	private function mailcode_form() {
 		GLOBAL $db, $MYSQL_PREFIX, $TDTRAC_SITE;
 		$sql = "SELECT * FROM `tdtracmail` WHERE prefix = '{$MYSQL_PREFIX}'";
-		$result = mysql_query($sql, $db);
-		$line = mysql_fetch_array($result);
+		$result = mysqli_query($db, $sql);
+		$line = mysqli_fetch_array($result);
 		$form = new tdform(array('action' => "{$TDTRAC_SITE}json/adm/base:admin/sub:savemailcode/id:0/", 'id' => 'mcode'));
 		
 		$fes = $form->addText(array('name'=>"email", 'label'=>"E-Mail Address", 'preset' => $line['email']));

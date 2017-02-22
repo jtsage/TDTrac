@@ -16,11 +16,11 @@ class tdform {
 	/**
 	 * @var array Form Member storage
 	 */
-	public $members = "";
+	public $members = [];
 	/**
 	 * @var array Formated HTML
 	 */
-	private $html = "";
+	private $html = [];
 	/**
 	 * @var string Name of Form
 	 */
@@ -28,7 +28,7 @@ class tdform {
 	/**
 	 * @var array Hidden Element Storage
 	 */
-	private $hidden = "";
+	private $hidden = [];
 	
 	/**
 	 * Create a new form

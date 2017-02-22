@@ -141,8 +141,8 @@ class tdtrac_shows {
 			intval($id)
 		);
 	
-		$result = mysql_query($sql, $db);
-		$row = mysql_fetch_array($result);
+		$result = mysqli_query($db, $sql);
+		$row = mysqli_fetch_array($result);
 		$form = new tdform(array(
 			'action' => "{$TDTRAC_SITE}json/save/base:show/id:{$id}/",
 			'id' => "showedit"
@@ -194,7 +194,7 @@ class tdtrac_shows {
 	private function view() {
 		GLOBAL $db, $MYSQL_PREFIX, $TDTRAC_SITE, $SITE_SCRIPT;
 		$sql = "SELECT * FROM `{$MYSQL_PREFIX}shows` ORDER BY `closed` ASC, `created` DESC";
-		$result = mysql_query($sql, $db);
+		$result = mysqli_query($db, $sql);
 		$list = new tdlist(array('id' => 'show_view', 'actions' => false, 'inset' => true));
 		$showsopen = true;
 		
@@ -207,7 +207,7 @@ class tdtrac_shows {
 		
 		$list->addDivide('Open Shows');
 		
-		while ( $row = mysql_fetch_array($result) ) {
+		while ( $row = mysqli_fetch_array($result) ) {
 			if ( $showsopen && $row['closed'] == 1 ) {
 				$list->addDivide('Closed Shows');
 				$showsopen = false;

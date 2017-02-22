@@ -71,10 +71,10 @@ class tdtrac_user {
 	private function load($username) {
 		GLOBAL $db, $MYSQL_PREFIX;
 		$sql = sprintf("SELECT payroll, limithours, u.userid, CONCAT(first, ' ', last) as name, u.email, groupname, ug.groupid as gid FROM `{$MYSQL_PREFIX}groupnames` gn, `{$MYSQL_PREFIX}usergroups` ug, `{$MYSQL_PREFIX}users` u WHERE username = '%s' AND u.userid = ug.userid AND ug.groupid = gn.groupid",
-			mysql_real_escape_string($username)
+			mysqli_real_escape_string($db, $username)
 		);
-		$result = mysql_query($sql, $db);
-		$row = mysql_fetch_array($result);
+		$result = mysqli_query($db, $sql);
+		$row = mysqli_fetch_array($result);
 		$this->username = $username;
 		$this->onpayroll = $row['payroll'];
 		$this->name = $row['name'];
@@ -115,12 +115,12 @@ class tdtrac_user {
 		$checkpass = $_SESSION['tdtracpass'];
 	
 		$sql = sprintf("SELECT password FROM `{$MYSQL_PREFIX}users` WHERE username = '%s' LIMIT 1",
-			mysql_real_escape_string($checkname)
+			mysqli_real_escape_string($db, $checkname)
 		);
-		$result = mysql_query($sql, $db);
+		$result = mysqli_query($db, $sql);
 	
-		$row = mysql_fetch_array($result);
-		mysql_free_result($result);
+		$row = mysqli_fetch_array($result);
+		mysqli_free_result($result);
 		if ( md5("havesomesalt".$row['password']) == $checkpass ) { return 1; }
 		return 0;
 	}
@@ -168,10 +168,10 @@ class tdtrac_user {
 	public function can($permission) {
 		GLOBAL $db, $MYSQL_PREFIX;
 		$sql = "SELECT `permcan` FROM `{$MYSQL_PREFIX}permissions` pm, `{$MYSQL_PREFIX}usergroups` ug, `{$MYSQL_PREFIX}users` u WHERE u.userid = {$this->id} AND u.userid = ug.userid AND ug.groupid = pm.groupid AND pm.permid = '{$permission}'";
-		$result = mysql_query($sql, $db);
-		//die(mysql_error());
-		if ( mysql_num_rows($result) < 1 ) { return false; }
-		while ( $row = mysql_fetch_array($result)) {
+		$result = mysqli_query($db, $sql);
+		//die(mysqli_error($db));
+		if ( mysqli_num_rows($result) < 1 ) { return false; }
+		while ( $row = mysqli_fetch_array($result)) {
 			if ( $row['permcan'] ) { return true; }
 		}
 		return false;
@@ -202,22 +202,22 @@ class tdtrac_user {
 		$checkpass = $_REQUEST['tracpass'];
 		
 		$sql = sprintf("SELECT userid, password, active, chpass, DATE_FORMAT(lastlogin, '%%b %%D %%h:%%i %%p') AS lastlog FROM `{$MYSQL_PREFIX}users` WHERE username = '%s' LIMIT 1",
-			mysql_real_escape_string($checkname)
+			mysqli_real_escape_string($db, $checkname)
 		);
-		$result = mysql_query($sql, $db);
+		$result = mysqli_query($db, $sql);
 	
-		$row = mysql_fetch_array($result);
+		$row = mysqli_fetch_array($result);
 		if ( $row['password'] == $checkpass && ( $row['userid'] == 1 || $row['active'] == 1 ) ) { 
 			$json['msg'] = "Login Successful<br />Last Login: {$row['lastlog']}";
 			$json['success'] = true;
 			$_SESSION['tdtracuser'] = $checkname;
 			$_SESSION['tdtracpass'] = md5("havesomesalt".$checkpass);
 			$setlastloginsql = "UPDATE {$MYSQL_PREFIX}users SET lastlogin = CURRENT_TIMESTAMP WHERE userid = {$row['userid']}";
-			$setlastloginres = mysql_query($setlastloginsql, $db);
+			$setlastloginres = mysqli_query($db, $setlastloginsql);
 			if ( $row['userid'] == 1 ) { //CHECK UPGRADE STATUS ON ADMIN LOGIN (USER #1)
 				$sql2 = "SELECT value FROM {$MYSQL_PREFIX}tdtrac WHERE name = 'version' AND value = '{$TDTRAC_DBVER}'";
-				$res2 = mysql_query($sql2, $db);
-				if ( mysql_num_rows($res2) < 1 ) { $json['msg'] .= "<br><strong>WARNING:</strong> Database not up-to-date, please run upgrade"; }
+				$res2 = mysqli_query($db, $sql2);
+				if ( mysqli_num_rows($res2) < 1 ) { $json['msg'] .= "<br><strong>WARNING:</strong> Database not up-to-date, please run upgrade"; }
 			}
 	    		if ( $row['chpass'] <> 0 ) { 
 				$json['msg'] .= "<br />Login Successful, Please Change Your Password!";
@@ -268,10 +268,10 @@ class tdtrac_user {
 			if ( strlen($_REQUEST['newpass1']) < 4 ) { $json = array('success' => false, 'msg' => "Password must be at least 5 characters"); }
 			if ( strlen($_REQUEST['newpass1']) > 15 ) { $json = array('success' => false, 'msg' => "Password may not exceed 15 characters"); }
 			$sql = sprintf("UPDATE `{$MYSQL_PREFIX}users` SET `chpass` = 0 , `password` = '%s' WHERE `userid` = %d LIMIT 1",
-				mysql_real_escape_string($_REQUEST['newpass1']),
+				mysqli_real_escape_string($db, $_REQUEST['newpass1']),
 				$this->id
 			);
-			$result = mysql_query($sql, $db);
+			$result = mysqli_query($db, $sql);
 			if ( $result ) { $json = array('success' => true, 'msg' => "Password Changed"); }
 			else { $json = array('success' => false, 'msg' => "Password Change Failed"); }
 		} else { $json = array('success' => false, 'msg' => "Password Change Mismatch"); }
@@ -291,8 +291,8 @@ class tdtrac_user {
 	public function get_name($userid) {
 	        GLOBAL $db, $MYSQL_PREFIX;
 	        $sql = "SELECT CONCAT(first, ' ', last) as name FROM `{$MYSQL_PREFIX}users` WHERE userid = ".intval($userid);
-	        $result = mysql_query($sql, $db);
-	        $row = mysql_fetch_array($result);
+	        $result = mysqli_query($db, $sql);
+	        $row = mysqli_fetch_array($result);
 	        return $row['name'];
 	}
 	
@@ -307,8 +307,8 @@ class tdtrac_user {
 	public function get_group($gid) {
 	        GLOBAL $db, $MYSQL_PREFIX;
 	        $sql = "SELECT groupname as name FROM `{$MYSQL_PREFIX}groupnames` WHERE groupid = ".intval($gid);
-	        $result = mysql_query($sql, $db);
-	        $row = mysql_fetch_array($result);
+	        $result = mysqli_query($db, $sql);
+	        $row = mysqli_fetch_array($result);
 	        return $row['name'];
 	}
 }
@@ -327,12 +327,12 @@ function email_pwsend() {
 	if ( !($_REQUEST["tracemail"]) || $_REQUEST["tracemail"] == "" ) { 
 		echo(json_encode(array('msg'=>"E-Mail Address Invalid", 'success'=>true, 'location'=>$TDTRAC_SITE)));
 	} else {
-		$sql = "SELECT username, password FROM {$MYSQL_PREFIX}users WHERE email = '".mysql_real_escape_string($_REQUEST["tracemail"])."'";
-		$result = mysql_query($sql, $db);
-		if ( mysql_num_rows($result) == 0 ) { thrower("E-Mail Address Invalid"); }
+		$sql = "SELECT username, password FROM {$MYSQL_PREFIX}users WHERE email = '".mysqli_real_escape_string($db, $_REQUEST["tracemail"])."'";
+		$result = mysqli_query($db, $sql);
+		if ( mysqli_num_rows($result) == 0 ) { thrower("E-Mail Address Invalid"); }
 		else {
 			$body = "TDTrac Password Reminder:<br /><br />\n";
-			while ( $row = mysql_fetch_array($result) ) {
+			while ( $row = mysqli_fetch_array($result) ) {
 				$body .= "Username: {$row['username']}<br />\n";
 				$body .= "Password: {$row['password']}<br /><br />\n";
 			}

@@ -192,7 +192,7 @@ class tdtrac_json {
 								if ( $this->action['id'] == 0 ) {
 									$this->do_sql($this->get_insert_sql('user'), true);
 									$sql = sprintf("INSERT INTO `{$MYSQL_PREFIX}usergroups` ( `userid`, `groupid` ) VALUES ( %d, %d )",
-										mysql_insert_id($db),
+										mysqli_insert_id($db),
 										intval($_REQUEST['groupid'])
 									);
 									$this->do_sql($sql, true);
@@ -287,8 +287,8 @@ class tdtrac_json {
 			$this->json['msg'] = 'TEST MODE - Nothing Done';
 		} else {
 			foreach ( $sql as $eachsql ) {
-				if ( ! (mysql_query($eachsql, $db)) ) {
-					$errors[] = mysql_error();
+				if ( ! (mysqli_query($db, $eachsql)) ) {
+					$errors[] = mysqli_error($db);
 					$results[] = false;
 				} else {
 					$errors[] = '';
@@ -321,7 +321,7 @@ class tdtrac_json {
 	 * @return mixed One of more SQL Queries
 	 */
 	private function get_insert_sql($type) {
-		GLOBAL $MYSQL_PREFIX, $TDTRAC_PAYRATE;
+		GLOBAL $db, $MYSQL_PREFIX, $TDTRAC_PAYRATE;
 		
 		$sql = "NOT FOUND";
 		
@@ -335,21 +335,21 @@ class tdtrac_json {
 					intval($_REQUEST['prio']),
 					make_date($_REQUEST['date']),
 					intval($_REQUEST['assign']),
-					mysql_real_escape_string($_REQUEST['desc'])
+					mysqli_real_escape_string($db, $_REQUEST['desc'])
 				); break;
 			case "show":
 				$sqlstring  = "INSERT INTO `{$MYSQL_PREFIX}shows` ( showname, company, venue, dates )";
 				$sqlstring .= " VALUES ( '%s', '%s', '%s', '%s' )";
 				
 				$sql = sprintf($sqlstring,
-					mysql_real_escape_string($_REQUEST['showname']),
-					mysql_real_escape_string($_REQUEST['company']),
-					mysql_real_escape_string($_REQUEST['venue']),
-					mysql_real_escape_string($_REQUEST['dates'])
+					mysqli_real_escape_string($db, $_REQUEST['showname']),
+					mysqli_real_escape_string($db, $_REQUEST['company']),
+					mysqli_real_escape_string($db, $_REQUEST['venue']),
+					mysqli_real_escape_string($db, $_REQUEST['dates'])
 				); break;
 			case "group":
 				$sql = sprintf("INSERT INTO {$MYSQL_PREFIX}groupnames (groupname) VALUES ('%s')",
-					mysql_real_escape_string($this->action['newname'])
+					mysqli_real_escape_string($db, $this->action['newname'])
 				); break;
 			case "user":
 				$sql = array();
@@ -357,12 +357,12 @@ class tdtrac_json {
 				$sqlstring .= " VALUES ( '%s', '%s', '%s', '%s', '%d', '%s', '%f' )";
 				
 				$sql = sprintf($sqlstring,
-					mysql_real_escape_string($_REQUEST['username']),
-					mysql_real_escape_string($_REQUEST['first']),
-					mysql_real_escape_string($_REQUEST['last']),
-					mysql_real_escape_string($_REQUEST['password']),
+					mysqli_real_escape_string($db, $_REQUEST['username']),
+					mysqli_real_escape_string($db, $_REQUEST['first']),
+					mysqli_real_escape_string($db, $_REQUEST['last']),
+					mysqli_real_escape_string($db, $_REQUEST['password']),
 					intval($_REQUEST['phone']),
-					mysql_real_escape_string($_REQUEST['email']),
+					mysqli_real_escape_string($db, $_REQUEST['email']),
 					$TDTRAC_PAYRATE
 				); break;
 			case "budget":
@@ -377,9 +377,9 @@ class tdtrac_json {
 					floatval($_REQUEST['price']),
 					(($_REQUEST['tax'] > 0 && is_numeric($_REQUEST['tax'])) ? $_REQUEST['tax'] : 0 ),
 					intval($rcptid),
-					mysql_real_escape_string($_REQUEST['vendor']),
-					mysql_real_escape_string($_REQUEST['category']),
-					mysql_real_escape_string($_REQUEST['dscr']),
+					mysqli_real_escape_string($db, $_REQUEST['vendor']),
+					mysqli_real_escape_string($db, $_REQUEST['category']),
+					mysqli_real_escape_string($db, $_REQUEST['dscr']),
 					make_date($_REQUEST['date']),
 					intval($_REQUEST['pending']),
 					(($_REQUEST['repay'] == "yes" || $_REQUEST['repay'] == 'paid' ) ? "1" : "0"),
@@ -399,7 +399,7 @@ class tdtrac_json {
 					intval($_REQUEST['showid']),
 					make_date($_REQUEST['date']),
 					floatval($_REQUEST['worked']),
-					mysql_real_escape_string($_REQUEST['note'])
+					mysqli_real_escape_string($db, $_REQUEST['note'])
 				); break;
 		}
 		return $sql;
@@ -413,7 +413,7 @@ class tdtrac_json {
 	 * @return mixed One of more SQL Queries
 	 */
 	private function get_update_sql($type) {
-		GLOBAL $MYSQL_PREFIX;
+		GLOBAL $db, $MYSQL_PREFIX;
 		
 		$sql = "NOT FOUND";
 		
@@ -426,7 +426,7 @@ class tdtrac_json {
 					intval($_REQUEST['showid']),
 					intval($_REQUEST['prio']),
 					intval($_REQUEST['assign']),
-					mysql_real_escape_string($_REQUEST['desc']),
+					mysqli_real_escape_string($db, $_REQUEST['desc']),
 					make_date($_REQUEST['date']),
 					intval($_REQUEST['complete']),
 					intval($_REQUEST['id'])
@@ -436,22 +436,22 @@ class tdtrac_json {
 				$sqlstring .= " closed=%d WHERE showid = %d";
 			
 				$sql = sprintf($sqlstring,
-					mysql_real_escape_string($_REQUEST['showname']),
-					mysql_real_escape_string($_REQUEST['company']),
-					mysql_real_escape_string($_REQUEST['venue']),
-					mysql_real_escape_string($_REQUEST['dates']),
+					mysqli_real_escape_string($db, $_REQUEST['showname']),
+					mysqli_real_escape_string($db, $_REQUEST['company']),
+					mysqli_real_escape_string($db, $_REQUEST['venue']),
+					mysqli_real_escape_string($db, $_REQUEST['dates']),
 					intval($_REQUEST['closed']),
 					intval($_REQUEST['id'])
 				); break;
 			case "group":
 				$sql = sprintf("UPDATE `{$MYSQL_PREFIX}groupnames` SET groupname = '%s' WHERE groupid = %d",
-					mysql_real_escape_string($this->action['newname']),
+					mysqli_real_escape_string($db, $this->action['newname']),
 					intval($this->action['id'])
 				); break;
 			case "mailcode":
 				$sql = sprintf("UPDATE tdtracmail SET code = '%s', email = '%s' WHERE prefix = '{$MYSQL_PREFIX}'",
-					mysql_real_escape_string($_REQUEST['code']),
-					mysql_real_escape_string($_REQUEST['email'])
+					mysqli_real_escape_string($db, $_REQUEST['code']),
+					mysqli_real_escape_string($db, $_REQUEST['email'])
 				); break;
 			case "perm":
 				$sql = array();
@@ -469,12 +469,12 @@ class tdtrac_json {
 				$sqlstring .= " `phone` = '%d', `email` = '%s', `payrate` = '%f'  WHERE `userid` = %d LIMIT 1";
 				
 				$sql[] = sprintf($sqlstring,
-					mysql_real_escape_string($_REQUEST['password']),
-					mysql_real_escape_string($_REQUEST['username']),
-					mysql_real_escape_string($_REQUEST['last']),
-					mysql_real_escape_string($_REQUEST['first']),
+					mysqli_real_escape_string($db, $_REQUEST['password']),
+					mysqli_real_escape_string($db, $_REQUEST['username']),
+					mysqli_real_escape_string($db, $_REQUEST['last']),
+					mysqli_real_escape_string($db, $_REQUEST['first']),
 					intval($_REQUEST['phone']),
-					mysql_real_escape_string($_REQUEST['email']),
+					mysqli_real_escape_string($db, $_REQUEST['email']),
 					floatval($_REQUEST['payrate']),
 					intval($_REQUEST['id'])
 				);
@@ -492,9 +492,9 @@ class tdtrac_json {
 					intval($_REQUEST['showid']),
 					floatval($_REQUEST['price']),
 					floatval($_REQUEST['tax']),
-					mysql_real_escape_string($_REQUEST['vendor']),
-					mysql_real_escape_string($_REQUEST['category']),
-					mysql_real_escape_string($_REQUEST['dscr']),
+					mysqli_real_escape_string($db, $_REQUEST['vendor']),
+					mysqli_real_escape_string($db, $_REQUEST['category']),
+					mysqli_real_escape_string($db, $_REQUEST['dscr']),
 					make_date($_REQUEST['date']),
 					intval($_REQUEST['pending']),
 					(($_REQUEST['repay'] == "yes" || $_REQUEST['repay'] == 'paid' ) ? "1" : "0"),
@@ -511,7 +511,7 @@ class tdtrac_json {
 					make_date($_REQUEST['date']),
 					floatval($_REQUEST['worked']),
 					intval($_REQUEST['submitted']),
-					mysql_real_escape_string($_REQUEST['note']),
+					mysqli_real_escape_string($db, $_REQUEST['note']),
 					intval($_REQUEST['id'])
 				); break;
 		}
@@ -525,14 +525,14 @@ class tdtrac_json {
 	 * @return void
 	 */
 	private function send_hours_add() {
-		GLOBAL $MYSQL_PREFIX;
+		GLOBAL $db, $MYSQL_PREFIX;
 		
 		$sql = array();
 		
 		$mailmessage = sprintf("%s Added Payroll: %f for %s (%s)",
 			$this->user->name,
 			number_format(floatval($_REQUEST['worked']),2),
-			mysql_real_escape_string($_REQUEST['date']),
+			mysqli_real_escape_string($db, $_REQUEST['date']),
 			$this->user->get_name(intval($_REQUEST['userid']))
 		);
 		
@@ -541,8 +541,8 @@ class tdtrac_json {
 		if ( $this->user->id == intval($_REQUEST['userid']) ) { // ADDING FOR SELF, NOTIFY WHERE `notify`
 			if ( $this->user->isemp ) { // BUT ONLY FOR LIMITED ACCOUNTS
 				$users_to_notify_sql = "SELECT userid FROM `{$MYSQL_PREFIX}users` WHERE notify = 1";
-				$users_to_notify_res = mysql_query($users_to_notify_sql, $db);
-				while ( $row = mysql_fetch_array($users_to_notify_res) ) {
+				$users_to_notify_res = mysqli_query($db, $users_to_notify_sql);
+				while ( $row = mysqli_fetch_array($users_to_notify_res) ) {
 					$sql[] = sprintf($mail_sql_str,	$row['userid'], $this->user->id, $mailmessage );
 				}
 			}
