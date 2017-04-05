@@ -31,7 +31,7 @@ if ( !file_exists(".htaccess") ) { $TDTRAC_SITE .= "index.php?action="; }
 
 $user = new tdtrac_user();
 
-$rawaction = preg_split("/\//", $_REQUEST['action']);
+$rawaction = preg_split("/\//", ltrim($_REQUEST['action'],"/"));
 
 if ( !isset($rawaction[0]) || $rawaction[0] == "" ) {
 	$action['module'] = 'index';
