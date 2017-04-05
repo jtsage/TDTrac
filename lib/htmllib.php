@@ -82,22 +82,22 @@ function makeHeader($title = '') {
 	$html[] = '<meta name="apple-mobile-web-app-capable" content="yes">';
 	$html[] = "<title>TDTrac{$TDTRAC_CPNY}:{$TDTRAC_VERSION} - {$title}</title>";
 	$html[] = '<!--[if lt IE 9]>';
-	$html[] = ' <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>';
+	$html[] = ' <script src="https://html5shim.googlecode.com/svn/trunk/html5.js"></script>';
 	$html[] = '<![endif]-->';
 	
 	$css = array(
-		"http://code.jquery.com/mobile/1.4.3/jquery.mobile-1.4.3" . $min . ".css",
-		"http://dev.jtsage.com/cdn/datebox/1.4.4/jqm-datebox-1.4.4" . $min . ".css",
+		"https://code.jquery.com/mobile/1.4.3/jquery.mobile-1.4.3" . $min . ".css",
+		"https://cdn.jtsage.com/datebox/1.4.4/jqm-datebox-1.4.4" . $min . ".css",
 		$TDTRAC_SITE . "css/tdtheme.css",
 		$TDTRAC_SITE . "css/tdtheme.mobile.css",
 	);
 	$js = array(
-		"http://code.jquery.com/jquery-2.1.1" . $min . ".js",
-		"http://code.jquery.com/mobile/1.4.3/jquery.mobile-1.4.3" . $min . ".js",
-		"http://dev.jtsage.com/cdn/datebox/1.4.4/jqm-datebox-1.4.4.comp.calbox" . $min . ".js",
-		"http://dev.jtsage.com/cdn/datebox/i18n/jquery.mobile.datebox.i18n.en_US.utf8.js",
-		"http://dev.jtsage.com/cdn/windows/1.4.3/jqm-windows-1.4.3.mdialog" . $min . ".js",
-		"http://dev.jtsage.com/cdn/windows/1.4.3/jqm-windows-1.4.3.alertbox" . $min . ".js",
+		"https://code.jquery.com/jquery-2.1.1" . $min . ".js",
+		"https://code.jquery.com/mobile/1.4.3/jquery.mobile-1.4.3" . $min . ".js",
+		"https://cdn.jtsage.com/datebox/1.4.4/jqm-datebox-1.4.4.comp.calbox" . $min . ".js",
+		"https://cdn.jtsage.com/datebox/i18n/jquery.mobile.datebox.i18n.en_US.utf8.js",
+		"https://cdn.jtsage.com/windows/1.4.3/jqm-windows-1.4.3.mdialog" . $min . ".js",
+		"https://cdn.jtsage.com/windows/1.4.3/jqm-windows-1.4.3.alertbox" . $min . ".js",
 		$TDTRAC_SITE . "js/tdtrac.jquery.js",
 	);
 	
